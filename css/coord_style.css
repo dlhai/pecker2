@@ -1,0 +1,168 @@
+﻿.xBoard {
+    margin-bottom:10px;
+}
+.xBoard>summary {
+    padding: 5px 10px;
+    width: 100%; 
+    background: #f0f0f0;
+    border-bottom: 1px solid #dddddd;
+    border-top: 1px solid #dddddd;
+}
+.xBoard>div {
+}
+.xBoard>.xTagRow {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+}
+.xBoard>.xTagRow>label {
+    flex-shrink: 0;
+    flex-grow: 0;
+    margin:5px;
+    margin-left:10px;
+    width:56px;
+}
+.xBoard>.xTagRow>div {
+    flex-grow: 1;
+}
+.xBoard>.xTagRow>.xBItem {
+    margin:5px;
+    border: 1px solid #dddddd;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+/*右边带小x号的小框框*/
+.xNail2 {
+    padding:5px;
+}
+.xNail2>div {
+    border-radius: 4px;
+    border: 1px solid #dddddd;
+    padding:3px 20px 3px 3px;
+    display:inline-block;
+    position: relative;
+    margin:3px;
+}
+.xNail2>div::after {
+    content:"x";
+    position: absolute;
+    top: 3px;
+    right: 5px;
+}
+
+/*右边带确认的小框框*/
+.signbox {
+    border-radius: 4px;
+    border: 1px solid #dddddd;
+    padding:3px 40px 3px 3px;
+    display:inline-block;
+    position: relative;
+    min-width: 160px; 
+    margin:3px 5px;
+}
+.signbox:after {
+    content:"确认";
+    position: absolute;
+    top: 3px;
+    right: 5px;
+}
+
+/*表单上带文字标签的元素*/
+.xItem {
+    margin: 5px;
+    display: inline-block;
+}
+.xItem>label {
+    width: 60px;
+    text-align:right;
+}
+.xItem>div {
+    border-radius: 4px;
+    border: 1px solid #dddddd;
+    display:inline-block;
+    padding:5px 10px;
+    margin:0px 5px;
+    width:150px;
+}
+
+/* 水平方向上的图片列表 */
+.xHImgList{
+    border-radius: 4px;border: 1px solid #dddddd;
+    margin:5px;
+    padding:5px;
+}
+.xHImgList > img {
+    width: 120px;
+    height: 80px;
+}
+
+.xDoc {
+    position: relative;
+    overflow:hidden;
+}
+.xDoc:after {
+    content: '上传';
+    width: 40px;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    text-align:center;
+    padding-top:5px;
+    border-left: 1px solid #dddddd;
+}
+
+.xDoc:before {
+    content: '';
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    top: 12px;
+    right: 50px;
+    border-top: 6px solid #404040;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+}
+
+.xMenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display:none;
+    float: left;
+    min-width: 160px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    font-size: 14px;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+}
+
+/*基本表格样式*/
+.xTable {
+    width: 100%;
+}
+.xTable>thead > tr > th {
+    text-align: center;
+    background-color: #f0f0f0;
+}
+.xTable> tbody > tr:nth-child(2n) > td {
+    background-color: #f5f5f5;
+}
+.xTable>thead > tr > th, .xTable>tbody > tr > td{
+    padding: 2px 4px;
+    vertical-align: top;
+}
+.xTable>tbody>tr:hover>td, .xTable>tbody>tr:hover>th {
+    background-color: #f0f0f5 !important;
+}

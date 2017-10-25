@@ -1,0 +1,109 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟</title>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/frmstyle5.css">
+    <script type="text/javascript" src="js/doTe.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/db.js"></script>
+    <script type="text/javascript">
+        function navto(url) {
+            $('#modulelist').children().removeClass("active");
+            $('#submodulelist').children().removeClass("active");
+            $('#mainframe').attr('src', url);
+        }
+    </script>
+    <style>
+        #submodulelist > li > a {
+            position: relative;
+            display: block;
+            padding: 5px 15px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body class="xFc_scol">
+    <header class="xFi_fixed xNavbar">
+        <a class="xNavbar-Brand" href="javascript:navto('system.html')">啄木鸟</a>
+        <ul id="modulelist" class="nav navbar-nav" style="margin-left: 10px; font-size: 16px; "></ul>
+        <ul id="submodulelist" class="nav navbar-nav" style="margin-top: 20px; margin-left: 200px; font-size: 16px; "></ul>
+        <ul class="nav navbar-nav navbar-avatar pull-right">
+            <li style="margin-right:60px;">切换为：<select id="rolelist2" style="margin-top:10px;width:130px;" onchange="RoleChange();"></select></li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    <span id="usr_name" class="hidden-sm-only">曹操</span>
+                    <span class="thumb-small avatar inline"><img id="usr_face" src="img/face/face0.jpg" alt="用户头像" class="img-circle"></span>
+                    <b class="caret hidden-sm-only"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a id="usr_self" href="#">我的</a></li>
+                    <li><a href="#"><span class="badge bg-danger pull-right">3</span>通知</a></li>
+                    <li><a href="#">设置</a></li>
+                    <li class="divider"></li>
+                    <li><a href="javascript:navto('system.html')">系统</a></li>
+                    <li><a href="javascript:navto('signout.html')">退出</a></li>
+                </ul>
+            </li>
+        </ul>
+
+        </header>
+    <div class="xFi_grow" style="height:100px; background:#22baa0;">
+        <iframe id="mainframe" style="border:0px; width:100%;height:100%;" src="coord.html"></iframe>
+    </div>
+
+
+<script id="tpl_module" type="text/template">
+    {% for (var i = 0; i < it.length; i++) { %}
+        <li {% if (i==0) { %} class="active" {% } %}>
+            <a onclick="ClickModule(this,'{%=it[i].url%}')">{%=it[i].name %}</a>
+        </li>
+    {% } %}
+</script>
+
+    <script type="text/javascript">
+        var tpl_module = doT.template(document.getElementById('tpl_module').innerHTML);
+
+        var tpl_rolelist2 = '{% for (var i = 0, l = it.length; i < l; i++) { %}<option>{%=it[i].type%}</option>{% } %}';
+        document.getElementById("rolelist2").innerHTML = doT.template(tpl_rolelist2)(db_roles);
+        RoleChange();
+
+        function RoleChange() {
+            var usr_type = GetArItem(db_roles, "type", $('#rolelist2').val());
+            $('#modulelist').html(tpl_module(usr_type.modules));
+            if (usr_type.modules[0].submod)
+                $('#submodulelist').html(tpl_module(usr_type.modules[0].submod));
+            else
+                 $('#submodulelist').html("");
+            $('#mainframe').attr("src", usr_type.modules[0].url);
+            if (usr_type.type.indexOf("超级帐号") == -1)
+            {
+                var user = GetArItem(db_userlist.data, "account", usr_type.act);
+                $('#usr_name').html(user.name);
+                $('#usr_face').attr("src", src="img/face/face" + user.face+ ".jpg");
+                $('#usr_self').attr("href", "javascript:navto('self.html?account="+user.account+"')");
+            }
+        }
+
+        function ClickModule(This, m) {
+            $(This).parent().parent().children().removeClass("active");
+            $(This).parent().addClass("active");
+            $('#mainframe').attr("src", m);
+
+            if ("modulelist" == $(This).parent().parent().attr("id") )
+            {
+                var idx = $(This).parent().index();
+                var usr_type = GetArItem(db_roles, "type", $('#rolelist2').val());
+                if (usr_type.modules[idx].submod)
+                    $('#submodulelist').html(tpl_module(usr_type.modules[idx].submod));
+                else
+                     $('#submodulelist').html("");
+            }
+        }
+
+    </script>
+</body>
+</html>

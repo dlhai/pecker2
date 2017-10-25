@@ -1,0 +1,201 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.css"/>
+    <script type="text/javascript" src="js/doTe.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <link rel="StyleSheet" href="css/dtree.css" type="text/css" />
+    <script type="text/javascript" src="js/dtree.js"></script>
+
+    <style>
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+        .d_dtree-scroll {
+            width: 100%;
+            height: 100%;
+            overflow-y: scroll;
+            overflow-x: scroll;
+        }
+
+        .d_panel {
+            border-radius: 4px;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-color: #e0e4e8;
+        }
+        .d_panel .heading {
+            border-bottom: 1px solid #dddddd;
+            padding: 10px 15px;
+            color: #656565;
+        }
+        .d_panel .heading2 {
+            border-bottom: 1px solid #dddddd;
+            padding: 5px;
+        }
+        .d_panel .heading2 strong {
+            padding-left: 10px;
+        }
+
+        .d_data_item {
+            margin: 5px 15px;
+            display: inline-block;
+        }
+
+        .d_data_item label {
+            width: 60px;
+            text-align:right;
+        }
+        .d_data_item div {
+            border-radius: 4px;
+            border: 1px solid #dddddd;
+            display:inline-block;
+            padding:5px 10px;
+            margin:0px 5px;
+            width:150px;
+        }
+
+        .d_detail {
+            margin-right: 2px;
+            margin-bottom: 10px;
+        }
+
+        .d_table {
+            width: 100%;
+        }
+        .d_table thead > tr > th {
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+        .d_table > tbody > tr:nth-child(2n) > td {
+            background-color: #f5f5f5;
+        }
+        .d_table thead > tr > th, .d_table tbody > tr > td{
+            padding: 2px 4px;
+            vertical-align: top;
+        }
+
+        .table-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
+            background-color: #f0f0f5 !important;
+        }
+
+        .d_rAngle {
+            border-radius: 4px;
+            border: 1px solid #dddddd;
+            border-color: #e0e4e8;
+        }
+
+        .d_dItem {
+            margin: 5px 15px;
+            display: inline-block;
+        }
+
+        .d_dImage {
+            margin-top: 5px;
+            margin-bottom: 5px;
+            margin-left: 15px;
+            margin-right: 23px;
+            display: inline-block;
+        }
+
+        input:focus {
+            border-color: #66afe9;
+            box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
+        }
+
+    </style> 
+</head>
+<body style="display: flex; flex-direction: row; align-items: stretch; padding:5px;">
+    <section class="d_panel" style="width: 100px; margin: 10px; flex-shrink: 1; flex-grow:1;">
+        <header class="heading">风机供应商<div style="float: right;"><input class="d_rAngle" style="margin-right: 50px;"  type="text" placeholder="搜索" /><a href="#">添加</a></div></header>
+        <div class="d_dtree-scroll" style="padding:5px;">
+            <table class="d_table table-hover">
+                <thead><tr><th id="X" style="min-width:65px;">名称</th><th style="min-width:50px;">联系人</th><th style="min-width:115px;">电话</th>
+                    <th style="min-width:50px;">负责人</th><th style="min-width:110px;">传真</th><th>完整名称</th><th>地址</th></tr></thead>
+                <tbody id="d_table_efan">
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="d_panel" style="width: 100px; margin: 10px; flex-shrink: 1; flex-grow:1;">
+        <header class="heading">叶片供应商<div style="float: right;"><input class="d_rAngle" style="margin-right: 50px;" type="text" placeholder="搜索" /><a href="#">添加</a></div></header>
+        <div class="d_dtree-scroll" style="padding:5px;">
+            <table class="d_table table-hover">
+                <thead><tr><th id="X" style="min-width:65px;">名称</th><th style="min-width:50px;">联系人</th><th style="min-width:115px;">电话</th>
+                        <th style="min-width:50px;">负责人</th><th style="min-width:110px;">传真</th><th>完整名称</th><th>地址</th></tr></thead>
+                <tbody id="d_table_leaf"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <script id="tpl_table_item" type="text/template">
+        {% for (var i in it) { %}
+        <tr><td>{%=it[i].name%}</td><td>{%=it[i].atten%}</td><td>{%=it[i].tel%}</td><td>{%=it[i].leader%}</td>
+        <td>{%=it[i].fax%}</td><td>{%=it[i].fname%}</td><td>{%=it[i].addr%}</td></tr>
+        {% } %}
+    </script>
+
+        <script type="text/javascript">
+            var userlist = [
+{ "name": "洒而电器", "fname": "嵊州市洒而电器厂", "addr": "罗湖区东晓路", "atten": "顾冰薇", "tel": "0532-86011111", "leader": "常辰淋", "fax": "023-63862607" },
+{ "name": "沈阳电机", "fname": "沈阳电机厂销售总公司", "addr": "罗湖区蛟湖路12号大院", "atten": "钱振海", "tel": "0551-4243311", "leader": "舒代巧", "fax": "0311-87600111" },
+{ "name": "士林电机", "fname": "沈阳士林电机制造有限公司", "addr": "福田区景田东路景田市场二楼", "atten": "雷亦旋", "tel": "0571-87622362", "leader": "阳昕燕", "fax": "0752-95105688" },
+{ "name": "万鹏机电", "fname": "绍兴市万鹏机电有限公司", "addr": "福田区园岭44栋105号", "atten": "陆易绿", "tel": "020-95105105", "leader": "巴以彤", "fax": "0577-88389999" },
+{ "name": "任重仪表", "fname": "上海任重仪表电器有限公司", "addr": "南山区南头常兴路11号", "atten": "陈嘉木", "tel": "0371-68356666", "leader": "鲍元柳", "fax": "0769-95105106" },
+{ "name": "英士达", "fname": "深圳市英士达机电技术开发有限公司", "addr": "南山区西丽留仙大道", "atten": "周绍元", "tel": "021-8008207890", "leader": "戈刚林", "fax": "0530-3982522" },
+{ "name": "大力神", "fname": "浙江嵊州市大力神机电厂", "addr": "罗湖区罗沙公路经二路1号（罗湖体育局对面）", "atten": "杜诗蕾", "tel": "0531-86012520", "leader": "勾觅丹", "fax": "028-86433232" },
+{ "name": "万邦机电", "fname": "湖北万邦机电发展有限公司", "addr": "罗湖区莲塘国威路松源大厦一楼", "atten": "罗鸿彩", "tel": "025-95105105", "leader": "苗新华", "fax": "0351-2233611" },
+{ "name": "嘉晨电机", "fname": "沈阳嘉晨电机(产品)制造有限公司", "addr": "福田区南园街道松岭路22号", "atten": "石梦凡", "tel": "0535-95105175", "leader": "钱小乐", "fax": "0591-87050222" },
+{ "name": "博佳电机", "fname": "浙江博佳电机有限公司", "addr": "龙岗区葵涌街道葵兴东路12号", "atten": "孙刚毅", "tel": "0512-67513131", "leader": "师子寒", "fax": "0310-3023233" },
+{ "name": "奥比特", "fname": "东莞市奥比特化工贸易有限公司", "addr": "深圳市罗湖区翠竹路2028号翠竹大厦", "atten": "谢依霜", "tel": "0592-2088888", "leader": "余涛鸣", "fax": "0898-31686222" },
+{ "name": "雨田电机", "fname": "贵州雨田电机有限公司", "addr": "罗湖区宝岗路笋岗大厦5楼", "atten": "严芷容", "tel": "029-95105688", "leader": "相瑶一", "fax": "0536-2972522" },
+{ "name": "德托精密", "fname": "上海德托精密机电事业部", "addr": "深圳市罗湖区翠山路国防大厦", "atten": "余博容", "tel": "021-95105105", "leader": "边星瑶", "fax": "0757-82232940" },
+{ "name": "伟琴仪器", "fname": "鹤壁市伟琴仪器仪表有限公司", "addr": "深圳市罗湖区泥岗西路1046号鸿颖大厦首层", "atten": "程含芙", "tel": "027-88068888", "leader": "劳思寒", "fax": "0228-1775821" },
+{ "name": "和利时", "fname": "北京和利时电机技术有限公司", "addr": "福田区香蜜湖社区文化中心二楼", "atten": "韩德泽", "tel": "0755-82328647", "leader": "魏苑", "fax": "022-26144822" },
+{ "name": "丰源微特", "fname": "常州市丰源微特电机有限公司", "addr": "盐田区梅沙街道成坑71号", "atten": "姜慕蕊", "tel": "010-51019999", "leader": "朱蛋", "fax": "0851-8181222" },
+{ "name": "线源电子", "fname": "东莞市线源电子有限公司", "addr": "南山区白石洲下白石居委会综合楼101", "atten": "付高爽", "tel": "0411-82603331", "leader": "危瑞丽", "fax": "010-83831716" },
+{ "name": "冠克机电", "fname": "上海冠克机电科技有限公司", "addr": "盐田区盐田四村永安综合服务楼", "atten": "石又晴", "tel": "0791-6101074", "leader": "勾星瑶", "fax": "0512-65776577" },
+{ "name": "天津安全", "fname": "天津安全电机有限公司", "addr": "罗湖区南极路南华大厦附楼（广深宾馆后）", "atten": "蓝梦槐", "tel": "0771-2222222", "leader": "康细细", "fax": "0510-82588188" },
+{ "name": "九安电气", "fname": "乐清九安电气有限公司", "addr": "盐田区沙头角园林路25号", "atten": "窦加隆", "tel": "0431-86122222", "leader": "郎佳", "fax": "0519-88175312" },
+{ "name": "本溪市微", "fname": "本溪市微电机厂", "addr": "宝安区九区创业一路", "atten": "卓动力", "tel": "0574-56163111", "leader": "鲍凌春", "fax": "0513-83512816" },
+{ "name": "精量电子", "fname": "武汉精量电子有限公司", "addr": "西乡宝民二路108号西乡街道办事综合楼1楼", "atten": "盛韩嘉", "tel": "0731-2637122", "leader": "伊帅成", "fax": "0755-83587526" },
+{ "name": "洒而电器", "fname": "嵊州市洒而电器厂", "addr": "福永街道德丰路77号（福永医院旁边）", "atten": "顾冰薇", "tel": "0532-86011111", "leader": "卫尔容", "fax": "021-66050000" },
+{ "name": "沈阳电机", "fname": "沈阳电机厂销售总公司", "addr": "宝安区新沙路488号107号房", "atten": "钱振海", "tel": "0551-4243311", "leader": "滕龙", "fax": "0510-86888111" },
+{ "name": "士林电机", "fname": "沈阳士林电机制造有限公司", "addr": "宝安区松岗街道办事处3楼302室", "atten": "雷亦旋", "tel": "0571-87622362", "leader": "傅奕冰", "fax": "0531-96369" },
+{ "name": "万鹏机电", "fname": "绍兴市万鹏机电有限公司", "addr": "宝安区石岩街道前心大道国税3楼308室", "atten": "陆易绿", "tel": "020-95105105", "leader": "范沛凝", "fax": "0631-5969369" },
+            ];
+
+            FillTable();
+            function FillTable() {
+                var tpl_table_item = doT.template(document.getElementById('tpl_table_item').innerHTML);
+                var text = tpl_table_item(userlist);
+                 text = text + text;
+                $("#d_table_efan").html(text);
+                $("#d_table_leaf").html(text);
+            }
+
+        </script>
+
+        <script type="text/javascript">
+            var currow = -1;
+            $("tr").click(function () {
+                if (currow != -1) {
+                    currow++;
+                    if (currow % 2 == 0)
+                        $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#f5f5f5");
+                    else
+                        $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#ffffff");
+                }
+                currow = $(this).index();
+                $(this).children().css("background-color", "#00f0f5");
+            });
+        </script>
+</body>
+</html>
+
