@@ -10,6 +10,7 @@
     <script src="js/bootstrap.js"></script>
     <link rel="StyleSheet" href="css/dtree.css" type="text/css" />
     <script type="text/javascript" src="js/dtree.js"></script>
+    <script src="js/db.js"></script>
 
     <style>
         html, body {
@@ -113,10 +114,10 @@
 <body style="display: flex; flex-direction: row; align-items: stretch; padding:5px;">
     <section class="d_panel" style="width: 100px; margin: 10px; flex-shrink: 1; flex-grow:1;">
         <header class="heading">技工列表<div style="float: right;"><input class="d_rAngle" style="margin-right: 50px;"  type="text" placeholder="搜索" /><a href="#">添加</a></div></header>
-        <div class="d_dtree-scroll" style="padding:5px;">
-            <table class="d_table table-hover">
+        <div id="d_table_item" class="d_dtree-scroll" style="padding:5px;">
+            <table  class="d_table table-hover">
                 <thead><tr><th id="X">姓名</th><th>身份证号</th><th>性别</th><th>年龄</th><th>联系电话</th><th>维修队长</th><th>居住地址</th></tr></thead>
-                <tbody id="d_table_item">
+                <tbody >
                 </tbody>
             </table>
         </div>
@@ -160,13 +161,16 @@
         <div class="d_data_item"><label>民族</label><div>{%=it.ethnic%}</div></div>
         <div class="d_data_item"><label>出生年月</label><div>{%=it.birth%}</div></div>
         <div class="d_data_item"><label>住址</label><div style="width:404px;">{%=it.origo%}</div></div>
-        <div class="d_data_item"><label>身份证号</label><div>{%=it.ID%}</div></div>
+        <div class="d_data_item"><label>身份证号</label><div>{%=it.id%}</div></div>
         <div class="d_data_item"><label>联系电话</label><div>{%=it.phone%}</div></div>
         <div class="d_data_item"><label>邮箱</label><div>{%=it.mail%}</div></div>
         <div class="d_data_item"><label>QQ号码</label><div>{%=it.qq%}</div></div>
         <div class="d_data_item"><label>微信号</label><div>{%=it.wechat%}</div></div>
-        <div class="d_data_item"><label>维修队长</label><div>{%=it.skill%}</div></div>
         <div class="d_data_item"><label>居住地址</label><div style="width:404px;">{%=it.addr%}</div></div>
+        <div class="d_data_item"><label>角色</label><div>{%=it.prof%}</div></div>
+        {% if (it.prof=="专家") { %}
+        <div class="d_data_item"><label>领域</label><div>{%=it.skill%}</div></div>
+        {% } %}
     </script>
 
     <script id="tpl_certiflist" type="text/template">
@@ -230,150 +234,62 @@
         {% } %}
     </script>
 
+    <script type="text/javascript">
+        var url = decodeURI(window.location.search);
+        var act = url.substring(url.lastIndexOf('=') + 1, url.length);
+        
+        var userlist = {
+            fields: [
+            { "title": "姓名", "name": "name", twidth: "50px" },
+            { "title": "性别", "name": "sex", twidth: "36px" },
+            { "title": "出生年月", "name": "birth", twidth: "100px" },
+            { "title": "住址", "name": "origo" },
+            { "title": "身份证号", "name": "id", twidth: "100px", tstyle: "word-wrap:break-all;" },
+            { "title": "联系电话", "name": "phone", twidth: "100px", tstyle: "word-wrap:break-all;" },
+            { "title": "居住地址", "name": "addr" }
+            ],
+            data: getsubarray(db_userlist.data, "prof", act),
+            addition:rnditem(db_addition),
+        };
+        $("#d_table_item").html(RenderTable(userlist));
+    </script>
 
-        <script type="text/javascript">
-            //顾冰薇 450802199204068703	女	广西壮族自治区贵港市港北区
-            //钱振海 411300199101223559	男	河南省南阳市
-            //雷亦旋 610300198802174085	女	陕西省宝鸡市
-            //陆易绿 341124198707088408	女	安徽省滁州市全椒县
-            //陈嘉木 230716199403192899	男	黑龙江省伊春市上甘岭区
-            //周绍元 142328198109306719	男	山西省忻州地区石楼县
-            //杜诗蕾 542126198711289967	女	西藏自治区昌都地区察雅县
-            //罗鸿彩 610426199408311938	男	陕西省咸阳市永寿县
-            //石梦凡 513001199902107844	女	四川省达川地区达川市
-            //孙刚毅 520203197907222079	男	贵州省六盘水市六枝特区
-            //谢依霜 510422199111120429	女	四川省攀枝花市盐边县
-            //严芷容 440224197612263887	女	广东省韶关市仁化县
-            //余博容 652323198402167736	男	新疆维吾尔族自治区昌吉回族自治州呼图壁县
-            //程含芙 210404198802026601	女	辽宁省抚顺市望花区
-            //韩德泽 500112198506248210	男	重庆市渝北区
-            //姜慕蕊 610101197406077807	女	陕西省西安市市辖区
-            //付高爽 362523197412188175	男	江西省抚州地区黎川县
-            //石又晴 352229198008261144	女	福建省宁德地区寿宁县
-            var userlist = [
-                {
-                    account: "gubingwei", ethnic: "汉", birth: "1992.04.06", mail: "gubingwei@sina.com", origo: "福建省宁德地区寿宁县",
-                    qq: "1234567890", wechat: "wechat1234567890", name: "顾冰薇", ID: "450802 1992 0406 8703", sex: "女", age: "30",
-                    phone: "130 1992 0406", skill: "是", addr: "广西壮族自治区贵港市港北区", idimg: "img/person/sfz1.jpg",
-                    certif: [{ img: "img/person/jkz1.jpg", name: "健康证", office: "福建省宁德地区疾病控制中心", issuedate: "2008.06.16" },
-                        { img: "img/person/gkzy1.jpg", name: "高空作业证", office: "福建省宁德安监局", issuedate: "2008.06.16" },
-                        { img: "img/person/dgzy1.jpg", name: "电工证", office: "福建省宁德安监局", issuedate: "2008.06.16" },
-                        { img: "img/person/jjz1.jpg", name: "急救证", office: "福建省红十字会", issuedate: "2008.06.16" },
-                        { img: "img/person/bxpz1.jpg", name: "保险凭证", office: "人保财险福建省宁德地区支公司", issuedate: "2008.06.16" }],
-                    edu: [{ img1: "img/person/byz1.jpg", img2: "img/person/gkzy1.jpg", tmstart: "2008.06.16", qualif: "博士", tmend: "2009.07.16", edu: "清华大学" },
-                        { img1: "img/person/byz2.jpg", img2: "img/person/gkzy1.jpg", tmstart: "2007.06.16", qualif: "硕士", tmend: "2008.06.16", edu: "北京航空航天大学" },
-                        { img1: "img/person/byz3.jpg", img2: "img/person/gkzy1.jpg", tmstart: "2006.06.16", qualif: "学士", tmend: "2007.06.16", edu: "河南科技大学" }],
-                    employ: [{ img: "img/person/lzzm1.jpg", tmstart: "2008.06.16", tmend: "2009.07.16", workin: "广州联创通信技术有限公司", pos: "前台" },
-                        { img: "img/person/lzzm2.jpg", tmstart: "2007.06.16", tmend: "2008.06.16", workin: "惠州华特斯智能科技有限公司", pos: "检验员" },
-                        { img: "img/person/lzzm3.jpg", tmstart: "2006.06.16", tmend: "2007.06.16", workin: "西安晟威通信技术有限公司", pos: "研发工程师" }],
-                    opus: [{ img: "img/person/zp1.jpg", title: "金风科技为“中国智造”注入新动能", journal: "中国风电新闻网", date: "2015.12.31", link: "http://www.chinawindnews.com/" },
-                        { img: "img/person/zp2.jpg", title: "中国风电塔筒高度新纪录诞生", journal: "北极星电力新闻网", date: "2010.10.30", link: "http://www.chinawindnews.com/" },
-                        { img: "img/person/zp3.jpg", title: "金风科技天津首个兆瓦级分布式风电项目获批", journal: "新能源网", date: "2016.02.03", link: "http://www.chinawindnews.com/" }]
-                },
-                {
-                    account: "qianzhenhai", ethnic: "满", birth: "1991.01.22", mail: "qianzhenhai@163.com", origo: "江西省抚州地区黎川县",
-                    qq: "1234567891", wechat: "wechat12345", name: "钱振海", ID: "411300 1991 0122 3559", sex: "男", age: "20",
-                    phone: "130 1991 0122", skill: "否", addr: "河南省南阳市", idimg: "img/person/sfz2.jpg",
-                    certif: [{ img: "img/person/jkz2.jpg", name: "健康证", office: "江西省抚州地区疾病控制中心", issuedate: "2008.06.16" },
-                        { img: "img/person/gkzy2.jpg", name: "高空作业证", office: "江西省抚州地区安监局", issuedate: "2008.06.16" },
-                        { img: "img/person/dgzy2.jpg", name: "电工证", office: "江西省抚州地区安监局", issuedate: "2008.06.16" },
-                        { img: "img/person/jjz2.jpg", name: "急救证", office: "江西省抚州地区红十字会", issuedate: "2008.06.16" },
-                        { img: "img/person/bxpz2.jpg", name: "保险凭证", office: "江西省抚州地区人保财险", issuedate: "2008.06.16" }],
-                    edu: [{ img1: "img/person/byz1.jpg", img2: "img/person/xwz1.jpg", tmstart: "2008.06.16", tmend: "2009.07.16", qualif: "博士", edu: "上海交通大学" },
-                        { img1: "img/person/byz2.jpg", img2: "img/person/xwz2.jpg", tmstart: "2007.06.16", tmend: "2008.06.16", qualif: "硕士", edu: "南开大学" },
-                        { img1: "img/person/byz3.jpg", img2: "img/person/xwz3.jpg", tmstart: "2006.06.16", tmend: "2007.06.16", qualif: "学士", edu: "中国人民大学" }],
-                    employ: [{ img: "img/person/lzzm4.jpg", tmstart: "2008.06.16", tmend: "2009.07.16", workin: "广州联创通信技术有限公司", pos: "前台" },
-                        { img: "img/person/lzzm5.jpg", tmstart: "2007.06.16", tmend: "2008.06.16", workin: "惠州华特斯智能科技有限公司", pos: "检验员" },
-                        { img: "img/person/lzzm6.jpg", tmstart: "2006.06.16", tmend: "2007.06.16", workin: "西安晟威通信技术有限公司", pos: "研发工程师" }],
-                    opus: [{ img: "img/person/zp1.jpg", title: "金风科技为“中国智造”注入新动能", journal: "中国风电新闻网", date: "2015.12.31", link: "http://www.chinawindnews.com/" },
-                        { img: "img/person/zp2.jpg", title: "中国风电塔筒高度新纪录诞生", journal: "北极星电力新闻网", date: "2010.10.30", link: "http://www.chinawindnews.com/" },
-                        { img: "img/person/zp3.jpg", title: "金风科技天津首个兆瓦级分布式风电项目获批", journal: "新能源网", date: "2016.02.03", link: "http://www.chinawindnews.com/" }]
-                },
-                {
-                    account: "leiyixuan", ethnic: "壮", birth: "1988.02.17", mail: "leiyixuan@qq.com", origo: "陕西省西安市市辖区",
-                    qq: "1234567892", wechat: "wechat4567890", name: "雷亦旋", ID: "610300 1988 0217 4085", sex: "女", age: "28",
-                    phone: "130 1988 0217", skill: "否", addr: "安徽省滁州市全椒县", idimg: "img/person/sfz3.jpg",
-                    certif: [{ img: "img/person/jkz3.jpg", name: "健康证", office: "陕西省西安市病控制中心", issuedate: "2008.06.16" },
-                        { img: "img/person/gkzy3.jpg", name: "高空作业证", office: "陕西省西安市安监局", issuedate: "2008.06.16" },
-                        { img: "img/person/dgzy3.jpg", name: "电工证", office: "陕西省西安市安监局", issuedate: "2008.06.16" },
-                        { img: "img/person/jjz3.jpg", name: "急救证", office: "陕西省西安市红十字会", issuedate: "2008.06.16" },
-                        { img: "img/person/bxpz3.jpg", name: "保险凭证", office: "人保财险陕西省西安市支公司", issuedate: "2008.06.16" }],
-                    edu: [{ img1: "img/person/byz1.jpg", img2: "img/person/xwz1.jpg", tmstart: "2008.06.16", tmend: "2009.07.16", qualif: "博士", edu: "西安交通大学" },
-                        { img1: "img/person/byz2.jpg", img2: "img/person/xwz2.jpg", tmstart: "2007.06.16", tmend: "2008.06.16", qualif: "硕士", edu: "武汉大学" },
-                        { img1: "img/person/byz3.jpg", img2: "img/person/xwz3.jpg", tmstart: "2006.06.16", tmend: "2007.06.16", qualif: "学士", edu: "厦门大学" }],
-                    employ: [{ img: "img/person/lzzm1.jpg", tmstart: "2008.06.16", tmend: "2009.07.16", workin: "曲阜利特莱通信器材有限公司", pos: "前台" },
-                        { img: "img/person/lzzm2.jpg", tmstart: "2007.06.16", tmend: "2008.06.16", workin: "山东百谷信息技术有限公司", pos: "检验员" },
-                        { img: "img/person/lzzm3.jpg", tmstart: "2006.06.16", tmend: "2007.06.16", workin: "昆山亿溪电子材料有限公司", pos: "研发工程师" }],
-                    opus: [{ img: "img/person/zp1.jpg", title: "金风科技为“中国智造”注入新动能", journal: "中国风电新闻网", date: "2015.12.31", link: "http://www.chinawindnews.com/" },
-                        { img: "img/person/zp2.jpg", title: "中国风电塔筒高度新纪录诞生", journal: "北极星电力新闻网", date: "2010.10.30", link: "http://www.chinawindnews.com/" },
-                        { img: "img/person/zp3.jpg", title: "金风科技天津首个兆瓦级分布式风电项目获批", journal: "新能源网", date: "2016.02.03", link: "http://www.chinawindnews.com/" }]
-                },
-                {
-                    account: "sungangyi", ethnic: "回", birth: "1979.07.22", mail: "sungangyi@21cn.net", origo: "辽宁省抚顺市望花区",
-                    qq: "1234567893", wechat: "wechat12367890", name: "孙刚毅", ID: "520203 1979 0722 2079", sex: "男", age: "36",
-                    phone: "130 1979 0722", skill: "否", addr: "贵州省六盘水市六枝特区", idimg: "img/person/sfz4.jpg",
-                    certif: [{ img: "img/person/jkz4.jpg", name: "健康证", office: "辽宁省抚顺市疾病控制中心", issuedate: "2008.06.16" },
-                        { img: "img/person/gkzy4.jpg", name: "高空作业证", office: "辽宁省抚顺市安监局", issuedate: "2008.06.16" },
-                        { img: "img/person/dgzy4.jpg", name: "电工证", office: "辽宁省抚顺市安监局", issuedate: "2008.06.16" },
-                        { img: "img/person/jjz4.jpg", name: "急救证", office: "辽宁省抚顺市红十字会", issuedate: "2008.06.16" },
-                        { img: "img/person/bxpz4.jpg", name: "保险凭证", office: "人保财险辽宁省抚顺市支公司", issuedate: "2008.06.16" }],
-                    edu: [{ img1: "img/person/byz1.jpg", img2: "img/person/xwz1.jpg", tmstart: "2008.06.16", tmend: "2009.07.16", qualif: "博士", edu: "中南财经政法大学" },
-                        { img1: "img/person/byz2.jpg", img2: "img/person/xwz2.jpg", tmstart: "2007.06.16", tmend: "2008.06.16", qualif: "硕士", edu: "内蒙古大学" },
-                        { img1: "img/person/byz3.jpg", img2: "img/person/xwz3.jpg", tmstart: "2006.06.16", tmend: "2007.06.16", qualif: "学士", edu: "北京工商大学" }],
-                    employ: [{ img: "img/person/lzzm4.jpg", tmstart: "2008.06.16", tmend: "2009.07.16", workin: "天津盈禾利物流有限公司", pos: "前台" },
-                        { img: "img/person/lzzm5.jpg", tmstart: "2007.06.16", tmend: "2008.06.16", workin: "上海华夏物流有限公司", pos: "检验员" },
-                        { img: "img/person/lzzm6.jpg", tmstart: "2006.06.16", tmend: "2007.06.16", workin: "深圳戎马广告有限公司", pos: "研发工程师" }],
-                    opus: [{ img: "img/person/zp1.jpg", title: "金风科技为“中国智造”注入新动能", journal: "中国风电新闻网", date: "2015.12.31", link: "http://www.chinawindnews.com/" },
-                        { img: "img/person/zp2.jpg", title: "中国风电塔筒高度新纪录诞生", journal: "北极星电力新闻网", date: "2010.10.30", link: "http://www.chinawindnews.com/" },
-                        { img: "img/person/zp3.jpg", title: "金风科技天津首个兆瓦级分布式风电项目获批", journal: "新能源网", date: "2016.02.03", link: "http://www.chinawindnews.com/" }]
-                }
-            ];
-
-            FillTable();
-            function FillTable() {
-                var tpl_table_item = doT.template(document.getElementById('tpl_table_item').innerHTML);
-                var text = tpl_table_item(userlist);
-                text = text + text + text + text;
-                text = text + text + text + text;
-                $("#d_table_item").html(text);
+    <script type="text/javascript">
+        var currow = -1;
+        $("tr").click(function () {
+            if (currow != -1) {
+                currow++;
+                if (currow % 2 == 0)
+                    $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#f5f5f5");
+                else
+                    $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#ffffff");
             }
+            currow = $(this).index();
+            $(this).children().css("background-color", "#00f0f5");
 
-        </script>
+            for (i in userlist.data) {
+                if (userlist.data[i].name == $(this).children(":first-child").text()) {
+                    var tpl_baseinf = doT.template(document.getElementById('tpl_baseinf').innerHTML);
+                    $("#d_baseinf").html(tpl_baseinf(userlist.data[i]));
 
-        <script type="text/javascript">
-            var currow = -1;
-            $("tr").click(function () {
-                if (currow != -1) {
-                    currow++;
-                    if (currow % 2 == 0)
-                        $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#f5f5f5");
-                    else
-                        $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#ffffff");
+                    var idx = rndrange(0, db_addition.length);
+
+                    var tpl_certiflist = doT.template(document.getElementById('tpl_certiflist').innerHTML);
+                    $("#d_certiflist").html(tpl_certiflist(db_addition[idx].certif));
+
+                    var tpl_edulist = doT.template(document.getElementById('tpl_edulist').innerHTML);
+                    $("#d_edulist").html(tpl_edulist(db_addition[idx].edu));
+
+                    var tpl_employlist = doT.template(document.getElementById('tpl_employlist').innerHTML);
+                    $("#d_employlist").html(tpl_employlist(db_addition[idx].employ));
+
+                    var tpl_opuslist = doT.template(document.getElementById('tpl_opuslist').innerHTML);
+                    $("#d_opuslist").html(tpl_opuslist(db_addition[idx].opus));
+
+                    break;
                 }
-                currow = $(this).index();
-                $(this).children().css("background-color", "#00f0f5");
-
-                for (i in userlist) {
-                    if (userlist[i].name == $(this).children(":first-child").text()) {
-                        var tpl_baseinf = doT.template(document.getElementById('tpl_baseinf').innerHTML);
-                        $("#d_baseinf").html(tpl_baseinf(userlist[i]));
-
-                        var tpl_certiflist = doT.template(document.getElementById('tpl_certiflist').innerHTML);
-                        $("#d_certiflist").html(tpl_certiflist(userlist[i].certif));
-
-                        var tpl_edulist = doT.template(document.getElementById('tpl_edulist').innerHTML);
-                        $("#d_edulist").html(tpl_edulist(userlist[i].edu));
-
-                        var tpl_employlist = doT.template(document.getElementById('tpl_employlist').innerHTML);
-                        $("#d_employlist").html(tpl_employlist(userlist[i].employ));
-
-                        var tpl_opuslist = doT.template(document.getElementById('tpl_opuslist').innerHTML);
-                        $("#d_opuslist").html(tpl_opuslist(userlist[i].opus));
-
-                        break;
-                    }
-                }
-            });
-        </script>
+            }
+        });
+    </script>
 </body>
 </html>

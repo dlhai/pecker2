@@ -47,6 +47,18 @@ function rndsubarray(ar, min, max, att, val )
     }
 }
 
+//从数组中选出符合条件的元素，形成一个新的数组并返回, 要求被选取的元素att属性值为mval子字符串
+function getsubarray(ar, att, mval )
+{
+    var r = [];
+    for (var i = 0; i < ar.length; i++) {
+        if ( mval.indexOf(ar[i][att]) >= 0)
+            r.push(ar[i]);
+    }
+    return r;
+}
+
+
 function GetArItem( ar, att, val )
 {
     if (att)
@@ -59,8 +71,49 @@ function GetArItem( ar, att, val )
     return "";
 }
 
+function RenderTable(it)
+{
+    var r = "<table class=\"d_table\"><thead><tr>";
+    for (c in it.fields) {
+        if (it.fields[c].twidth)
+            r += "<th width=\""+it.fields[c].twidth+"\">" + it.fields[c].title + "</th>";
+        else
+            r += "<th>" + it.fields[c].title + "</th>";
+    }
+    r += "</tr></thead>\n";
+
+    r += "<tbody>";
+    for (x in it.data) {
+        r += "<tr>";
+        for (c in it.fields) {
+            if (it.fields[c].tstyle)
+                r += "<td style=\""+it.fields[c].tstyle+"\">" + it.data[x][it.fields[c].name] + "</td>";
+            else
+                r += "<td>" + it.data[x][it.fields[c].name] + "</td>";
+        }
+        r +=  "</tr>";
+    }
+    r += "</tbody></table>";
+    return r;
+}
+
+// 未完成
+function  RenderForm(ar, i) {
+    var r = "";
+    for (x = 0; x < ar.fields.length; x++) {
+        if (ar.fields[x].type == "text")
+            r += "<div class=\"d_data_item\"><label>" + ar.fields[x].title + "</label><div style=\"width:404px;\">" + ar.data[i][ar.fields[x].name] + "</div></div>"
+        else if (ar.fields[x].type == "image")
+            r += "<div class=\"xImgSFZ\"><img src=\"" + ar.data[i][ar.fields[x].name] + "\"/></div>";
+        else
+            r += "<div class=\"d_data_item\"><label>" + ar.fields[x].title + "</label><div>" + ar.data[i][ar.fields[x].name] + "</div></div>"
+    }
+    return r;
+}
+
+
 var db_roles = [
-   {type:"叶片超级帐号", act:"超叶", modules:[{ name: "风场", url: "leaf_su7.html" }, { name: "人员", url: "person.html?type=leaf" }, { name: "厂家", url: "leaf_su_vender.html" }]},
+   {type:"叶片超级帐号", act:"超叶", modules:[{ name: "风场", url: "leaf_su7.html" }, { name: "人员", url: "person.html?type=风场|驻场" }, { name: "厂家", url: "leaf_su_vender.html" }]},
    {type:"风场主管", act: "chenjiamu", modules: [
            { name: "设备", url: "winder.html", submod: [{ name: "区域1", url: "winder.html" }, { name: "区域2", url: "winder.html" }, { name: "区域3", url: "winder.html" }]},
            { name: "案件", url: "coord.html",submod: [{ name: "区域1", url: "coord.html" }, { name: "区域2", url: "coord.html" }, { name: "区域3", url: "coord.html" }]},
@@ -406,9 +459,9 @@ var db_addition = [
         { img: "img/person/dgzy1.jpg", name: "电工证", office: "福建省宁德安监局", issuedate: "2008.06.16" },
         { img: "img/person/jjz1.jpg", name: "急救证", office: "福建省红十字会", issuedate: "2008.06.16" },
         { img: "img/person/bxpz1.jpg", name: "保险凭证", office: "人保财险福建省宁德地区支公司", issuedate: "2008.06.16" }],
-        edu: [{ img1: "img/person/byz1.jpg", img2: "img/person/gkzy1.jpg", tmstart: "2008.06.16", qualif: "博士", tmend: "2009.07.16", edu: "清华大学" },
-        { img1: "img/person/byz2.jpg", img2: "img/person/gkzy1.jpg", tmstart: "2007.06.16", qualif: "硕士", tmend: "2008.06.16", edu: "北京航空航天大学" },
-        { img1: "img/person/byz3.jpg", img2: "img/person/gkzy1.jpg", tmstart: "2006.06.16", qualif: "学士", tmend: "2007.06.16", edu: "河南科技大学" }],
+        edu: [{ img1: "img/person/byz1.jpg", img2: "img/person/xwz1.jpg", tmstart: "2008.06.16", qualif: "博士", tmend: "2009.07.16", edu: "清华大学" },
+        { img1: "img/person/byz2.jpg", img2: "img/person/xwz2.jpg", tmstart: "2007.06.16", qualif: "硕士", tmend: "2008.06.16", edu: "北京航空航天大学" },
+        { img1: "img/person/byz3.jpg", img2: "img/person/xwz3.jpg", tmstart: "2006.06.16", qualif: "学士", tmend: "2007.06.16", edu: "河南科技大学" }],
         employ: [{ img: "img/person/lzzm1.jpg", tmstart: "2008.06.16", tmend: "2009.07.16", workin: "广州联创通信技术有限公司", pos: "前台" },
         { img: "img/person/lzzm2.jpg", tmstart: "2007.06.16", tmend: "2008.06.16", workin: "惠州华特斯智能科技有限公司", pos: "检验员" },
         { img: "img/person/lzzm3.jpg", tmstart: "2006.06.16", tmend: "2007.06.16", workin: "西安晟威通信技术有限公司", pos: "研发工程师" }],

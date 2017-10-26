@@ -213,33 +213,26 @@
         </div>
         {% } %}
     </script>
+    <script type="text/javascript">
+        var url = window.location.search;
+        var act = url.substring(url.lastIndexOf('=') + 1, url.length);
+        var item = GetArItem(db_userlist.data, "account", act);
+        var i = rndrange(0, db_addition.length);
 
+        var tpl_baseinf = doT.template(document.getElementById('tpl_baseinf').innerHTML);
+        $("#d_baseinf").html(tpl_baseinf(item));
 
-        <script type="text/javascript">
+        var tpl_certiflist = doT.template(document.getElementById('tpl_certiflist').innerHTML);
+        $("#d_certiflist").html(tpl_certiflist(db_addition[i].certif));
 
+        var tpl_edulist = doT.template(document.getElementById('tpl_edulist').innerHTML);
+        $("#d_edulist").html(tpl_edulist(db_addition[i].edu));
 
-            var url = window.location.search;
-            var act = url.substring(url.lastIndexOf('=') + 1, url.length);
-            var item = GetArItem(db_userlist.data, "account", act);
-            var i = rndrange(0, db_addition.length);
+        var tpl_employlist = doT.template(document.getElementById('tpl_employlist').innerHTML);
+        $("#d_employlist").html(tpl_employlist(db_addition[i].employ));
 
-            var tpl_baseinf = doT.template(document.getElementById('tpl_baseinf').innerHTML);
-            $("#d_baseinf").html(tpl_baseinf(item));
-
-            var tpl_certiflist = doT.template(document.getElementById('tpl_certiflist').innerHTML);
-            $("#d_certiflist").html(tpl_certiflist(db_addition[i].certif));
-
-            var tpl_edulist = doT.template(document.getElementById('tpl_edulist').innerHTML);
-            $("#d_edulist").html(tpl_edulist(db_addition[i].edu));
-
-            var tpl_employlist = doT.template(document.getElementById('tpl_employlist').innerHTML);
-            $("#d_employlist").html(tpl_employlist(db_addition[i].employ));
-
-            var tpl_opuslist = doT.template(document.getElementById('tpl_opuslist').innerHTML);
-            $("#d_opuslist").html(tpl_opuslist(db_addition[i].opus));
-
-
-        </script>
-
+        var tpl_opuslist = doT.template(document.getElementById('tpl_opuslist').innerHTML);
+        $("#d_opuslist").html(tpl_opuslist(db_addition[i].opus));
+    </script>
 </body>
 </html>
