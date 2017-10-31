@@ -113,30 +113,32 @@ function  RenderForm(ar, i) {
 
 
 var db_roles = [
-   {type:"叶片超级帐号", act:"超叶", modules:[{ name: "风场", url: "leaf_su7.html" }, { name: "人员", url: "person.html?type=风场|驻场" }, { name: "厂家", url: "leaf_su_vender.html" }]},
-   {type:"风场主管", act: "chenjiamu", modules: [
+    {type: "叶片超级帐号", act: "叶片su", modules: [{ name: "地图", url: "map.html?type=风场&range=all" }, { name: "风场", url: "leaf_su7.html" }, { name: "人员", url: "person.html?type=风场|驻场" }, { name: "厂家", url: "leaf_su_vender.html" }]},
+    {type: "风场主管", act: "chenjiamu", modules: [
+           { name: "地图", url: "map.html?type=风场&range=all" },
            { name: "设备", url: "winder.html", submod: [{ name: "区域1", url: "winder.html" }, { name: "区域2", url: "winder.html" }, { name: "区域3", url: "winder.html" }]},
            { name: "案件", url: "coord.html",submod: [{ name: "区域1", url: "coord.html" }, { name: "区域2", url: "coord.html" }, { name: "区域3", url: "coord.html" }]},
            { name: "记录", url: "winder_repairlog.html", submod: [{ name: "区域1", url: "winder_repairlog.html" }, { name: "区域2", url: "winder_repairlog.html" }, { name: "区域3", url: "winder_repairlog.html" }] }
-       ]
+        ]
    },
-   {type: "驻场人员", act: "chenjiamu", modules: [
-           { name: "设备", url: "winder.html", submod: [{ name: "区域1", url: "winder.html" }, { name: "区域2", url: "winder.html" }, { name: "区域3", url: "winder.html" }]},
-           { name: "案件", url: "coord.html",submod: [{ name: "区域1", url: "coord.html" }, { name: "区域2", url: "coord.html" }, { name: "区域3", url: "coord.html" }]},
-           { name: "记录", url: "winder_repairlog.html", submod: [{ name: "区域1", url: "winder_repairlog.html" }, { name: "区域2", url: "winder_repairlog.html" }, { name: "区域3", url: "winder_repairlog.html" }] }
-       ]
+    {type: "驻场人员", act: "chenjiamu", modules: [
+            { name: "地图", url: "map.html?type=风场&range=all" },
+            { name: "设备", url: "winder.html", submod: [{ name: "区域1", url: "winder.html" }, { name: "区域2", url: "winder.html" }, { name: "区域3", url: "winder.html" }]},
+            { name: "案件", url: "coord.html",submod: [{ name: "区域1", url: "coord.html" }, { name: "区域2", url: "coord.html" }, { name: "区域3", url: "coord.html" }]},
+            { name: "记录", url: "winder_repairlog.html", submod: [{ name: "区域1", url: "winder_repairlog.html" }, { name: "区域2", url: "winder_repairlog.html" }, { name: "区域3", url: "winder_repairlog.html" }] }
+        ]
    },
-   {type:"设备超级帐号", act:"超设", modules:[{ name: "设备", url: "dev_su.html" }, { name: "仓库", url: "devwh_su.html" }, { name: "人员", url: "devwh_su_person.html" }]},
+   {type:"设备超级帐号", act:"设备su", modules:[{ name: "设备", url: "dev_su.html" }, { name: "仓库", url: "devwh_su.html" }, { name: "人员", url: "person.html?type=设备|驻管" }]},
    {type:"设备管理员", act:"sungangyi", modules:[{ name: "", url: "dev.html" }]},
-   {type:"仓库超级帐号", act:"超仓", modules:[{ name: "仓库", url: "matwh_su.html" }, { name: "人员", url: "matwh_su_person.html" }, { name: "材料", url: "material.html" }]},
+   {type:"仓库超级帐号", act:"仓库su", modules:[{ name: "仓库", url: "matwh_su.html" }, { name: "人员", url: "person.html?type=仓管|仓主" }, { name: "材料", url: "material.html" }]},
    {type:"仓库主管", act:"shimengfan", modules:[{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }]},
    {type:"仓库管理员", act:"luohongcai", modules:[{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }]},
-   {type:"调度超级帐号", act:"超调", modules:[{ name: "调度", url: "coord_su.html" }]},
+   {type:"调度超级帐号", act:"调度su", modules:[{ name: "调度", url: "person.html?type=总调|调度" }]},
    {type:"调度主管", act: "dushilei", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "winder_repairlog.html" }]},
    {type:"调度", act:"zhoushaoyuan", modules:[{ name: "案件", url: "coord.html" }, { name: "记录", url: "winder_repairlog.html" }]},
-   {type:"专家超级帐号", act:"超专", modules:[{ name: "专家", url: "expert_su2.html" }, { name: "记录", url: "winder_repairlog.html" }]},
+   {type:"专家超级帐号", act:"专家su", modules:[{ name: "专家", url: "person.html?type=专家" }, { name: "记录", url: "winder_repairlog.html" }]},
    {type:"专家", act:"gubingwei", modules:[{ name: "案件", url: "coord.html" }, { name: "记录", url: "winder_repairlog.html" }]},
-   {type:"技工超级帐号", act:"超技", modules:[{ name: "技工", url: "repair_su2.html" }]},
+   {type:"技工超级帐号", act:"技工su", modules:[{ name: "技工", url: "person.html?type=技工|队长" }]},
    {type:"维修队长", act:"qianzhenhai", modules:[{ name: "案件", url: "coord.html" }, { name: "记录", url: "winder_repairlog.html" }]},
    {type:"技工", act:"leiyixuan", modules:[{ name: "案件", url: "coord.html" },{ name: "记录", url: "winder_repairlog.html" }]},
 ];

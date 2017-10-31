@@ -1,0 +1,554 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.css"/>
+    <script type="text/javascript" src="js/doTe.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <link rel="StyleSheet" href="css/dtree.css" type="text/css" />
+    <link rel="StyleSheet" href="css/coord_card.css" type="text/css" />
+    <link rel="StyleSheet" href="css/coord_style.css" type="text/css" />
+    <script type="text/javascript" src="js/db.js"></script>
+
+    <style type="text/css">
+        .lspeech, .rspeech {
+            margin: 2px;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+        }
+
+        .lspeech {
+            justify-content: flex-start;
+            padding-right: 20px;
+        }
+
+        .rspeech {
+            justify-content: flex-end;
+            padding-left: 20px;
+            text-align: right;
+        }
+
+        .lspeech > div, .rspeech > div {
+            margin: 5px;
+        }
+
+        .lspeech > div > img, .rspeech > div > img {
+            border-radius: 4px;
+            border: 1px solid #d0d0d0;
+            width: 48px;
+            height: 48px;
+        }
+
+        .lspeech > div > div, .rspeech > div > div {
+            background-color: rgb(255, 253, 247);
+            border: 1px solid rgba(252, 185, 8, 0.35);
+            border-radius: 4px;
+            position: relative;
+            padding: 5px 10px;
+        }
+
+        .lspeech > div > div:before {
+            content: '';
+            width: 0px;
+            height: 0px;
+            position: absolute;
+            top: 6px;
+            left: -6px;
+            border-left: 0px;
+            border-top: 6px solid transparent;
+            border-right: 6px solid rgba(252, 185, 8, 0.35);
+            border-bottom: 6px solid transparent;
+        }
+
+        .lspeech > div > div:after {
+            content: '';
+            width: 0px;
+            height: 0px;
+            position: absolute;
+            top: 7px;
+            left: -5px;
+            border-left: 0px;
+            border-top: 5px solid transparent;
+            border-right: 5px solid rgb(255, 253, 247);
+            border-bottom: 5px solid transparent;
+        }
+
+        .rspeech > div > div:before {
+            content: '';
+            width: 0px;
+            height: 0px;
+            position: absolute;
+            top: 6px;
+            right: -6px;
+            border-left: 6px solid rgba(252, 185, 8, 0.35);
+            border-top: 6px solid transparent;
+            border-right: 0px;
+            border-bottom: 6px solid transparent;
+        }
+
+        .rspeech > div > div:after {
+            content: '';
+            width: 0px;
+            height: 0px;
+            position: absolute;
+            top: 7px;
+            right: -5px;
+            border-left: 5px solid rgb(255, 253, 247);
+            border-top: 5px solid transparent;
+            border-right: 0px;
+            border-bottom: 5px solid transparent;
+        }
+    </style>
+    <style>
+        html, body {height: 100%;overflow: hidden;}
+        .xrAngle {border-radius: 4px;border: 1px solid #dddddd;}
+        .xScroll {overflow-y: scroll;overflow-x: scroll;}
+        .xFullScroll {width: 100%;height: 100%;overflow-y: scroll;overflow-x: scroll;}
+        .xPanel {border-radius: 4px;border: 1px solid #dddddd;}
+        .xHPanel {border-radius: 4px;border: 1px solid #dddddd;margin:10px; height:300px;}
+		.xPanel .xHead  {padding: 10px 15px;color: #656565;border-bottom: 1px solid #dddddd;}
+        .xPanel .xLHead {padding: 6px;background: #f5f5f5;border-right: 1px solid #dddddd;width: 28px;height: 100%;}
+        .xFc_srow {display: flex;flex-direction: row;}
+        .xFc_scol {display: flex;flex-direction: column;align-items: stretch;align-content: stretch;}
+        .xFi_fixed{flex-shrink: 0;flex-grow: 0;}
+        .xFi_grow {flex-grow: 1;}
+
+        .xPanel2 {
+            border-radius: 4px;
+            border: 1px solid #dddddd;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            align-content: stretch;
+            margin: 5px;
+        }
+        .xPanel2>header {
+            padding: 10px 15px;
+            color: #656565;
+            border-bottom: 1px solid #dddddd;
+            flex-shrink: 0;
+            flex-grow: 0;
+        }
+
+        .xHPanel2 {
+            border-radius: 4px;
+            border: 1px solid #dddddd;
+            margin: 10px;
+            height: 300px;
+        }
+        .xPanel2>.header {
+            padding: 6px;
+            background: #f5f5f5;
+            border-right: 1px solid #dddddd;
+            width: 28px;
+            height: 100%;
+        }
+
+         .xImgSFZ {
+            border-radius: 4px;
+            border: 1px solid #dddddd;
+            border-color: #e0e4e8;
+            margin: 2px;
+            display: inline-block;
+            width: 150px;
+            height: 100px;
+        }
+        .xImgSFZ img {width: 148px;height: 98px;}
+
+
+        .SmallHead {
+        }
+        .SmallHead img {
+            border-radius: 10px;
+            width: 20px;
+            height: 20px;
+        }
+
+        .d_dtree-scroll {
+            width: 100%;
+            height: 100%;
+            overflow-y: scroll;
+            overflow-x: scroll;
+        }
+
+        .d_panel {
+            border-radius: 4px;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-color: #e0e4e8;
+        }
+        .d_panel .heading {
+            border-bottom: 1px solid #dddddd;
+            padding: 10px 15px;
+            color: #656565;
+        }
+        .d_panel .heading2 {
+            border-bottom: 1px solid #dddddd;
+            padding: 5px;
+        }
+        .d_panel .heading2 strong {
+            padding-left: 10px;
+        }
+
+        .d_data_item {
+            margin: 5px 15px;
+            display: inline-block;
+        }
+
+        .d_data_item label {
+            width: 60px;
+            text-align:right;
+        }
+        .d_data_item div {
+            border-radius: 4px;
+            border: 1px solid #dddddd;
+            display:inline-block;
+            padding:5px 10px;
+            margin:0px 5px;
+            width:150px;
+        }
+
+        .d_detail {
+            margin-right: 2px;
+            margin-bottom: 10px;
+        }
+
+        .d_rAngle {
+            border-radius: 4px;
+            border: 1px solid #dddddd;
+            border-color: #e0e4e8;
+        }
+
+        .d_dItem {
+            margin: 5px 15px;
+            display: inline-block;
+        }
+
+        .d_dImage {
+            margin-top: 5px;
+            margin-bottom: 5px;
+            margin-left: 15px;
+            margin-right: 23px;
+            display: inline-block;
+        }
+
+        input:focus {
+            border-color: #66afe9;
+            box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
+        }
+    </style> 
+</head>
+<body class="xFc_srow" style="padding:5px;">
+    <section class="xPanel2 xFi_grow">
+        <header>维修记录<div style="float: right;"><a href="#">添加</a></div></header>
+        <div class="xFi_grow xScroll">
+            <table class="xTable">
+                <thead><tr><th id="X" style="min-width:65px;">单号</th><th style="min-width:50px;">故障类别</th><th style="min-width:115px;">报修人</th>
+                        <th style="min-width:50px;">联系电话</th><th style="min-width:110px;">报修单位</th><th>报修时间</th></tr></thead>
+                <tbody id="troublelist"></tbody>
+            </table>
+        </div>
+    </section>
+    <section class="xPanel2 xFi_grow" style="max-width:720px;">
+        <header>案件处理</header>
+        <div class="xScroll xFi_grow">
+            <details open class="xBoard">
+                <summary style="border-top:0px;">报修</summary>
+                <div>
+                    <div>
+                        <div class="xItem"><label>单号</label><div id="code">　</div></div>
+                        <div class="xItem"><label>故障类别</label><div id="type">　</div></div>
+                        <div class="xItem"><label>报修人</label><div id="create">　</div></div>
+                        <div class="xItem"><label>联系电话</label><div id="phone">　</div></div>
+                        <div class="xItem"><label>报修单位</label><div id="winder">　</div></div>
+                        <div class="xItem"><label>报修时间</label><div id="createdt">　</div></div>
+                   </div>
+                   <div id="imgs" class="xHImgList">
+                        <img src="img/person/sfz1.jpg"/>
+                        <img src="img/person/sfz2.jpg"/>
+                        <img src="img/person/sfz3.jpg"/>
+                    </div>
+                    <div id="remark" class="xrAngle" style="margin:5px;margin-top:10px; padding:5px 10px;">
+                        故障说明信息，正是礁石的阻挡，才使浪花显得美丽。在逆境中要看到生活的美，在希望中别忘记不断奋斗。为了成材，松树从不向四季如春的温室外献殷勤。
+                    </div>
+                </div>
+            </details>             
+            <details open class="xBoard">
+                <summary>准备</summary>
+                <div class="xTagRow" style="margin-top:5px;"><label>专家组</label>
+                    <div id="prepare_expert" class="xBItem xNail2">　</div>
+                </div>
+                <div class="xTagRow"><label>评估报告</label>
+                    <div id="prepare_report" style="position: relative;"><div class="xrAngle xDoc" style="margin: 5px; padding: 5px 10px;">一次评估报告</div></div>
+                    <div id="prepare_report2" style="position: relative;"><div class="xrAngle xDoc" style="margin: 5px; padding: 5px 10px;">二次评估报告</div></div>
+                </div>
+                <div class="xTagRow"><label>维修方案</label>
+                    <div>
+                        <div id="prepare_scheme" style="min-width: 280px; position: relative;"><div class="xrAngle xDoc" style="margin: 5px; padding: 5px 10px;">维修方案</div></div>
+                        <div id="prepare_windermastersign" class="signbox">【风场】　　　</div>
+                        <div id="prepare_winderclerksign" class="signbox">【驻场】　　　</div>
+                        <div id="prepare_coordmastersign" class="signbox">【总调】　　　</div>
+                    </div>
+                </div>
+                <div class="xTagRow" ><label>维修队</label>
+                    <div id="repair_team" class="xFi_grow xrAngle xNail2" style="margin: 5px; padding:5px 10px;">　</div>
+                </div>
+                <div class="xTagRow" >
+                    <label>维修用料</label>
+                    <div id="repair_mat" class="xFi_grow xrAngle xNail2" style="margin: 5px; padding: 5px 10px;">　</div>
+                </div>
+                <div class="xTagRow" >
+                    <label>维修设备</label>
+                    <div id="repair_dev" class="xFi_grow xrAngle xNail2" style="margin: 5px; padding: 5px 10px;">　</div>
+                </div>
+            </details>             
+
+            <details open class="xBoard">
+                <summary>维修<div style="float: right;"><a href="#">添加</a></div></summary>
+                <div id="repair_log" style="padding:5px;">　</div>
+            </details>             
+            <details  open class="xBoard">
+                <summary>完工</summary>
+                <div class="xTagRow" style="margin-top:5px;"><label>维修报告</label>
+                    <div id="complete_report" style="min-width: 280px; position: relative;display:inline-block;">
+                        <div class="xrAngle xDoc" style="margin: 5px; padding: 5px 10px;">维修报告</div></div>
+                    <div id="complete_repairteamldrsign" class="signbox">【队长】　　　</div>
+                    <div id="complete_winderclerksign" class="signbox">【驻场】　　　</div>
+                </div>
+                <div>
+                    <div class="xFc_srow" style="padding: 10px 0px 0px 10px; align-items: baseline;">
+                        <div class="xFi_fixed" style="margin-right:10px;width:56px;">维修方案</div>
+                        <div id="complete_report2" class="xFi_grow" style="position: relative;">
+                            <div class="xrAngle xDoc" style="margin-right: 10px; padding: 5px 10px;">XXX维修方案 李四鬼 2017-05-31</div>
+                            <div id="abc" class="xMenu">
+                                <div><a>XXX维修方案 李四鬼 2017-05-31</a></div>
+                                <div><a>XXX维修方案 李四鬼 2017-05-31</a></div>
+                                <div><a>XXX维修方案 李四鬼 2017-05-31</a></div>
+                            </div>
+                        </div>
+                        <div id="complete_winderclerksign2" class="xrAngle" style="margin-right: 10px; padding: 5px 10px; display: inline-block">驻厂孙二狗已确认</div>
+                        <div id="complete_repairteamldrsign2" class="xrAngle" style="margin-right: 10px; padding: 5px 10px; display: inline-block">队长赵大丑已确认</div>
+                    </div>
+                </div>
+            </details>             
+        </div>
+    </section>
+    <section class="xPanel2" style="width: 500px; min-width: 300px;">
+        <header>对话</header>
+        <div class="xFi_grow xScroll" ><div id="speechlist" style="padding:10px;"></div></div>
+
+        <footer class="xFc_srow xFi_fixed" style="padding:10px; height: 120px; width: 100%; align-items: flex-end;">
+            <textarea class="xFi_grow xrAngle" style="margin-right:10px; padding:5px 10px; height:100px;width:100px;resize:none;"></textarea>
+            <div class="xFi_fixed"><button>发送</button></div>
+        </footer>
+    </section>
+
+<script id="tpl_troublelist" type="text/template">
+    {% for (var i = 0; i < it.length; i++) { %}
+    <tr>
+        <td>{%=it[i].code%}</td>
+        <td>{%=it[i].type%}</td>
+        <td>{%=it[i].create%}</td>
+        <td>{%=it[i].phone%}</td>
+        <td>{%=it[i].winder%}</td>
+        <td>{%=it[i].createdt%}</td>
+    </tr>
+    {% } %}
+</script>
+<script id="tpl_doc" type="text/template">
+        <div class="xrAngle xDoc" style="margin: 5px; padding: 5px 60px 5px 10px;">{%=it[0]%}</div>
+        <div id="abc" class="xMenu">
+            {% for (var i = 0; i < it.length; i++) { %}
+            <div><a>{%=it[i]%}</a></div>
+            {% } %}
+        </div>
+</script>
+
+<script id="tpl_user" type="text/template">
+        <div class="SmallHead" style="display: inline-block"><img src="img/face/face{%=it.face%}.jpg"/>【{%=it.prof%}】{%=it.name%}</div>
+</script>
+
+<script id="tpl_users" type="text/template">
+    {% for (var i = 0; i < it.length; i++) { %}
+        <div class="SmallHead" style="display: inline-block"><img src="img/face/face{%=it[i].face%}.jpg"/>【{%=it[i].prof%}】{%=it[i].name%}</div>
+    {% } %}
+</script>
+
+<script id="tpl_imgs" type="text/template">
+    {% for (var i = 0; i < it.length; i++) { %}
+        <img src="{%=it[i]%}"/>
+    {% } %}
+</script>
+
+<script id="tpl_imgs" type="text/template">
+    {% for (var i = 0; i < it.length; i++) { %}
+        <img src="{%=it[i]%}"/>
+    {% } %}
+</script>
+
+<script id="tpl_nails" type="text/template">
+    {% for (var i = 0; i < it.length; i++) { %}
+        <div>{%=it[i]%}</div>
+    {% } %}
+</script>
+
+<script id="tpl_repair_log2" type="text/template">
+    <table class="xTable">
+    <thead><tr ><th>现场图片</th><th>说明</th><th>发表人</th></tr></thead>
+    {% for (var i = 0; i < it.length; i++) { %}
+    <tr>
+        <td>
+            <div class="xHImgList" style="border:0px;">
+            {% for (var j = 0; j < it[i].img.length; j++) { %}
+            <img src="{%=it[i].img[j]%}"/>
+            {% } %}
+            </div>
+        </td>
+        <td  style="max-width: 250px;">{%=it[i].remark%}</td>
+        <td>
+            <div><span class="SmallHead"><img src="img/face/face{%=it[i].create.face%}.jpg"/>【{%=it[i].create.prof%}】{%=it[i].create.name%}</span></div>
+            <div>{%=it[i].time%}</div>
+        </td>
+    </tr>
+    {% } %}
+    </table>
+</script>
+
+<script type="text/javascript">
+    var tpl_doc = doT.template(document.getElementById('tpl_doc').innerHTML);
+    var tpl_user = doT.template(document.getElementById('tpl_user').innerHTML);
+    var tpl_users = doT.template(document.getElementById('tpl_users').innerHTML);
+    var tpl_imgs = doT.template(document.getElementById('tpl_imgs').innerHTML);
+    var tpl_nails = doT.template(document.getElementById('tpl_nails').innerHTML);
+    var tpl_repair_log = doT.template(document.getElementById('tpl_repair_log2').innerHTML);
+
+    var currow = -1;
+    var troublelist = [];
+
+    $(function () {
+
+        troublelist = rndsubarray(db_troublelist.data, 30, 50);
+        for (var i = 0; i < troublelist.length; i++)
+        {
+            teamldr = rnditem(db_userlist.data, "prof", "队长");
+            troublelist[i].imgs = rndsubarray(db_attach.winderimg, 3, 5);
+            troublelist[i].prepare_expert = rndsubarray( db_userlist.data, 3, 5, "prof", "专家");
+            troublelist[i].prepare_report = rndsubarray( db_attach.assess, 3, 5);
+            troublelist[i].prepare_report2 = rndsubarray(db_attach.assess2,3,5);
+            troublelist[i].prepare_scheme = rndsubarray(db_attach.scheme,3,5);
+            troublelist[i].prepare_windermastersign = rnditem(db_userlist.data, "prof", "风场" );
+            troublelist[i].prepare_winderclerksign = rnditem(db_userlist.data, "prof", "驻场" );
+            troublelist[i].prepare_coordmastersign = rnditem(db_userlist.data, "prof", "总调");
+            troublelist[i].repair_team = [teamldr].concat( rndsubarray(db_userlist.data,3,5,"prof", "技工"));
+            troublelist[i].repair_mat = rndsubarray(db_attach.matout,2,4);
+            troublelist[i].repair_dev = rndsubarray(db_attach.devuse,2,4);
+            troublelist[i].complete_winderclerksign = troublelist[i].prepare_winderclerksign;
+            troublelist[i].complete_repairteamldrsign = teamldr;
+            troublelist[i].complete_report = rndsubarray(db_attach.report,2,4);
+            troublelist[i].repair_log = [];
+            var c = rndrange(2, 4);
+            for (var j = 0; j < c; j++)
+            {
+                var x = {};
+                x.img = rndsubarray(db_attach.winderimg, 2, 4);
+                x.remark = rnditem(db_speech);
+                x.create = rnditem(troublelist[i].repair_team);
+                x.time = rnditem(db_attach.vtime);
+                troublelist[i].repair_log.push(x);
+            }
+        }
+
+        // 渲染报修单
+        var tpl_troublelist = doT.template(document.getElementById('tpl_troublelist').innerHTML);
+        $("#troublelist").html(tpl_troublelist(troublelist));
+
+        $("tr").click(function () {
+            if (currow != -1) {
+                currow++;
+                if (currow % 2 == 0)
+                    $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#f5f5f5");
+                else
+                    $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#ffffff");
+            }
+            currow = $(this).index();
+            $(this).children().css("background-color", "#00f0f5");
+            renderdetail();
+        });
+    });
+
+    function renderdetail()
+    {
+        var cur = troublelist[currow - 1];
+        $("#code").html(cur.code);
+        $("#type").html(cur.type);
+        $("#create").html(cur.create);
+        $("#phone").html(cur.phone);
+        $("#winder").html(cur.winder);
+        $("#createdt").html(cur.createdt);
+        $("#imgs").html(tpl_imgs(cur.imgs));
+        $("#remark").html(cur.remark+cur.remark+cur.remark+cur.remark);
+
+        $("#prepare_expert").html(tpl_users(cur.prepare_expert));
+        $("#prepare_report").html(tpl_doc(cur.prepare_report));
+        $("#prepare_report2").html(tpl_doc(cur.prepare_report2));
+        $("#prepare_scheme").html(tpl_doc(cur.prepare_scheme));
+        $("#prepare_windermastersign").html(tpl_user(cur.prepare_windermastersign));
+        $("#prepare_winderclerksign").html(tpl_user(cur.prepare_winderclerksign));
+        $("#prepare_coordmastersign").html(tpl_user(cur.prepare_coordmastersign));
+
+        $("#repair_team").html(tpl_users(cur.repair_team));
+        $("#repair_mat").html(tpl_nails(cur.repair_mat));
+        $("#repair_dev").html(tpl_nails(cur.repair_dev));
+        $("#repair_log").html(tpl_repair_log(cur.repair_log));
+
+        $("#complete_report").html(tpl_doc(cur.complete_report));
+        $("#complete_winderclerksign").html(tpl_user(cur.complete_winderclerksign));
+        $("#complete_repairteamldrsign").html(tpl_user(cur.complete_repairteamldrsign));
+    }
+
+</script>
+
+<script type="text/javascript"> // 生成聊天成员列表
+    var ul = [];
+    var userlist = "";
+    while (ul.length<50){
+        var x = parseInt(Math.random() * db_userlist.data.length);
+        while ( $.inArray(x, ul) != -1)
+            x = parseInt(Math.random() * db_userlist.data.length);
+        ul.push(x);
+        userlist += "<div class=\"SmallHead\"><img src=\"img/face/face" + db_userlist.data[x].face
+            + ".jpg\"/>【" + db_userlist.data[x].prof + "】" + db_userlist.data[x].name + "</div>";
+    }
+    $("#userlist").html(userlist);
+</script>
+<script type="text/javascript"> // 生成聊天内容列表
+    var speechlist = "";
+    for (var i = 0; i < 50; i++ ){
+        var u = ul[parseInt(Math.random() * ul.length)];
+        var s = parseInt(Math.random() * db_speech.length);
+
+        // <div style="width: 100%; text-align:center;">--------分割线--------</div>
+        if ( u%2 == 0 ){
+            speechlist += "<div class=\"lspeech\">"+
+                "<div><img src=\"img/face/face"+db_userlist.data[u].face+".jpg\" /></div>"+
+                "<div><span>【" + db_userlist.data[u].prof + "】"+db_userlist.data[u].name+"</span>"+
+                "<div>"+db_speech[s]+"</div></div></div>";
+        }
+        else{
+            speechlist += "<div class=\"rspeech\">"+
+                "<div><span>【" + db_userlist.data[u].prof + "】"+db_userlist.data[u].name+"</span>"+
+                "<div>"+db_speech[s]+"</div></div>"+
+                "<div><img src=\"img/face/face"+db_userlist.data[u].face+".jpg\" /></div>"+
+                "</div>";
+        }
+    }
+    $("#speechlist").html(speechlist);
+</script>
+
+</body>
+</html>
+
