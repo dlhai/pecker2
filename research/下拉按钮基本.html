@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>下拉按钮</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <script src="js/jquery.min.js"></script>
+    <style type="text/css">
+
+    .x3Doc {
+        position: relative;
+    }
+    .x3Doc>.x3Doc-handle {
+    }
+
+    .x3Doc>.x3Doc-menu {
+        position: absolute;
+        display: none;
+    }
+    </style> 
+</head>
+<body style="padding:5px;">
+	 <div class="x3Doc">
+		<div class="x3Doc-handle" >XXX维修方案 李四鬼 2017-05-31</div>
+		<div class="x3Doc-menu">
+			<div><a>XXX维修方案 李四a鬼 2017-05-31</a></div>
+			<div><a>XXX维修方案 李四b鬼 2017-05-31</a></div>
+			<div><a>XXX维修方案 李四c鬼 2017-05-31</a></div>
+		</div>
+	</div>
+    <br /> alsdkfjl;asdjf;asd;f
+    <br /><br /><br /><br /><br />
+	 <div class="x3Doc">
+		<div class="x3Doc-handle" >XXX维修方案 李四鬼 2017-05-31</div>
+		<div class="x3Doc-menu">
+			<div><a>XXX维修方案 李四a鬼 2017-05-31</a></div>
+			<div><a>XXX维修方案 李四b鬼 2017-05-31</a></div>
+			<div><a>XXX维修方案 李四c鬼 2017-05-31</a></div>
+		</div>
+	</div>
+
+    alsdkfjl;asdjf;asd;f
+
+<script type="text/javascript">
+    $(function () {
+        $(".x3Doc>.x3Doc-handle").on("click", function ()
+        {
+            $(this).next(".x3Doc-menu").css("display", "block");
+            $(this).next(".x3Doc-menu").addClass("x3Doc-click");
+        });
+
+        window.onclick = x3DocMenuHide;
+        function x3DocMenuHide() {
+            $(".x3Doc-menu:not(.x3Doc-click)").css("display", "none");
+            $(".x3Doc>.x3Doc-click").removeClass("x3Doc-click");
+        }
+    });
+
+</script>
+</body >
+</html >
+
