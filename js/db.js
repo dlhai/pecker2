@@ -1,4 +1,25 @@
-﻿//生成[min-max)之间的一个数
+﻿function tmfmt(tm, fmt) {
+     var o = { 
+        "M+" : tm.getMonth()+1,                 //月份 
+        "d+" : tm.getDate(),                    //日 
+        "h+" : tm.getHours(),                   //小时 
+        "m+" : tm.getMinutes(),                 //分 
+        "s+" : tm.getSeconds(),                 //秒 
+        "q+" : Math.floor((tm.getMonth()+3)/3), //季度 
+        "S"  : tm.getMilliseconds()             //毫秒 
+    }; 
+    if(/(y+)/.test(fmt)) {
+            fmt=fmt.replace(RegExp.$1, (tm.getFullYear()+"").substr(4 - RegExp.$1.length)); 
+    }
+     for(var k in o) {
+        if(new RegExp("("+ k +")").test(fmt)){
+             fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+         }
+     }
+    return fmt; 
+}
+
+//生成[min-max)之间的一个数
 function rndrange(min, max) { return parseInt(Math.random() * (max - min)) + min; }
 //生成长度为len一个数字字符串
 function rndnumstr(len) {
@@ -34,16 +55,33 @@ function rndsubarray(ar, min, max, att, val )
     }
     else
     {
-        var a = [], r = [];
-        var c = rndrange(min,max);
-        while (a.length < c) {
-            var x = rndrange(0, ar.length);
-            while ($.inArray(x, a) != -1)
-                x = rndrange(0, ar.length);
-            a.push(x);
-            r.push(ar[x]);
+        var a = [];
+        for (var i = 0; i < ar.length; i++)
+            a.push(i);
+        var count = rndrange(min, max);
+        var sel = [];
+        for (var i = 0; i < count && i < ar.length; i++) {
+            var x = rndrange(0, a.length);
+            sel.push(a[x]);
+            a.splice(x, 1);
         }
+        sel.sort();
+
+        var r = [];
+        for (var i = 0; i < a.length; i++)
+            r.push(ar[a[i]]);
         return r;
+
+        //var a = [], r = [];
+        //var c = rndrange(min,max);
+        //while (a.length < c) {
+        //    var x = rndrange(0, ar.length);
+        //    while ($.inArray(x, a) != -1)
+        //        x = rndrange(0, ar.length);
+        //    a.push(x);
+        //    r.push(ar[x]);
+        //}
+        //return r;
     }
 }
 
@@ -74,22 +112,26 @@ function GetArItem( ar, att, val )
 function RenderTable(it)
 {
     var r = "<table class=\"d_table\"><thead><tr>";
-    for (c in it.fields) {
-        if (it.fields[c].twidth)
-            r += "<th width=\""+it.fields[c].twidth+"\">" + it.fields[c].title + "</th>";
+    for ( var c in it.fields) {
+        if (it.fields[c].twidth) {
+            if (parseInt( it.fields[c].twidth) > 0)
+                r += "<th width=\"" + it.fields[c].twidth + "\">" + it.fields[c].title + "</th>";
+        }
         else
             r += "<th>" + it.fields[c].title + "</th>";
     }
     r += "</tr></thead>\n";
 
     r += "<tbody>";
-    for (x in it.data) {
+    for (var x in it.data) {
         r += "<tr>";
         for (c in it.fields) {
-            if (it.fields[c].tstyle)
-                r += "<td style=\""+it.fields[c].tstyle+"\">" + it.data[x][it.fields[c].name] + "</td>";
-            else
-                r += "<td>" + it.data[x][it.fields[c].name] + "</td>";
+            if (!it.fields[c].twidth || it.fields[c].twidth && parseInt( it.fields[c].twidth ) > 0) {
+                if (it.fields[c].tstyle)
+                    r += "<td style=\""+it.fields[c].tstyle+"\">" + it.data[x][it.fields[c].name] + "</td>";
+                else
+                    r += "<td>" + it.data[x][it.fields[c].name] + "</td>";
+            }
         }
         r +=  "</tr>";
     }
@@ -97,20 +139,18 @@ function RenderTable(it)
     return r;
 }
 
-// 未完成
 function  RenderForm(ar, i) {
     var r = "";
     for (x = 0; x < ar.fields.length; x++) {
-        if (ar.fields[x].type == "text")
-            r += "<div class=\"d_data_item\"><label>" + ar.fields[x].title + "</label><div style=\"width:404px;\">" + ar.data[i][ar.fields[x].name] + "</div></div>"
-        else if (ar.fields[x].type == "image")
+        if (ar.fields[x].ftype == "bigtext")
+            r += "<div class=\"d_data_item\"><label>" + ar.fields[x].title + "</label><div style=\"width:500px;\">" + ar.data[i][ar.fields[x].name] + "</div></div>"
+        else if (ar.fields[x].ftype == "image")
             r += "<div class=\"xImgSFZ\"><img src=\"" + ar.data[i][ar.fields[x].name] + "\"/></div>";
         else
             r += "<div class=\"d_data_item\"><label>" + ar.fields[x].title + "</label><div>" + ar.data[i][ar.fields[x].name] + "</div></div>"
     }
     return r;
 }
-
 
 var db_roles = [
     {type: "叶片超级帐号", act: "叶片su", modules: [{ name: "地图", url: "map.html?type=风场&range=all" }, { name: "风场", url: "leaf_su7.html" }, { name: "人员", url: "person.html?type=风场|驻场" }, { name: "厂家", url: "leaf_su_vender.html" }]},
@@ -128,19 +168,20 @@ var db_roles = [
             { name: "记录", url: "winder_repairlog.html", submod: [{ name: "区域1", url: "winder_repairlog.html" }, { name: "区域2", url: "winder_repairlog.html" }, { name: "区域3", url: "winder_repairlog.html" }] }
         ]
    },
-   {type:"设备超级帐号", act:"设备su", modules:[{ name: "设备", url: "dev_su.html" }, { name: "仓库", url: "devwh_su.html" }, { name: "人员", url: "person.html?type=设备|驻管" }]},
-   {type:"设备管理员", act:"sungangyi", modules:[{ name: "", url: "dev.html" }]},
-   {type:"仓库超级帐号", act:"仓库su", modules:[{ name: "仓库", url: "matwh_su.html" }, { name: "人员", url: "person.html?type=仓管|仓主" }, { name: "材料", url: "material.html" }]},
-   {type:"仓库主管", act:"shimengfan", modules:[{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }]},
-   {type:"仓库管理员", act:"luohongcai", modules:[{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }]},
-   {type:"调度超级帐号", act:"调度su", modules:[{ name: "调度", url: "person.html?type=总调|调度" }]},
-   {type:"调度主管", act: "dushilei", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "winder_repairlog.html" }]},
-   {type:"调度", act:"zhoushaoyuan", modules:[{ name: "案件", url: "coord.html" }, { name: "记录", url: "winder_repairlog.html" }]},
-   {type:"专家超级帐号", act:"专家su", modules:[{ name: "专家", url: "person.html?type=专家" }, { name: "记录", url: "winder_repairlog.html" }]},
-   {type:"专家", act:"gubingwei", modules:[{ name: "案件", url: "coord.html" }, { name: "记录", url: "winder_repairlog.html" }]},
-   {type:"技工超级帐号", act:"技工su", modules:[{ name: "技工", url: "person.html?type=技工|队长" }]},
-   {type:"维修队长", act:"qianzhenhai", modules:[{ name: "案件", url: "coord.html" }, { name: "记录", url: "winder_repairlog.html" }]},
-   {type:"技工", act:"leiyixuan", modules:[{ name: "案件", url: "coord.html" },{ name: "记录", url: "winder_repairlog.html" }]},
+    { type: "设备超级帐号", act: "设备su", modules: [{ name: "地图", url: "map.html?type=司机|总备&range=all" }, { name: "驻地", url: "devwh_su.html" }, { name: "人员", url: "person.html?type=司机|总备&depart=db_devwh_list" }] },
+    { type: "驻地主管", act: "buzixian", modules: [{ name: "地图", url: "map.html?type=司机" },{ name: "驻地", url: "devwh.html" },{ name: "人员", url: "person.html?type=司机&depart=塔里木驻" }] },
+    { type: "设备司机", act: "sungangyi", modules: [{ name: "设备", url: "dev.html" }] },
+    { type: "仓库超级帐号", act: "仓库su", modules: [{ name: "仓库", url: "matwh_su.html" }, { name: "人员", url: "person.html?type=仓管|仓主" }, { name: "材料", url: "material.html" }] },
+    { type: "仓库主管", act: "shimengfan", modules: [{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }] },
+    { type: "仓库管理员", act: "luohongcai", modules: [{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }] },
+    { type: "调度超级帐号", act: "调度su", modules: [{ name: "调度", url: "person.html?type=总调|调度" }] },
+    { type: "调度主管", act: "dushilei", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "winder_repairlog.html" }] },
+    { type: "调度", act: "zhoushaoyuan", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "winder_repairlog.html" }] },
+    { type: "专家超级帐号", act: "专家su", modules: [{ name: "专家", url: "person.html?type=专家" }, { name: "记录", url: "winder_repairlog.html" }] },
+    { type: "专家", act: "gubingwei", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "winder_repairlog.html" }] },
+    { type: "技工超级帐号", act: "技工su", modules: [{ name: "技工", url: "person.html?type=技工|队长" }] },
+    { type: "维修队长", act: "qianzhenhai", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "winder_repairlog.html" }] },
+    { type: "技工", act: "leiyixuan", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "winder_repairlog.html" }] },
 ];
 
 var db_leafvender =
@@ -221,7 +262,8 @@ var db_attach =
     devuse: ["设备调用单_840110737", "设备调用单_901130332", "设备调用单_780922800", "设备调用单_810302577", "设备调用单_910907006", "设备调用单_780728516", "设备调用单_810928109", "设备调用单_751218624", "设备调用单_810914797", "设备调用单_890529869", "设备调用单_890221332", "设备调用单_760722431", "设备调用单_700728549", "设备调用单_890320962", "设备调用单_730907507", "设备调用单_930816162", "设备调用单_900830678", "设备调用单_951228519", "设备调用单_760321367", "设备调用单_890822530", "设备调用单_791222607", "设备调用单_730217983", "设备调用单_930201086", "设备调用单_780201836", "设备调用单_760427128", "设备调用单_851030084", "设备调用单_850217506", "设备调用单_741031506", "设备调用单_941007954", "设备调用单_780924267", "设备调用单_850421166"],
     matout: ["用料单_990210784", "用料单_790722207", "用料单_911112042", "用料单_761226388", "用料单_840216773", "用料单_880202660", "用料单_850624821", "用料单_740607780", "用料单_741218817", "用料单_800826114", "用料单_930111224", "用料单_930603487", "用料单_820525171", "用料单_890311715", "用料单_940510422", "用料单_901209410", "用料单_841227992", "用料单_900704440", "用料单_860323775", "用料单_810415316", "用料单_900226874", "用料单_890511593", "用料单_910106840", "用料单_941103230"],
     matout_status:["等待备货","正在备货","等待审核","等待发货","等待确认"],
-    vtime:["2008-11-30 5:49:21","2005-03-09 9:39:7","2007-11-09 2:0:5","2009-04-16 21:30:41","2008-12-20 12:54:26","2007-09-11 16:41:2","2008-04-21 22:21:48","2005-10-11 8:20:35","2004-01-28 6:0:29","2008-01-31 20:32:35","2006-01-19 13:53:12","2003-12-04 14:13:3","2008-11-06 14:14:19","2009-01-31 7:7:30","2005-03-17 11:11:42","2010-03-15 18:22:11","2008-12-24 13:50:9","2008-03-20 2:7:39","2008-06-15 10:31:10","2008-05-04 10:44:11","2010-09-25 14:57:48","2009-10-15 4:54:22","2005-05-31 7:20:18","2008-07-28 19:24:48","2004-04-24 10:18:1","2004-08-16 11:27:22","2010-04-02 17:57:42","2008-12-18 1:54:24","2010-06-19 13:18:11","2006-01-23 5:26:5","2010-08-05 10:56:17","2003-08-30 10:59:20","2006-11-04 18:56:57"],
+    vtime: ["2008-11-30 5:49:21", "2005-03-09 9:39:7", "2007-11-09 2:0:5", "2009-04-16 21:30:41", "2008-12-20 12:54:26", "2007-09-11 16:41:2", "2008-04-21 22:21:48", "2005-10-11 8:20:35", "2004-01-28 6:0:29", "2008-01-31 20:32:35", "2006-01-19 13:53:12", "2003-12-04 14:13:3", "2008-11-06 14:14:19", "2009-01-31 7:7:30", "2005-03-17 11:11:42", "2010-03-15 18:22:11", "2008-12-24 13:50:9", "2008-03-20 2:7:39", "2008-06-15 10:31:10", "2008-05-04 10:44:11", "2010-09-25 14:57:48", "2009-10-15 4:54:22", "2005-05-31 7:20:18", "2008-07-28 19:24:48", "2004-04-24 10:18:1", "2004-08-16 11:27:22", "2010-04-02 17:57:42", "2008-12-18 1:54:24", "2010-06-19 13:18:11", "2006-01-23 5:26:5", "2010-08-05 10:56:17", "2003-08-30 10:59:20", "2006-11-04 18:56:57"],
+    sign:[]
     };
 
 var db_mat = {
@@ -320,6 +362,130 @@ var db_mat = {
     ]
 };
 
+var db_devwh_list = {
+    fields: [
+        { "title": "名称", "name": "name", },
+        { "title": "全名", "fname": "name", },
+        { "title": "地理位置", "name": "gps", },
+        { "title": "地址", "name": "addr", "ftype": "bigtext" },
+        { "title": "主管", "name": "leader", },
+        { "title": "备注", "name": "remark", "ftype": "bigtext" },
+    ],
+    data: [
+{"name":"长白一驻","fname":"长白山一号驻地","gps":"116.357701,40.596596","addr":"青海省玉树藏族自治州治多县","leader":"顾冰薇","remark":"站在巨人的肩上是为了超过巨人。"},
+{"name":"兴安岭驻","fname":"大兴安岭X号驻地","gps":"123.130206,50.629764","addr":"西藏自治区昌都地区类乌齐县","leader":"钱振海","remark":"泉水，奋斗之路越曲折，心灵越纯洁。"},
+{"name":"大草原驻","fname":"大草原蓝天白云驻地","gps":"85.231774,46.32769","addr":"辽宁省大连市","leader":"雷亦旋","remark":"如果缺少破土面出并与风雪拚搏的勇气，种子的前途并不比落叶美妙一分。"},
+{"name":"风吹草驻","fname":"风吹草低没牛羊驻地","gps":"96.564509,40.766858","addr":"湖北省省直辖行政单位神农架林区","leader":"步孜娴","remark":"竹笋虽然柔嫩，但它不怕重压，敢于奋斗、敢于冒尖。"},
+{"name":"天山林驻","fname":"天山森林驻地","gps":"84.127936,38.201158","addr":"重庆市县奉节县","leader":"陈嘉木","remark":"不要让追求之舟停泊在幻想的港湾，而应扬起奋斗的风帆，驶向现实生活的大海。"},
+{"name":"塔里木驻","fname":"塔里木驻地","gps":"87.513039,32.664229","addr":"河北省沧州市沧县","leader":"周绍元","remark":"智者的梦再美，也不如愚人实干的脚印。"},
+{"name":"准葛尔驻","fname":"准葛尔沙漠驻地","gps":"105.248033,34.267815","addr":"云南省文山壮族苗族自治州文山县","leader":"杜诗蕾","remark":"耕耘者的汗水是哺育种子成长的乳汁。"},
+{"name":"柴达木驻","fname":"柴达木盐湖驻地","gps":"120.996119,38.664246","addr":"湖北省宜昌市点军区","leader":"罗鸿彩","remark":"不去耕耘，不去播种，再肥的沃土也长不出庄稼，不去奋斗，不去创造，再美的青春也结不出硕果。"},
+{"name":"祁连荒驻","fname":"祁连山荒漠驻地","gps":"109.957741,37.148299","addr":"贵州省遵义市正安县","leader":"石梦凡","remark":"让珊瑚远离惊涛骇浪的侵蚀吗？那无异是将它们的美丽葬送。"},
+{"name":"草原蓝驻","fname":"大草原蓝天白云驻地2号","gps":"95.681439,39.808819","addr":"山东省济南市市辖区","leader":"孙刚毅","remark":"再好的种子，不播种下去，也结不出丰硕的果实。"},
+{"name":"无人区驻","fname":"无人区卷心菜驻地","gps":"116.286411,33.777599","addr":"西藏自治区山南地区措美县","leader":"谢依霜","remark":"如果可恨的挫折使你尝到苦果，朋友，奋起必将让你尝到人生的欢乐。"},
+{"name":"昆仑山驻","fname":"昆仑山雪域驻地","gps":"103.113947,32.227408","addr":"陕西省渭南市富平县","leader":"严芷容","remark":"瀑布---为了奔向江河湖海，即使面临百丈深渊，仍然呼啸前行，决不退缩"},
+{"name":"渤海湾驻","fname":"渤海湾无风海浪驻地","gps":"114.446681,19.83017","addr":"甘肃省甘南藏族自治州碌曲县","leader":"余博容","remark":"对于勇士来说，贫病、困窘、责难、诽谤、冷嘲热讽......，一切压迫都是前进的动力。"},
+{"name":"太行山驻","fname":"太行山绝壁攀岩上不去驻地","gps":"111.944649,28.136926","addr":"河南省商丘市永城市","leader":"程含芙","remark":"不从泥泞不堪的小道上迈步，就踏不上铺满鲜花的大路。"},
+{"name":"天府宝驻","fname":"天府之国无限宝贝驻地","gps":"116.948714,28.006373","addr":"浙江省杭州市建德市","leader":"韩德泽","remark":"幻想在漫长的生活征途中顺水行舟的人，他的终点在下游。只有敢于扬起风帆，顶恶浪的勇士，才能争到上游。"},
+]
+};
+
+var db_dev_list ={
+    fields: [
+        { "title": "照片", "name": "image", "ftype": "image", "twidth": "0" },
+        { "title": "名称", "name": "name", },
+        { "title": "型号", "name": "type", },
+        { "title": "编号", "name": "code", },
+        { "title": "当前位置", "name": "gps", },
+        { "title": "状态", "name": "status", },
+        { "title": "司机", "name": "driver", },
+        { "title": "联系电话", "name": "phone", },
+        { "title": "备注", "name": "remark", "ftype": "bigtext", },
+        { "title": "生产厂家", "name": "producer", "ftype": "bigtext", "twidth": "0" },
+        { "title": "生产日期", "name": "producedate", "twidth": "0" },
+        { "title": "购置日期", "name": "buydate", "twidth": "0" },
+        { "title": "年检日期", "name": "checkdate", },
+    ],
+    data:[
+    { "name": "96式主战坦克", "type": "96式", "code": "7030CTA/P2", "status": "空闲", "producer": "嵊州市洒而电器厂", "producedate": "1992-04-06", "buydate": "1984-02-16", "checkdate": "1975-12-18", "remark": "嵊州市洒而电器厂" },
+    { "name": "99式主战坦克", "type": "99式", "code": "7330BM ", "status": "出勤", "producer": "沈阳电机厂销售总公司", "producedate": "1991-01-22", "buydate": "1988-02-02", "checkdate": "1981-09-14", "remark": "沈阳电机厂销售总公司" },
+    { "name": "63A式水陆坦克", "type": "63A式", "code": "D111508A ", "status": "空闲", "producer": "沈阳士林电机制造有限公司", "producedate": "1988-02-17", "buydate": "1985-06-24", "checkdate": "1989-05-29", "remark": "沈阳士林电机制造有限公司" },
+    { "name": "155毫米自行榴弹炮", "type": "155 m", "code": "2528H ", "status": "出勤", "producer": "绍兴市万鹏机电有限公司", "producedate": "1987-07-08", "buydate": "1974-06-07", "checkdate": "1989-02-21", "remark": "绍兴市万鹏机电有限公司" },
+    { "name": "PCZ45弹药支援车", "type": "PCZ45", "code": "1207KTN1/P6 ", "status": "空闲", "producer": "上海任重仪表电器有限公司", "producedate": "1994-03-19", "buydate": "1974-12-18", "checkdate": "1976-07-22", "remark": "上海任重仪表电器有限公司" },
+    { "name": "ZCY45营指挥车", "type": "ZCY45", "code": "2236HDB ", "status": "出勤", "producer": "深圳市英士达机电技术开发有限公司", "producedate": "1981-09-30", "buydate": "1980-08-26", "checkdate": "1970-07-28", "remark": "深圳市英士达机电技术开发有限公司" },
+    { "name": "ZCY45连指挥车", "type": "ZCY45", "code": "BK1712 ", "status": "报废", "producer": "浙江嵊州市大力神机电厂", "producedate": "1987-11-28", "buydate": "1993-01-11", "checkdate": "1989-03-20", "remark": "浙江嵊州市大力神机电厂" },
+    { "name": "95式自动步枪", "type": "95式", "code": "4053156W2K ", "status": "其他", "producer": "湖北万邦机电发展有限公司", "producedate": "1994-08-31", "buydate": "1993-06-03", "checkdate": "1973-09-07", "remark": "湖北万邦机电发展有限公司" },
+    { "name": "03式自动步枪", "type": "03式", "code": "7303C/P4 ", "status": "空闲", "producer": "沈阳嘉晨电机(产品)制造有限公司", "producedate": "1999-02-10", "buydate": "1982-05-25", "checkdate": "1993-08-16", "remark": "沈阳嘉晨电机(产品)制造有限公司" },
+    { "name": "10式阻击步枪", "type": "10式", "code": "E2526EH ", "status": "出勤", "producer": "浙江博佳电机有限公司", "producedate": "1979-07-22", "buydate": "1989-03-11", "checkdate": "1990-08-30", "remark": "浙江博佳电机有限公司" },
+    { "name": "WS-2火箭弹", "type": "WS-2", "code": "N413M/P6 ", "status": "空闲", "producer": "东莞市奥比特化工贸易有限公司", "producedate": "1991-11-12", "buydate": "1994-05-10", "checkdate": "1995-12-28", "remark": "东莞市奥比特化工贸易有限公司" },
+    { "name": "卫士-2远程火箭炮", "type": "卫士-2", "code": "23120EW33K ", "status": "出勤", "producer": "贵州雨田电机有限公司", "producedate": "1976-12-26", "buydate": "1990-12-09", "checkdate": "1976-03-21", "remark": "贵州雨田电机有限公司" },
+    { "name": "WS-2发射车", "type": "WS-2", "code": "SA1-120BSS ", "status": "空闲", "producer": "上海德托精密机电事业部", "producedate": "1984-02-16", "buydate": "1984-12-27", "checkdate": "1989-08-22", "remark": "上海德托精密机电事业部" },
+    { "name": "86式步兵战车", "type": "86式", "code": "7034AC ", "status": "出勤", "producer": "鹤壁市伟琴仪器仪表有限公司", "producedate": "1988-02-02", "buydate": "1990-07-04", "checkdate": "1979-12-22", "remark": "鹤壁市伟琴仪器仪表有限公司" },
+    { "name": "92式步兵战车", "type": "92式", "code": "32907/P6x ", "status": "报废", "producer": "北京和利时电机技术有限公司", "producedate": "1985-06-24", "buydate": "1986-03-23", "checkdate": "1973-02-17", "remark": "北京和利时电机技术有限公司" },
+    { "name": "武直-10武装直升机", "type": "武直-10", "code": "7040X2DF ", "status": "其他", "producer": "常州市丰源微特电机有限公司", "producedate": "1974-06-07", "buydate": "1981-04-15", "checkdate": "1993-02-01", "remark": "常州市丰源微特电机有限公司" },
+    { "name": "武直-19武装侦察直升机", "type": "武直-19", "code": "NNQP6960", "status": "空闲", "producer": "东莞市线源电子有限公司", "producedate": "1974-12-18", "buydate": "1990-02-26", "checkdate": "1978-02-01", "remark": "东莞市线源电子有限公司" },
+
+    ]
+}
+
+var db_devtasklist = {
+    fields: [
+        { "title": "发单人", "name": "create" },
+        { "title": "发单时间", "name": "createdt" },
+        { "title": "接单司机", "name": "receiver" },
+        { "title": "接单时间", "name": "receivedt" },
+        { "title": "预期时长", "name": "span" },
+        { "title": "完成时间", "name": "completedt" },
+        { "title": "任务地点", "name": "place" },
+        { "title": "状态", "name": "status" },
+    ],
+    data: [
+        { "create": "雷亦旋", "createdt": "1992-04-06", "receiver": "庾依玉", "receivedt": "1984-02-16", "span": "3", "completedt": "1975-12-18", "place": "青海省玉树藏族自治州治多县", "status": "拒绝" },
+        { "create": "陆易绿", "createdt": "1991-01-22", "receiver": "万坤", "receivedt": "1988-02-02", "span": "5", "completedt": "1981-09-14", "place": "西藏自治区昌都地区类乌齐县", "status": "完成" },
+        { "create": "陈嘉木", "createdt": "1988-02-17", "receiver": "程新桐", "receivedt": "1985-06-24", "span": "7", "completedt": "1989-05-29", "place": "辽宁省大连市", "status": "拒绝" },
+        { "create": "周绍元", "createdt": "1987-07-08", "receiver": "敖玲沁", "receivedt": "1974-06-07", "span": "6", "completedt": "1989-02-21", "place": "湖北省省直辖行政单位神农架林区", "status": "完成" },
+        { "create": "杜诗蕾", "createdt": "1994-03-19", "receiver": "能丰", "receivedt": "1974-12-18", "span": "10", "completedt": "1976-07-22", "place": "重庆市县奉节县", "status": "完成" },
+        { "create": "罗鸿彩", "createdt": "1981-09-30", "receiver": "计翎妍", "receivedt": "1980-08-26", "span": "8", "completedt": "1970-07-28", "place": "河北省沧州市沧县", "status": "完成" },
+        { "create": "石梦凡", "createdt": "1987-11-28", "receiver": "阎乐晨", "receivedt": "1993-01-11", "span": "4", "completedt": "1989-03-20", "place": "云南省文山壮族苗族自治州文山县", "status": "拒绝" },
+        { "create": "孙刚毅", "createdt": "1994-08-31", "receiver": "吕采南", "receivedt": "1993-06-03", "span": "3", "completedt": "1973-09-07", "place": "湖北省宜昌市点军区", "status": "完成" },
+        { "create": "谢依霜", "createdt": "1999-02-10", "receiver": "堵昕燕", "receivedt": "1982-05-25", "span": "5", "completedt": "1993-08-16", "place": "贵州省遵义市正安县", "status": "完成" },
+        { "create": "严芷容", "createdt": "1979-07-22", "receiver": "萧传军", "receivedt": "1989-03-11", "span": "1", "completedt": "1990-08-30", "place": "山东省济南市市辖区", "status": "完成" },
+        { "create": "余博容", "createdt": "1991-11-12", "receiver": "邓娟", "receivedt": "1994-05-10", "span": "2", "completedt": "1995-12-28", "place": "西藏自治区山南地区措美县", "status": "完成" },
+        { "create": "程含芙", "createdt": "1976-12-26", "receiver": "江智卓", "receivedt": "1990-12-09", "span": "7", "completedt": "1976-03-21", "place": "陕西省渭南市富平县", "status": "拒绝" },
+        { "create": "韩德泽", "createdt": "1984-02-16", "receiver": "柏肜瑛", "receivedt": "1984-12-27", "span": "6", "completedt": "1989-08-22", "place": "甘肃省甘南藏族自治州碌曲县", "status": "完成" },
+        { "create": "姜慕蕊", "createdt": "1988-02-02", "receiver": "水成日", "receivedt": "1990-07-04", "span": "10", "completedt": "1979-12-22", "place": "河南省商丘市永城市", "status": "完成" },
+        { "create": "付高爽", "createdt": "1985-06-24", "receiver": "周宏图", "receivedt": "1986-03-23", "span": "8", "completedt": "1973-02-17", "place": "浙江省杭州市建德市", "status": "完成" },
+        { "create": "石又晴", "createdt": "1974-06-07", "receiver": "齐痴凝", "receivedt": "1981-04-15", "span": "4", "completedt": "1993-02-01", "place": "安徽省芜湖市", "status": "完成" },
+        { "create": "蓝梦槐", "createdt": "1974-12-18", "receiver": "郝紫瞳", "receivedt": "1990-02-26", "span": "3", "completedt": "1978-02-01", "place": "青海省玉树藏族自治州治多县", "status": "拒绝" },
+        { "create": "窦加隆", "createdt": "1984-02-16", "receiver": "云尘", "receivedt": "1981-04-15", "span": "5", "completedt": "1989-02-21", "place": "西藏自治区昌都地区类乌齐县", "status": "完成" },
+        { "create": "盛韩嘉", "createdt": "1988-02-02", "receiver": "储艺璇", "receivedt": "1990-02-26", "span": "1", "completedt": "1976-07-22", "place": "辽宁省大连市", "status": "完成" },
+        { "create": "常辰淋", "createdt": "1985-06-24", "receiver": "荣海龙", "receivedt": "1989-05-11", "span": "2", "completedt": "1970-07-28", "place": "湖北省省直辖行政单位神农架林区", "status": "完成" },
+        { "create": "舒代巧", "createdt": "1974-06-07", "receiver": "卜伟成", "receivedt": "1991-01-06", "span": "7", "completedt": "1989-03-20", "place": "重庆市县奉节县", "status": "完成" },
+        { "create": "阳昕燕", "createdt": "1974-12-18", "receiver": "满玲漪", "receivedt": "1994-11-03", "span": "6", "completedt": "1979-12-22", "place": "河北省沧州市沧县", "status": "完成" },
+        { "create": "巴以彤", "createdt": "1980-08-26", "receiver": "马凌春", "receivedt": "1984-01-10", "span": "7", "completedt": "1973-02-17", "place": "云南省文山壮族苗族自治州文山县", "status": "完成" },
+        { "create": "鲍元柳", "createdt": "1993-01-11", "receiver": "傅微", "receivedt": "1990-11-30", "span": "6", "completedt": "1993-02-01", "place": "湖北省宜昌市点军区", "status": "完成" },
+        { "create": "戈刚林", "createdt": "1993-06-03", "receiver": "凌钟吉", "receivedt": "1978-09-22", "span": "10", "completedt": "1978-02-01", "place": "贵州省遵义市正安县", "status": "拒绝" },
+        { "create": "勾觅丹", "createdt": "1982-05-25", "receiver": "步孜娴", "receivedt": "1981-03-02", "span": "8", "completedt": "1976-04-27", "place": "山东省济南市市辖区", "status": "拒绝" },
+        { "create": "苗新华", "createdt": "1989-03-11", "receiver": "侯星嘉", "receivedt": "1991-09-07", "span": "1", "completedt": "1985-10-30", "place": "西藏自治区山南地区措美县", "status": "完成" },
+        { "create": "钱小乐", "createdt": "1994-05-10", "receiver": "齐任安", "receivedt": "1978-07-28", "span": "2", "completedt": "1985-02-17", "place": "陕西省渭南市富平县", "status": "完成" },
+        { "create": "师子寒", "createdt": "1990-12-09", "receiver": "柏鑫", "receivedt": "1981-09-28", "span": "7", "completedt": "1974-10-31", "place": "甘肃省甘南藏族自治州碌曲县", "status": "完成" },
+        { "create": "余涛鸣", "createdt": "1984-12-27", "receiver": "饶忆丹", "receivedt": "1975-12-18", "span": "6", "completedt": "1994-10-07", "place": "河南省商丘市永城市", "status": "完成" },
+        { "create": "相瑶一", "createdt": "1990-07-04", "receiver": "宿柯朱", "receivedt": "1981-09-14", "span": "10", "completedt": "1978-09-24", "place": "浙江省杭州市建德市", "status": "完成" },
+        { "create": "劳思寒", "createdt": "1986-03-23", "receiver": "孟广斌", "receivedt": "1989-05-29", "span": "8", "completedt": "1985-04-21", "place": "新疆维吾尔自治区巴音郭楞蒙古自治州库尔勒市", "status": "拒绝" },
+        { "create": "魏苑", "createdt": "1978-07-28", "receiver": "安悦", "receivedt": "1990-08-30", "span": "4", "completedt": "1974-10-31", "place": "湖南省邵阳市武冈市", "status": "完成" },
+        { "create": "勾星瑶", "createdt": "1981-09-28", "receiver": "鲁白桃", "receivedt": "1995-12-28", "span": "3", "completedt": "1994-10-07", "place": "安徽省黄山市徽州区", "status": "完成" },
+        { "create": "郎佳", "createdt": "1975-12-18", "receiver": "平勇", "receivedt": "1976-03-21", "span": "5", "completedt": "1978-09-24", "place": "黑龙江省大庆市", "status": "完成" },
+        { "create": "鲍凌春", "createdt": "1981-09-14", "receiver": "肖怜雪", "receivedt": "1989-08-22", "span": "4", "completedt": "1985-04-21", "place": "四川省南充市嘉陵区", "status": "完成" },
+        { "create": "伊帅成", "createdt": "1989-05-29", "receiver": "全曼云", "receivedt": "1979-12-22", "span": "3", "completedt": "1993-11-18", "place": "辽宁省沈阳市新民市", "status": "完成" },
+        { "create": "卫尔容", "createdt": "1989-02-21", "receiver": "元镇国", "receivedt": "1973-02-17", "span": "5", "completedt": "1986-11-13", "place": "黑龙江省伊春市汤旺河区", "status": "拒绝" },
+        { "create": "滕龙", "createdt": "1976-07-22", "receiver": "贾灵泉", "receivedt": "1993-02-01", "span": "1", "completedt": "1984-01-20", "place": "新疆维吾尔自治区和田地区和田县", "status": "完成" },
+        { "create": "傅奕冰", "createdt": "1970-07-28", "receiver": "巩恒霖", "receivedt": "1978-02-01", "span": "2", "completedt": "1983-03-17", "place": "湖北省孝感市汉川市", "status": "完成" },
+        { "create": "范沛凝", "createdt": "1989-03-20", "receiver": "严少", "receivedt": "1976-04-27", "span": "7", "completedt": "1979-10-20", "place": "广东省河源市紫金县", "status": "完成" },
+        { "create": "顾伟祺", "createdt": "1973-09-07", "receiver": "云宇峰", "receivedt": "1985-10-30", "span": "6", "completedt": "1981-11-01", "place": "安徽省淮南市田家庵区", "status": "完成" },
+        { "create": "邱雅懿", "createdt": "1993-08-16", "receiver": "匡贝", "receivedt": "1985-02-17", "span": "10", "completedt": "1993-11-17", "place": "西藏自治区日喀则地区吉隆县", "status": "完成" },
+    ]
+};
+
 var db_userlist = {
     head: "帐号,密码,姓名,性别,民族,出生年月,住址,身份证号,身份证扫描件,联系电话,邮箱,QQ号码,微信号,居住地址,类别,领域",
     col: "account,pwd,name,sex,ethnic,birth,origo,id,idimg,phone,mail,qq,wechat,addr,prof,skill",
@@ -339,119 +505,118 @@ var db_userlist = {
         { "title": "QQ号码", "name": "qq", },
         { "title": "微信号", "name": "wechat", },
         { "title": "居住地址", "name": "addr", "type": "text" },
-        { "title": "类别", "name": "prof", },
+        { "title": "角色", "name": "prof", },
         { "title": "领域", "name": "skill", },
     ],
     data: [
-{"account":"gubingwei","pwd":"gubingwei","face":"14","name":"顾冰薇","sex":"女","ethnic":"汉族","birth":"1992-04-06","origo":"广西壮族自治区贵港市港北区","id":"450802199204068703","idimg":"img/person/sfz1.jpg","phone":"17788109922","mail":"gubingwei@163.com","qq":"4112408840","wechat":"4112408840","addr":"罗湖区东晓路","prof":"专家","skill":"避雷"},
-{"account":"qianzhenhai","pwd":"qianzhenhai","face":"3","name":"钱振海","sex":"男","ethnic":"壮族","birth":"1991-01-22","origo":"河南省南阳市","id":"411300199101223559","idimg":"img/person/sfz2.jpg","phone":"13333715119","mail":"qianzhenhai@21cn.com","qq":"3071619289","wechat":"3071619289","addr":"罗湖区蛟湖路12号大院","prof":"队长","skill":"工艺设计 材料"},
-{"account":"leiyixuan","pwd":"leiyixuan","face":"5","name":"雷亦旋","sex":"女","ethnic":"汉族","birth":"1988-02-17","origo":"陕西省宝鸡市","id":"610300198802174085","idimg":"img/person/sfz3.jpg","phone":"13333850299","mail":"leiyixuan@sina.com","qq":"4232830671","wechat":"4232830671","addr":"福田区景田东路景田市场二楼","prof":"技工","skill":"工艺生产"},
-{"account":"luyilv","pwd":"luyilv","face":"16","name":"陆易绿","sex":"女","ethnic":"回族","birth":"1987-07-08","origo":"安徽省滁州市全椒县","id":"341124198707088408","idimg":"img/person/sfz4.jpg","phone":"13333822799","mail":"luyilv@qq.com","qq":"4212628996","wechat":"4212628996","addr":"福田区园岭44栋105号","prof":"驻场","skill":"材料"},
-{"account":"chenjiamu","pwd":"chenjiamu","face":"8","name":"陈嘉木","sex":"男","ethnic":"汉族","birth":"1994-03-19","origo":"黑龙江省伊春市上甘岭区","id":"230716199403192899","idimg":"img/person/sfz5.jpg","phone":"17734800004","mail":"chenjiamu@126.com","qq":"53232374","wechat":"53232374","addr":"南山区南头常兴路11号","prof":"风场","skill":"安全 避雷"},
-{"account":"zhoushaoyuan","pwd":"zhoushaoyuan","face":"10","name":"周绍元","sex":"男","ethnic":"满族","birth":"1981-09-30","origo":"山西省忻州地区石楼县","id":"142328198109306719","idimg":"img/person/sfz6.jpg","phone":"17752555009","mail":"zhoushaoyuan@189.cn","qq":"4078194","wechat":"4078194","addr":"南山区西丽留仙大道","prof":"调度","skill":"避雷"},
-{"account":"dushilei","pwd":"dushilei","face":"4","name":"杜诗蕾","sex":"女","ethnic":"汉族","birth":"1987-11-28","origo":"西藏自治区昌都地区察雅县","id":"542126198711289967","idimg":"img/person/sfz7.jpg","phone":"17737777344","mail":"dushilei@yeah.net","qq":"6040078","wechat":"6040078","addr":"罗湖区罗沙公路经二路1号（罗湖体育局对面）","prof":"总调","skill":"工艺设计"},
-{"account":"luohongcai","pwd":"luohongcai","face":"19","name":"罗鸿彩","sex":"男","ethnic":"维吾尔","birth":"1994-08-31","origo":"陕西省咸阳市永寿县","id":"610426199408311938","idimg":"img/person/sfz8.jpg","phone":"17703717005","mail":"luohongcai@eyou.com","qq":"6252318817","wechat":"6252318817","addr":"罗湖区莲塘国威路松源大厦一楼","prof":"仓管","skill":"工艺生产"},
-{"account":"shimengfan","pwd":"shimengfan","face":"4","name":"石梦凡","sex":"女","ethnic":"汉族","birth":"1999-02-10","origo":"四川省达川地区达川市","id":"513001199902107844","idimg":"img/person/sfz9.jpg","phone":"17320111171","mail":"shimengfan@hotmail.com","qq":"5222926114","wechat":"5222926114","addr":"福田区南园街道松岭路22号","prof":"仓主","skill":"材料 工艺设计 工艺生产"},
-{"account":"sungangyi","pwd":"sungangyi","face":"2","name":"孙刚毅","sex":"男","ethnic":"苗族","birth":"1979-07-22","origo":"贵州省六盘水市六枝特区","id":"520203197907222079","idimg":"img/person/sfz10.jpg","phone":"18103711136","mail":"sungangyi@163.com","qq":"4060411224","wechat":"4060411224","addr":"龙岗区葵涌街道葵兴东路12号","prof":"设备","skill":"安全"},
-{"account":"xieyishuang","pwd":"xieyishuang","face":"20","name":"谢依霜","sex":"女","ethnic":"汉族","birth":"1991-11-12","origo":"四川省攀枝花市盐边县","id":"510422199111120429","idimg":"img/person/sfz11.jpg","phone":"13333829001","mail":"xieyishuang@21cn.com","qq":"1010103487","wechat":"1010103487","addr":"深圳市罗湖区翠竹路2028号翠竹大厦","prof":"公众","skill":"避雷"},
-{"account":"yanzhirong","pwd":"yanzhirong","face":"3","name":"严芷容","sex":"女","ethnic":"彝族","birth":"1976-12-26","origo":"广东省韶关市仁化县","id":"440224197612263887","idimg":"img/person/sfz12.jpg","phone":"13303711138","mail":"yanzhirong@sina.com","qq":"1010125171","wechat":"1010125171","addr":"罗湖区宝岗路笋岗大厦5楼","prof":"专家","skill":"工艺设计"},
-{"account":"yuborong","pwd":"yuborong","face":"9","name":"余博容","sex":"男","ethnic":"汉族","birth":"1984-02-16","origo":"新疆维吾尔族自治区昌吉回族自治州呼图壁县","id":"652323198402167736","idimg":"img/person/sfz13.jpg","phone":"18137888009","mail":"yuborong@qq.com","qq":"4020811715","wechat":"4020811715","addr":"深圳市罗湖区翠山路国防大厦","prof":"队长","skill":"工艺生产"},
-{"account":"chenghanfu","pwd":"chenghanfu","face":"17","name":"程含芙","sex":"女","ethnic":"土家","birth":"1988-02-02","origo":"辽宁省抚顺市望花区","id":"210404198802026601","idimg":"img/person/sfz14.jpg","phone":"18037773369","mail":"chenghanfu@126.com","qq":"3272410422","wechat":"3272410422","addr":"深圳市罗湖区泥岗西路1046号鸿颖大厦首层","prof":"技工","skill":"材料"},
-{"account":"handeze","pwd":"handeze","face":"15","name":"韩德泽","sex":"男","ethnic":"汉族","birth":"1985-06-24","origo":"重庆市渝北区","id":"500112198506248210","idimg":"img/person/sfz15.jpg","phone":"18100333939","mail":"handeze@189.cn","qq":"4212409410","wechat":"4212409410","addr":"福田区香蜜湖社区文化中心二楼","prof":"驻场","skill":"安全"},
-{"account":"jiangmurui","pwd":"jiangmurui","face":"8","name":"姜慕蕊","sex":"女","ethnic":"藏族","birth":"1974-06-07","origo":"陕西省西安市市辖区","id":"610101197406077807","idimg":"img/person/sfz1.jpg","phone":"13333831009","mail":"jiangmurui@yeah.net","qq":"1020027992","wechat":"1020027992","addr":"盐田区梅沙街道成坑71号","prof":"风场","skill":"避雷"},
-{"account":"fugaoshuang","pwd":"fugaoshuang","face":"1","name":"付高爽","sex":"男","ethnic":"汉族","birth":"1974-12-18","origo":"江西省抚州地区黎川县","id":"362523197412188175","idimg":"img/person/sfz2.jpg","phone":"13343849666","mail":"fugaoshuang@eyou.com","qq":"2902104440","wechat":"2902104440","addr":"南山区白石洲下白石居委会综合楼101","prof":"调度","skill":"工艺设计"},
-{"account":"shiyouqing","pwd":"shiyouqing","face":"16","name":"石又晴","sex":"女","ethnic":"蒙古","birth":"1980-08-26","origo":"福建省宁德地区寿宁县","id":"352229198008261144","idimg":"img/person/sfz3.jpg","phone":"13333818366","mail":"shiyouqing@hotmail.com","qq":"23623775","wechat":"23623775","addr":"盐田区盐田四村永安综合服务楼","prof":"总调","skill":"工艺生产"},
-{"account":"lanmenghuai","pwd":"lanmenghuai","face":"12","name":"蓝梦槐","sex":"女","ethnic":"汉族","birth":"1993-01-11","origo":"广东省佛山市","id":"440604199301112243","idimg":"img/person/sfz4.jpg","phone":"13333835119","mail":"lanmenghuai@qq.com","qq":"44011383","wechat":"44011383","addr":"罗湖区南极路南华大厦附楼（广深宾馆后）","prof":"仓管","skill":"材料"},
-{"account":"doujialong","pwd":"doujialong","face":"9","name":"窦加隆","sex":"男","ethnic":"侗族","birth":"1993-06-03","origo":"河南省郑州市市辖区","id":"410101199306034879","idimg":"img/person/sfz5.jpg","phone":"18137166646","mail":"doujialong@126.com","qq":"13072580","wechat":"13072580","addr":"盐田区沙头角园林路25号","prof":"仓主","skill":"安全"},
-{"account":"shenghanjia","pwd":"shenghanjia","face":"2","name":"盛韩嘉","sex":"男","ethnic":"汉族","birth":"1982-05-25","origo":"辽宁省沈阳市市辖区","id":"210101198205251717","idimg":"img/person/sfz6.jpg","phone":"18037155369","mail":"shenghanjia@189.cn","qq":"65900380","wechat":"65900380","addr":"宝安区九区创业一路","prof":"设备","skill":"避雷"},
-{"account":"changchenlin","pwd":"changchenlin","face":"0","name":"常辰淋","sex":"男","ethnic":"布依","birth":"1989-03-11","origo":"安徽省芜湖市","id":"340208198903117151","idimg":"img/person/sfz7.jpg","phone":"17752565757","mail":"changchenlin@yeah.net","qq":"1042631193","wechat":"1042631193","addr":"西乡宝民二路108号西乡街道办事综合楼1楼","prof":"公众","skill":"工艺设计 工艺生产"},
-{"account":"shudaiqiao","pwd":"shudaiqiao","face":"12","name":"舒代巧","sex":"女","ethnic":"汉族","birth":"1994-05-10","origo":"青海省玉树藏族自治州治多县","id":"63272419940510422X","idimg":"img/person/sfz8.jpg","phone":"18103710621","mail":"shudaiqiao@eyou.com","qq":"1300110784","wechat":"1300110784","addr":"福永街道德丰路77号（福永医院旁边）","prof":"专家","skill":"工艺生产"},
-{"account":"yangxinyan","pwd":"yangxinyan","face":"3","name":"阳昕燕","sex":"女","ethnic":"瑶族","birth":"1990-12-09","origo":"西藏自治区昌都地区类乌齐县","id":"54212419901209410X","idimg":"img/person/sfz9.jpg","phone":"17320111191","mail":"yangxinyan@hotmail.com","qq":"2020322207","wechat":"17320111191","addr":"宝安区新沙路488号107号房","prof":"队长","skill":"材料"},
-{"account":"bayitong","pwd":"bayitong","face":"8","name":"巴以彤","sex":"女","ethnic":"汉族","birth":"1984-12-27","origo":"辽宁省大连市","id":"210200198412279922","idimg":"img/person/sfz10.jpg","phone":"18103711190","mail":"bayitong@163.com","qq":"1042212042","wechat":"18103711190","addr":"宝安区松岗街道办事处3楼302室","prof":"技工","skill":"避雷"},
-{"account":"baoyuanliu","pwd":"baoyuanliu","face":"14","name":"鲍元柳","sex":"女","ethnic":"白族","birth":"1990-07-04","origo":"湖北省省直辖行政单位神农架林区","id":"429021199007044401","idimg":"img/person/sfz11.jpg","phone":"13333822009","mail":"baoyuanliu@21cn.com","qq":"4022426388","wechat":"13333822009","addr":"宝安区石岩街道前心大道国税3楼308室","prof":"驻场","skill":"工艺设计 材料"},
-{"account":"geganglin","pwd":"geganglin","face":"6","name":"戈刚林","sex":"男","ethnic":"汉族","birth":"1986-03-23","origo":"重庆市县奉节县","id":"500236198603237755","idimg":"img/person/sfz12.jpg","phone":"18939511369","mail":"geganglin@sina.com","qq":"5232316773","wechat":"18939511369","addr":"罗湖区东晓路","prof":"风场","skill":"工艺生产"},
-{"account":"goumidan","pwd":"goumidan","face":"4","name":"勾觅丹","sex":"女","ethnic":"朝鲜","birth":"1981-04-15","origo":"河北省沧州市沧县","id":"130921198104153164","idimg":"img/person/sfz13.jpg","phone":"18137888005","mail":"goumidan@qq.com","qq":"1040402660","wechat":"18137888005","addr":"罗湖区蛟湖路12号大院","prof":"调度","skill":"材料"},
-{"account":"miaoxinhua","pwd":"miaoxinhua","face":"2","name":"苗新华","sex":"女","ethnic":"汉族","birth":"1990-02-26","origo":"云南省文山壮族苗族自治州文山县","id":"53262119900226874X","idimg":"img/person/sfz14.jpg","phone":"17703866664","mail":"miaoxinhua@126.com","qq":"11224821","wechat":"17703866664","addr":"福田区景田东路景田市场二楼","prof":"总调","skill":"安全 避雷"},
-{"account":"qianxiaole","pwd":"qianxiaole","face":"3","name":"钱小乐","sex":"男","ethnic":"哈尼","birth":"1989-05-11","origo":"湖北省宜昌市点军区","id":"420504198905115935","idimg":"img/person/sfz15.jpg","phone":"13333711179","mail":"qianxiaole@163.com","qq":"1010107780","wechat":"13333711179","addr":"福田区园岭44栋105号","prof":"仓管","skill":"避雷"},
-{"account":"shizihan","pwd":"shizihan","face":"13","name":"师子寒","sex":"女","ethnic":"汉族","birth":"1991-01-06","origo":"贵州省遵义市正安县","id":"520324199101068400","idimg":"img/person/sfz1.jpg","phone":"18039578577","mail":"shizihan@21cn.com","qq":"5052507507","wechat":"18039578577","addr":"南山区南头常兴路11号","prof":"仓主","skill":"工艺设计"},
-{"account":"yutaoming","pwd":"yutaoming","face":"9","name":"余涛鸣","sex":"女","ethnic":"黎族","birth":"1994-11-03","origo":"山东省济南市市辖区","id":"370101199411032303","idimg":"img/person/sfz2.jpg","phone":"18135679789","mail":"yutaoming@sina.com","qq":"5423271993","wechat":"18135679789","addr":"南山区西丽留仙大道","prof":"设备","skill":"工艺生产"},
-{"account":"xiangyaoyi","pwd":"xiangyaoyi","face":"5","name":"相瑶一","sex":"男","ethnic":"汉族","birth":"1984-01-10","origo":"西藏自治区山南地区措美县","id":"542227198401107373","idimg":"img/person/sfz3.jpg","phone":"13323861688","mail":"xiangyaoyi@qq.com","qq":"1424001990","wechat":"13323861688","addr":"罗湖区罗沙公路经二路1号（罗湖体育局对面）","prof":"公众","skill":"材料 工艺设计 工艺生产"},
-{"account":"laosihan","pwd":"laosihan","face":"1","name":"劳思寒","sex":"女","ethnic":"哈萨克","birth":"1990-11-30","origo":"陕西省渭南市富平县","id":"610528199011303321","idimg":"img/person/sfz4.jpg","phone":"18037277737","mail":"laosihan@126.com","qq":"4211011995","wechat":"18037277737","addr":"罗湖区莲塘国威路松源大厦一楼","prof":"专家","skill":"安全"},
-{"account":"weiyuan","pwd":"weiyuan","face":"5","name":"魏苑","sex":"女","ethnic":"汉族","birth":"1978-09-22","origo":"甘肃省甘南藏族自治州碌曲县","id":"623026197809228004","idimg":"img/person/sfz5.jpg","phone":"17752555369","mail":"weiyuan@189.cn","qq":"4404211976","wechat":"17752555369","addr":"福田区南园街道松岭路22号","prof":"队长","skill":"避雷"},
-{"account":"gouxingyao","pwd":"gouxingyao","face":"2","name":"勾星瑶","sex":"男","ethnic":"傣族","birth":"1981-03-02","origo":"河南省商丘市永城市","id":"411481198103025774","idimg":"img/person/sfz6.jpg","phone":"17737700060","mail":"gouxingyao@yeah.net","qq":"4109001989","wechat":"17737700060","addr":"龙岗区葵涌街道葵兴东路12号","prof":"技工","skill":"工艺设计"},
-{"account":"langjia","pwd":"langjia","face":"6","name":"郎佳","sex":"女","ethnic":"汉族","birth":"1991-09-07","origo":"浙江省杭州市建德市","id":"33018219910907006X","idimg":"img/person/sfz7.jpg","phone":"18037311688","mail":"langjia@eyou.com","qq":"41272679","wechat":"18037311688","addr":"深圳市罗湖区翠竹路2028号翠竹大厦","prof":"驻场","skill":"工艺生产"},
-{"account":"baolingchun","pwd":"baolingchun","face":"11","name":"鲍凌春","sex":"女","ethnic":"畲族","birth":"1978-07-28","origo":"新疆维吾尔自治区巴音郭楞蒙古自治州库尔勒市","id":"652801197807285161","idimg":"img/person/sfz8.jpg","phone":"17320111161","mail":"baolingchun@hotmail.com","qq":"43112273","wechat":"17320111161","addr":"罗湖区宝岗路笋岗大厦5楼","prof":"风场","skill":"材料"},
-{"account":"yishuaicheng","pwd":"yishuaicheng","face":"1","name":"伊帅成","sex":"男","ethnic":"汉族","birth":"1981-09-28","origo":"湖南省邵阳市武冈市","id":"430581198109281099","idimg":"img/person/sfz9.jpg","phone":"17320111181","mail":"yishuaicheng@163.com","qq":"44162193","wechat":"17320111181","addr":"深圳市罗湖区翠山路国防大厦","prof":"调度","skill":"安全"},
-{"account":"weierrong","pwd":"weierrong","face":"17","name":"卫尔容","sex":"女","ethnic":"傈僳","birth":"1975-12-18","origo":"安徽省黄山市徽州区","id":"341004197512186248","idimg":"img/person/sfz10.jpg","phone":"18103711196","mail":"weierrong@21cn.com","qq":"41272278","wechat":"18103711196","addr":"深圳市罗湖区泥岗西路1046号鸿颖大厦首层","prof":"总调","skill":"避雷"},
-{"account":"tenglong","pwd":"tenglong","face":"14","name":"滕龙","sex":"男","ethnic":"汉族","birth":"1981-09-14","origo":"黑龙江省大庆市","id":"230600198109147973","idimg":"img/person/sfz11.jpg","phone":"18037888521","mail":"tenglong@sina.com","qq":"37050076","wechat":"18037888521","addr":"福田区香蜜湖社区文化中心二楼","prof":"仓管","skill":"工艺设计"},
-{"account":"fuyibing","pwd":"fuyibing","face":"5","name":"傅奕冰","sex":"男","ethnic":"东乡族","birth":"1989-05-29","origo":"四川省南充市嘉陵区","id":"51130419890529869X","idimg":"img/person/sfz12.jpg","phone":"18137888007","mail":"fuyibing@qq.com","qq":"23010885","wechat":"18137888007","addr":"盐田区梅沙街道成坑71号","prof":"仓主","skill":"工艺生产"},
-{"account":"fanpeining","pwd":"fanpeining","face":"12","name":"范沛凝","sex":"女","ethnic":"汉族","birth":"1989-02-21","origo":"辽宁省沈阳市新民市","id":"210181198902213320","idimg":"img/person/sfz13.jpg","phone":"18037888009","mail":"fanpeining@126.com","qq":"37070485","wechat":"18037888009","addr":"南山区白石洲下白石居委会综合楼101","prof":"设备","skill":"材料"},
-{"account":"guweiqi","pwd":"guweiqi","face":"4","name":"顾伟祺","sex":"男","ethnic":"仡佬族","birth":"1976-07-22","origo":"黑龙江省伊春市汤旺河区","id":"230712197607224317","idimg":"img/person/sfz14.jpg","phone":"17703717774","mail":"guweiqi@189.cn","qq":"13063189","wechat":"17703717774","addr":"盐田区盐田四村永安综合服务楼","prof":"公众","skill":"安全"},
-{"account":"qiuyayi","pwd":"qiuyayi","face":"19","name":"邱雅懿","sex":"男","ethnic":"汉族","birth":"1970-07-28","origo":"河南省鹤壁市山城区","id":"410603197007285492","idimg":"img/person/sfz15.jpg","phone":"18903844448","mail":"qiuyayi@yeah.net","qq":"54233879","wechat":"18903844448","addr":"罗湖区南极路南华大厦附楼（广深宾馆后）","prof":"专家","skill":"避雷"},
-{"account":"qinpancui","pwd":"qinpancui","face":"15","name":"覃盼翠","sex":"女","ethnic":"拉祜族","birth":"1989-03-20","origo":"云南省德宏傣族景颇族自治州梁河县","id":"53312219890320962X","idimg":"img/person/sfz1.jpg","phone":"13333812199","mail":"qinpancui@eyou.com","qq":"5222251986","wechat":"13333812199","addr":"盐田区沙头角园林路25号","prof":"队长","skill":"工艺设计 工艺生产"},
-{"account":"gaowenlin","pwd":"gaowenlin","face":"2","name":"高文林","sex":"男","ethnic":"汉族","birth":"1973-09-07","origo":"福建省泉州市永春县","id":"350525197309075075","idimg":"img/person/sfz2.jpg","phone":"13333859788","mail":"gaowenlin@hotmail.com","qq":"4306231991","wechat":"13333859788","addr":"宝安区九区创业一路","prof":"技工","skill":"工艺生产"},
-{"account":"mojiyao","pwd":"mojiyao","face":"15","name":"莫寄瑶","sex":"女","ethnic":"佤族","birth":"1993-08-16","origo":"西藏自治区日喀则地区昂仁县","id":"542327199308161623","idimg":"img/person/sfz3.jpg","phone":"18039111151","mail":"mojiyao@qq.com","qq":"150500179","wechat":"18039111151","addr":"西乡宝民二路108号西乡街道办事综合楼1楼","prof":"驻场","skill":"材料"},
-{"account":"fuyouqing","pwd":"fuyouqing","face":"20","name":"付又青","sex":"女","ethnic":"汉族","birth":"1990-08-30","origo":"山西省晋中地区","id":"142400199008306780","idimg":"img/person/sfz4.jpg","phone":"18103710062","mail":"fuyouqing@126.com","qq":"130534188","wechat":"18103710062","addr":"福永街道德丰路77号（福永医院旁边）","prof":"风场","skill":"避雷"},
-{"account":"weixingqing","pwd":"weixingqing","face":"18","name":"韦兴庆","sex":"男","ethnic":"水族","birth":"1995-12-28","origo":"湖北省黄冈市市辖区","id":"421101199512285196","idimg":"img/person/sfz5.jpg","phone":"18103710130","mail":"weixingqing@189.cn","qq":"623026194","wechat":"18103710130","addr":"宝安区新沙路488号107号房","prof":"调度","skill":"工艺设计 材料"},
-{"account":"xiaanmin","pwd":"xiaanmin","face":"0","name":"夏安民","sex":"男","ethnic":"汉族","birth":"1976-03-21","origo":"广东省珠海市斗门县","id":"440421197603213679","idimg":"img/person/sfz6.jpg","phone":"17760766636","mail":"xiaanmin@yeah.net","qq":"522700175","wechat":"17760766636","addr":"宝安区松岗街道办事处3楼302室","prof":"总调","skill":"工艺生产"},
-{"account":"fangzhihe","pwd":"fangzhihe","face":"10","name":"方芷荷","sex":"女","ethnic":"纳西","birth":"1989-08-22","origo":"河南省濮阳市","id":"410900198908225309","idimg":"img/person/sfz7.jpg","phone":"17703717009","mail":"fangzhihe@eyou.com","qq":"341125194","wechat":"17703717009","addr":"宝安区石岩街道前心大道国税3楼308室","prof":"仓管","skill":"材料"},
-{"account":"dingyachang","pwd":"dingyachang","face":"1","name":"丁雅昶","sex":"男","ethnic":"汉族","birth":"1979-12-22","origo":"河南省周口地区郸城县","id":"412726197912226072","idimg":"img/person/sfz8.jpg","phone":"17335577774","mail":"dingyachang@hotmail.com","qq":"430100181","wechat":"17335577774","addr":"罗湖区东晓路","prof":"仓主","skill":"安全 避雷"},
-{"account":"wanliqiang","pwd":"wanliqiang","face":"12","name":"万力强","sex":"男","ethnic":"羌族","birth":"1973-02-17","origo":"湖南省永州市东安县","id":"431122197302179832","idimg":"img/person/sfz9.jpg","phone":"17303858866","mail":"wanliqiang@163.com","qq":"510727179","wechat":"17303858866","addr":"罗湖区蛟湖路12号大院","prof":"设备","skill":"避雷"},
-{"account":"xiaoxiqin","pwd":"xiaoxiqin","face":"19","name":"肖惜芹","sex":"女","ethnic":"汉族","birth":"1993-02-01","origo":"广东省河源市紫金县","id":"441621199302010860","idimg":"img/person/sfz10.jpg","phone":"17788109896","mail":"xiaoxiqin@21cn.com","qq":"632722186","wechat":"17788109896","addr":"福田区景田东路景田市场二楼","prof":"公众","skill":"工艺设计"},
-{"account":"fangtianling","pwd":"fangtianling","face":"6","name":"方天菱","sex":"女","ethnic":"土族","birth":"1978-02-01","origo":"河南省周口地区西华县","id":"412722197802018365","idimg":"img/person/sfz11.jpg","phone":"17703715061","mail":"fangtianling@sina.com","qq":"320500190","wechat":"17703715061","addr":"福田区园岭44栋105号","prof":"专家","skill":"工艺生产"},
-{"account":"wangdanyan","pwd":"wangdanyan","face":"4","name":"王丹烟","sex":"女","ethnic":"汉族","birth":"1976-04-27","origo":"山东省东营市","id":"370500197604271286","idimg":"img/person/sfz12.jpg","phone":"17703716709","mail":"wangdanyan@qq.com","qq":"441826188","wechat":"wangdanyan@qq.com","addr":"南山区南头常兴路11号","prof":"队长","skill":"材料 工艺设计 工艺生产"},
-{"account":"ducuilan","pwd":"ducuilan","face":"18","name":"杜翠岚","sex":"女","ethnic":"仫佬","birth":"1985-10-30","origo":"黑龙江省哈尔滨市平房区","id":"230108198510300843","idimg":"img/person/sfz13.jpg","phone":"18903718932","mail":"ducuilan@126.com","qq":"360622183","wechat":"ducuilan@126.com","addr":"南山区西丽留仙大道","prof":"技工","skill":"安全"},
-{"account":"yangyiyun","pwd":"yangyiyun","face":"13","name":"杨以云","sex":"女","ethnic":"汉族","birth":"1985-02-17","origo":"山东省潍坊市坊子区","id":"370704198502175067","idimg":"img/person/sfz14.jpg","phone":"18903717720","mail":"yangyiyun@yeah.net","qq":"320412175","wechat":"yangyiyun@yeah.net","addr":"罗湖区罗沙公路经二路1号（罗湖体育局对面）","prof":"驻场","skill":"避雷"},
-{"account":"xiaolianxue","pwd":"xiaolianxue","face":"3","name":"肖怜雪","sex":"女","ethnic":"锡伯","birth":"1974-10-31","origo":"云南省楚雄彝族自治州牟定县","id":"532323197410315063","idimg":"img/person/sfz15.jpg","phone":"18137772520","mail":"xiaolianxue@eyou.com","qq":"1309271977","wechat":"xiaolianxue@eyou.com","addr":"罗湖区莲塘国威路松源大厦一楼","prof":"风场","skill":"工艺设计"},
-{"account":"quanmanyun","pwd":"quanmanyun","face":"19","name":"全曼云","sex":"女","ethnic":"汉族","birth":"1994-10-07","origo":"湖南省常德市津市市","id":"430781199410079549","idimg":"img/person/sfz1.jpg","phone":"13333850599","mail":"quanmanyun@hotmail.com","qq":"4512021979","wechat":"quanmanyun@hotmail.com","addr":"福田区南园街道松岭路22号","prof":"调度","skill":"工艺生产"},
-{"account":"yuanzhenguo","pwd":"yuanzhenguo","face":"3","name":"元镇国","sex":"男","ethnic":"柯尔克","birth":"1978-09-24","origo":"宁夏回族自治区","id":"640400197809242673","idimg":"img/person/sfz2.jpg","phone":"17729799989","mail":"yuanzhenguo@qq.com","qq":"5108021994","wechat":"yuanzhenguo@qq.com","addr":"龙岗区葵涌街道葵兴东路12号","prof":"总调","skill":"材料"},
-{"account":"jialingquan","pwd":"jialingquan","face":"13","name":"贾灵泉","sex":"女","ethnic":"汉族","birth":"1985-04-21","origo":"天津市市辖区红桥区","id":"12010619850421166X","idimg":"img/person/sfz3.jpg","phone":"17729799994","mail":"jialingquan@126.com","qq":"6527221986","wechat":"jialingquan@126.com","addr":"深圳市罗湖区翠竹路2028号翠竹大厦","prof":"仓管","skill":"安全"},
-{"account":"gonghenglin","pwd":"gonghenglin","face":"14","name":"巩恒霖","sex":"男","ethnic":"景颇","birth":"1993-11-18","origo":"吉林省长春市榆树市","id":"220182199311188015","idimg":"img/person/sfz4.jpg","phone":"18103710105","mail":"gonghenglin@189.cn","qq":"3206011992","wechat":"gonghenglin@189.cn","addr":"罗湖区宝岗路笋岗大厦5楼","prof":"仓主","skill":"避雷"},
-{"account":"yanshao","pwd":"yanshao","face":"0","name":"严少","sex":"男","ethnic":"汉族","birth":"1986-11-13","origo":"广东省深圳市龙岗区","id":"440307198611133136","idimg":"img/person/sfz5.jpg","phone":"18103719250","mail":"yanshao@yeah.net","qq":"3092115316","wechat":"yanshao@yeah.net","addr":"深圳市罗湖区翠山路国防大厦","prof":"设备","skill":"工艺设计"},
-{"account":"yunyufeng","pwd":"yunyufeng","face":"5","name":"云宇峰","sex":"男","ethnic":"达斡尔","birth":"1984-01-20","origo":"河北省沧州市青县","id":"130922198401205211","idimg":"img/person/sfz6.jpg","phone":"17719811988","mail":"yunyufeng@eyou.com","qq":"3262126874","wechat":"yunyufeng@eyou.com","addr":"深圳市罗湖区泥岗西路1046号鸿颖大厦首层","prof":"公众","skill":"工艺生产"},
-{"account":"kuangbei","pwd":"kuangbei","face":"13","name":"匡贝","sex":"女","ethnic":"汉族","birth":"1983-03-17","origo":"青海省西宁市","id":"630123198303172146","idimg":"img/person/sfz7.jpg","phone":"17752566606","mail":"kuangbei@hotmail.com","qq":"2050411593","wechat":"kuangbei@hotmail.com","addr":"福田区香蜜湖社区文化中心二楼","prof":"专家","skill":"材料"},
-{"account":"kangjingtong","pwd":"kangjingtong","face":"11","name":"康靖童","sex":"男","ethnic":"撒拉","birth":"1979-10-20","origo":"山东省德州市平原县","id":"37142619791020569X","idimg":"img/person/sfz8.jpg","phone":"17335577767","mail":"kangjingtong@163.com","qq":"2032406840","wechat":"kangjingtong@163.com","addr":"盐田区梅沙街道成坑71号","prof":"队长","skill":"安全"},
-{"account":"luomuhui","pwd":"luomuhui","face":"4","name":"骆慕卉","sex":"女","ethnic":"汉族","birth":"1981-11-01","origo":"四川省甘孜藏族自治州丹巴县","id":"513323198111014123","idimg":"img/person/sfz9.jpg","phone":"18137796677","mail":"luomuhui@21cn.com","qq":"7010103230","wechat":"luomuhui@21cn.com","addr":"南山区白石洲下白石居委会综合楼101","prof":"技工","skill":"避雷"},
-{"account":"yuwei","pwd":"yuwei","face":"12","name":"俞伟","sex":"男","ethnic":"布朗","birth":"1993-11-17","origo":"湖北省黄冈市黄州区","id":"421102199311177152","idimg":"img/person/sfz10.jpg","phone":"17788109926","mail":"yuwei@sina.com","qq":"4222710737","wechat":"yuwei@sina.com","addr":"盐田区盐田四村永安综合服务楼","prof":"驻场","skill":"工艺设计 工艺生产"},
-{"account":"yuyouyi","pwd":"yuyouyi","face":"11","name":"余友易","sex":"女","ethnic":"汉族","birth":"1984-03-13","origo":"广东省河源市紫金县","id":"441621198403134606","idimg":"img/person/sfz11.jpg","phone":"17703715062","mail":"yuyouyi@qq.com","qq":"1052830332","wechat":"yuyouyi@qq.com","addr":"罗湖区南极路南华大厦附楼（广深宾馆后）","prof":"风场","skill":"工艺生产"},
-{"account":"wujing","pwd":"wujing","face":"16","name":"吴靖","sex":"男","ethnic":"毛南","birth":"1980-12-18","origo":"安徽省芜湖市马塘区","id":"340203198012180219","idimg":"img/person/sfz12.jpg","phone":"18103832966","mail":"wujing@126.com","qq":"2302622800","wechat":"wujing@126.com","addr":"盐田区沙头角园林路25号","prof":"调度","skill":"材料"},
-{"account":"yuyiyu","pwd":"yuyiyu","face":"12","name":"庾依玉","sex":"女","ethnic":"汉族","birth":"1978-03-20","origo":"河北省保定市涿州市","id":"130681197803207788","idimg":"img/person/sfz13.jpg","phone":"18135777725","mail":"yuyiyu@163.com","qq":"1148102577","wechat":"yuyiyu@163.com","addr":"宝安区九区创业一路","prof":"总调","skill":"避雷"},
-{"account":"wankun","pwd":"wankun","face":"8","name":"万坤","sex":"男","ethnic":"塔吉克","birth":"1994-01-22","origo":"福建省福州市平潭县","id":"350128199401220171","idimg":"img/person/sfz14.jpg","phone":"17761666624","mail":"wankun@21cn.com","qq":"3018207006","wechat":"wankun@21cn.com","addr":"西乡宝民二路108号西乡街道办事综合楼1楼","prof":"仓管","skill":"工艺设计 材料"},
-{"account":"chengxintong","pwd":"chengxintong","face":"19","name":"程新桐","sex":"女","ethnic":"汉族","birth":"1983-04-13","origo":"广东省广州市","id":"440113198304138080","idimg":"img/person/sfz15.jpg","phone":"17703715554","mail":"chengxintong@sina.com","qq":"5280128516","wechat":"chengxintong@sina.com","addr":"福永街道德丰路77号（福永医院旁边）","prof":"仓主","skill":"工艺生产"},
-{"account":"aolingqin","pwd":"aolingqin","face":"8","name":"敖玲沁","sex":"女","ethnic":"普米","birth":"1980-02-02","origo":"河北省张家口市尚义县","id":"13072519800202346X","idimg":"img/person/sfz1.jpg","phone":"13333825099","mail":"aolingqin@qq.com","qq":"3058128109","wechat":"aolingqin@qq.com","addr":"宝安区新沙路488号107号房","prof":"设备","skill":"材料"},
-{"account":"nengfeng","pwd":"nengfeng","face":"14","name":"能丰","sex":"女","ethnic":"汉族","birth":"1980-04-06","origo":"新疆维吾尔自治区省直辖行政单位","id":"659003198004060508","idimg":"img/person/sfz2.jpg","phone":"13333828199","mail":"nengfeng@126.com","qq":"4100418624","wechat":"nengfeng@126.com","addr":"宝安区松岗街道办事处3楼302室","prof":"公众","skill":"安全 避雷"},
-{"account":"jilingyan","pwd":"jilingyan","face":"13","name":"计翎妍","sex":"女","ethnic":"阿昌","birth":"1989-10-09","origo":"河北省保定市望都县","id":"130631198910092446","idimg":"img/person/sfz3.jpg","phone":"18039111171","mail":"jilingyan@189.cn","qq":"3060014797","wechat":"jilingyan@189.cn","addr":"宝安区石岩街道前心大道国税3楼308室","prof":"专家","skill":"避雷"},
-{"account":"yanlechen","pwd":"yanlechen","face":"15","name":"阎乐晨","sex":"男","ethnic":"汉族","birth":"1979-08-02","origo":"西藏自治区日喀则地区岗巴县","id":"542338197908020410","idimg":"img/person/sfz4.jpg","phone":"18003719110","mail":"yanlechen@yeah.net","qq":"1130429869","wechat":"yanlechen@yeah.net","addr":"罗湖区东晓路","prof":"队长","skill":"工艺设计"},
-{"account":"lvcainan","pwd":"lvcainan","face":"11","name":"吕采南","sex":"女","ethnic":"怒族","birth":"1986-05-16","origo":"贵州省铜仁地区思南县","id":"522225198605161682","idimg":"img/person/sfz5.jpg","phone":"18103710926","mail":"lvcainan@eyou.com","qq":"1018121332","wechat":"lvcainan@eyou.com","addr":"罗湖区蛟湖路12号大院","prof":"技工","skill":"工艺生产"},
-{"account":"duxinyan","pwd":"duxinyan","face":"12","name":"堵昕燕","sex":"女","ethnic":"汉族","birth":"1991-08-02","origo":"湖南省岳阳市华容县","id":"430623199108021902","idimg":"img/person/sfz6.jpg","phone":"18137666629","mail":"duxinyan@hotmail.com","qq":"3071222431","wechat":"duxinyan@hotmail.com","addr":"福田区景田东路景田市场二楼","prof":"驻场","skill":"材料 工艺设计 工艺生产"},
-{"account":"xiaochuanjun","pwd":"xiaochuanjun","face":"1","name":"萧传军","sex":"男","ethnic":"鄂温克","birth":"1979-03-18","origo":"内蒙古自治区","id":"150500197903182637","idimg":"img/person/sfz7.jpg","phone":"17788177588","mail":"xiaochuanjun@163.com","qq":"1060328549","wechat":"xiaochuanjun@163.com","addr":"福田区园岭44栋105号","prof":"风场","skill":"安全"},
-{"account":"dengjuan","pwd":"dengjuan","face":"0","name":"邓娟","sex":"女","ethnic":"汉族","birth":"1988-01-30","origo":"河北省邢台市清河县","id":"130534198801302524","idimg":"img/person/sfz8.jpg","phone":"17703810086","mail":"dengjuan@21cn.com","qq":"3312220962","wechat":"dengjuan@21cn.com","addr":"南山区南头常兴路11号","prof":"调度","skill":"避雷"},
-{"account":"jiangzhizhuo","pwd":"jiangzhizhuo","face":"3","name":"江智卓","sex":"女","ethnic":"京族","birth":"1994-01-10","origo":"甘肃省甘南藏族自治州碌曲县","id":"623026199401105464","idimg":"img/person/sfz9.jpg","phone":"17335752222","mail":"jiangzhizhuo@sina.com","qq":"1010685","wechat":"jiangzhizhuo@sina.com","addr":"南山区西丽留仙大道","prof":"总调","skill":"工艺设计"},
-{"account":"bairongying","pwd":"bairongying","face":"9","name":"柏肜瑛","sex":"男","ethnic":"汉族","birth":"1975-01-23","origo":"贵州省黔南布依族苗族自治州","id":"522700197501237297","idimg":"img/person/sfz10.jpg","phone":"18037336699","mail":"bairongying@qq.com","qq":"2018293","wechat":"bairongying@qq.com","addr":"罗湖区罗沙公路经二路1号（罗湖体育局对面）","prof":"仓管","skill":"工艺生产"},
-{"account":"shuichengri","pwd":"shuichengri","face":"11","name":"水成日","sex":"男","ethnic":"基诺","birth":"1994-05-16","origo":"安徽省滁州市定远县","id":"341125199405169633","idimg":"img/person/sfz11.jpg","phone":"17788109930","mail":"shuichengri@126.com","qq":"4030786","wechat":"shuichengri@126.com","addr":"罗湖区莲塘国威路松源大厦一楼","prof":"仓主","skill":"材料"},
-{"account":"zhouhongtu","pwd":"zhouhongtu","face":"18","name":"周宏图","sex":"男","ethnic":"汉族","birth":"1981-01-01","origo":"湖南省长沙市","id":"43010019810101923X","idimg":"img/person/sfz12.jpg","phone":"17703716705","mail":"zhouhongtu@126.com","qq":"1092284","wechat":"zhouhongtu@126.com","addr":"福田区南园街道松岭路22号","prof":"设备","skill":"安全"},
-{"account":"qichining","pwd":"qichining","face":"2","name":"齐痴凝","sex":"女","ethnic":"德昂","birth":"1979-07-12","origo":"四川省绵阳市平武县","id":"510727197907128767","idimg":"img/person/sfz13.jpg","phone":"18037334789","mail":"qichining@189.cn","qq":"6012383","wechat":"qichining@189.cn","addr":"龙岗区葵涌街道葵兴东路12号","prof":"公众","skill":"避雷"},
-{"account":"haozitong","pwd":"haozitong","face":"0","name":"郝紫瞳","sex":"女","ethnic":"汉族","birth":"1986-04-23","origo":"青海省玉树藏族自治州杂多县","id":"632722198604237220","idimg":"img/person/sfz14.jpg","phone":"18037373746","mail":"haozitong@yeah.net","qq":"5080206870","wechat":"haozitong@yeah.net","addr":"深圳市罗湖区翠竹路2028号翠竹大厦","prof":"专家","skill":"工艺设计"},
-{"account":"yunchen","pwd":"yunchen","face":"5","name":"云尘","sex":"男","ethnic":"保安","birth":"1990-02-15","origo":"江苏省苏州市","id":"320500199002151551","idimg":"img/person/sfz15.jpg","phone":"13383855554","mail":"yunchen@eyou.com","qq":"1130022355","wechat":"13383855554","addr":"罗湖区宝岗路笋岗大厦5楼","prof":"队长","skill":"工艺生产"},
-{"account":"chuyixuan","pwd":"chuyixuan","face":"1","name":"储艺璇","sex":"女","ethnic":"汉族","birth":"1988-09-04","origo":"广东省清远市连南瑶族自治县","id":"441826198809046203","idimg":"img/person/sfz1.jpg","phone":"13082525268","mail":"chuyixuan@hotmail.com","qq":"1030017408","wechat":"13082525268","addr":"深圳市罗湖区翠山路国防大厦","prof":"技工","skill":"材料"},
-{"account":"ronghailong","pwd":"ronghailong","face":"4","name":"荣海龙","sex":"女","ethnic":"俄罗斯","birth":"1983-04-02","origo":"江西省鹰潭市余江县","id":"360622198304021564","idimg":"img/person/sfz2.jpg","phone":"15220202026","mail":"ronghailong@163.com","qq":"3142679","wechat":"15220202026","addr":"深圳市罗湖区泥岗西路1046号鸿颖大厦首层","prof":"驻场","skill":"安全"},
-{"account":"buweicheng","pwd":"buweicheng","face":"13","name":"卜伟成","sex":"男","ethnic":"汉族","birth":"1975-03-21","origo":"江苏省常州市","id":"320412197503218639","idimg":"img/person/sfz3.jpg","phone":"13001097739","mail":"buweicheng@21cn.com","qq":"5332381","wechat":"13001097739","addr":"福田区香蜜湖社区文化中心二楼","prof":"风场","skill":"避雷"},
-{"account":"manlingyi","pwd":"manlingyi","face":"7","name":"满玲漪","sex":"女","ethnic":"裕固","birth":"1977-08-09","origo":"河北省沧州市南皮县","id":"130927197708097283","idimg":"img/person/sfz4.jpg","phone":"15640852345","mail":"manlingyi@sina.com","qq":"4110293","wechat":"15640852345","addr":"盐田区梅沙街道成坑71号","prof":"调度","skill":"工艺设计 工艺生产"},
-{"account":"malingchun","pwd":"malingchun","face":"3","name":"马凌春","sex":"女","ethnic":"汉族","birth":"1979-04-09","origo":"广西壮族自治区","id":"451202197904090927","idimg":"img/person/sfz5.jpg","phone":"17746599939","mail":"malingchun@qq.com","qq":"4162184","wechat":"17746599939","addr":"南山区白石洲下白石居委会综合楼101","prof":"总调","skill":"工艺生产"},
-{"account":"fuwei","pwd":"fuwei","face":"11","name":"傅微","sex":"女","ethnic":"乌孜别","birth":"1994-08-20","origo":"四川省广元市市中区","id":"510802199408201381","idimg":"img/person/sfz6.jpg","phone":"13686860858","mail":"fuwei@126.com","qq":"3020380","wechat":"13686860858","addr":"盐田区盐田四村永安综合服务楼","prof":"仓管","skill":"材料"},
-{"account":"lingzhongji","pwd":"lingzhongji","face":"19","name":"凌钟吉","sex":"男","ethnic":"汉族","birth":"1986-01-14","origo":"新疆维吾尔自治区博尔塔拉蒙古自治州精河县","id":"652722198601141710","idimg":"img/person/sfz7.jpg","phone":"18636751234","mail":"lingzhongji@yeah.net","qq":"1068178","wechat":"18636751234","addr":"罗湖区南极路南华大厦附楼（广深宾馆后）","prof":"仓主","skill":"避雷"},
-{"account":"buzixian","pwd":"buzixian","face":"14","name":"步孜娴","sex":"男","ethnic":"门巴","birth":"1992-01-01","origo":"江苏省南通市市辖区","id":"320601199201011350","idimg":"img/person/sfz8.jpg","phone":"15208167567","mail":"buzixian@eyou.com","qq":"35012894","wechat":"15208167567","addr":"盐田区沙头角园林路25号","prof":"设备","skill":"工艺设计 材料"},
-{"account":"houxingjia","pwd":"houxingjia","face":"17","name":"侯星嘉","sex":"男","ethnic":"汉族","birth":"1984-08-26","origo":"四川省成都市市辖区","id":"510101198408267672","idimg":"img/person/sfz9.jpg","phone":"15699999927","mail":"houxingjia@hotmail.com","qq":"5101011984","wechat":"15699999927","addr":"宝安区九区创业一路","prof":"公众","skill":"工艺生产"},
-{"account":"qirenan","pwd":"qirenan","face":"13","name":"齐任安","sex":"男","ethnic":"鄂伦春","birth":"1991-03-08","origo":"新疆维吾尔自治区和田地区和田县","id":"653221199103089894","idimg":"img/person/sfz10.jpg","phone":"15699996944","mail":"qirenan@qq.com","qq":"6532211991","wechat":"15699996944","addr":"西乡宝民二路108号西乡街道办事综合楼1楼","prof":"专家","skill":"材料"},
-{"account":"baixin","pwd":"baixin","face":"2","name":"柏鑫","sex":"男","ethnic":"汉族","birth":"1988-10-25","origo":"湖北省孝感市汉川市","id":"42098419881025483X","idimg":"img/person/sfz11.jpg","phone":"18810000908","mail":"baixin@126.com","qq":"4209841988","wechat":"18810000908","addr":"福永街道德丰路77号（福永医院旁边）","prof":"队长","skill":"安全 避雷"},
-{"account":"raoyidan","pwd":"raoyidan","face":"19","name":"饶忆丹","sex":"女","ethnic":"独龙","birth":"1975-01-07","origo":"广东省河源市紫金县","id":"441621197501079386","idimg":"img/person/sfz12.jpg","phone":"13821825399","mail":"raoyidan@189.cn","qq":"4416211975","wechat":"13821825399","addr":"宝安区新沙路488号107号房","prof":"技工","skill":"避雷"},
-{"account":"sukezhu","pwd":"sukezhu","face":"9","name":"宿柯朱","sex":"男","ethnic":"汉族","birth":"1980-11-20","origo":"安徽省淮南市田家庵区","id":"340403198011200733","idimg":"img/person/sfz13.jpg","phone":"18088676767","mail":"sukezhu@yeah.net","qq":"3404031980","wechat":"18088676767","addr":"宝安区松岗街道办事处3楼302室","prof":"驻场","skill":"工艺设计"},
-{"account":"mengguangbin","pwd":"mengguangbin","face":"7","name":"孟广斌","sex":"男","ethnic":"赫哲","birth":"1990-09-05","origo":"西藏自治区日喀则地区吉隆县","id":"542335199009057797","idimg":"img/person/sfz14.jpg","phone":"13821138505","mail":"mengguangbin@eyou.com","qq":"5423351990","wechat":"13821138505","addr":"宝安区石岩街道前心大道国税3楼308室","prof":"风场","skill":"工艺生产"},
-{"account":"anyue","pwd":"anyue","face":"0","name":"安悦","sex":"男","ethnic":"汉族","birth":"1989-10-21","origo":"重庆市县荣昌县","id":"500226198910215190","idimg":"img/person/sfz15.jpg","phone":"18600000346","mail":"anyue@hotmail.com","qq":"5002261989","wechat":"18600000346","addr":"罗湖区东晓路","prof":"调度","skill":"材料 工艺设计 工艺生产"},
-{"account":"lubaitao","pwd":"lubaitao","face":"3","name":"鲁白桃","sex":"女","ethnic":"高山","birth":"1977-08-16","origo":"江苏省连云港市连云区","id":"320703197708165665","idimg":"img/person/sfz1.jpg","phone":"15699999974","mail":"lubaitao@163.com","qq":"3207031977","wechat":"15699999974","addr":"罗湖区蛟湖路12号大院","prof":"总调","skill":"安全"},
-{"account":"pingyong","pwd":"pingyong","face":"17","name":"平勇","sex":"男","ethnic":"汉族","birth":"1980-01-15","origo":"四川省凉山彝族自治州木里藏族自治县","id":"513422198001159451","idimg":"img/person/sfz2.jpg","phone":"15122391000","mail":"pingyong@21cn.com","qq":"5134221980","wechat":"15122391000","addr":"福田区景田东路景田市场二楼","prof":"仓管","skill":"避雷"},
-
-]
+        { "account": "gubingwei", "pwd": "gubingwei", "face": "14", "name": "顾冰薇", "sex": "女", "ethnic": "汉族", "birth": "1992-04-06", "origo": "广西壮族自治区贵港市港北区", "id": "450802199204068703", "idimg": "img/person/sfz1.jpg", "phone": "17788109922", "mail": "gubingwei@163.com", "qq": "4112408840", "wechat": "4112408840", "addr": "罗湖区东晓路", "prof": "专家", "skill": "避雷" },
+        { "account": "qianzhenhai", "pwd": "qianzhenhai", "face": "3", "name": "钱振海", "sex": "男", "ethnic": "壮族", "birth": "1991-01-22", "origo": "河南省南阳市", "id": "411300199101223559", "idimg": "img/person/sfz2.jpg", "phone": "13333715119", "mail": "qianzhenhai@21cn.com", "qq": "3071619289", "wechat": "3071619289", "addr": "罗湖区蛟湖路12号大院", "prof": "队长", "skill": "工艺设计 材料" },
+        { "account": "leiyixuan", "pwd": "leiyixuan", "face": "5", "name": "雷亦旋", "sex": "女", "ethnic": "汉族", "birth": "1988-02-17", "origo": "陕西省宝鸡市", "id": "610300198802174085", "idimg": "img/person/sfz3.jpg", "phone": "13333850299", "mail": "leiyixuan@sina.com", "qq": "4232830671", "wechat": "4232830671", "addr": "福田区景田东路景田市场二楼", "prof": "技工", "skill": "工艺生产" },
+        { "account": "luyilv", "pwd": "luyilv", "face": "16", "name": "陆易绿", "sex": "女", "ethnic": "回族", "birth": "1987-07-08", "origo": "安徽省滁州市全椒县", "id": "341124198707088408", "idimg": "img/person/sfz4.jpg", "phone": "13333822799", "mail": "luyilv@qq.com", "qq": "4212628996", "wechat": "4212628996", "addr": "福田区园岭44栋105号", "prof": "驻场", "skill": "材料" },
+        { "account": "chenjiamu", "pwd": "chenjiamu", "face": "8", "name": "陈嘉木", "sex": "男", "ethnic": "汉族", "birth": "1994-03-19", "origo": "黑龙江省伊春市上甘岭区", "id": "230716199403192899", "idimg": "img/person/sfz5.jpg", "phone": "17734800004", "mail": "chenjiamu@126.com", "qq": "53232374", "wechat": "53232374", "addr": "南山区南头常兴路11号", "prof": "风场", "skill": "安全 避雷" },
+        { "account": "zhoushaoyuan", "pwd": "zhoushaoyuan", "face": "10", "name": "周绍元", "sex": "男", "ethnic": "满族", "birth": "1981-09-30", "origo": "山西省忻州地区石楼县", "id": "142328198109306719", "idimg": "img/person/sfz6.jpg", "phone": "17752555009", "mail": "zhoushaoyuan@189.cn", "qq": "4078194", "wechat": "4078194", "addr": "南山区西丽留仙大道", "prof": "调度", "skill": "避雷" },
+        { "account": "dushilei", "pwd": "dushilei", "face": "4", "name": "杜诗蕾", "sex": "女", "ethnic": "汉族", "birth": "1987-11-28", "origo": "西藏自治区昌都地区察雅县", "id": "542126198711289967", "idimg": "img/person/sfz7.jpg", "phone": "17737777344", "mail": "dushilei@yeah.net", "qq": "6040078", "wechat": "6040078", "addr": "罗湖区罗沙公路经二路1号（罗湖体育局对面）", "prof": "总调", "skill": "工艺设计" },
+        { "account": "luohongcai", "pwd": "luohongcai", "face": "19", "name": "罗鸿彩", "sex": "男", "ethnic": "维吾尔", "birth": "1994-08-31", "origo": "陕西省咸阳市永寿县", "id": "610426199408311938", "idimg": "img/person/sfz8.jpg", "phone": "17703717005", "mail": "luohongcai@eyou.com", "qq": "6252318817", "wechat": "6252318817", "addr": "罗湖区莲塘国威路松源大厦一楼", "prof": "仓管", "skill": "工艺生产" },
+        { "account": "shimengfan", "pwd": "shimengfan", "face": "4", "name": "石梦凡", "sex": "女", "ethnic": "汉族", "birth": "1999-02-10", "origo": "四川省达川地区达川市", "id": "513001199902107844", "idimg": "img/person/sfz9.jpg", "phone": "17320111171", "mail": "shimengfan@hotmail.com", "qq": "5222926114", "wechat": "5222926114", "addr": "福田区南园街道松岭路22号", "prof": "仓主", "skill": "材料 工艺设计 工艺生产" },
+        { "account": "sungangyi", "pwd": "sungangyi", "face": "2", "name": "孙刚毅", "sex": "男", "ethnic": "苗族", "birth": "1979-07-22", "origo": "贵州省六盘水市六枝特区", "id": "520203197907222079", "idimg": "img/person/sfz10.jpg", "phone": "18103711136", "mail": "sungangyi@163.com", "qq": "4060411224", "wechat": "4060411224", "addr": "龙岗区葵涌街道葵兴东路12号", "prof": "司机", "skill": "安全" },
+        { "account": "xieyishuang", "pwd": "xieyishuang", "face": "20", "name": "谢依霜", "sex": "女", "ethnic": "汉族", "birth": "1991-11-12", "origo": "四川省攀枝花市盐边县", "id": "510422199111120429", "idimg": "img/person/sfz11.jpg", "phone": "13333829001", "mail": "xieyishuang@21cn.com", "qq": "1010103487", "wechat": "1010103487", "addr": "深圳市罗湖区翠竹路2028号翠竹大厦", "prof": "公众", "skill": "避雷" },
+        { "account": "yanzhirong", "pwd": "yanzhirong", "face": "3", "name": "严芷容", "sex": "女", "ethnic": "彝族", "birth": "1976-12-26", "origo": "广东省韶关市仁化县", "id": "440224197612263887", "idimg": "img/person/sfz12.jpg", "phone": "13303711138", "mail": "yanzhirong@sina.com", "qq": "1010125171", "wechat": "1010125171", "addr": "罗湖区宝岗路笋岗大厦5楼", "prof": "专家", "skill": "工艺设计" },
+        { "account": "yuborong", "pwd": "yuborong", "face": "9", "name": "余博容", "sex": "男", "ethnic": "汉族", "birth": "1984-02-16", "origo": "新疆维吾尔族自治区昌吉回族自治州呼图壁县", "id": "652323198402167736", "idimg": "img/person/sfz13.jpg", "phone": "18137888009", "mail": "yuborong@qq.com", "qq": "4020811715", "wechat": "4020811715", "addr": "深圳市罗湖区翠山路国防大厦", "prof": "队长", "skill": "工艺生产" },
+        { "account": "chenghanfu", "pwd": "chenghanfu", "face": "17", "name": "程含芙", "sex": "女", "ethnic": "土家", "birth": "1988-02-02", "origo": "辽宁省抚顺市望花区", "id": "210404198802026601", "idimg": "img/person/sfz14.jpg", "phone": "18037773369", "mail": "chenghanfu@126.com", "qq": "3272410422", "wechat": "3272410422", "addr": "深圳市罗湖区泥岗西路1046号鸿颖大厦首层", "prof": "技工", "skill": "材料" },
+        { "account": "handeze", "pwd": "handeze", "face": "15", "name": "韩德泽", "sex": "男", "ethnic": "汉族", "birth": "1985-06-24", "origo": "重庆市渝北区", "id": "500112198506248210", "idimg": "img/person/sfz15.jpg", "phone": "18100333939", "mail": "handeze@189.cn", "qq": "4212409410", "wechat": "4212409410", "addr": "福田区香蜜湖社区文化中心二楼", "prof": "驻场", "skill": "安全" },
+        { "account": "jiangmurui", "pwd": "jiangmurui", "face": "8", "name": "姜慕蕊", "sex": "女", "ethnic": "藏族", "birth": "1974-06-07", "origo": "陕西省西安市市辖区", "id": "610101197406077807", "idimg": "img/person/sfz1.jpg", "phone": "13333831009", "mail": "jiangmurui@yeah.net", "qq": "1020027992", "wechat": "1020027992", "addr": "盐田区梅沙街道成坑71号", "prof": "风场", "skill": "避雷" },
+        { "account": "fugaoshuang", "pwd": "fugaoshuang", "face": "1", "name": "付高爽", "sex": "男", "ethnic": "汉族", "birth": "1974-12-18", "origo": "江西省抚州地区黎川县", "id": "362523197412188175", "idimg": "img/person/sfz2.jpg", "phone": "13343849666", "mail": "fugaoshuang@eyou.com", "qq": "2902104440", "wechat": "2902104440", "addr": "南山区白石洲下白石居委会综合楼101", "prof": "调度", "skill": "工艺设计" },
+        { "account": "shiyouqing", "pwd": "shiyouqing", "face": "16", "name": "石又晴", "sex": "女", "ethnic": "蒙古", "birth": "1980-08-26", "origo": "福建省宁德地区寿宁县", "id": "352229198008261144", "idimg": "img/person/sfz3.jpg", "phone": "13333818366", "mail": "shiyouqing@hotmail.com", "qq": "23623775", "wechat": "23623775", "addr": "盐田区盐田四村永安综合服务楼", "prof": "总调", "skill": "工艺生产" },
+        { "account": "lanmenghuai", "pwd": "lanmenghuai", "face": "12", "name": "蓝梦槐", "sex": "女", "ethnic": "汉族", "birth": "1993-01-11", "origo": "广东省佛山市", "id": "440604199301112243", "idimg": "img/person/sfz4.jpg", "phone": "13333835119", "mail": "lanmenghuai@qq.com", "qq": "44011383", "wechat": "44011383", "addr": "罗湖区南极路南华大厦附楼（广深宾馆后）", "prof": "仓管", "skill": "材料" },
+        { "account": "doujialong", "pwd": "doujialong", "face": "9", "name": "窦加隆", "sex": "男", "ethnic": "侗族", "birth": "1993-06-03", "origo": "河南省郑州市市辖区", "id": "410101199306034879", "idimg": "img/person/sfz5.jpg", "phone": "18137166646", "mail": "doujialong@126.com", "qq": "13072580", "wechat": "13072580", "addr": "盐田区沙头角园林路25号", "prof": "仓主", "skill": "安全" },
+        { "account": "shenghanjia", "pwd": "shenghanjia", "face": "2", "name": "盛韩嘉", "sex": "男", "ethnic": "汉族", "birth": "1982-05-25", "origo": "辽宁省沈阳市市辖区", "id": "210101198205251717", "idimg": "img/person/sfz6.jpg", "phone": "18037155369", "mail": "shenghanjia@189.cn", "qq": "65900380", "wechat": "65900380", "addr": "宝安区九区创业一路", "prof": "司机", "skill": "避雷" },
+        { "account": "changchenlin", "pwd": "changchenlin", "face": "0", "name": "常辰淋", "sex": "男", "ethnic": "布依", "birth": "1989-03-11", "origo": "安徽省芜湖市", "id": "340208198903117151", "idimg": "img/person/sfz7.jpg", "phone": "17752565757", "mail": "changchenlin@yeah.net", "qq": "1042631193", "wechat": "1042631193", "addr": "西乡宝民二路108号西乡街道办事综合楼1楼", "prof": "公众", "skill": "工艺设计 工艺生产" },
+        { "account": "shudaiqiao", "pwd": "shudaiqiao", "face": "12", "name": "舒代巧", "sex": "女", "ethnic": "汉族", "birth": "1994-05-10", "origo": "青海省玉树藏族自治州治多县", "id": "63272419940510422X", "idimg": "img/person/sfz8.jpg", "phone": "18103710621", "mail": "shudaiqiao@eyou.com", "qq": "1300110784", "wechat": "1300110784", "addr": "福永街道德丰路77号（福永医院旁边）", "prof": "专家", "skill": "工艺生产" },
+        { "account": "yangxinyan", "pwd": "yangxinyan", "face": "3", "name": "阳昕燕", "sex": "女", "ethnic": "瑶族", "birth": "1990-12-09", "origo": "西藏自治区昌都地区类乌齐县", "id": "54212419901209410X", "idimg": "img/person/sfz9.jpg", "phone": "17320111191", "mail": "yangxinyan@hotmail.com", "qq": "2020322207", "wechat": "17320111191", "addr": "宝安区新沙路488号107号房", "prof": "队长", "skill": "材料" },
+        { "account": "bayitong", "pwd": "bayitong", "face": "8", "name": "巴以彤", "sex": "女", "ethnic": "汉族", "birth": "1984-12-27", "origo": "辽宁省大连市", "id": "210200198412279922", "idimg": "img/person/sfz10.jpg", "phone": "18103711190", "mail": "bayitong@163.com", "qq": "1042212042", "wechat": "18103711190", "addr": "宝安区松岗街道办事处3楼302室", "prof": "技工", "skill": "避雷" },
+        { "account": "baoyuanliu", "pwd": "baoyuanliu", "face": "14", "name": "鲍元柳", "sex": "女", "ethnic": "白族", "birth": "1990-07-04", "origo": "湖北省省直辖行政单位神农架林区", "id": "429021199007044401", "idimg": "img/person/sfz11.jpg", "phone": "13333822009", "mail": "baoyuanliu@21cn.com", "qq": "4022426388", "wechat": "13333822009", "addr": "宝安区石岩街道前心大道国税3楼308室", "prof": "驻场", "skill": "工艺设计 材料" },
+        { "account": "geganglin", "pwd": "geganglin", "face": "6", "name": "戈刚林", "sex": "男", "ethnic": "汉族", "birth": "1986-03-23", "origo": "重庆市县奉节县", "id": "500236198603237755", "idimg": "img/person/sfz12.jpg", "phone": "18939511369", "mail": "geganglin@sina.com", "qq": "5232316773", "wechat": "18939511369", "addr": "罗湖区东晓路", "prof": "风场", "skill": "工艺生产" },
+        { "account": "goumidan", "pwd": "goumidan", "face": "4", "name": "勾觅丹", "sex": "女", "ethnic": "朝鲜", "birth": "1981-04-15", "origo": "河北省沧州市沧县", "id": "130921198104153164", "idimg": "img/person/sfz13.jpg", "phone": "18137888005", "mail": "goumidan@qq.com", "qq": "1040402660", "wechat": "18137888005", "addr": "罗湖区蛟湖路12号大院", "prof": "调度", "skill": "材料" },
+        { "account": "miaoxinhua", "pwd": "miaoxinhua", "face": "2", "name": "苗新华", "sex": "女", "ethnic": "汉族", "birth": "1990-02-26", "origo": "云南省文山壮族苗族自治州文山县", "id": "53262119900226874X", "idimg": "img/person/sfz14.jpg", "phone": "17703866664", "mail": "miaoxinhua@126.com", "qq": "11224821", "wechat": "17703866664", "addr": "福田区景田东路景田市场二楼", "prof": "总调", "skill": "安全 避雷" },
+        { "account": "qianxiaole", "pwd": "qianxiaole", "face": "3", "name": "钱小乐", "sex": "男", "ethnic": "哈尼", "birth": "1989-05-11", "origo": "湖北省宜昌市点军区", "id": "420504198905115935", "idimg": "img/person/sfz15.jpg", "phone": "13333711179", "mail": "qianxiaole@163.com", "qq": "1010107780", "wechat": "13333711179", "addr": "福田区园岭44栋105号", "prof": "仓管", "skill": "避雷" },
+        { "account": "shizihan", "pwd": "shizihan", "face": "13", "name": "师子寒", "sex": "女", "ethnic": "汉族", "birth": "1991-01-06", "origo": "贵州省遵义市正安县", "id": "520324199101068400", "idimg": "img/person/sfz1.jpg", "phone": "18039578577", "mail": "shizihan@21cn.com", "qq": "5052507507", "wechat": "18039578577", "addr": "南山区南头常兴路11号", "prof": "仓主", "skill": "工艺设计" },
+        { "account": "yutaoming", "pwd": "yutaoming", "face": "9", "name": "余涛鸣", "sex": "女", "ethnic": "黎族", "birth": "1994-11-03", "origo": "山东省济南市市辖区", "id": "370101199411032303", "idimg": "img/person/sfz2.jpg", "phone": "18135679789", "mail": "yutaoming@sina.com", "qq": "5423271993", "wechat": "18135679789", "addr": "南山区西丽留仙大道", "prof": "司机", "skill": "工艺生产" },
+        { "account": "xiangyaoyi", "pwd": "xiangyaoyi", "face": "5", "name": "相瑶一", "sex": "男", "ethnic": "汉族", "birth": "1984-01-10", "origo": "西藏自治区山南地区措美县", "id": "542227198401107373", "idimg": "img/person/sfz3.jpg", "phone": "13323861688", "mail": "xiangyaoyi@qq.com", "qq": "1424001990", "wechat": "13323861688", "addr": "罗湖区罗沙公路经二路1号（罗湖体育局对面）", "prof": "公众", "skill": "材料 工艺设计 工艺生产" },
+        { "account": "laosihan", "pwd": "laosihan", "face": "1", "name": "劳思寒", "sex": "女", "ethnic": "哈萨克", "birth": "1990-11-30", "origo": "陕西省渭南市富平县", "id": "610528199011303321", "idimg": "img/person/sfz4.jpg", "phone": "18037277737", "mail": "laosihan@126.com", "qq": "4211011995", "wechat": "18037277737", "addr": "罗湖区莲塘国威路松源大厦一楼", "prof": "专家", "skill": "安全" },
+        { "account": "weiyuan", "pwd": "weiyuan", "face": "5", "name": "魏苑", "sex": "女", "ethnic": "汉族", "birth": "1978-09-22", "origo": "甘肃省甘南藏族自治州碌曲县", "id": "623026197809228004", "idimg": "img/person/sfz5.jpg", "phone": "17752555369", "mail": "weiyuan@189.cn", "qq": "4404211976", "wechat": "17752555369", "addr": "福田区南园街道松岭路22号", "prof": "队长", "skill": "避雷" },
+        { "account": "gouxingyao", "pwd": "gouxingyao", "face": "2", "name": "勾星瑶", "sex": "男", "ethnic": "傣族", "birth": "1981-03-02", "origo": "河南省商丘市永城市", "id": "411481198103025774", "idimg": "img/person/sfz6.jpg", "phone": "17737700060", "mail": "gouxingyao@yeah.net", "qq": "4109001989", "wechat": "17737700060", "addr": "龙岗区葵涌街道葵兴东路12号", "prof": "技工", "skill": "工艺设计" },
+        { "account": "langjia", "pwd": "langjia", "face": "6", "name": "郎佳", "sex": "女", "ethnic": "汉族", "birth": "1991-09-07", "origo": "浙江省杭州市建德市", "id": "33018219910907006X", "idimg": "img/person/sfz7.jpg", "phone": "18037311688", "mail": "langjia@eyou.com", "qq": "41272679", "wechat": "18037311688", "addr": "深圳市罗湖区翠竹路2028号翠竹大厦", "prof": "驻场", "skill": "工艺生产" },
+        { "account": "baolingchun", "pwd": "baolingchun", "face": "11", "name": "鲍凌春", "sex": "女", "ethnic": "畲族", "birth": "1978-07-28", "origo": "新疆维吾尔自治区巴音郭楞蒙古自治州库尔勒市", "id": "652801197807285161", "idimg": "img/person/sfz8.jpg", "phone": "17320111161", "mail": "baolingchun@hotmail.com", "qq": "43112273", "wechat": "17320111161", "addr": "罗湖区宝岗路笋岗大厦5楼", "prof": "风场", "skill": "材料" },
+        { "account": "yishuaicheng", "pwd": "yishuaicheng", "face": "1", "name": "伊帅成", "sex": "男", "ethnic": "汉族", "birth": "1981-09-28", "origo": "湖南省邵阳市武冈市", "id": "430581198109281099", "idimg": "img/person/sfz9.jpg", "phone": "17320111181", "mail": "yishuaicheng@163.com", "qq": "44162193", "wechat": "17320111181", "addr": "深圳市罗湖区翠山路国防大厦", "prof": "调度", "skill": "安全" },
+        { "account": "weierrong", "pwd": "weierrong", "face": "17", "name": "卫尔容", "sex": "女", "ethnic": "傈僳", "birth": "1975-12-18", "origo": "安徽省黄山市徽州区", "id": "341004197512186248", "idimg": "img/person/sfz10.jpg", "phone": "18103711196", "mail": "weierrong@21cn.com", "qq": "41272278", "wechat": "18103711196", "addr": "深圳市罗湖区泥岗西路1046号鸿颖大厦首层", "prof": "总调", "skill": "避雷" },
+        { "account": "tenglong", "pwd": "tenglong", "face": "14", "name": "滕龙", "sex": "男", "ethnic": "汉族", "birth": "1981-09-14", "origo": "黑龙江省大庆市", "id": "230600198109147973", "idimg": "img/person/sfz11.jpg", "phone": "18037888521", "mail": "tenglong@sina.com", "qq": "37050076", "wechat": "18037888521", "addr": "福田区香蜜湖社区文化中心二楼", "prof": "仓管", "skill": "工艺设计" },
+        { "account": "fuyibing", "pwd": "fuyibing", "face": "5", "name": "傅奕冰", "sex": "男", "ethnic": "东乡族", "birth": "1989-05-29", "origo": "四川省南充市嘉陵区", "id": "51130419890529869X", "idimg": "img/person/sfz12.jpg", "phone": "18137888007", "mail": "fuyibing@qq.com", "qq": "23010885", "wechat": "18137888007", "addr": "盐田区梅沙街道成坑71号", "prof": "仓主", "skill": "工艺生产" },
+        { "account": "fanpeining", "pwd": "fanpeining", "face": "12", "name": "范沛凝", "sex": "女", "ethnic": "汉族", "birth": "1989-02-21", "origo": "辽宁省沈阳市新民市", "id": "210181198902213320", "idimg": "img/person/sfz13.jpg", "phone": "18037888009", "mail": "fanpeining@126.com", "qq": "37070485", "wechat": "18037888009", "addr": "南山区白石洲下白石居委会综合楼101", "prof": "司机", "skill": "材料" },
+        { "account": "guweiqi", "pwd": "guweiqi", "face": "4", "name": "顾伟祺", "sex": "男", "ethnic": "仡佬族", "birth": "1976-07-22", "origo": "黑龙江省伊春市汤旺河区", "id": "230712197607224317", "idimg": "img/person/sfz14.jpg", "phone": "17703717774", "mail": "guweiqi@189.cn", "qq": "13063189", "wechat": "17703717774", "addr": "盐田区盐田四村永安综合服务楼", "prof": "公众", "skill": "安全" },
+        { "account": "qiuyayi", "pwd": "qiuyayi", "face": "19", "name": "邱雅懿", "sex": "男", "ethnic": "汉族", "birth": "1970-07-28", "origo": "河南省鹤壁市山城区", "id": "410603197007285492", "idimg": "img/person/sfz15.jpg", "phone": "18903844448", "mail": "qiuyayi@yeah.net", "qq": "54233879", "wechat": "18903844448", "addr": "罗湖区南极路南华大厦附楼（广深宾馆后）", "prof": "专家", "skill": "避雷" },
+        { "account": "qinpancui", "pwd": "qinpancui", "face": "15", "name": "覃盼翠", "sex": "女", "ethnic": "拉祜族", "birth": "1989-03-20", "origo": "云南省德宏傣族景颇族自治州梁河县", "id": "53312219890320962X", "idimg": "img/person/sfz1.jpg", "phone": "13333812199", "mail": "qinpancui@eyou.com", "qq": "5222251986", "wechat": "13333812199", "addr": "盐田区沙头角园林路25号", "prof": "队长", "skill": "工艺设计 工艺生产" },
+        { "account": "gaowenlin", "pwd": "gaowenlin", "face": "2", "name": "高文林", "sex": "男", "ethnic": "汉族", "birth": "1973-09-07", "origo": "福建省泉州市永春县", "id": "350525197309075075", "idimg": "img/person/sfz2.jpg", "phone": "13333859788", "mail": "gaowenlin@hotmail.com", "qq": "4306231991", "wechat": "13333859788", "addr": "宝安区九区创业一路", "prof": "技工", "skill": "工艺生产" },
+        { "account": "mojiyao", "pwd": "mojiyao", "face": "15", "name": "莫寄瑶", "sex": "女", "ethnic": "佤族", "birth": "1993-08-16", "origo": "西藏自治区日喀则地区昂仁县", "id": "542327199308161623", "idimg": "img/person/sfz3.jpg", "phone": "18039111151", "mail": "mojiyao@qq.com", "qq": "150500179", "wechat": "18039111151", "addr": "西乡宝民二路108号西乡街道办事综合楼1楼", "prof": "驻场", "skill": "材料" },
+        { "account": "fuyouqing", "pwd": "fuyouqing", "face": "20", "name": "付又青", "sex": "女", "ethnic": "汉族", "birth": "1990-08-30", "origo": "山西省晋中地区", "id": "142400199008306780", "idimg": "img/person/sfz4.jpg", "phone": "18103710062", "mail": "fuyouqing@126.com", "qq": "130534188", "wechat": "18103710062", "addr": "福永街道德丰路77号（福永医院旁边）", "prof": "风场", "skill": "避雷" },
+        { "account": "weixingqing", "pwd": "weixingqing", "face": "18", "name": "韦兴庆", "sex": "男", "ethnic": "水族", "birth": "1995-12-28", "origo": "湖北省黄冈市市辖区", "id": "421101199512285196", "idimg": "img/person/sfz5.jpg", "phone": "18103710130", "mail": "weixingqing@189.cn", "qq": "623026194", "wechat": "18103710130", "addr": "宝安区新沙路488号107号房", "prof": "调度", "skill": "工艺设计 材料" },
+        { "account": "xiaanmin", "pwd": "xiaanmin", "face": "0", "name": "夏安民", "sex": "男", "ethnic": "汉族", "birth": "1976-03-21", "origo": "广东省珠海市斗门县", "id": "440421197603213679", "idimg": "img/person/sfz6.jpg", "phone": "17760766636", "mail": "xiaanmin@yeah.net", "qq": "522700175", "wechat": "17760766636", "addr": "宝安区松岗街道办事处3楼302室", "prof": "总调", "skill": "工艺生产" },
+        { "account": "fangzhihe", "pwd": "fangzhihe", "face": "10", "name": "方芷荷", "sex": "女", "ethnic": "纳西", "birth": "1989-08-22", "origo": "河南省濮阳市", "id": "410900198908225309", "idimg": "img/person/sfz7.jpg", "phone": "17703717009", "mail": "fangzhihe@eyou.com", "qq": "341125194", "wechat": "17703717009", "addr": "宝安区石岩街道前心大道国税3楼308室", "prof": "仓管", "skill": "材料" },
+        { "account": "dingyachang", "pwd": "dingyachang", "face": "1", "name": "丁雅昶", "sex": "男", "ethnic": "汉族", "birth": "1979-12-22", "origo": "河南省周口地区郸城县", "id": "412726197912226072", "idimg": "img/person/sfz8.jpg", "phone": "17335577774", "mail": "dingyachang@hotmail.com", "qq": "430100181", "wechat": "17335577774", "addr": "罗湖区东晓路", "prof": "仓主", "skill": "安全 避雷" },
+        { "account": "wanliqiang", "pwd": "wanliqiang", "face": "12", "name": "万力强", "sex": "男", "ethnic": "羌族", "birth": "1973-02-17", "origo": "湖南省永州市东安县", "id": "431122197302179832", "idimg": "img/person/sfz9.jpg", "phone": "17303858866", "mail": "wanliqiang@163.com", "qq": "510727179", "wechat": "17303858866", "addr": "罗湖区蛟湖路12号大院", "prof": "司机", "skill": "避雷" },
+        { "account": "xiaoxiqin", "pwd": "xiaoxiqin", "face": "19", "name": "肖惜芹", "sex": "女", "ethnic": "汉族", "birth": "1993-02-01", "origo": "广东省河源市紫金县", "id": "441621199302010860", "idimg": "img/person/sfz10.jpg", "phone": "17788109896", "mail": "xiaoxiqin@21cn.com", "qq": "632722186", "wechat": "17788109896", "addr": "福田区景田东路景田市场二楼", "prof": "公众", "skill": "工艺设计" },
+        { "account": "fangtianling", "pwd": "fangtianling", "face": "6", "name": "方天菱", "sex": "女", "ethnic": "土族", "birth": "1978-02-01", "origo": "河南省周口地区西华县", "id": "412722197802018365", "idimg": "img/person/sfz11.jpg", "phone": "17703715061", "mail": "fangtianling@sina.com", "qq": "320500190", "wechat": "17703715061", "addr": "福田区园岭44栋105号", "prof": "专家", "skill": "工艺生产" },
+        { "account": "wangdanyan", "pwd": "wangdanyan", "face": "4", "name": "王丹烟", "sex": "女", "ethnic": "汉族", "birth": "1976-04-27", "origo": "山东省东营市", "id": "370500197604271286", "idimg": "img/person/sfz12.jpg", "phone": "17703716709", "mail": "wangdanyan@qq.com", "qq": "441826188", "wechat": "wangdanyan@qq.com", "addr": "南山区南头常兴路11号", "prof": "队长", "skill": "材料 工艺设计 工艺生产" },
+        { "account": "ducuilan", "pwd": "ducuilan", "face": "18", "name": "杜翠岚", "sex": "女", "ethnic": "仫佬", "birth": "1985-10-30", "origo": "黑龙江省哈尔滨市平房区", "id": "230108198510300843", "idimg": "img/person/sfz13.jpg", "phone": "18903718932", "mail": "ducuilan@126.com", "qq": "360622183", "wechat": "ducuilan@126.com", "addr": "南山区西丽留仙大道", "prof": "技工", "skill": "安全" },
+        { "account": "yangyiyun", "pwd": "yangyiyun", "face": "13", "name": "杨以云", "sex": "女", "ethnic": "汉族", "birth": "1985-02-17", "origo": "山东省潍坊市坊子区", "id": "370704198502175067", "idimg": "img/person/sfz14.jpg", "phone": "18903717720", "mail": "yangyiyun@yeah.net", "qq": "320412175", "wechat": "yangyiyun@yeah.net", "addr": "罗湖区罗沙公路经二路1号（罗湖体育局对面）", "prof": "驻场", "skill": "避雷" },
+        { "account": "xiaolianxue", "pwd": "xiaolianxue", "face": "3", "name": "肖怜雪", "sex": "女", "ethnic": "锡伯", "birth": "1974-10-31", "origo": "云南省楚雄彝族自治州牟定县", "id": "532323197410315063", "idimg": "img/person/sfz15.jpg", "phone": "18137772520", "mail": "xiaolianxue@eyou.com", "qq": "1309271977", "wechat": "xiaolianxue@eyou.com", "addr": "罗湖区莲塘国威路松源大厦一楼", "prof": "风场", "skill": "工艺设计" },
+        { "account": "quanmanyun", "pwd": "quanmanyun", "face": "19", "name": "全曼云", "sex": "女", "ethnic": "汉族", "birth": "1994-10-07", "origo": "湖南省常德市津市市", "id": "430781199410079549", "idimg": "img/person/sfz1.jpg", "phone": "13333850599", "mail": "quanmanyun@hotmail.com", "qq": "4512021979", "wechat": "quanmanyun@hotmail.com", "addr": "福田区南园街道松岭路22号", "prof": "调度", "skill": "工艺生产" },
+        { "account": "yuanzhenguo", "pwd": "yuanzhenguo", "face": "3", "name": "元镇国", "sex": "男", "ethnic": "柯尔克", "birth": "1978-09-24", "origo": "宁夏回族自治区", "id": "640400197809242673", "idimg": "img/person/sfz2.jpg", "phone": "17729799989", "mail": "yuanzhenguo@qq.com", "qq": "5108021994", "wechat": "yuanzhenguo@qq.com", "addr": "龙岗区葵涌街道葵兴东路12号", "prof": "总调", "skill": "材料" },
+        { "account": "jialingquan", "pwd": "jialingquan", "face": "13", "name": "贾灵泉", "sex": "女", "ethnic": "汉族", "birth": "1985-04-21", "origo": "天津市市辖区红桥区", "id": "12010619850421166X", "idimg": "img/person/sfz3.jpg", "phone": "17729799994", "mail": "jialingquan@126.com", "qq": "6527221986", "wechat": "jialingquan@126.com", "addr": "深圳市罗湖区翠竹路2028号翠竹大厦", "prof": "仓管", "skill": "安全" },
+        { "account": "gonghenglin", "pwd": "gonghenglin", "face": "14", "name": "巩恒霖", "sex": "男", "ethnic": "景颇", "birth": "1993-11-18", "origo": "吉林省长春市榆树市", "id": "220182199311188015", "idimg": "img/person/sfz4.jpg", "phone": "18103710105", "mail": "gonghenglin@189.cn", "qq": "3206011992", "wechat": "gonghenglin@189.cn", "addr": "罗湖区宝岗路笋岗大厦5楼", "prof": "仓主", "skill": "避雷" },
+        { "account": "yanshao", "pwd": "yanshao", "face": "0", "name": "严少", "sex": "男", "ethnic": "汉族", "birth": "1986-11-13", "origo": "广东省深圳市龙岗区", "id": "440307198611133136", "idimg": "img/person/sfz5.jpg", "phone": "18103719250", "mail": "yanshao@yeah.net", "qq": "3092115316", "wechat": "yanshao@yeah.net", "addr": "深圳市罗湖区翠山路国防大厦", "prof": "司机", "skill": "工艺设计" },
+        { "account": "yunyufeng", "pwd": "yunyufeng", "face": "5", "name": "云宇峰", "sex": "男", "ethnic": "达斡尔", "birth": "1984-01-20", "origo": "河北省沧州市青县", "id": "130922198401205211", "idimg": "img/person/sfz6.jpg", "phone": "17719811988", "mail": "yunyufeng@eyou.com", "qq": "3262126874", "wechat": "yunyufeng@eyou.com", "addr": "深圳市罗湖区泥岗西路1046号鸿颖大厦首层", "prof": "公众", "skill": "工艺生产" },
+        { "account": "kuangbei", "pwd": "kuangbei", "face": "13", "name": "匡贝", "sex": "女", "ethnic": "汉族", "birth": "1983-03-17", "origo": "青海省西宁市", "id": "630123198303172146", "idimg": "img/person/sfz7.jpg", "phone": "17752566606", "mail": "kuangbei@hotmail.com", "qq": "2050411593", "wechat": "kuangbei@hotmail.com", "addr": "福田区香蜜湖社区文化中心二楼", "prof": "专家", "skill": "材料" },
+        { "account": "kangjingtong", "pwd": "kangjingtong", "face": "11", "name": "康靖童", "sex": "男", "ethnic": "撒拉", "birth": "1979-10-20", "origo": "山东省德州市平原县", "id": "37142619791020569X", "idimg": "img/person/sfz8.jpg", "phone": "17335577767", "mail": "kangjingtong@163.com", "qq": "2032406840", "wechat": "kangjingtong@163.com", "addr": "盐田区梅沙街道成坑71号", "prof": "队长", "skill": "安全" },
+        { "account": "luomuhui", "pwd": "luomuhui", "face": "4", "name": "骆慕卉", "sex": "女", "ethnic": "汉族", "birth": "1981-11-01", "origo": "四川省甘孜藏族自治州丹巴县", "id": "513323198111014123", "idimg": "img/person/sfz9.jpg", "phone": "18137796677", "mail": "luomuhui@21cn.com", "qq": "7010103230", "wechat": "luomuhui@21cn.com", "addr": "南山区白石洲下白石居委会综合楼101", "prof": "技工", "skill": "避雷" },
+        { "account": "yuwei", "pwd": "yuwei", "face": "12", "name": "俞伟", "sex": "男", "ethnic": "布朗", "birth": "1993-11-17", "origo": "湖北省黄冈市黄州区", "id": "421102199311177152", "idimg": "img/person/sfz10.jpg", "phone": "17788109926", "mail": "yuwei@sina.com", "qq": "4222710737", "wechat": "yuwei@sina.com", "addr": "盐田区盐田四村永安综合服务楼", "prof": "驻场", "skill": "工艺设计 工艺生产" },
+        { "account": "yuyouyi", "pwd": "yuyouyi", "face": "11", "name": "余友易", "sex": "女", "ethnic": "汉族", "birth": "1984-03-13", "origo": "广东省河源市紫金县", "id": "441621198403134606", "idimg": "img/person/sfz11.jpg", "phone": "17703715062", "mail": "yuyouyi@qq.com", "qq": "1052830332", "wechat": "yuyouyi@qq.com", "addr": "罗湖区南极路南华大厦附楼（广深宾馆后）", "prof": "风场", "skill": "工艺生产" },
+        { "account": "wujing", "pwd": "wujing", "face": "16", "name": "吴靖", "sex": "男", "ethnic": "毛南", "birth": "1980-12-18", "origo": "安徽省芜湖市马塘区", "id": "340203198012180219", "idimg": "img/person/sfz12.jpg", "phone": "18103832966", "mail": "wujing@126.com", "qq": "2302622800", "wechat": "wujing@126.com", "addr": "盐田区沙头角园林路25号", "prof": "调度", "skill": "材料" },
+        { "account": "yuyiyu", "pwd": "yuyiyu", "face": "12", "name": "庾依玉", "sex": "女", "ethnic": "汉族", "birth": "1978-03-20", "origo": "河北省保定市涿州市", "id": "130681197803207788", "idimg": "img/person/sfz13.jpg", "phone": "18135777725", "mail": "yuyiyu@163.com", "qq": "1148102577", "wechat": "yuyiyu@163.com", "addr": "宝安区九区创业一路", "prof": "总调", "skill": "避雷" },
+        { "account": "wankun", "pwd": "wankun", "face": "8", "name": "万坤", "sex": "男", "ethnic": "塔吉克", "birth": "1994-01-22", "origo": "福建省福州市平潭县", "id": "350128199401220171", "idimg": "img/person/sfz14.jpg", "phone": "17761666624", "mail": "wankun@21cn.com", "qq": "3018207006", "wechat": "wankun@21cn.com", "addr": "西乡宝民二路108号西乡街道办事综合楼1楼", "prof": "仓管", "skill": "工艺设计 材料" },
+        { "account": "chengxintong", "pwd": "chengxintong", "face": "19", "name": "程新桐", "sex": "女", "ethnic": "汉族", "birth": "1983-04-13", "origo": "广东省广州市", "id": "440113198304138080", "idimg": "img/person/sfz15.jpg", "phone": "17703715554", "mail": "chengxintong@sina.com", "qq": "5280128516", "wechat": "chengxintong@sina.com", "addr": "福永街道德丰路77号（福永医院旁边）", "prof": "仓主", "skill": "工艺生产" },
+        { "account": "aolingqin", "pwd": "aolingqin", "face": "8", "name": "敖玲沁", "sex": "女", "ethnic": "普米", "birth": "1980-02-02", "origo": "河北省张家口市尚义县", "id": "13072519800202346X", "idimg": "img/person/sfz1.jpg", "phone": "13333825099", "mail": "aolingqin@qq.com", "qq": "3058128109", "wechat": "aolingqin@qq.com", "addr": "宝安区新沙路488号107号房", "prof": "司机", "skill": "材料" },
+        { "account": "nengfeng", "pwd": "nengfeng", "face": "14", "name": "能丰", "sex": "女", "ethnic": "汉族", "birth": "1980-04-06", "origo": "新疆维吾尔自治区省直辖行政单位", "id": "659003198004060508", "idimg": "img/person/sfz2.jpg", "phone": "13333828199", "mail": "nengfeng@126.com", "qq": "4100418624", "wechat": "nengfeng@126.com", "addr": "宝安区松岗街道办事处3楼302室", "prof": "公众", "skill": "安全 避雷" },
+        { "account": "jilingyan", "pwd": "jilingyan", "face": "13", "name": "计翎妍", "sex": "女", "ethnic": "阿昌", "birth": "1989-10-09", "origo": "河北省保定市望都县", "id": "130631198910092446", "idimg": "img/person/sfz3.jpg", "phone": "18039111171", "mail": "jilingyan@189.cn", "qq": "3060014797", "wechat": "jilingyan@189.cn", "addr": "宝安区石岩街道前心大道国税3楼308室", "prof": "专家", "skill": "避雷" },
+        { "account": "yanlechen", "pwd": "yanlechen", "face": "15", "name": "阎乐晨", "sex": "男", "ethnic": "汉族", "birth": "1979-08-02", "origo": "西藏自治区日喀则地区岗巴县", "id": "542338197908020410", "idimg": "img/person/sfz4.jpg", "phone": "18003719110", "mail": "yanlechen@yeah.net", "qq": "1130429869", "wechat": "yanlechen@yeah.net", "addr": "罗湖区东晓路", "prof": "队长", "skill": "工艺设计" },
+        { "account": "lvcainan", "pwd": "lvcainan", "face": "11", "name": "吕采南", "sex": "女", "ethnic": "怒族", "birth": "1986-05-16", "origo": "贵州省铜仁地区思南县", "id": "522225198605161682", "idimg": "img/person/sfz5.jpg", "phone": "18103710926", "mail": "lvcainan@eyou.com", "qq": "1018121332", "wechat": "lvcainan@eyou.com", "addr": "罗湖区蛟湖路12号大院", "prof": "技工", "skill": "工艺生产" },
+        { "account": "duxinyan", "pwd": "duxinyan", "face": "12", "name": "堵昕燕", "sex": "女", "ethnic": "汉族", "birth": "1991-08-02", "origo": "湖南省岳阳市华容县", "id": "430623199108021902", "idimg": "img/person/sfz6.jpg", "phone": "18137666629", "mail": "duxinyan@hotmail.com", "qq": "3071222431", "wechat": "duxinyan@hotmail.com", "addr": "福田区景田东路景田市场二楼", "prof": "驻场", "skill": "材料 工艺设计 工艺生产" },
+        { "account": "xiaochuanjun", "pwd": "xiaochuanjun", "face": "1", "name": "萧传军", "sex": "男", "ethnic": "鄂温克", "birth": "1979-03-18", "origo": "内蒙古自治区", "id": "150500197903182637", "idimg": "img/person/sfz7.jpg", "phone": "17788177588", "mail": "xiaochuanjun@163.com", "qq": "1060328549", "wechat": "xiaochuanjun@163.com", "addr": "福田区园岭44栋105号", "prof": "风场", "skill": "安全" },
+        { "account": "dengjuan", "pwd": "dengjuan", "face": "0", "name": "邓娟", "sex": "女", "ethnic": "汉族", "birth": "1988-01-30", "origo": "河北省邢台市清河县", "id": "130534198801302524", "idimg": "img/person/sfz8.jpg", "phone": "17703810086", "mail": "dengjuan@21cn.com", "qq": "3312220962", "wechat": "dengjuan@21cn.com", "addr": "南山区南头常兴路11号", "prof": "调度", "skill": "避雷" },
+        { "account": "jiangzhizhuo", "pwd": "jiangzhizhuo", "face": "3", "name": "江智卓", "sex": "女", "ethnic": "京族", "birth": "1994-01-10", "origo": "甘肃省甘南藏族自治州碌曲县", "id": "623026199401105464", "idimg": "img/person/sfz9.jpg", "phone": "17335752222", "mail": "jiangzhizhuo@sina.com", "qq": "1010685", "wechat": "jiangzhizhuo@sina.com", "addr": "南山区西丽留仙大道", "prof": "总调", "skill": "工艺设计" },
+        { "account": "bairongying", "pwd": "bairongying", "face": "9", "name": "柏肜瑛", "sex": "男", "ethnic": "汉族", "birth": "1975-01-23", "origo": "贵州省黔南布依族苗族自治州", "id": "522700197501237297", "idimg": "img/person/sfz10.jpg", "phone": "18037336699", "mail": "bairongying@qq.com", "qq": "2018293", "wechat": "bairongying@qq.com", "addr": "罗湖区罗沙公路经二路1号（罗湖体育局对面）", "prof": "仓管", "skill": "工艺生产" },
+        { "account": "shuichengri", "pwd": "shuichengri", "face": "11", "name": "水成日", "sex": "男", "ethnic": "基诺", "birth": "1994-05-16", "origo": "安徽省滁州市定远县", "id": "341125199405169633", "idimg": "img/person/sfz11.jpg", "phone": "17788109930", "mail": "shuichengri@126.com", "qq": "4030786", "wechat": "shuichengri@126.com", "addr": "罗湖区莲塘国威路松源大厦一楼", "prof": "仓主", "skill": "材料" },
+        { "account": "zhouhongtu", "pwd": "zhouhongtu", "face": "18", "name": "周宏图", "sex": "男", "ethnic": "汉族", "birth": "1981-01-01", "origo": "湖南省长沙市", "id": "43010019810101923X", "idimg": "img/person/sfz12.jpg", "phone": "17703716705", "mail": "zhouhongtu@126.com", "qq": "1092284", "wechat": "zhouhongtu@126.com", "addr": "福田区南园街道松岭路22号", "prof": "总备", "skill": "安全" },
+        { "account": "qichining", "pwd": "qichining", "face": "2", "name": "齐痴凝", "sex": "女", "ethnic": "德昂", "birth": "1979-07-12", "origo": "四川省绵阳市平武县", "id": "510727197907128767", "idimg": "img/person/sfz13.jpg", "phone": "18037334789", "mail": "qichining@189.cn", "qq": "6012383", "wechat": "qichining@189.cn", "addr": "龙岗区葵涌街道葵兴东路12号", "prof": "公众", "skill": "避雷" },
+        { "account": "haozitong", "pwd": "haozitong", "face": "0", "name": "郝紫瞳", "sex": "女", "ethnic": "汉族", "birth": "1986-04-23", "origo": "青海省玉树藏族自治州杂多县", "id": "632722198604237220", "idimg": "img/person/sfz14.jpg", "phone": "18037373746", "mail": "haozitong@yeah.net", "qq": "5080206870", "wechat": "haozitong@yeah.net", "addr": "深圳市罗湖区翠竹路2028号翠竹大厦", "prof": "专家", "skill": "工艺设计" },
+        { "account": "yunchen", "pwd": "yunchen", "face": "5", "name": "云尘", "sex": "男", "ethnic": "保安", "birth": "1990-02-15", "origo": "江苏省苏州市", "id": "320500199002151551", "idimg": "img/person/sfz15.jpg", "phone": "13383855554", "mail": "yunchen@eyou.com", "qq": "1130022355", "wechat": "13383855554", "addr": "罗湖区宝岗路笋岗大厦5楼", "prof": "队长", "skill": "工艺生产" },
+        { "account": "chuyixuan", "pwd": "chuyixuan", "face": "1", "name": "储艺璇", "sex": "女", "ethnic": "汉族", "birth": "1988-09-04", "origo": "广东省清远市连南瑶族自治县", "id": "441826198809046203", "idimg": "img/person/sfz1.jpg", "phone": "13082525268", "mail": "chuyixuan@hotmail.com", "qq": "1030017408", "wechat": "13082525268", "addr": "深圳市罗湖区翠山路国防大厦", "prof": "技工", "skill": "材料" },
+        { "account": "ronghailong", "pwd": "ronghailong", "face": "4", "name": "荣海龙", "sex": "女", "ethnic": "俄罗斯", "birth": "1983-04-02", "origo": "江西省鹰潭市余江县", "id": "360622198304021564", "idimg": "img/person/sfz2.jpg", "phone": "15220202026", "mail": "ronghailong@163.com", "qq": "3142679", "wechat": "15220202026", "addr": "深圳市罗湖区泥岗西路1046号鸿颖大厦首层", "prof": "驻场", "skill": "安全" },
+        { "account": "buweicheng", "pwd": "buweicheng", "face": "13", "name": "卜伟成", "sex": "男", "ethnic": "汉族", "birth": "1975-03-21", "origo": "江苏省常州市", "id": "320412197503218639", "idimg": "img/person/sfz3.jpg", "phone": "13001097739", "mail": "buweicheng@21cn.com", "qq": "5332381", "wechat": "13001097739", "addr": "福田区香蜜湖社区文化中心二楼", "prof": "风场", "skill": "避雷" },
+        { "account": "manlingyi", "pwd": "manlingyi", "face": "7", "name": "满玲漪", "sex": "女", "ethnic": "裕固", "birth": "1977-08-09", "origo": "河北省沧州市南皮县", "id": "130927197708097283", "idimg": "img/person/sfz4.jpg", "phone": "15640852345", "mail": "manlingyi@sina.com", "qq": "4110293", "wechat": "15640852345", "addr": "盐田区梅沙街道成坑71号", "prof": "调度", "skill": "工艺设计 工艺生产" },
+        { "account": "malingchun", "pwd": "malingchun", "face": "3", "name": "马凌春", "sex": "女", "ethnic": "汉族", "birth": "1979-04-09", "origo": "广西壮族自治区", "id": "451202197904090927", "idimg": "img/person/sfz5.jpg", "phone": "17746599939", "mail": "malingchun@qq.com", "qq": "4162184", "wechat": "17746599939", "addr": "南山区白石洲下白石居委会综合楼101", "prof": "总调", "skill": "工艺生产" },
+        { "account": "fuwei", "pwd": "fuwei", "face": "11", "name": "傅微", "sex": "女", "ethnic": "乌孜别", "birth": "1994-08-20", "origo": "四川省广元市市中区", "id": "510802199408201381", "idimg": "img/person/sfz6.jpg", "phone": "13686860858", "mail": "fuwei@126.com", "qq": "3020380", "wechat": "13686860858", "addr": "盐田区盐田四村永安综合服务楼", "prof": "仓管", "skill": "材料" },
+        { "account": "lingzhongji", "pwd": "lingzhongji", "face": "19", "name": "凌钟吉", "sex": "男", "ethnic": "汉族", "birth": "1986-01-14", "origo": "新疆维吾尔自治区博尔塔拉蒙古自治州精河县", "id": "652722198601141710", "idimg": "img/person/sfz7.jpg", "phone": "18636751234", "mail": "lingzhongji@yeah.net", "qq": "1068178", "wechat": "18636751234", "addr": "罗湖区南极路南华大厦附楼（广深宾馆后）", "prof": "仓主", "skill": "避雷" },
+        { "account": "buzixian", "pwd": "buzixian", "face": "14", "name": "步孜娴", "sex": "男", "ethnic": "门巴", "birth": "1992-01-01", "origo": "江苏省南通市市辖区", "id": "320601199201011350", "idimg": "img/person/sfz8.jpg", "phone": "15208167567", "mail": "buzixian@eyou.com", "qq": "35012894", "wechat": "15208167567", "addr": "盐田区沙头角园林路25号", "prof": "总备", "skill": "工艺设计 材料" },
+        { "account": "houxingjia", "pwd": "houxingjia", "face": "17", "name": "侯星嘉", "sex": "男", "ethnic": "汉族", "birth": "1984-08-26", "origo": "四川省成都市市辖区", "id": "510101198408267672", "idimg": "img/person/sfz9.jpg", "phone": "15699999927", "mail": "houxingjia@hotmail.com", "qq": "5101011984", "wechat": "15699999927", "addr": "宝安区九区创业一路", "prof": "公众", "skill": "工艺生产" },
+        { "account": "qirenan", "pwd": "qirenan", "face": "13", "name": "齐任安", "sex": "男", "ethnic": "鄂伦春", "birth": "1991-03-08", "origo": "新疆维吾尔自治区和田地区和田县", "id": "653221199103089894", "idimg": "img/person/sfz10.jpg", "phone": "15699996944", "mail": "qirenan@qq.com", "qq": "6532211991", "wechat": "15699996944", "addr": "西乡宝民二路108号西乡街道办事综合楼1楼", "prof": "专家", "skill": "材料" },
+        { "account": "baixin", "pwd": "baixin", "face": "2", "name": "柏鑫", "sex": "男", "ethnic": "汉族", "birth": "1988-10-25", "origo": "湖北省孝感市汉川市", "id": "42098419881025483X", "idimg": "img/person/sfz11.jpg", "phone": "18810000908", "mail": "baixin@126.com", "qq": "4209841988", "wechat": "18810000908", "addr": "福永街道德丰路77号（福永医院旁边）", "prof": "队长", "skill": "安全 避雷" },
+        { "account": "raoyidan", "pwd": "raoyidan", "face": "19", "name": "饶忆丹", "sex": "女", "ethnic": "独龙", "birth": "1975-01-07", "origo": "广东省河源市紫金县", "id": "441621197501079386", "idimg": "img/person/sfz12.jpg", "phone": "13821825399", "mail": "raoyidan@189.cn", "qq": "4416211975", "wechat": "13821825399", "addr": "宝安区新沙路488号107号房", "prof": "技工", "skill": "避雷" },
+        { "account": "sukezhu", "pwd": "sukezhu", "face": "9", "name": "宿柯朱", "sex": "男", "ethnic": "汉族", "birth": "1980-11-20", "origo": "安徽省淮南市田家庵区", "id": "340403198011200733", "idimg": "img/person/sfz13.jpg", "phone": "18088676767", "mail": "sukezhu@yeah.net", "qq": "3404031980", "wechat": "18088676767", "addr": "宝安区松岗街道办事处3楼302室", "prof": "驻场", "skill": "工艺设计" },
+        { "account": "mengguangbin", "pwd": "mengguangbin", "face": "7", "name": "孟广斌", "sex": "男", "ethnic": "赫哲", "birth": "1990-09-05", "origo": "西藏自治区日喀则地区吉隆县", "id": "542335199009057797", "idimg": "img/person/sfz14.jpg", "phone": "13821138505", "mail": "mengguangbin@eyou.com", "qq": "5423351990", "wechat": "13821138505", "addr": "宝安区石岩街道前心大道国税3楼308室", "prof": "风场", "skill": "工艺生产" },
+        { "account": "anyue", "pwd": "anyue", "face": "0", "name": "安悦", "sex": "男", "ethnic": "汉族", "birth": "1989-10-21", "origo": "重庆市县荣昌县", "id": "500226198910215190", "idimg": "img/person/sfz15.jpg", "phone": "18600000346", "mail": "anyue@hotmail.com", "qq": "5002261989", "wechat": "18600000346", "addr": "罗湖区东晓路", "prof": "调度", "skill": "材料 工艺设计 工艺生产" },
+        { "account": "lubaitao", "pwd": "lubaitao", "face": "3", "name": "鲁白桃", "sex": "女", "ethnic": "高山", "birth": "1977-08-16", "origo": "江苏省连云港市连云区", "id": "320703197708165665", "idimg": "img/person/sfz1.jpg", "phone": "15699999974", "mail": "lubaitao@163.com", "qq": "3207031977", "wechat": "15699999974", "addr": "罗湖区蛟湖路12号大院", "prof": "总调", "skill": "安全" },
+        { "account": "pingyong", "pwd": "pingyong", "face": "17", "name": "平勇", "sex": "男", "ethnic": "汉族", "birth": "1980-01-15", "origo": "四川省凉山彝族自治州木里藏族自治县", "id": "513422198001159451", "idimg": "img/person/sfz2.jpg", "phone": "15122391000", "mail": "pingyong@21cn.com", "qq": "5134221980", "wechat": "15122391000", "addr": "福田区景田东路景田市场二楼", "prof": "仓管", "skill": "避雷" },
+    ]
 };
 
 var db_addition = [

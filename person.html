@@ -58,7 +58,7 @@
             display:inline-block;
             padding:5px 10px;
             margin:0px 5px;
-            width:150px;
+            width:200px;
         }
 
         .d_detail {
@@ -124,8 +124,9 @@
     </section>
 
     <div class="" style="overflow-y: scroll; overflow-x: scroll; width: 100px; margin: 10px; flex-shrink: 2; flex-grow: 1; ">
-        <section id="d_baseinf" class="d_panel d_detail">
+        <section class="d_panel d_detail">
             <header class="heading">基本信息<div style="float: right;"><a href="#">编辑</a></div></header>
+            <div id="d_baseinf" style="padding: 5px; "></div>
         </section>
         <section id="d_certiflist" class="d_panel d_detail">
             <header class="heading">证件信息<div style="float: right;"><a href="#">编辑</a></div></header>
@@ -140,38 +141,6 @@
             <header class="heading">发表作品<div style="float: right;"><a href="#">编辑</a></div></header>
         </section>
     </div>
-
-
-    <script id="tpl_table_item" type="text/template">
-        {% for (var i in it) { %}
-        <tr><td>{%=it[i].name%}</td><td>{%=it[i].ID%}</td><td>{%=it[i].sex%}</td><td>{%=it[i].age%}</td>
-        <td>{%=it[i].phone%}</td><td>{%=it[i].skill%}</td><td>{%=it[i].addr%}</td></tr>
-        {% } %}
-    </script>
-
-    <script id="tpl_baseinf" type="text/template">
-        <header class="heading">基本信息<div style="float: right;"><a href="#">编辑</a></div></header>
-        <div class="d_rAngle d_dImage" style="width: 216px; height: 140px; float: left;">
-            <img style="width: 216px; height: 140px;" src="{%=it.idimg%}" />
-        </div>
-        <div class="d_data_item"><label>帐号</label><div>{%=it.account%}</div></div>
-        <div class="d_data_item"><label>密码</label><div style="text-align:right;"><a>点击重置密码</a></div></div>
-        <div class="d_data_item"><label>姓名</label><div>{%=it.name%}</div></div>
-        <div class="d_data_item"><label>性别</label><div>{%=it.sex%}</div></div>
-        <div class="d_data_item"><label>民族</label><div>{%=it.ethnic%}</div></div>
-        <div class="d_data_item"><label>出生年月</label><div>{%=it.birth%}</div></div>
-        <div class="d_data_item"><label>住址</label><div style="width:404px;">{%=it.origo%}</div></div>
-        <div class="d_data_item"><label>身份证号</label><div>{%=it.id%}</div></div>
-        <div class="d_data_item"><label>联系电话</label><div>{%=it.phone%}</div></div>
-        <div class="d_data_item"><label>邮箱</label><div>{%=it.mail%}</div></div>
-        <div class="d_data_item"><label>QQ号码</label><div>{%=it.qq%}</div></div>
-        <div class="d_data_item"><label>微信号</label><div>{%=it.wechat%}</div></div>
-        <div class="d_data_item"><label>居住地址</label><div style="width:404px;">{%=it.addr%}</div></div>
-        <div class="d_data_item"><label>角色</label><div>{%=it.prof%}</div></div>
-        {% if (it.prof=="专家") { %}
-        <div class="d_data_item"><label>领域</label><div>{%=it.skill%}</div></div>
-        {% } %}
-    </script>
 
     <script id="tpl_certiflist" type="text/template">
         <header class="heading">证件信息<div style="float: right;"><a href="#">编辑</a></div></header>
@@ -236,21 +205,33 @@
 
     <script type="text/javascript">
         var url = decodeURI(window.location.search);
-        var act = url.substring(url.lastIndexOf('=') + 1, url.length);
-        
+        function GetParam(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+            var r = url.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+        var act = GetParam("type");
+        var depart = GetParam("depart");
+        if (depart == "db_devwh_list") depart = db_devwh_list;
+        else depart = { data: [{ name: depart }]};
+
         var userlist = {
             fields: [
+            { "title": "所在单位", "name": "depart", twidth: "70px" },
+            { "title": "角色", "name": "prof", twidth: "40px"},
+            { "title": "联系电话", "name": "phone", twidth: "100px", tstyle: "word-wrap:break-all;" },
             { "title": "姓名", "name": "name", twidth: "50px" },
             { "title": "性别", "name": "sex", twidth: "36px" },
             { "title": "出生年月", "name": "birth", twidth: "100px" },
             { "title": "住址", "name": "origo" },
             { "title": "身份证号", "name": "id", twidth: "100px", tstyle: "word-wrap:break-all;" },
-            { "title": "联系电话", "name": "phone", twidth: "100px", tstyle: "word-wrap:break-all;" },
-            { "title": "居住地址", "name": "addr" }
+            { "title": "居住地址", "name": "addr", ftype:"bigtext", }
             ],
             data: getsubarray(db_userlist.data, "prof", act),
-            addition:rnditem(db_addition),
         };
+        for (var i in userlist.data) {
+            userlist.data[i].depart = rnditem(depart.data).name;
+        }
         $("#d_table_item").html(RenderTable(userlist));
     </script>
 
@@ -267,28 +248,21 @@
             currow = $(this).index();
             $(this).children().css("background-color", "#00f0f5");
 
-            for (i in userlist.data) {
-                if (userlist.data[i].name == $(this).children(":first-child").text()) {
-                    var tpl_baseinf = doT.template(document.getElementById('tpl_baseinf').innerHTML);
-                    $("#d_baseinf").html(tpl_baseinf(userlist.data[i]));
+            $("#d_baseinf").html(RenderForm(userlist,currow));
 
-                    var idx = rndrange(0, db_addition.length);
+            var idx = rndrange(0, db_addition.length);
 
-                    var tpl_certiflist = doT.template(document.getElementById('tpl_certiflist').innerHTML);
-                    $("#d_certiflist").html(tpl_certiflist(db_addition[idx].certif));
+            var tpl_certiflist = doT.template(document.getElementById('tpl_certiflist').innerHTML);
+            $("#d_certiflist").html(tpl_certiflist(db_addition[idx].certif));
 
-                    var tpl_edulist = doT.template(document.getElementById('tpl_edulist').innerHTML);
-                    $("#d_edulist").html(tpl_edulist(db_addition[idx].edu));
+            var tpl_edulist = doT.template(document.getElementById('tpl_edulist').innerHTML);
+            $("#d_edulist").html(tpl_edulist(db_addition[idx].edu));
 
-                    var tpl_employlist = doT.template(document.getElementById('tpl_employlist').innerHTML);
-                    $("#d_employlist").html(tpl_employlist(db_addition[idx].employ));
+            var tpl_employlist = doT.template(document.getElementById('tpl_employlist').innerHTML);
+            $("#d_employlist").html(tpl_employlist(db_addition[idx].employ));
 
-                    var tpl_opuslist = doT.template(document.getElementById('tpl_opuslist').innerHTML);
-                    $("#d_opuslist").html(tpl_opuslist(db_addition[idx].opus));
-
-                    break;
-                }
-            }
+            var tpl_opuslist = doT.template(document.getElementById('tpl_opuslist').innerHTML);
+            $("#d_opuslist").html(tpl_opuslist(db_addition[idx].opus));
         });
     </script>
 </body>

@@ -32,14 +32,56 @@
     padding: 5px;
 }
 
+/*案件信息中，阶段样式定义
+<details open class="x2Board">
+    <summary>标题</summary> 
+    <div class="xTagRow">  除标题外，每个div一行，可以有多行。每个div行是一个flex
+        <label>每行左侧的标签</label>
+        <div>自定义内容，可以有多个</div>
+    </div>
+*/
+.x2Board {
+    margin-bottom:10px;
+}
+.x2Board>summary {
+    padding: 5px 10px;
+    width: 100%; 
+    background: #f0f0f0;
+    border-bottom: 1px solid #dddddd;
+    border-top: 1px solid #dddddd;
+}
+.x2Board>div {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+}
+.x2Board>div>label {
+    flex-shrink: 0;
+    flex-grow: 0;
+    margin:5px;
+    margin-left:10px;
+    width:56px;
+}
+.x2Board>div>div {
+    flex-grow: 1;
+    margin: 5px;
+    padding: 5px 10px;
+}
+.x2Board>div>.x2BItem {
+    margin:5px;
+    border: 1px solid #dddddd;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+
 /*右边带小x号的小框框*/
 .xNail2 {
-    padding:5px;
 }
 .xNail2>div {
     border-radius: 4px;
     border: 1px solid #dddddd;
-    padding:3px 20px 3px 3px;
+    padding:3px 25px 3px 8px;
     display:inline-block;
     position: relative;
     margin:3px;
@@ -48,24 +90,17 @@
     content:"x";
     position: absolute;
     top: 3px;
-    right: 5px;
+    right: 10px;
 }
 
 /*右边带确认的小框框*/
 .signbox {
     border-radius: 4px;
     border: 1px solid #dddddd;
-    padding:3px 40px 3px 3px;
+    padding:1px 5px 1px 20px;
     display:inline-block;
     position: relative;
-    min-width: 160px; 
     margin:3px 5px;
-}
-.signbox:after {
-    content:"确认";
-    position: absolute;
-    top: 3px;
-    right: 5px;
 }
 
 /*表单上带文字标签的元素*/

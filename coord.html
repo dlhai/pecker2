@@ -242,6 +242,45 @@
             border-color: #66afe9;
             box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
         }
+
+        /*背景带图章的签字框*/
+        .signbox2 {
+            display: inline-block;
+            position: relative;
+            background-image: url(img/yin/c_200.png);
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            padding: 2px 5px 5px 5px;
+            font-weight: 700;
+            font-size: 16px;
+            width: 60px;
+            height: 26px;
+        }
+
+        /*单据标签，左边带4字状态显示，右边有小x号*/
+        .x2Vouch {
+            border-radius: 4px;
+            border: 1px solid #dddddd;
+            padding: 3px 25px 3px 68px;
+            display: inline-block;
+            position: relative;
+            margin: 3px;
+        }
+        .x2Vouch::before {
+            content: "状态显示";
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            padding:3px 4px;
+            border-right:1px solid #dddddd;
+        }
+        .x2Vouch::after {
+            content: "x";
+            position: absolute;
+            top: 3px;
+            right: 10px;
+        }
+
     </style> 
 </head>
 <body class="xFc_srow" style="padding:5px;">
@@ -274,63 +313,79 @@
                     </div>
                 </div>
             </details>             
-            <details open class="xBoard">
-                <summary>准备</summary>
-                <div class="xTagRow" style="margin-top:5px;"><label>专家组</label>
-                    <div id="prepare_expert" class="xBItem xNail2">　</div>
+            <details open class="x2Board"><summary>准备</summary>
+                <div style="margin-top:5px;"><label>专家组</label>
+                    <div id="prepare_expert" class="x2BItem">　</div>
                 </div>
-                <div class="xTagRow"><label>评估报告</label>
-                    <div id="prepare_report" style="position: relative;"><div class="xrAngle xDoc" style="margin: 5px; padding: 5px 10px;">一次评估报告</div></div>
-                    <div id="prepare_report2" style="position: relative;"><div class="xrAngle xDoc" style="margin: 5px; padding: 5px 10px;">二次评估报告</div></div>
-                </div>
-                <div class="xTagRow"><label>维修方案</label>
-                    <div>
-                        <div id="prepare_scheme" style="min-width: 280px; position: relative;"><div class="xrAngle xDoc" style="margin: 5px; padding: 5px 10px;">维修方案</div></div>
-                        <div id="prepare_windermastersign" class="signbox">【风场】　　　</div>
-                        <div id="prepare_winderclerksign" class="signbox">【驻场】　　　</div>
-                        <div id="prepare_coordmastersign" class="signbox">【总调】　　　</div>
+                <div><label>评估报告</label>
+                    <div id="prepare_report" class="x3Doc xFi_grow" style="padding:0px;">
+                        <div class="x3Doc-handle">XXX评估报告 李四鬼 2017-05-31</div><div class="x3Doc-upload"><a href="#">上传</a></div>
+                        <div class="x3Doc-menu">
+                            <div><a>XXX维修方案 李四a鬼 2017-05-31</a></div>
+                            <div><a>XXX维修方案 李四b鬼 2017-05-31</a></div>
+                            <div><a>XXX维修方案 李四c鬼 2017-05-31</a>sdffffffffffffffffffffffffffffff</div>
+                        </div>
+                    </div>
+                    <div id="prepare_report2" class="x3Doc" style="padding:0px;">
+                        <div class="x3Doc-handle">XXX评估报告 李四鬼 2017-05-31</div><div class="x3Doc-upload"><a href="#">上传</a></div>
+                        <div class="x3Doc-menu">
+                            <div><a>XXX维修方案 李四a鬼 2017-05-31</a></div>
+                            <div><a>XXX维修方案 李四b鬼 2017-05-31</a></div>
+                            <div><a>XXX维修方案 李四c鬼 2017-05-31<span>sdffffffffffffffffffffffffffffff</span></a></div>
+                        </div>
                     </div>
                 </div>
-                <div class="xTagRow" ><label>维修队</label>
-                    <div id="repair_team" class="xFi_grow xrAngle xNail2" style="margin: 5px; padding:5px 10px;">　</div>
+                <div><label>维修方案</label>
+                    <div id="prepare_scheme" class="x3Doc" style="padding: 0px; width: 200px;">
+                        <div class="x3Doc-handle">XXX维修方案 李四鬼 2017-05-31</div><div class="x3Doc-upload"><a href="#">上传</a></div>
+                        <div class="x3Doc-menu">
+                            <div><a>XXX维修方案 李四a鬼 2017-05-31</a></div>
+                            <div><a>XXX维修方案 李四b鬼 2017-05-31</a></div>
+                            <div><a>XXX维修方案 李四c鬼 2017-05-31</a>sdffffffffffffffffffffffffffffff</div>
+                        </div>
+                    </div>
+                    <div class="xrAngle" style="width: 200px;padding:2px 5px;">
+                        <div id="prepare_windermastersign" class="signbox2" style="background-image: url(img/yin/C_200_2.png)">签字者</div>
+                        <div id="prepare_winderclerksign" class="signbox2" style="background-image: url(img/yin/C_47_2.png)">签字者</div>
+                        <div id="prepare_coordmastersign" class="signbox2" style="background-image: url(img/yin/C_123_2.png)">签字者</div>
+                        <div id="prepare_sign" style="float:right;margin-top:3px;"><a href="#">我要签字</a></div>
+                    </div>
                 </div>
-                <div class="xTagRow" >
-                    <label>维修用料</label>
-                    <div id="repair_mat" class="xFi_grow xrAngle xNail2" style="margin: 5px; padding: 5px 10px;">　</div>
+                <div><label>维修队</label>
+                    <div id="repair_team" class="xFi_grow xrAngle ">
+                        <div id="prepare_sign" style="float:right;"><a href="#">添加</a></div>
+                    </div>
                 </div>
-                <div class="xTagRow" >
-                    <label>维修设备</label>
-                    <div id="repair_dev" class="xFi_grow xrAngle xNail2" style="margin: 5px; padding: 5px 10px;">　</div>
+                <div><label>维修用料</label>
+                    <div id="repair_mat" class="xFi_grow xrAngle">　</div>
+                </div>
+                <div><label>维修设备</label>
+                    <div id="repair_dev" class="xFi_grow xrAngle">　</div>
                 </div>
             </details>             
-
             <details open class="xBoard">
                 <summary>维修<div style="float: right;"><a href="#">添加</a></div></summary>
                 <div id="repair_log" style="padding:5px;">　</div>
             </details>             
-            <details  open class="xBoard">
+            <details  open class="x2Board">
                 <summary>完工</summary>
-                <div class="xTagRow" style="margin-top:5px;"><label>维修报告</label>
-                    <div id="complete_report" style="min-width: 280px; position: relative;display:inline-block;">
-                        <div class="xrAngle xDoc" style="margin: 5px; padding: 5px 10px;">维修报告</div></div>
-                    <div id="complete_repairteamldrsign" class="signbox">【队长】　　　</div>
-                    <div id="complete_winderclerksign" class="signbox">【驻场】　　　</div>
-                </div>
-                <div>
-                    <div class="xFc_srow" style="padding: 10px 0px 0px 10px; align-items: baseline;">
-                        <div class="xFi_fixed" style="margin-right:10px;width:56px;">维修方案</div>
-                        <div id="complete_report2" class="xFi_grow" style="position: relative;">
-                            <div class="xrAngle xDoc" style="margin-right: 10px; padding: 5px 10px;">XXX维修方案 李四鬼 2017-05-31</div>
-                            <div id="abc" class="xMenu">
-                                <div><a>XXX维修方案 李四鬼 2017-05-31</a></div>
-                                <div><a>XXX维修方案 李四鬼 2017-05-31</a></div>
-                                <div><a>XXX维修方案 李四鬼 2017-05-31</a></div>
-                            </div>
+                <div style="margin-top:5px;">
+                    <label>维修报告</label>
+                    <div id="complete_report" class="x3Doc" style="padding: 0px; width: 200px;">
+                        <div class="x3Doc-handle">XXX维修方案 李四鬼 2017-05-31</div><div class="x3Doc-upload"><a href="#">上传</a></div>
+                        <div class="x3Doc-menu">
+                            <div><a>XXX维修方案 李四a鬼 2017-05-31</a></div>
+                            <div><a>XXX维修方案 李四b鬼 2017-05-31</a></div>
+                            <div><a>XXX维修方案 李四c鬼 2017-05-31</a>sdffffffffffffffffffffffffffffff</div>
                         </div>
-                        <div id="complete_winderclerksign2" class="xrAngle" style="margin-right: 10px; padding: 5px 10px; display: inline-block">驻厂孙二狗已确认</div>
-                        <div id="complete_repairteamldrsign2" class="xrAngle" style="margin-right: 10px; padding: 5px 10px; display: inline-block">队长赵大丑已确认</div>
+                    </div>
+                    <div class="xrAngle" style="width: 200px;padding:2px 5px;">
+                        <div id="complete_repairteamldrsign" class="signbox2" style="background-image: url(img/yin/C_98_2.png)">签字者</div>
+                        <div id="complete_winderclerksign" class="signbox2" style="background-image: url(img/yin/C_47_2.png)">签字者</div>
+                        <div id="prepare_sign" style="float:right;margin-top:3px;"><a href="#">我要签字</a></div>
                     </div>
                 </div>
+
             </details>             
         </div>
     </section>
@@ -365,13 +420,48 @@
     {% } %}
 </script>
 <script id="tpl_doc" type="text/template">
-        <div class="xrAngle xDoc" style="margin: 5px; padding: 5px 60px 5px 10px;">{%=it[0]%}</div>
-        <div id="abc" class="xMenu">
-            {% for (var i = 0; i < it.length; i++) { %}
-            <div><a>{%=it[i]%}</a></div>
-            {% } %}
+        <div class="x3Doc-handle">{%=it[0].name%} {%=it[0].auther.name%} {%=it[0].stime%}</div>
+        <div class="x3Doc-upload"><a href="#">上传</a></div>
+        <div class="x3Doc-menu">
+        {%~it:val:idx%}
+            <div><a>{%=val.name%} {%=val.auther.name%} {%=val.stime%}</a></div>
+        {%~%}
         </div>
 </script>
+
+<script id="tpl_scheme" type="text/template">
+    <div class="x3Doc-handle">{%=it[0].name%} {%=it[0].auther.name%} {%=it[0].stime%}</div>
+    <div class="x3Doc-upload"><a href="#">上传</a></div>
+    <div class="x3Doc-menu">
+        {%~it:val:idx%}
+        <div>
+            <a>
+                {%=val.name%} {%=val.auther.name%} {%=val.stime%}
+                {%?troublelist[cursel-1].prepare_winderclerksign.where == idx %} <img width="48px" height="20px" src="img/yin/C_47.png"> {%?%}
+                {%?troublelist[cursel-1].prepare_windermastersign.where == idx %} <img width="48px" height="20px" src="img/yin/C_200.png"> {%?%}
+                {%?troublelist[cursel-1].prepare_coordmastersign.where == idx %} <img width="48px" height="20px" src="img/yin/C_123.png"> {%?%}
+            </a>
+        </div>
+        {%~%}
+    </div>
+</script>
+
+<script id="tpl_repairreport" type="text/template">
+    <div class="x3Doc-handle">{%=it[0].name%} {%=it[0].auther.name%} {%=it[0].stime%}</div>
+    <div class="x3Doc-upload"><a href="#">上传</a></div>
+    <div class="x3Doc-menu">
+        {%~it:val:idx%}
+        <div>
+            <a>
+                {%=val.name%} {%=val.auther.name%} {%=val.stime%}
+                {%?troublelist[cursel-1].complete_winderclerksign.where == idx %} <img width="48px" height="20px" src="img/yin/C_47.png"> {%?%}
+                {%?troublelist[cursel-1].complete_repairteamldrsign.where == idx %} <img width="48px" height="20px" src="img/yin/C_98.png"> {%?%}
+            </a>
+        </div>
+        {%~%}
+    </div>
+</script>
+
 
 <script id="tpl_user" type="text/template">
         <div class="SmallHead" style="display: inline-block"><img src="img/face/face{%=it.face%}.jpg"/>【{%=it.prof%}】{%=it.name%}</div>
@@ -379,7 +469,7 @@
 
 <script id="tpl_users" type="text/template">
     {% for (var i = 0; i < it.length; i++) { %}
-        <div class="SmallHead" style="display: inline-block"><img src="img/face/face{%=it[i].face%}.jpg"/>【{%=it[i].prof%}】{%=it[i].name%}</div>
+        <div class="SmallHead xNail2" style="display: inline-block"><img src="img/face/face{%=it[i].face%}.jpg"/>【{%=it[i].prof%}】{%=it[i].name%}</div>
     {% } %}
 </script>
 
@@ -396,8 +486,9 @@
 </script>
 
 <script id="tpl_nails" type="text/template">
+    <div style="float:right;"><a href="#">添加</a></div>
     {% for (var i = 0; i < it.length; i++) { %}
-        <div>{%=it[i]%}</div>
+        <div class="x2Vouch">{%=it[i]%}</div>
     {% } %}
 </script>
 
@@ -467,7 +558,6 @@
     {% }%}
     {% }%}
 </script>
-
 <script type="text/javascript">
     var tpl_doc = doT.template(document.getElementById('tpl_doc').innerHTML);
     var tpl_user = doT.template(document.getElementById('tpl_user').innerHTML);
@@ -477,6 +567,9 @@
     var tpl_repair_log = doT.template(document.getElementById('tpl_repair_log2').innerHTML);
     var tpl_userlist = doT.template(document.getElementById('tpl_userlist').innerHTML);
     var tpl_speech = doT.template(document.getElementById('tpl_speech').innerHTML);
+    var tpl_repairreport = doT.template(document.getElementById('tpl_repairreport').innerHTML);
+    var tpl_scheme = doT.template(document.getElementById('tpl_scheme').innerHTML);
+    
 
 
     var cursel = -1;
@@ -487,21 +580,22 @@
         troublelist = rndsubarray(db_troublelist.data, 3, 10);
         for (var i = 0; i < troublelist.length; i++)
         {
-            teamldr = rnditem(db_userlist.data, "prof", "队长");
+            var coord = rnditem(db_userlist.data, "prof", "调度");
+            var teamldr = rnditem(db_userlist.data, "prof", "队长");
             troublelist[i].imgs = rndsubarray(db_attach.winderimg, 3, 5);
             troublelist[i].prepare_expert = rndsubarray( db_userlist.data, 3, 5, "prof", "专家");
-            troublelist[i].prepare_report = rndsubarray( db_attach.assess, 3, 5);
-            troublelist[i].prepare_report2 = rndsubarray(db_attach.assess2,3,5);
-            troublelist[i].prepare_scheme = rndsubarray(db_attach.scheme,3,5);
-            troublelist[i].prepare_windermastersign = rnditem(db_userlist.data, "prof", "风场" );
-            troublelist[i].prepare_winderclerksign = rnditem(db_userlist.data, "prof", "驻场" );
-            troublelist[i].prepare_coordmastersign = rnditem(db_userlist.data, "prof", "总调");
+            troublelist[i].prepare_report = GenDoc( "评估报告", troublelist[i].prepare_expert, 3, 6);
+            troublelist[i].prepare_report2 = GenDoc( "二评报告", troublelist[i].prepare_expert, 3, 6);
+            troublelist[i].prepare_scheme = GenDoc( "维修方案", [coord], 3, 6);
+            troublelist[i].prepare_windermastersign = { who: rnditem(db_userlist.data, "prof", "风场"), where: rndrange(0, troublelist[i].prepare_scheme.length) };
+            troublelist[i].prepare_winderclerksign = { who: rnditem(db_userlist.data, "prof", "驻场" ), where: rndrange(0, troublelist[i].prepare_scheme.length) };
+            troublelist[i].prepare_coordmastersign = { who: rnditem(db_userlist.data, "prof", "总调"), where: rndrange(0, troublelist[i].prepare_scheme.length) };
             troublelist[i].repair_team = [teamldr].concat( rndsubarray(db_userlist.data,3,5,"prof", "技工"));
             troublelist[i].repair_mat = rndsubarray(db_attach.matout,2,4);
-            troublelist[i].repair_dev = rndsubarray(db_attach.devuse,2,4);
-            troublelist[i].complete_winderclerksign = troublelist[i].prepare_winderclerksign;
-            troublelist[i].complete_repairteamldrsign = teamldr;
-            troublelist[i].complete_report = rndsubarray(db_attach.report, 2, 4);
+            troublelist[i].repair_dev = rndsubarray(db_attach.devuse, 2, 4);
+            troublelist[i].complete_report = GenDoc("维修方案", [teamldr], 2, 4);
+            troublelist[i].complete_winderclerksign = { who: troublelist[i].prepare_winderclerksign.who, where: rndrange(0, troublelist[i].complete_report.length) };
+            troublelist[i].complete_repairteamldrsign = { who: teamldr, where: rndrange(0, troublelist[i].complete_report.length) };
 
             // 生成维修记录
             troublelist[i].repair_log = [];
@@ -518,9 +612,10 @@
 
             // 生成聊天成员列表
             troublelist[i].userlist = [].concat(troublelist[i].prepare_expert);
-            troublelist[i].userlist.push(troublelist[i].prepare_windermastersign);
-            troublelist[i].userlist.push(troublelist[i].prepare_winderclerksign);
-            troublelist[i].userlist.push(troublelist[i].prepare_coordmastersign);
+            troublelist[i].userlist.push(coord);
+            troublelist[i].userlist.push(troublelist[i].prepare_windermastersign.who);
+            troublelist[i].userlist.push(troublelist[i].prepare_winderclerksign.who);
+            troublelist[i].userlist.push(troublelist[i].prepare_coordmastersign.who);
             troublelist[i].userlist = troublelist[i].userlist.concat(troublelist[i].repair_team);
 
         }
@@ -551,62 +646,53 @@
         $("#prepare_expert").html(tpl_users(cur.prepare_expert));
         $("#prepare_report").html(tpl_doc(cur.prepare_report));
         $("#prepare_report2").html(tpl_doc(cur.prepare_report2));
-        $("#prepare_scheme").html(tpl_doc(cur.prepare_scheme));
-        $("#prepare_windermastersign").html(tpl_user(cur.prepare_windermastersign));
-        $("#prepare_winderclerksign").html(tpl_user(cur.prepare_winderclerksign));
-        $("#prepare_coordmastersign").html(tpl_user(cur.prepare_coordmastersign));
+        $("#prepare_scheme").html(tpl_scheme(cur.prepare_scheme));
+        $("#prepare_windermastersign").html(cur.prepare_windermastersign.who.name);
+        $("#prepare_windermastersign").css("background-image","url(img/yin/C_200.png)");
+        $("#prepare_winderclerksign").html(cur.prepare_winderclerksign.who.name);
+        $("#prepare_winderclerksign").css("background-image", "url(img/yin/C_47.png)");
+        $("#prepare_coordmastersign").html(cur.prepare_coordmastersign.who.name);
+        $("#prepare_coordmastersign").css("background-image", "url(img/yin/C_123.png)");
 
         $("#repair_team").html(tpl_users(cur.repair_team));
         $("#repair_mat").html(tpl_nails(cur.repair_mat));
         $("#repair_dev").html(tpl_nails(cur.repair_dev));
         $("#repair_log").html(tpl_repair_log(cur.repair_log));
 
-        $("#complete_report").html(tpl_doc(cur.complete_report));
-        $("#complete_winderclerksign").html(tpl_user(cur.complete_winderclerksign));
-        $("#complete_repairteamldrsign").html(tpl_user(cur.complete_repairteamldrsign));
+        $("#complete_report").html(tpl_repairreport(cur.complete_report));
+        $("#complete_winderclerksign").html(cur.complete_winderclerksign.who.name);
+        $("#complete_winderclerksign").css("background-image", "url(img/yin/C_47.png)");
+        $("#complete_repairteamldrsign").html(cur.complete_repairteamldrsign.who.name);
+        $("#complete_repairteamldrsign").css("background-image", "url(img/yin/C_98.png)");
         $("#userlist").html(tpl_userlist(cur.userlist));
         $("#speechlist").html(tpl_speech(cur.userlist));
+
+        $(".x3Doc>.x3Doc-handle").on("click", function () {
+            $(this).siblings(".x3Doc-menu").css("display", "block");
+            $(this).siblings(".x3Doc-menu").addClass("x3Doc-click");
+        });
+    }
+
+    function GenDoc( name, auther, lband, rband )
+    {
+        var r = [];
+        var start = new Date(new Date() - 86400000*rndrange(30,60));
+        var c = rndrange(lband,rband);
+        for (var j = 0; j < c; j++)
+        {
+            var x = {};
+            x.name = name;
+            x.auther = rnditem(auther);
+            x.time = new Date(start + (c - j) * 86400000);
+            x.stime = tmfmt(x.time,"yy-MM-dd");
+            r.push(x);
+        }
+
+        return r;
     }
 
 </script>
-<!--
-<script type="text/javascript"> // 生成聊天成员列表
-    var ul = [];
-    var userlist = "";
-    while (ul.length<50){
-        var x = parseInt(Math.random() * db_userlist.data.length);
-        while ( $.inArray(x, ul) != -1)
-            x = parseInt(Math.random() * db_userlist.data.length);
-        ul.push(x);
-        userlist += "<div class=\"SmallHead\"><img src=\"img/face/face" + db_userlist.data[x].face
-            + ".jpg\"/>【" + db_userlist.data[x].prof + "】" + db_userlist.data[x].name + "</div>";
-    }
-    $("#userlist").html(userlist);
-</script>
-<script type="text/javascript"> // 生成聊天内容列表
-    var speechlist = "";
-    for (var i = 0; i < 50; i++ ){
-        var u = ul[parseInt(Math.random() * ul.length)];
-        var s = parseInt(Math.random() * db_speech.length);
 
-        // <div style="width: 100%; text-align:center;">--------分割线--------</div>
-        if ( u%2 == 0 ){
-            speechlist += "<div class=\"lspeech\">"+
-                "<div><img src=\"img/face/face"+db_userlist.data[u].face+".jpg\" /></div>"+
-                "<div><span>【" + db_userlist.data[u].prof + "】"+db_userlist.data[u].name+"</span>"+
-                "<div>"+db_speech[s]+"</div></div></div>";
-        }
-        else{
-            speechlist += "<div class=\"rspeech\">"+
-                "<div><span>【" + db_userlist.data[u].prof + "】"+db_userlist.data[u].name+"</span>"+
-                "<div>"+db_speech[s]+"</div></div>"+
-                "<div><img src=\"img/face/face"+db_userlist.data[u].face+".jpg\" /></div>"+
-                "</div>";
-        }
-    }
-    $("#speechlist").html(speechlist);
-</script>
--->
 </body>
 </html>
 
