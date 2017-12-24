@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.css"/>
+    <script type="text/javascript" src="js/doTe.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <style>
+        .xtree {
+            font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+            font-size: 16px;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .xtree > div div {
+            padding-left: 18px;
+            border: 0px;
+            margin: 0px;
+        }
+        .xtree div>img {
+            border: 0px;
+            vertical-align: middle;
+        }
+        .xtree div>span > img {
+            margin-right: 5px;
+        }
+    </style> 
+</head>
+<body>
+    <div id="root" class="xtree" />
+    <script type="text/javascript">
+        request("root");
+        function request(tag) {
+            at = tag.split("_");
+            node = $("#" + tag);
+
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("GET", "/sublist?id="+at[1]+"&type="+at[0], true);
+            xmlhttp.onreadystatechange = function () {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    node.append(totreeitem(at[0], xmlhttp.responseText));
+                    node.children("img").attr("src", "img/nolines_minus.gif");
+                    $(".xtree div>img").unbind("click", itemexpand);
+                    $(".xtree div>span").unbind("click", itemclick);
+                    $(".xtree div>img").bind("click", itemexpand);
+                    $(".xtree div>span").bind("click", itemclick);
+                }
+            };
+            xmlhttp.send();
+        }
+
+        function totreeitem(type, data) {
+            treeimg = { "winderco": "img/diy/1_open.png", "winderprov": "img/folder.gif", "winder": "img/diy/3.png" }
+            subtype = { "root": "winderco", "winderco": "winderprov", "winderprov": "winder" }
+            type = subtype[type];
+            r = "";
+            data = $.parseJSON(data);
+            for (i in data) {
+                if (type != "winder")
+                {
+                    t = "<div id=\"" + type + "_" + data[i].id + "\">"
+                        + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
+                        + treeimg[type] + "\">" + data[i].name + "</span></div>"
+                }
+                else 
+                {
+                    t = "<div><div id=\"" + type + "_" + data[i].id + "\"><span><img src=\""
+                        + treeimg[type] + "\">" + data[i].name + "</span></div></div>"
+                }
+                r += t + "\n"
+            }
+            return r;
+        }
+
+        function itemexpand() {
+            var siblings = $(this).siblings("div");
+            if (siblings.length == 0) {
+                id = $(this).parent().attr("id");
+                if (!id.startsWith("winder_"))
+                    request(id);
+            }
+            else if (siblings.css("display") == "none") {
+                $(event.srcElement).attr("src", "img/nolines_minus.gif");
+                siblings.css("display", "block");
+            }
+            else {
+                $(event.srcElement).attr("src", "img/nolines_plus.gif");
+                siblings.css("display", "none");
+            }
+        }
+        function itemclick()
+        {
+            alert("itemclick");
+        }
+    </script>
+</body >
+</html >

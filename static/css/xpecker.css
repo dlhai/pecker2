@@ -1,0 +1,177 @@
+/*框架*/
+html, body {height: 100%;overflow: hidden;}
+body {
+    margin: 0;
+    padding: 5px;
+}
+
+/*弹性盒*/
+.xFCsrow {
+    display: flex;
+    flex-direction: row;
+}
+.xFCscol {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    align-content: stretch;
+}
+.xFCsrow > *, .xFCscol > * {
+    flex-grow: 1;
+}
+.xFIfixed {
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+/*滚动条*/
+.xScroll {
+    overflow-y: scroll;
+    overflow-x: scroll;
+}
+
+/*面板*/
+.xPanel {
+    border-radius: 4px;
+    background-color: #ffffff;
+    border: 1px solid #dddddd;
+    border-color: #e0e4e8;
+}
+.xPanel > header {
+    border-bottom: 1px solid #dddddd;
+    padding: 10px 15px;
+    color: #656565;
+}
+
+/*面板2 自带弹性盒*/
+.xPanel2 {
+    border-radius: 4px;
+    border: 1px solid #dddddd;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    align-content: stretch;
+    margin: 5px;
+}
+
+.xPanel2>header {
+    padding: 10px 15px;
+    color: #656565;
+    border-bottom: 1px solid #dddddd;
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+/*树*/
+.xTree {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	color: #666;
+	white-space: nowrap;
+}
+
+.xTree > div div {
+	padding-left: 18px;
+	border: 0px;
+	margin: 0px;
+}
+.xTree div>img {
+	border: 0px;
+	vertical-align: middle;
+}
+.xTree div>span > img {
+	margin-right: 5px;
+}
+
+/*表格，需要js配合，xTable-hover是附助*/
+.xTable {width: 100%;}
+.xTable thead > tr > th {
+    text-align: center;
+    background-color: #f0f0f0;
+}
+.xTable > tbody > tr:nth-child(2n) > td {
+    background-color: #f5f5f5;
+}
+.xTable thead > tr > th, .d_table tbody > tr > td {
+    padding: 2px 4px;
+    vertical-align: top;
+}
+.xTable-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
+    background-color: #f0f0f5 !important;
+}
+
+/*表单上的标签*/
+.xFormItem {
+    margin: 5px 10px;
+    display: inline-block;
+}
+.xFormItem label {
+    width: 60px;
+    text-align: right;
+}
+.xFormItem div {
+    border-radius: 4px;
+    border: 1px solid #dddddd;
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 0px 5px;
+    width: 200px;
+}
+
+/*文档控件，需要js配合*/
+.x3Doc {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+}
+.x3Doc > .x3Doc-handle {
+    border-radius: 4px;
+    border: 1px solid #dddddd;
+    padding: 5px 30px 5px 10px;
+    display: inline-block;
+    position: relative;
+    flex-grow: 1;
+}
+.x3Doc > .x3Doc-handle::after {
+    content: '';
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    top: 14px;
+    right: 8px;
+    border-top: 6px solid #404040;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+}
+.x3Doc > .x3Doc-upload {
+    border-radius: 4px;
+    border: 1px solid #dddddd;
+    padding: 5px 10px;
+    display: inline-block;
+    flex-shrink: 0;flex-grow: 0;
+}
+.x3Doc > .x3Doc-menu {
+    position: absolute;
+    display: none;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    width: 100%;
+    padding: 5px 5px;
+    background-color: #ffffff;
+    background-clip: padding-box;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    color: #333333;
+}
+.x3Doc > .x3Doc-menu > div > a {
+    color: #333333;
+}
+.x3Doc > .x3Doc-menu > div > a:hover {
+    background-color: #357ebd;
+    color: #ffffff;
+    text-decoration: none;
+}
+

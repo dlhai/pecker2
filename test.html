@@ -1,0 +1,21 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>test</title>
+
+</head>
+<body>
+    <div id="123"></div>
+    <script type="text/javascript">
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("GET", "/windertree", true);
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                document.getElementById("123").innerHTML = xmlhttp.responseText;
+            }
+        };
+        xmlhttp.send();
+    </script>
+</body>
+</html>

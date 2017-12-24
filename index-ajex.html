@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Mobile first web app theme | first</title>
+  <meta name="description" content="mobile first, app, web app, responsive, admin dashboard, flat, flat ui">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"> 
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <link rel="stylesheet" href="css/font-awesome.min.css">
+  <link rel="stylesheet" href="css/plugin.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="text/javascript" src="doTe.js"></script>
+  <link rel="stylesheet" href="index.css">  
+  <!--[if lt IE 9]>
+    <script src="js/ie/respond.min.js"></script>
+    <script src="js/ie/html5.js"></script>
+  <![endif]-->
+</head>
+<body data-spy="scroll" data-target="#nav">
+  <!-- header -->
+  <header id="header" class="navbar">    
+    <ul class="nav navbar-nav navbar-avatar pull-right">
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">            
+          <span class="hidden-sm-only">Mika Sokeil</span>
+          <span class="thumb-small avatar inline"><img src="images/avatar.jpg" alt="Mika Sokeil" class="img-circle"></span>
+          <b class="caret hidden-sm-only"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <li><a href="#">Settings</a></li>
+          <li><a href="#">Profile</a></li>
+          <li><a href="#"><span class="badge bg-danger pull-right">3</span>Notifications</a></li>
+          <li class="divider"></li>
+          <li><a href="docs.html">Help</a></li>
+          <li><a href="signin.html">Logout</a></li>
+        </ul>
+      </li>
+    </ul>
+    <a class="navbar-brand" href="index.html">first</a>
+    <button type="button" class="btn btn-link pull-left nav-toggle hidden-lg" data-toggle="class:show" data-target="#nav">
+      <i class="icon-reorder icon-xlarge text-default"></i>
+    </button>
+    <ul class="nav navbar-nav hidden-sm">
+      <li>
+        <div class="m-t m-b-small" id="panel-notifications">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-comment-alt icon-xlarge text-default"></i><b class="badge badge-notes bg-danger count-n">2</b></a>
+          <section class="dropdown-menu m-l-small m-t-mini">
+            <section class="panel panel-large arrow arrow-top">
+              <header class="panel-heading bg-white"><span class="h5"><strong>You have <span class="count-n">2</span> notifications</strong></span></header>
+              <div class="list-group list-group-flush m-t-n">
+                <a href="#" class="media list-group-item">
+                  <span class="pull-left thumb-small"><img src="images/avatar.jpg" alt="John said" class="img-circle"></span>
+                  <span class="media-body block m-b-none">
+                    Moved to Bootstrap 3.0<br>
+                    <small class="text-muted">23 June 13</small>
+                  </span>
+                </a>
+                <a href="#" class="media list-group-item">
+                  <span class="media-body block m-b-none">
+                    first v.1 (Bootstrap 2.3 based) released<br>
+                    <small class="text-muted">19 June 13</small>
+                  </span>
+                </a>
+              </div>
+              <footer class="panel-footer text-small">
+                <a href="#" class="pull-right"><i class="icon-cog"></i></a>
+                <a href="#">See all the notifications</a>
+              </footer>
+            </section>
+          </section>
+        </div>
+      </li>
+      <li><div class="m-t-small"><a class="btn btn-small btn-info" data-toggle="modal" href="#modal"><i class="icon-plus"></i> POST</a></div></li>
+      <li class="dropdown shift" data-toggle="shift:appendTo" data-target=".nav-primary .nav">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-cog icon-xlarge visible-sm visible-sm-inline"></i>Settings <b class="caret hidden-sm-only"></b></a>
+        <ul class="dropdown-menu">
+          <li>
+            <a href="#" data-toggle="class:navbar-fixed" data-target='body'>Navbar 
+              <span class="text-active">auto</span>
+              <span class="text">fixed</span>
+            </a>
+          </li>
+          <li class="visible-lg">
+            <a href="#" data-toggle="class:nav-vertical" data-target="#nav">Nav 
+              <span class="text-active">vertical</span>
+              <span class="text">horizontal</span>
+            </a>
+          </li>
+          <li class="divider hidden-sm"></li>
+          <li class="dropdown-header">Colors</li>
+          <li>
+            <a href="#" data-toggle="class:bg bg-black" data-target='.navbar'>Navbar 
+              <span class="text-active">white</span>
+              <span class="text">inverse</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" data-toggle="class:bg-light" data-target='#nav'>Nav 
+              <span class="text-active">inverse</span>
+              <span class="text">light</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <form class="navbar-form pull-left shift" action="" data-toggle="shift:appendTo" data-target=".nav-primary">
+      <i class="icon-search text-muted"></i>
+      <input type="text" class="input-small form-control" placeholder="Search">
+    </form>
+  </header>
+  <!-- / header -->
+  <!-- nav -->
+  <nav id="nav" class="nav-primary nav-doc visible-lg bg-light">
+    <ul id="userlist2" class="nav m-t-small"  data-spy="affix" data-offset-top="50">
+      <li class="dropdown-header">角色列表</li>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#icons">Icons</a></li>
+      <li><a href="#btn-circle">Circle buttons</a></li>
+      <li><a href="#progress">Progress</a></li>
+      <li><a href="#list-group">List group</a></li>
+      <li><a href="#panel">Panel</a></li>
+      <li><a href="#mobile">Mobile</a></li>
+      <li><a href="#toggle-class">Toggle class</a></li>
+      <li><a href="#shift">Shift</a></li>
+      <li><a href="#button-state">Button state</a></li>
+      <li><a href="#combodate">Combodate</a></li>
+      <li><a href="#file-input">File input</a></li>
+      <li><a href="#sparkline">Sparkline</a></li>
+      <li><a href="#easy-pie-chart">Easy pie chart</a></li>
+      <li><a href="#datepicker">Datepicker</a></li>
+      <li><a href="#slider">Slider</a></li>
+      <li><a href="#dropdown-select">Dropdown select</a></li>
+      <li><a href="#fullcalendar">Fullcalendar</a></li>
+      <li><a href="#fuelux">Fuelux</a></li>
+      <li><a href="#datatables">DataTables</a></li>
+    </ul>
+  </nav>
+  <!-- / nav -->
+  <section id="content">
+    <section class="main bg-white" id="docs">
+ <!--iframe src="matwh.out.html" width="100%" height="500px"  id="f1" frameborder="no" border="0" marginwidth="0" marginheight="0" scrolling="yes" allowtransparency="yes"></iframe-->
+    </section>
+  </section>
+    <!-- footer -->
+  <footer id="footer">
+    <div class="text-center padder clearfix">
+      <p>
+        <small>&copy; first 2013, Mobile first web app framework base on Bootstrap  更多模板：<a href="http://www.mycodes.net/" target="_blank">源码之家</a></small><br><br>
+        <a href="#" class="btn btn-mini btn-circle btn-twitter"><i class="icon-twitter"></i></a>
+        <a href="#" class="btn btn-mini btn-circle btn-facebook"><i class="icon-facebook"></i></a>
+        <a href="#" class="btn btn-mini btn-circle btn-gplus"><i class="icon-google-plus"></i></a>
+      </p>
+    </div>
+  </footer>
+  <!-- / footer -->
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+            <div class="modal-content">
+                  <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                              &times;
+                        </button>
+                        <h4 class="modal-title" id="myModalLabel">登录</h4>
+                  </div>
+                  <div class="modal-body">
+                  <table><tr><td rowspan="2" width="5%"/>
+                    <td rowspan="2" width="45%" height="200px" ><img src="bird.jpg" width="150px" height="200px"></td>
+                    <td><label for="username" >帐号：</label></td>
+                    <td>
+                  <div class="btn-group">
+                  <button data-toggle="dropdown" class="btn form-control btn-white dropdown-toggle">
+                    <span id="username" class="dropdown-label" style="float: left;" >请选一个帐号...</span> 
+                    <span class="caret" style="text-align: right;"></span>
+                  </button>
+                  <ul id="userlist1" class="dropdown-menu dropdown-select">
+                      <li><a href="#"><input type="radio" name="d-s-r">Option1</a></li>
+                      <li><a href="#"><input type="radio" name="d-s-r">Option2 asdfasf</a></li>
+                      <li><a href="#"><input type="radio" name="d-s-r">Option3</a></li>
+                  </ul>
+                </div>
+              
+                </td></tr>
+                    <tr><td><label for="password" >密码：</label></td>
+                    <td><input type="password" class="form-control" id="password" placeholder="请输入密码"></td>
+                  </tr></table>
+                  <div class="modal-footer">
+                    <div style="float:left;"><a href="#">注册帐号</a>&nbsp;|&nbsp;<a href="#">忘记密码</a></div>
+                    <button type="button" class="btn btn-primary" onclick="onlogin()">登录</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                  </div>
+            </div><!-- /.modal-content -->
+      </div><!-- /.modal -->
+</div>
+
+	<script src="js/jquery.min.js"></script>
+  <!-- Bootstrap -->
+  <script src="js/bootstrap.js"></script>
+  <!-- app -->
+  <script src="js/app.js"></script>
+  <script src="js/app.plugin.js"></script>
+  <script src="js/app.data.js"></script>
+  <!-- Sparkline Chart -->
+  <script src="js/charts/sparkline/jquery.sparkline.min.js"></script>
+  <!-- Easy Pie Chart -->
+  <script src="js/charts/easypiechart/jquery.easy-pie-chart.js"></script>
+  <script src="js/ie/excanvas.js"></script>
+  <!-- file input -->
+  <script src="js/file-input/bootstrap.file-input.js"></script>
+  <!-- datepicker -->
+  <script src="js/datepicker/bootstrap-datepicker.js"></script>
+  <!-- slider -->
+  <script src="js/slider/bootstrap-slider.js"></script>
+  <!-- combodate -->
+  <script src="js/combodate/moment.min.js"></script>
+  <script src="js/combodate/combodate.js"></script>
+
+
+<script type="text/javascript">
+      var btn_caption = ["叶片超级帐号","专家超级帐号","维修工超级帐号","设备仓库超级帐号",
+            "材料仓库超级帐号","调度超级帐号","风场主管","驻场人员","专家","维修队长","维修工","调度主管",
+            "调度","设备仓库主管","设备仓库管理员","材料仓库主管","材料仓库管理员"];
+
+      var roles = {"叶片超级帐号":"leaf_su","专家超级帐号":"expert_su","维修工超级帐号":"repair_su",
+            "设备仓库超级帐号":"devwh_su","材料仓库超级帐号":"matwh_su","调度超级帐号":"coord_su",
+            "风场主管":"winder_ldr","驻场人员":"winder","专家":"expert","维修队长":"repair_ldr",
+            "维修工":"repair","调度主管":"coord_ldr", "调度":"coord","设备仓库主管":"devwh_ldr",
+            "设备仓库管理员":"devwh","材料仓库主管":"matwh_ldr","材料仓库管理员":"mathwh"};
+     var roles2 = [ {name :"leaf_su", text:"叶片超级帐号"}, {name :"expert_su", text: "专家超级帐号"}, 
+    {name :"repair_su" , text:"维修工超级帐号"},{name :"devwh_su" , text:"设备仓库超级帐号"}, 
+    {name :"matwh_su" , text:"材料仓库超级帐号"}, {name :"coord_su" , text:"调度超级帐号"},
+    {name :"winder_ldr" , text:"风场主管"}, {name :"winder" , text:"驻场人员"},
+    {name :"expert" , text:"专家"} , {name :"repair_ldr" , text:"维修队长"},
+    {name :"repair" , text:"维修工"} , {name :"coord_ldr" , text:"调度主管"},
+    {name :"coord" , text:"调度"} , {name :"devwh_ldr" , text:"设备仓库主管"},
+    {name: "devwh", text: "设备仓库管理员" }, { name: "matwh_ldr", text: "材料仓库主管" },
+    {name: "mathwh", text: "材料仓库管理员" } ];
+
+
+      var tpl_userlist1 = doT.template('\
+            {% for (var i = 0, l = it.length; i < l; i++) { %}\
+                  <li><a href="#"><input type="radio" name="d-s-r">{%=it[i]%}</a></li>\
+            {% } %}');
+      document.getElementById("userlist1").innerHTML = tpl_userlist1(Object.keys(roles));
+/*      var tpl_userlist2 = doT.template('\
+            {% for (var i = 0, l = it.length; i < l; i++) { %}\
+                  <li><a href="#">{%=it[i]%}</a></li>\
+            {% } %}');*/
+      var tpl_userlist2 = doT.template('\
+            {% for (var i = 0, l = it.length; i < l; i++) { %}\
+                  <li><a href="javascript:void(0);" onclick="setcontent(\'{%=it[i]%}\',this)">{%=it[i]%}</a></li>\
+            {% } %}');            
+      document.getElementById("userlist2").innerHTML = tpl_userlist2(btn_caption);
+
+      $('#myModal').modal({backdrop:"static",keyboard:false,show:true});
+
+/*      $(function () { $('#myModal').on('hide.bs.modal', function (ev) {
+            var btn =$(ev.relatedTarget);
+            var id = btn.data("id");
+            var md = $(this);
+            var un = md.find("#username");
+            alert(un.val());
+            alert("sfsss");
+      })});*/
+
+      function setcontent(e,t)
+      {
+    //     alert(e);
+          var xmlhttp = new XMLHttpRequest();
+          xmlhttp.onreadystatechange=function()
+          {
+            if ( xmlhttp.readyState == 4 && xmlhttp.status == 200 )
+            {
+              document.getElementById("docs").innerHTML=xmlhttp.responseText;
+            }
+          };
+          xmlhttp.open("GET", "/"+roles[e]+".html", true);
+          xmlhttp.send();
+
+      };
+
+      function onlogin(e)
+      {
+          var sp = $('#myModal').find("#username");
+
+     //     alert(sp.text());
+      //    alert("/"+roles[sp.text()]+".html");
+          $('#myModal').modal("hide");
+
+          var xmlhttp = new XMLHttpRequest();
+          xmlhttp.onreadystatechange=function()
+          {
+            if ( xmlhttp.readyState == 4 && xmlhttp.status == 200 )
+            {
+              document.getElementById("docs").innerHTML=xmlhttp.responseText;
+            }
+          };
+          //xmlhttp.open("GET", "/ajax_info.txt", true);
+          xmlhttp.open("GET", "/"+roles[sp.text()]+".html", true);
+          xmlhttp.send();
+      }
+</script>
+
+</body>
+</html>

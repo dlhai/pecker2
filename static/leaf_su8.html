@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/xpecker.js"></script>
+</head>
+<body class="xFCsrow">
+    <section class="xPanel2 xFIfixed xScroll" style="width: 300px;padding:5px;">
+        <div id="root" class="xTree"></div>
+    </section>
+    <div class="xFCscol" >
+        <section class="xPanel2">
+            <header>节点信息<div style="float: right;"><a href="#">编辑</a></div></header>
+            <div id="item_detail"></div>
+        </section>
+        <section class="xPanel2">
+            <header>下级列表<div style="float: right;"><a href="#">导入</a><a href="#">添加</a></div></header>
+            <div class="xScroll" style="padding: 5px;"><div id="subitem_list"></div></div>
+        </section>
+    </div>
+
+    <script type="text/javascript">
+        request("root");
+        function request(tag) {
+            var at = tag.split("_");
+            var node = $("#" + tag);
+
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("GET", "/sublist?id=" + at[1] + "&type=" + at[0], true);
+            xmlhttp.onreadystatechange = function () {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    node.append(totreeitem(at[0], xmlhttp.responseText));
+                    node.children("img").attr("src", "img/nolines_minus.gif");
+                    $(".xTree div>img").unbind("click", itemexpand);
+                    $(".xTree div>span").unbind("click", itemclick);
+                    $(".xTree div>img").bind("click", itemexpand);
+                    $(".xTree div>span").bind("click", itemclick);
+                }
+            };
+            xmlhttp.send();
+        }
+
+        function totreeitem(type, rdata) {
+            var treeimg = { "winderco": "img/diy/1_open.png", "winderprov": "img/folder.gif", "winder": "img/diy/3.png" }
+            var subtype = { "root": "winderco", "winderco": "winderprov", "winderprov": "winder" }
+            var type = subtype[type];
+            var r = "";
+            data = $.parseJSON(rdata);
+            for (i in data) {
+                if (type != "winder") {
+                    t = "<div id=\"" + type + "_" + data[i].id + "\">"
+                        + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
+                        + treeimg[type] + "\">" + data[i].name + "</span></div>"
+                }
+                else {
+                    t = "<div><div id=\"" + type + "_" + data[i].id + "\"><span><img src=\""
+                        + treeimg[type] + "\">" + data[i].name + "</span></div></div>"
+                }
+                r += t + "\n"
+            }
+            return r;
+        }
+
+        function itemexpand() {
+            var siblings = $(this).siblings("div");
+            if (siblings.length == 0) {
+                id = $(this).parent().attr("id");
+                if (!id.startsWith("winder_"))
+                    request(id);
+            }
+            else if (siblings.css("display") == "none") {
+                $(event.srcElement).attr("src", "img/nolines_minus.gif");
+                siblings.css("display", "block");
+            }
+            else {
+                $(event.srcElement).attr("src", "img/nolines_plus.gif");
+                siblings.css("display", "none");
+            }
+        }
+        function itemclick() {
+            var at = $(this).parent().attr("id").split("_");
+            Request("/itemdetail?id=" + at[1] + "&type=" + at[0], function (d) {
+                var text = RenderForm2(d, 0);
+                $("#item_detail").html(text);
+            });
+            Request("/sublistdetail?id=" + at[1] + "&type=" + at[0], function (d) {
+                var text = RenderTable2(d, 0);
+                $("#subitem_list").html(text);
+            });
+            alert("itemclick");
+        }
+
+        function Request(url, fun) {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("GET", url, true);
+            xmlhttp.onreadystatechange = function () {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+                {
+                    jdata = $.parseJSON(xmlhttp.responseText);
+                    fun(jdata);
+                }
+            };
+            xmlhttp.send();
+        }
+
+    </script>
+
+</body>
+</html>
