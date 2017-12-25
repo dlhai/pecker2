@@ -83,7 +83,7 @@ if __name__ == "__main__":
 #测试链接
 #http://127.0.0.1:5000/itemdetail?type=winderco&id=1
 #http://127.0.0.1:5000/sublistdetail?type=root&id=1
-#http://127.0.0.1:5000/sublistdetail?type=winderco&id=1
+#http://127.0.0.1:5000/sublistdetail?type=winderco&id=2
 #http://127.0.0.1:5000/sublistdetail?type=winderarea&id=1
 #http://127.0.0.1:5000/sublist?type=root&id=1
 #http://127.0.0.1:5000/sublist?type=winderco&id=1
