@@ -7,7 +7,7 @@ import time
 setdata(loadpkl('rawdata.pkl'))
 prov=loadpkl('areadata.pkl')
 
-engine = create_engine('sqlite:///d:/'+str(int(time.time()))+'.db')
+engine = create_engine('sqlite:///./'+str(int(time.time()))+'.db')
 engine.echo = True
 metadata = MetaData(engine)
 
@@ -106,6 +106,7 @@ tbl_efan=Table('efan', metadata,
 
 tbl_leaf=Table('leaf', metadata,
 	Column('id',Integer,primary_key=True),
+	Column('code',String(32)),
 	Column('winderarea_id',Integer,ForeignKey('winderarea.id')),
 	Column('winder_id',Integer,ForeignKey('winder.id')),
 	Column('efan_id',Integer,ForeignKey('efan.id')),
@@ -175,14 +176,14 @@ QueryAll(tbl_efan)
 
 def dict_leaf(x):
     pdt=rnddate(4*365,5*365)
-    return dict(winderarea_id=x.winderarea_id,winder_id=x.winder_id,efan_id=x.id,leaf_vender_id=rnditem("leaf_vender").id,mat=rnditem("_mainmat"),producedate=pdt,putondate=rnddatespan(pdt,30,365))
+    return dict(code=rndqq(),winderarea_id=x.winderarea_id,winder_id=x.winder_id,efan_id=x.id,leaf_vender_id=rnditem("leaf_vender").id,mat=rnditem("_mainmat"),producedate=pdt,putondate=rnddatespan(pdt,30,365))
 conn.execute(tbl_leaf.insert(),[dict_leaf(x) for x in data("efan") for y in range(3)])
 QueryAll(tbl_leaf)
 
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","叶片超级帐号","")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"winder","风场主管","") for x in data("winder")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"winder","驻场","") for x in data("winder") for y in range(rndnum(2,3))])
-conn.execute(tbl_base.insert(),[dict(table="base",title="ID",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
+conn.execute(tbl_base.insert(),[dict(table="base",title="标识",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
 dict(table="base",title="表名",name="table",type="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="x",remark="",),
 dict(table="base",title="标题",name="title",type="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="x",remark="",),
 dict(table="base",title="字段名",name="name",type="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="x",remark="",),
@@ -192,8 +193,8 @@ dict(table="base",title="表格宽度",name="twidth",type="",ftype="",twidth="",
 dict(table="base",title="表格风格",name="tstyle",type="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="x",remark="",),
 dict(table="base",title="类型",name="dtype",type="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="x",remark="",),
 dict(table="base",title="生成规则",name="drule",type="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="x",remark="",),
-dict(table="base",title="说明",name="remark",type="",ftype="",twidth="",tstyle="",dtype="String(2048)",drule="x",remark="",),
-dict(table="user",title="ID",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
+dict(table="base",title="说明",name="remark",type="",ftype="bigtext",twidth="",tstyle="",dtype="String(2048)",drule="x",remark="",),
+dict(table="user",title="标识",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
 dict(table="user",title="帐号",name="account",type="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="person.pinyin",remark="",),
 dict(table="user",title="密码",name="pwd",type="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="person.pinyin",remark="",),
 dict(table="user",title="头像",name="face",type="image",ftype="",twidth="",tstyle="",dtype="String(32)",drule="rnditem:_faceimage",remark="",),
@@ -213,7 +214,7 @@ dict(table="user",title="职位",name="job",type="",ftype="",twidth="",tstyle=""
 dict(table="user",title="领域",name="skill",type="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="skill",remark="避雷、工艺设计、工艺生产、材料、安全",),
 dict(table="user",title="s.所在单位ID",name="depart_id",type="",ftype="",twidth="",tstyle="",dtype="Integer",drule="depart_id",remark="",),
 dict(table="user",title="s.单位表名",name="depart_table",type="",ftype="",twidth="",tstyle="",dtype="String(16)",drule="depart_table",remark="",),
-dict(table="leaf_vender",title="s.ID",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
+dict(table="leaf_vender",title="标识",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
 dict(table="leaf_vender",title="名称",name="name",type="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="x.name",remark="",),
 dict(table="leaf_vender",title="完整名称",name="fname",type="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="x.fname",remark="",),
 dict(table="leaf_vender",title="地址",name="addr",type="",ftype="",twidth="",tstyle="",dtype="String(128)",drule="p1.origin",remark="",),
@@ -221,7 +222,7 @@ dict(table="leaf_vender",title="联系人",name="atten",type="",ftype="",twidth=
 dict(table="leaf_vender",title="电话",name="tel",type="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="p1.phone",remark="",),
 dict(table="leaf_vender",title="主要负责人",name="leader",type="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="p2.name",remark="",),
 dict(table="leaf_vender",title="传真",name="fax",type="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="p2.phone",remark="",),
-dict(table="efan_vender",title="s.ID",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
+dict(table="efan_vender",title="标识",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
 dict(table="efan_vender",title="名称",name="name",type="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="x.name",remark="",),
 dict(table="efan_vender",title="完整名称",name="fname",type="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="x.fname",remark="",),
 dict(table="efan_vender",title="地址",name="addr",type="",ftype="",twidth="",tstyle="",dtype="String(128)",drule="p1.origin",remark="",),
@@ -229,35 +230,36 @@ dict(table="efan_vender",title="联系人",name="atten",type="",ftype="",twidth=
 dict(table="efan_vender",title="电话",name="tel",type="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="p1.phone",remark="",),
 dict(table="efan_vender",title="主要负责人",name="leader",type="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="p2.name",remark="",),
 dict(table="efan_vender",title="传真",name="fax",type="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="p2.phone",remark="",),
-dict(table="winderco",title="s.ID",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
+dict(table="winderco",title="标识",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
 dict(table="winderco",title="名称",name="name",type="",ftype="",twidth="",tstyle="",dtype="String(64),unique=True",drule="x.name",remark="",),
-dict(table="winderco",title="备注",name="remark",type="",ftype="",twidth="",tstyle="",dtype="String(2048)",drule="rnditem:_songci",remark="",),
-dict(table="winderprov",title="s.ID",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
+dict(table="winderco",title="备注",name="remark",type="",ftype="bigtext",twidth="",tstyle="",dtype="String(2048)",drule="rnditem:_songci",remark="",),
+dict(table="winderprov",title="标识",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
 dict(table="winderprov",title="所属企业",name="winderco_id",type="",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('winderco.id')",drule="x.id",remark="",),
 dict(table="winderprov",title="名称",name="name",type="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="y.name",remark="",),
-dict(table="winderprov",title="备注",name="remark",type="",ftype="",twidth="",tstyle="",dtype="String(2048)",drule="rnditem:_songci",remark="",),
-dict(table="winder",title="ID",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
+dict(table="winderprov",title="备注",name="remark",type="",ftype="bigtext",twidth="",tstyle="",dtype="String(2048)",drule="rnditem:_songci",remark="",),
+dict(table="winder",title="标识",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
 dict(table="winder",title="所属省区",name="winderprov_id",type="",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('winderprov.id')",drule="y.id",remark="",),
 dict(table="winder",title="所属企业",name="winderco_id",type="",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('winderco.id')",drule="y.winderco_id",remark="",),
 dict(table="winder",title="名称",name="name",type="",ftype="",twidth="",tstyle="",dtype="String(64)",drule='x.name+"风场"',remark="",),
 dict(table="winder",title="地址",name="addr",type="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="rnditem:_person:origin",remark="",),
 dict(table="winder",title="规模",name="scale",type="",ftype="",twidth="",tstyle="",dtype="String(16)",drule="rnditem:_scale",remark="",),
-dict(table="winder",title="自然状况",name="natural",type="",ftype="",twidth="",tstyle="",dtype="String(2048)",drule="rnditem:_songci",remark="例如风力、风沙、冰冻、温湿度、腐蚀、海拔等描述。也可能包括沙漠、山地、草原等地貌信息。",),
+dict(table="winder",title="自然状况",name="natural",type="",ftype="bigtext",twidth="",tstyle="",dtype="String(2048)",drule="rnditem:_songci",remark="例如风力、风沙、冰冻、温湿度、腐蚀、海拔等描述。也可能包括沙漠、山地、草原等地貌信息。",),
 dict(table="winder",title="传真",name="fax",type="",ftype="",twidth="",tstyle="",dtype="String(16)",drule="rnditem:_station:phone",remark="",),
-dict(table="winder",title="备注",name="remark",type="",ftype="",twidth="",tstyle="",dtype="String(2048)",drule="rnditem:_songci",remark="",),
+dict(table="winder",title="备注",name="remark",type="",ftype="bigtext",twidth="",tstyle="",dtype="String(2048)",drule="rnditem:_songci",remark="",),
 dict(table="winder",title="位置",name="position",type="",ftype="",twidth="",tstyle="",dtype="String(64)",drule='str(x.lng)+" "+str(x.lat)',remark="",),
-dict(table="winderarea",title="ID",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
+dict(table="winderarea",title="标识",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
 dict(table="winderarea",title="所属风场",name="winder_id",type="",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('winder.id')",drule="y.id",remark="",),
 dict(table="winderarea",title="名称",name="name",type="",ftype="",twidth="",tstyle="",dtype="String(64)",drule='x.name+"风区"',remark="",),
 dict(table="winderarea",title="备注",name="remark",type="",ftype="",twidth="",tstyle="",dtype="String(2048)",drule="rnditem:_songci",remark="",),
-dict(table="winderarea",title="位置",name="position",type="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="rndgpsarea(y.position,0.3,0.27)",remark="",),
-dict(table="efan",title="ID",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
+dict(table="winderarea",title="位置",name="position",type="",ftype="bigtext",twidth="",tstyle="",dtype="String(64)",drule="rndgpsarea(y.position,0.3,0.27)",remark="",),
+dict(table="efan",title="标识",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
 dict(table="efan",title="所属风区",name="winderarea_id",type="",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('winderarea.id')",drule="x.id",remark="风场一般分多个区域管理，例如1区、2区、3区等。",),
 dict(table="efan",title="所属风场",name="winder_id",type="",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('winder.id')",drule="x.winder_id",remark="",),
 dict(table="efan",title="型号",name="type",type="",ftype="",twidth="",tstyle="",dtype="String(32)",drule='rndtype("efan")',remark="",),
 dict(table="efan",title="生产厂家",name="efan_vender_id",type="",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('efan_vender.id')",drule="rnditem:efan_vender:id",remark="",),
 dict(table="efan",title="位置",name="position",type="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="rndgps(x.position)",remark="",),
-dict(table="leaf",title="ID",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
+dict(table="leaf",title="标识",name="id",type="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
+dict(table="leaf",title="编号",name="code",type="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="rndqq()",remark="借用一下QQ号生成函数",),
 dict(table="leaf",title="所属风区",name="winderarea_id",type="",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('winderarea.id')",drule="x.winderarea_id",remark="",),
 dict(table="leaf",title="所属风场",name="winder_id",type="",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('winder.id')",drule="x.winder_id",remark="",),
 dict(table="leaf",title="所属风机",name="efan_id",type="",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('efan.id')",drule="x.id",remark="",),

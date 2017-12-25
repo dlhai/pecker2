@@ -4,7 +4,7 @@ from flask import Flask,request
 
 app = Flask(__name__) 
 
-engine = create_engine('sqlite:///./db/1513959598.db')
+engine = create_engine('sqlite:///./db/1514172619.db')
 #engine.echo = True
 metadata = MetaData(engine)
 conn = engine.connect()
@@ -34,8 +34,8 @@ def query(s1, s2, s3=None):
     q2 = conn.execute(s2).fetchall()
     if s3 is not None:
         q3 = conn.execute(s3).fetchall()
-        return '{"result":200,\nfields:'+ to_json(q1) + ',\ndata:' + to_json(q2) + ',\naddit:' + to_json(q3)+ "\n}\n";
-    return '{"result":200,\nfields:'+ to_json(q1) + ',\ndata:' + to_json(q2) + "\n}\n";
+        return '{"result":200,\n"fields":'+ to_json(q1) + ',\n"data":' + to_json(q2) + ',\n"addit":' + to_json(q3)+ "\n}\n";
+    return '{"result":200,\n"fields":'+ to_json(q1) + ',\n"data":' + to_json(q2) + "\n}\n";
 
 @app.route("/itemdetail")
 def itemdetail():

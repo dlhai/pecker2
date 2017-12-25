@@ -14,7 +14,7 @@ import time
 setdata(loadpkl('rawdata.pkl'))
 prov=loadpkl('areadata.pkl')
 
-engine = create_engine('sqlite:///d:/'+str(int(time.time()))+'.db')
+engine = create_engine('sqlite:///./'+str(int(time.time()))+'.db')
 engine.echo = True
 metadata = MetaData(engine)
 
