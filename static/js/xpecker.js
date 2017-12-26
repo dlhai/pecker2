@@ -67,7 +67,7 @@ function RenderForm2(ar, i) {
     var r = "";
     for (x = 0; x < ar.fields.length; x++) {
         if (ar.fields[x].ftype == "bigtext")
-            r += "<div class=\"xFormItem\"><label>" + ar.fields[x].title + "</label><div style=\"overflow-y: scroll;width:490px;max-height:60px;\">"
+            r += "<div class=\"xFormItem\"><label>" + ar.fields[x].title + "</label><div style=\"overflow-y: scroll;width:500px;max-height:45px;\">"
                 + ar.data[i][ar.fields[x].name] + "</div></div>"
         else if (ar.fields[x].ftype == "image")
             r += "<div class=\"xImgSFZ\"><img src=\"" + ar.data[i][ar.fields[x].name] + "\"/></div>";

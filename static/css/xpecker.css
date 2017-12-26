@@ -103,11 +103,14 @@ body {
 /*表单上的标签*/
 .xFormItem {
     margin: 5px 10px;
-    display: inline-block;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: flex-start;
 }
 .xFormItem label {
     width: 60px;
     text-align: right;
+    margin: 5px 5px;
 }
 .xFormItem div {
     border-radius: 4px;
