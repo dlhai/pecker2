@@ -60,15 +60,16 @@ def QueryAll(tbl):
 
     model += "conn.execute(tbl_base.insert(),["
     for t in [ x for x in tbls if x.type == "table"]:
-        for r in t.data:
+        for r in t.data:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
             model += 'dict(table="' + t.name+'",'
             for i in range(len(t.field)):
-                if '"' in r[i]:
-                    model += t.field[i] +"='" + r[i] + "',"
-                elif "'" in r[i]: 
-                    model += t.field[i] +'="' + r[i] + '",'
+                s=str(r[i])
+                if '"' in s:
+                    model += t.field[i] +"='" + s + "',"
+                elif "'" in s: 
+                    model += t.field[i] +'="' + s + '",'
                 else:
-                    model += t.field[i] +'="' + r[i] + '",'
+                    model += t.field[i] +'="' + s + '",'
             model += "),\n"
     model += "])"
     return model

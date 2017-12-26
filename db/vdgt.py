@@ -125,6 +125,15 @@ def rndmail(person):
 def rndwechat(person,mail):
     return random.choice([str(int(person.phone)),mail,person.pinyin,str(int(person.qq))])
 
+#float转str，仅保留小数点后5位
+def f2s(f):
+    s = str(f)
+    i = s.find(".")
+    if i == -1:
+        return s
+    else:
+        return s[:i+7]
+
 def rndgpsarea(pos,xr,yr):
     x = float(pos.split(" ")[0]) - xr/2
     y = float(pos.split(" ")[1])- yr/2
@@ -136,10 +145,10 @@ def rndgpsarea(pos,xr,yr):
     yo = random.randint(0,8)
     ys = random.randint(1,3)
 
-    l = str(x+xo*px)
-    t = str(y+yo*py)
-    r = str(x+xo*px+xs*px)
-    b = str(y+yo*py+ys*py)
+    l = f2s(x+xo*px)
+    t = f2s(y+yo*py)
+    r = f2s(x+xo*px+xs*px)
+    b = f2s(y+yo*py+ys*py)
     lt = l+" "+t
     rt = r+" "+t
     rb = r+" "+b
@@ -148,12 +157,12 @@ def rndgpsarea(pos,xr,yr):
 
 def rndgps( position ):
     lt= position.split(",")[0].split(" ")
-    rb= position.split(",")[0].split(" ") 
+    rb= position.split(",")[1].split(" ") 
     l = float(lt[0])
     t = float(lt[1])
     r = float(rb[0])
     b = float(rb[1])
-    return str(random.uniform(l,r))+" "+str(random.uniform(t,b))
+    return f2s(random.uniform(l,r))+" "+f2s(random.uniform(t,b))
 
 def rnddate(min,max):
     return (datetime.datetime.now() - datetime.timedelta(days = rndnum(min,max)))
