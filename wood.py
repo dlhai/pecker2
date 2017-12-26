@@ -22,7 +22,7 @@ table = {
     'leaf':Table('leaf', metadata,autoload=True)
     }
 base=table["base"]
-base.sl = [base.c.title, base.c.name, base.c.type, base.c.twidth, base.c.tstyle]
+base.sl = [base.c.title, base.c.name, base.c.type, base.c.ftype, base.c.twidth, base.c.tstyle]
 organ = { "root": "winderco", "winderco": "winderprov", "winderprov": "winder", "winder":"winderarea","winderarea":"efan" }
 
 def to_array( qa ):
