@@ -100,6 +100,7 @@ tbl_efan=Table('efan', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('winderarea_id',Integer,ForeignKey('winderarea.id')),
 	Column('winder_id',Integer,ForeignKey('winder.id')),
+	Column('code',String(32)),
 	Column('type',String(32)),
 	Column('efan_vender_id',Integer,ForeignKey('efan_vender.id')),
 	Column('position',String(64)))
@@ -170,7 +171,7 @@ conn.execute(tbl_winderarea.insert(),[dict_winderarea(x,y) for y in data("winder
 QueryAll(tbl_winderarea)
 
 def dict_efan(x,y):
-    return dict(winderarea_id=x.id,winder_id=x.winder_id,type=rndtype("efan"),efan_vender_id=rnditem("efan_vender").id,position=rndgps(x.position))
+    return dict(winderarea_id=x.id,winder_id=x.winder_id,code=rndqq(),type=rndtype("efan"),efan_vender_id=rnditem("efan_vender").id,position=rndgps(x.position))
 conn.execute(tbl_efan.insert(),[dict_efan(x,y) for x in data("winderarea") for y in range(rndnum(30,50))])
 QueryAll(tbl_efan)
 
@@ -255,9 +256,10 @@ dict(table="winderarea",title="位置",name="position",forder="3.0",ftype="bigte
 dict(table="efan",title="标识",name="id",forder="-1.0",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
 dict(table="efan",title="所属风区",name="winderarea_id",forder="0.0",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('winderarea.id')",drule="x.id",remark="风场一般分多个区域管理，例如1区、2区、3区等。",),
 dict(table="efan",title="所属风场",name="winder_id",forder="1.0",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('winder.id')",drule="x.winder_id",remark="",),
-dict(table="efan",title="型号",name="type",forder="2.0",ftype="",twidth="",tstyle="",dtype="String(32)",drule='rndtype("efan")',remark="",),
-dict(table="efan",title="生产厂家",name="efan_vender_id",forder="3.0",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('efan_vender.id')",drule="rnditem:efan_vender:id",remark="",),
-dict(table="efan",title="位置",name="position",forder="4.0",ftype="",twidth="",tstyle="",dtype="String(64)",drule="rndgps(x.position)",remark="",),
+dict(table="efan",title="编号",name="code",forder="2.0",ftype="",twidth="",tstyle="",dtype="String(32)",drule="rndqq()",remark="借用一下QQ号生成函数",),
+dict(table="efan",title="型号",name="type",forder="3.0",ftype="",twidth="",tstyle="",dtype="String(32)",drule='rndtype("efan")',remark="",),
+dict(table="efan",title="生产厂家",name="efan_vender_id",forder="4.0",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('efan_vender.id')",drule="rnditem:efan_vender:id",remark="",),
+dict(table="efan",title="位置",name="position",forder="5.0",ftype="",twidth="",tstyle="",dtype="String(64)",drule="rndgps(x.position)",remark="",),
 dict(table="leaf",title="标识",name="id",forder="-1.0",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
 dict(table="leaf",title="编号",name="code",forder="0.0",ftype="",twidth="",tstyle="",dtype="String(32)",drule="rndqq()",remark="借用一下QQ号生成函数",),
 dict(table="leaf",title="所属风区",name="winderarea_id",forder="1.0",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('winderarea.id')",drule="x.winderarea_id",remark="",),

@@ -1,0 +1,4 @@
+2017年12月27日 星期三
+1.为db.efan增加code字段，并与db.leaf.code绑定成abc关系
+2.增加leaf_su8对风机列表显示的支持
+3.wood查询winder列表的增加了gps信息

@@ -4,7 +4,7 @@ from flask import Flask,request
 
 app = Flask(__name__) 
 
-engine = create_engine('sqlite:///./db/1514293267.db')
+engine = create_engine('sqlite:///./db/pecker.db')
 #engine.echo = True
 metadata = MetaData(engine)
 conn = engine.connect()
@@ -57,7 +57,7 @@ def sublistdetail():
         s2 = select([tbl]).where(tbl.c[type+"_id"]==id).order_by(tbl.c.id)
     if subtype == "efan":
         sub = table["leaf"]
-        s3 = select(-[sub]).where(sub.c.winderarea_id==id).order_by(sub.c.id)
+        s3 = select([sub]).where(sub.c.winderarea_id==id).order_by(sub.c.id)
         return query(s1,s2,s3)
     else:
         return query(s1,s2)
@@ -68,9 +68,14 @@ def sublist():
     id = request.args.get('id')
     subtype = organ[type]
     tbl = table[subtype]
-    sel = select([tbl.c.id, tbl.c.name]).order_by(tbl.c.id)
-    if type != "root":
+    sel = ""
+    if type =="root":
+        sel = select([tbl.c.id, tbl.c.name]).order_by(tbl.c.id)
+    elif type == "winder":
+        sel = select([tbl.c.id, tbl.c.name,tbl.c.position]).order_by(tbl.c.id).where(tbl.c[type+"_id"]==id)
+    else:
         sel = select([tbl.c.id, tbl.c.name]).order_by(tbl.c.id).where(tbl.c[type+"_id"]==id)
+
     return to_json(conn.execute(sel).fetchall())
 
 @app.route("/")
