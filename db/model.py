@@ -7,7 +7,7 @@ import time
 setdata(loadpkl('rawdata.pkl'))
 prov=loadpkl('areadata.pkl')
 
-engine = create_engine('sqlite:///./'+str(int(time.time()))+'.db')
+engine = create_engine('sqlite:///./pecker.db')
 engine.echo = True
 metadata = MetaData(engine)
 
@@ -175,10 +175,11 @@ def dict_efan(x,y):
 conn.execute(tbl_efan.insert(),[dict_efan(x,y) for x in data("winderarea") for y in range(rndnum(30,50))])
 QueryAll(tbl_efan)
 
-def dict_leaf(x):
+def dict_leaf(x,y):
     pdt=rnddate(4*365,5*365)
-    return dict(code=rndqq(),winderarea_id=x.winderarea_id,winder_id=x.winder_id,efan_id=x.id,leaf_vender_id=rnditem("leaf_vender").id,mat=rnditem("_mainmat"),producedate=pdt,putondate=rnddatespan(pdt,30,365))
-conn.execute(tbl_leaf.insert(),[dict_leaf(x) for x in data("efan") for y in range(3)])
+    a="abc"
+    return dict(code=x.code+a[y],winderarea_id=x.winderarea_id,winder_id=x.winder_id,efan_id=x.id,leaf_vender_id=rnditem("leaf_vender").id,mat=rnditem("_mainmat"),producedate=pdt,putondate=rnddatespan(pdt,30,365))
+conn.execute(tbl_leaf.insert(),[dict_leaf(x,y) for x in data("efan") for y in range(3)])
 QueryAll(tbl_leaf)
 
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","叶片超级帐号","")])
@@ -261,7 +262,7 @@ dict(table="efan",title="型号",name="type",forder="3.0",ftype="",twidth="",tst
 dict(table="efan",title="生产厂家",name="efan_vender_id",forder="4.0",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('efan_vender.id')",drule="rnditem:efan_vender:id",remark="",),
 dict(table="efan",title="位置",name="position",forder="5.0",ftype="",twidth="",tstyle="",dtype="String(64)",drule="rndgps(x.position)",remark="",),
 dict(table="leaf",title="标识",name="id",forder="-1.0",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
-dict(table="leaf",title="编号",name="code",forder="0.0",ftype="",twidth="",tstyle="",dtype="String(32)",drule="rndqq()",remark="借用一下QQ号生成函数",),
+dict(table="leaf",title="编号",name="code",forder="0.0",ftype="",twidth="",tstyle="",dtype="String(32)",drule="x.code+a[y]",remark="",),
 dict(table="leaf",title="所属风区",name="winderarea_id",forder="1.0",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('winderarea.id')",drule="x.winderarea_id",remark="",),
 dict(table="leaf",title="所属风场",name="winder_id",forder="2.0",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('winder.id')",drule="x.winder_id",remark="",),
 dict(table="leaf",title="所属风机",name="efan_id",forder="3.0",ftype="",twidth="",tstyle="",dtype="Integer,ForeignKey('efan.id')",drule="x.id",remark="",),

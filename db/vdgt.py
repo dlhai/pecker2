@@ -9,10 +9,12 @@ import datetime
 
 dat_all = {}
 userunique = []
+provunique = []
 def setdata(dat):
     global dat_all,userunique
     dat_all=dat
     userunique = [x for x in range(len(dat_all["_person"].data))]
+    userunique = [x for x in range(len(dat_all["_prov"].data))]
 def data(tbl):
     return dat_all[tbl]
 def addtbl(tbl):

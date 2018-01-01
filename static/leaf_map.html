@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <script src="js/jquery.min.js"></script>
+    <style type="text/css">
+        body, html {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            font-family: "微软雅黑";
+        }
+
+        #allmap {
+            height: 100%;
+            width: 100%;
+        }
+
+        #r-result {
+            width: 100%;
+        }
+    </style>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=nSxiPohfziUaCuONe4ViUP2N"></script>
+    <script src="js/xpecker.js"></script>
+    <title></title>
+</head>
+<body>
+    <div id="allmap"></div>
+</body>
+</html>
+<script type="text/javascript">
+    // 百度地图API功能
+    var map = new BMap.Map("allmap");
+    var point = new BMap.Point(116.404, 39.915);
+    map.centerAndZoom(point, 6);
+    map.addControl(new BMap.ScaleControl({ anchor: BMAP_ANCHOR_BOTTOM_LEFT }));
+    map.addControl(new BMap.NavigationControl());
+    map.enableScrollWheelZoom(true);
+
+    Request("/winderlist?winder_id=0", function (d1) {
+        var flower = new BMap.Icon("img/diy/3.png", new BMap.Size(16, 16));
+        for (var x in d1.winder) {
+            var marker = new BMap.Marker(CreatePoint(d1.winder[x].position), { icon: flower });
+            var label = new BMap.Label(d1.winder[x].name, { offset: new BMap.Size(20, -1) });
+            label.setStyle({ border: "1px solid blue", color: "blue", padding:"0px 4px" });
+            marker.setLabel(label);
+            map.addOverlay(marker);
+            addClickHandler(d1.winder[x].id, marker);
+        }
+        for (var x in d1.winderarea)
+            map.addOverlay(CreatePolygon(d1.winderarea[x].position));
+    });
+
+    //Request("/efanlist?winder_id=0", function (d2) {
+    //    for (var x in d2.efanlist) {
+    //        var marker2 = new BMap.Marker(CreatePoint(d2.efanlist[x].position));
+    //        map.addOverlay(marker2);
+    //    }
+    //});
+
+    function CreatePoint( pos ) {
+        var ar = pos.split(" ");
+        return new BMap.Point(parseFloat(ar[0]), parseFloat(ar[1]));
+    }
+
+    function CreatePolygon( pos ) {
+        var ar = pos.split(",");
+        var arr = [];
+        for (var i in ar)
+            arr.push(CreatePoint(ar[i]));
+        return new BMap.Polygon(arr);
+    }
+
+    function addClickHandler(id, marker) {
+        marker.addEventListener("click", function (e) {
+            Request("/itemdetail?type=winderco&id=" + id, function (d1) { openInfo(d1, e); });
+        }
+    }
+    function openInfo(detail, e) {
+        RanderForm(detail);
+        var p = e.target;
+        var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+        var infoWindow = new BMap.InfoWindow(content, opts);  // 创建信息窗口对象 
+        map.openInfoWindow(infoWindow, point); //开启信息窗口
+    }
+
+
+</script>

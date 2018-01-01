@@ -1,6 +1,6 @@
 #encoding:utf8
 from sqlalchemy import *
-from flask import Flask,request
+from flask import Flask,request, Response, jsonify
 
 app = Flask(__name__) 
 
@@ -37,6 +37,22 @@ def query(s1, s2, s3=None):
         return '{"result":200,\n"fields":'+ to_json(q1) + ',\n"data":' + to_json(q2) + ',\n"addit":' + to_json(q3)+ "\n}\n";
     return '{"result":200,\n"fields":'+ to_json(q1) + ',\n"data":' + to_json(q2) + "\n}\n";
 
+def query2(**kw):
+    r = '{"result":200,\n'
+    r += ",\n".join([ '"' + k + '":'+ to_json(conn.execute(v).fetchall()) for k,v in kw.items()] )
+    r += "\n}\n"
+    print("query2")
+    return r
+
+def query3(**kw):
+    r = '{"result":200,\n'
+    r += ",\n".join([ '"' + k + '":'+ to_json(conn.execute(v).fetchall()) for k,v in kw.items()] )
+    r += "\n}\n"
+    return Response(r, mimetype='application/json')
+
+
+#leaf_su8设备sheet用
+#测试链接 http://127.0.0.1:5000/itemdetail?type=winderco&id=1
 @app.route("/itemdetail")
 def itemdetail():
     type = request.args.get('type')
@@ -45,6 +61,10 @@ def itemdetail():
     return query(select(base.sl).where(base.c.table==type),\
         select([tbl]).where(tbl.c.id==id).order_by(tbl.c.id))
 
+#leaf_su8子设备列表table用，type=root时，仅超级用户可用
+#测试链接 http://127.0.0.1:5000/sublistdetail?type=root&id=1
+#测试链接 http://127.0.0.1:5000/sublistdetail?type=winderco&id=1
+#测试链接 http://127.0.0.1:5000/sublistdetail?type=winderarea&id=1
 @app.route("/sublistdetail")
 def sublistdetail():
     type = request.args.get('type')
@@ -62,33 +82,55 @@ def sublistdetail():
     else:
         return query(s1,s2)
 
+#leaf_su8设备树用，【暂废：winder补充了position，用来在】
+#测试链接 http://127.0.0.1:5000/sublist?type=root&id=1
+#测试链接 http://127.0.0.1:5000/sublist?type=winderco&id=1
 @app.route("/sublist")
 def sublist():
     type = request.args.get('type')
     id = request.args.get('id')
-    subtype = organ[type]
-    tbl = table[subtype]
+    tbl = table[organ[type]]
     sel = ""
     if type =="root":
         sel = select([tbl.c.id, tbl.c.name]).order_by(tbl.c.id)
-    elif type == "winder":
-        sel = select([tbl.c.id, tbl.c.name,tbl.c.position]).order_by(tbl.c.id).where(tbl.c[type+"_id"]==id)
+    #elif type == "winder":
+    #    sel = select([tbl.c.id, tbl.c.name,tbl.c.position]).order_by(tbl.c.id).where(tbl.c[type+"_id"]==id)
     else:
         sel = select([tbl.c.id, tbl.c.name]).order_by(tbl.c.id).where(tbl.c[type+"_id"]==id)
-
     return to_json(conn.execute(sel).fetchall())
 
+#leafmap用来显示地图上的风场地标和风区轮廓，考虑到调度，不限制权限，任何人可用
+#测试链接 http://127.0.0.1:5000/winderlist?winder_id=0
+#测试链接 http://127.0.0.1:5000/winderlist?winder_id=1
+@app.route("/winderlist")
+def winderlist():
+    winder_id = request.args.get('winder_id') #为0仅su可用，表示获得全部风场
+    tbl1 = table["winder"]
+    tbl2 = table["winderarea"]
+
+    if winder_id =="0":
+        s1 = select([tbl1.c.id, tbl1.c.name,tbl1.c.position]).order_by(tbl1.c.id)
+        s2 = select([tbl2.c.id, tbl2.c.name,tbl2.c.position]).order_by(tbl2.c.id)
+        return query3(winder=s1,winderarea=s2)
+    else:
+        s1 = select([tbl1.c.id, tbl1.c.name,tbl1.c.position]).order_by(tbl1.c.id).where(tbl1.c.id==winder_id)
+        s2 = select([tbl2.c.id, tbl2.c.name,tbl2.c.position]).order_by(tbl2.c.id).where(tbl2.c.winder_id==winder_id)
+        return query3(winder=s1,winderarea=s2)
+
+#leafmap用来显示地图上风电机分布，除su外，仅本风场人员可访问
+#与sublist之区别是这是无下级叶片列表，仅leaf, sublist无gps
+#测试链接 http://127.0.0.1:5000/efanlist?winder_id=1
+@app.route("/efanlist")
+def efanlist():
+    winder_id = request.args.get('winder_id')
+    tbl = table["efan"]
+    s = select([tbl.c.id, tbl.c.position]).where(tbl.c.winder_id==winder_id).order_by(tbl.c.id)
+    return query3(efanlist=s)
+
+#登录
 @app.route("/")
 def index():
     return app.send_static_file('index.html')
 
 if __name__ == "__main__":
     app.run()
-
-#测试链接
-#http://127.0.0.1:5000/itemdetail?type=winderco&id=1
-#http://127.0.0.1:5000/sublistdetail?type=root&id=1
-#http://127.0.0.1:5000/sublistdetail?type=winderco&id=2
-#http://127.0.0.1:5000/sublistdetail?type=winderarea&id=1
-#http://127.0.0.1:5000/sublist?type=root&id=1
-#http://127.0.0.1:5000/sublist?type=winderco&id=1

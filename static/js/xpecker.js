@@ -76,3 +76,15 @@ function RenderForm2(ar, i) {
     }
     return r;
 }
+
+function Request(url, fun) {
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("GET", url, true);
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            jdata = $.parseJSON(xmlhttp.responseText);
+            fun(jdata);
+        }
+    };
+    xmlhttp.send();
+}
