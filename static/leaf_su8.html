@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>啄木鸟风电维保系统</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <script type="text/javascript" src="js/doTe.js"></script>
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.js"></script>
     <link rel="stylesheet" href="css/bootstrap.css" />
@@ -27,12 +28,12 @@
 
     <script id="tpl_efan_list" type="text/template">
         {% for (var i in it.data) { %}
-        <div class="d_panel" style="margin: 5px; width: 490px; display: inline-block;">
+        <div class="xPanel" style="margin: 5px; width: 490px; display: inline-block;">
             <header class="heading2" style="flex-grow: 0;">
                 <img src="img/diy/3.png" />
-                <strong>编号:</strong><span>it.data[i].code</span>
-                <strong>型号:</strong><span>it.data[i].type</span>
-                <strong>生产厂家:</strong><span>it.data[i].efan_vender_id</span>
+                <strong>编号:</strong><span>{%=it.data[i].code%}</span>
+                <strong>型号:</strong><span>{%=it.data[i].type%}</span>
+                <strong>生产厂家:</strong><span>{%=it.data[i].efan_vender_id%}</span>
                 <div style="float: right;">
                     <a href="#">编辑</a>
                 </div>
@@ -43,17 +44,18 @@
                     {% for (var j in it.addit) { %}
                     {% if (it.addit[j].efan_id==it.data[i].id) { %}
                     <tr>
-                        <td>it.addit[j].code</td>
-                        <td>it.addit[j].mat</td>
-                        <td>it.addit[j].producedate</td>
-                        <td>it.addit[j].putondate</td>
-                        <td>it.addit[j].leaf_vender_id</td>
+                        <td>{%=it.addit[j].code%}</td>
+                        <td>{%=it.addit[j].mat%}</td>
+                        <td>{%=it.addit[j].producedate%}</td>
+                        <td>{%=it.addit[j].putondate%}</td>
+                        <td>{%=it.addit[j].leaf_vender_id%}</td>
                     </tr>
                     {% } %}
                     {% } %}
                 </tbody>
             </table>
         </div>
+        {% } %}
     </script>
 
     <script type="text/javascript">

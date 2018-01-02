@@ -22,6 +22,10 @@
         }
     </style>
     <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=nSxiPohfziUaCuONe4ViUP2N"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
     <title></title>
 </head>
@@ -47,6 +51,7 @@
             marker.setLabel(label);
             map.addOverlay(marker);
             addClickHandler(d1.winder[x].id, marker);
+            addClickHandler(d1.winder[x].id, label);
         }
         for (var x in d1.winderarea)
             map.addOverlay(CreatePolygon(d1.winderarea[x].position));
@@ -74,14 +79,19 @@
 
     function addClickHandler(id, marker) {
         marker.addEventListener("click", function (e) {
-            Request("/itemdetail?type=winderco&id=" + id, function (d1) { openInfo(d1, e); });
-        }
+            Request("/itemdetail?type=winder&id=" + id, function (d1) { openInfo(d1, e); });
+        });
     }
     function openInfo(detail, e) {
-        RanderForm(detail);
         var p = e.target;
         var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
-        var infoWindow = new BMap.InfoWindow(content, opts);  // 创建信息窗口对象 
+        var content = '<div class="xRndAngle" style="overflow-y: scroll;height:290px;padding:5px 0px">' + RenderForm2(detail, 0) + '</div>';
+        var infoWindow = new BMap.InfoWindow(content, {
+            width: 619,     // 信息窗口宽度
+            height: 320,     // 信息窗口高度
+            title: "风场信息", // 信息窗口标题
+            enableMessage: true//设置允许信息窗发送短息
+        });  // 创建信息窗口对象 
         map.openInfoWindow(infoWindow, point); //开启信息窗口
     }
 
