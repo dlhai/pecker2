@@ -28,7 +28,7 @@
 
     <script id="tpl_efan_list" type="text/template">
         {% for (var i in it.data) { %}
-        <div class="xPanel" style="margin: 5px; width: 490px; display: inline-block;">
+        <div class="xPanel" style="margin: 5px; width: 485px; display: inline-block;">
             <header class="heading2" style="flex-grow: 0;">
                 <img src="img/diy/3.png" />
                 <strong>编号:</strong><span>{%=it.data[i].code%}</span>
@@ -138,7 +138,7 @@
             xmlhttp.onreadystatechange = function () {
                 if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
                 {
-                    jdata = $.parseJSON(xmlhttp.responseText);
+                    var jdata = $.parseJSON(xmlhttp.responseText);
                     fun(jdata);
                 }
             };
@@ -147,7 +147,7 @@
 
         function Renderefan(d) {
             var tpl_efan_list = doT.template(document.getElementById('tpl_efan_list').innerHTML);
-            $("#item_detail").html(tpl_efan_list(d));
+            $("#subitem_list").html(tpl_efan_list(d));
         }
     </script>
 </body>
