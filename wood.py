@@ -1,6 +1,7 @@
 #encoding:utf8
 from sqlalchemy import *
 from flask import Flask,request, Response, jsonify
+import pdb
 
 app = Flask(__name__) 
 
@@ -50,6 +51,16 @@ def query3(**kw):
     r += "\n}\n"
     return Response(r, mimetype='application/json')
 
+#查询
+#测试链接 http://127.0.0.1:5000/query?type=[表名]&key1=val1&key2=val2....
+@app.route("/query")
+def query():
+    pdb.set_trace()
+    type = request.args.get('type')
+    id = request.args.get('id')
+    tbl = table[type]
+    return query3(fields=select(base.sl).where(base.c.table==type),\
+        data=select([tbl]).where(tbl.c.id==id).order_by(tbl.c.id))
 
 #leaf_su8设备sheet用
 #测试链接 http://127.0.0.1:5000/itemdetail?type=winderco&id=1
@@ -118,7 +129,7 @@ def winderlist():
         return query3(winder=s1,winderarea=s2)
 
 #leafmap用来显示地图上风电机分布，除su外，仅本风场人员可访问
-#与sublist之区别是这是无下级叶片列表，仅leaf, sublist无gps
+#与sublist之区别是这是无下级叶片列表，仅efan, sublist无gps
 #测试链接 http://127.0.0.1:5000/efanlist?winder_id=1
 @app.route("/efanlist")
 def efanlist():

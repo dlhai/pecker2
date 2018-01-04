@@ -63,18 +63,75 @@ function RenderTable2(it, style) {
     return r;
 }
 
-function RenderForm2(ar, i) {
+function RenderForm3(ar, idx) {
     var r = "";
-    for (x = 0; x < ar.fields.length; x++) {
-        if (ar.fields[x].ftype == "bigtext")
-            r += "<div class=\"xFormItem\"><label>" + ar.fields[x].title + "</label><div style=\"overflow-y: scroll;width:500px;max-height:45px;\">"
-                + ar.data[i][ar.fields[x].name] + "</div></div>"
-        else if (ar.fields[x].ftype == "image")
-            r += "<div class=\"xImgSFZ\"><img src=\"" + ar.data[i][ar.fields[x].name] + "\"/></div>";
-        else
-            r += "<div class=\"xFormItem\"><label>" + ar.fields[x].title + "</label><div>" + ar.data[i][ar.fields[x].name] + "</div></div>"
+    for (var i = 0; i < ar.fields.length; x++) {
+        r += "<div><label>" + ar.fields[i].title + "</label>";
+        if (ar.fields[i].ftype == "div")
+            r += "<div>"+ar.data[idx][ar.fields[i].name] + "</div>";
+        else if (ar.fields[i].ftype == "input")
+            r += '<input name="' + ar.fields[i].name+'" value="'+ ar.data[idx][ar.fields[i].name] + '"/>';
+        else if (ar.fields[i].ftype == "input_long")
+            r += '<input style="width:500px;" name="' + ar.fields[i].name + '" value="' + ar.data[idx][ar.fields[i].name] + '" />';
+        else if (ar.fields[i].ftype == "textarea")
+            r += '<textarea style="resize:none;width:500px;max-height:45px;" name="' + ar.fields[i].name + '>' + ar.data[idx][ar.fields[i].name] + '"</textarea>';
+        else if (ar.fields[i].ftype == "select")
+            r += '<select id="' + ar.fields[i].name+'" name="' + ar.fields[i].name + '>' + ar.data[idx][ar.fields[i].name] + '"</select>';
+        r += "</div>";
     }
     return r;
+}
+
+function RenderPane(ar, idx){
+    var r = "";
+    for (var i = 0; i < ar.fields.length; x++) {
+        var attr = "";
+        if (ar.fields[i].name.find("_") != -1)
+            attr = 'id="' + ar.fields[i].name + "_" + ar.data[idx][ar.fields[i].name] + '" ';
+
+        if (ar.fields[i].ftype == "input_long")
+            attr += 'style="width:500px;"';
+        else if (ar.fields[i].ftype == "textarea")
+            attr += 'style="overflow-y: scroll;width:500px;max-height:45px;"';
+
+        r += "<div><label>" + ar.fields[i].title + "</label><div " + attr + ">"
+            + ar.data[idx][ar.fields[i].name] + "</div></div>";
+    }
+    return r;
+}
+
+function ID2Name(ar, idx) {
+    var param = [];
+    for (var i in ar.fields)
+        if (ar.fields[i].name.find("_") != -1 )
+            param[ar.fields[i].name] = ar.data[idx][ar.fields[i].name];
+    if (param.length == 0)
+        return;
+
+    Request("/id2name?" + param.join("&"), function (d) {
+        if (d.result != "ok")
+            return;
+        for (var j in d)
+            if (j != "result")
+                $(j).html(d[j]);
+    });
+}
+
+function fillselect(ar, idx) {
+    var param = [];
+    for (var i in ar.fields)
+        if (ar.fields[i].ftype == "select")
+            Request("/id2name?" + param.join("&"), function (d) {
+    if (param.length == 0)
+        return;
+
+    Request("/id2name?" + param.join("&"), function (d) {
+        if (d.result != "ok")
+            return;
+        for (var j in d)
+            if (j != "result")
+                $(j).html(d[j]);
+    });
 }
 
 function Request(url, fun) {
@@ -88,3 +145,20 @@ function Request(url, fun) {
     };
     xmlhttp.send();
 }
+
+function RenderForm2(ar, i) {
+    alert("使用了旧接口：RenderForm2已被RenderPane");
+    return "";
+    //var r = "";
+    //for (var x = 0; x < ar.fields.length; x++) {
+    //    if (ar.fields[x].ftype == "bigtext")
+    //        r += "<div class=\"xFormItem\"><label>" + ar.fields[x].title + "</label><div style=\"overflow-y: scroll;width:500px;max-height:45px;\">"
+    //            + ar.data[i][ar.fields[x].name] + "</div></div>"
+    //    else if (ar.fields[x].ftype == "image")
+    //        r += "<div class=\"xImgSFZ\"><img src=\"" + ar.data[i][ar.fields[x].name] + "\"/></div>";
+    //    else
+    //        r += "<div class=\"xFormItem\"><label>" + ar.fields[x].title + "</label><div>" + ar.data[i][ar.fields[x].name] + "</div></div>"
+    //}
+    //return r;
+}
+

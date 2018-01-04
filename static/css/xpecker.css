@@ -107,7 +107,7 @@ body {
     background-color: #f0f0f5 !important;
 }
 
-/*表单上的标签*/
+/*（已废，新版为x2Form）面板上的标签*/
 .xFormItem {
     margin: 5px 10px;
     display: inline-flex;
@@ -128,22 +128,25 @@ body {
     width: 200px;
 }
 
-/*表单上的标签*/
+/*面板、表单上的标签*/
 .x2Form{
 
 }
-.x2Form > div {
+.x2Form>div {
     margin: 5px 10px;
     display: inline-flex;
     flex-direction: row;
     align-items: flex-start;
 }
-.x2Form > div > label {
+.x2Form>div>label {
     width: 60px;
     text-align: right;
     margin: 5px 5px;
 }
-.x2Form>div>input,.x2Form>div>textarea {
+.x2Form>div>div,
+.x2Form > div > input,
+.x2Form > div > select,
+.x2Form > div > textarea {
     border-radius: 4px;
     border: 1px solid #dddddd;
     display: inline-block;
@@ -151,7 +154,6 @@ body {
     margin: 0px 5px;
     width: 200px;
 }
-
 
 /*文档控件，需要js配合*/
 .x3Doc {
