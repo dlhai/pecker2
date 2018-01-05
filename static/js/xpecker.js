@@ -66,17 +66,20 @@ function RenderTable2(it, style) {
 function RenderForm3(ar, idx) {
     var r = "";
     for (var i = 0; i < ar.fields.length; x++) {
-        r += "<div><label>" + ar.fields[i].title + "</label>";
-        if (ar.fields[i].ftype == "div")
-            r += "<div>"+ar.data[idx][ar.fields[i].name] + "</div>";
-        else if (ar.fields[i].ftype == "input")
-            r += '<input name="' + ar.fields[i].name+'" value="'+ ar.data[idx][ar.fields[i].name] + '"/>';
-        else if (ar.fields[i].ftype == "input_long")
-            r += '<input style="width:500px;" name="' + ar.fields[i].name + '" value="' + ar.data[idx][ar.fields[i].name] + '" />';
-        else if (ar.fields[i].ftype == "textarea")
-            r += '<textarea style="resize:none;width:500px;max-height:45px;" name="' + ar.fields[i].name + '>' + ar.data[idx][ar.fields[i].name] + '"</textarea>';
-        else if (ar.fields[i].ftype == "select")
-            r += '<select id="' + ar.fields[i].name+'" name="' + ar.fields[i].name + '>' + ar.data[idx][ar.fields[i].name] + '"</select>';
+        var field = ar.fields[i];
+        var val = ar.data[idx][field.name];
+
+        r += "<div><label>" + field.title + "</label>";
+        if (field.ftype == "div")
+            r += "<div>"+val + "</div>";
+        else if (field.ftype == "input")
+            r += '<input name="' + field.name+'" value="'+ val + '"/>';
+        else if (field.ftype == "input_long")
+            r += '<input style="width:500px;" name="' + field.name + '" value="' + val + '" />';
+        else if (field.ftype == "textarea")
+            r += '<textarea style="resize:none;width:500px;max-height:45px;" name="' + field.name + '>' + val + '"</textarea>';
+        else if (field.ftype == "select")
+            r += '<select id="' + field.name +'_'+val+'" name="' + field.name + '>"</select>';
         r += "</div>";
     }
     return r;
@@ -100,41 +103,57 @@ function RenderPane(ar, idx){
     return r;
 }
 
+function RenderSelect(ar, id) {
+    var r = "";
+    for (var i in ar.data) {
+        var data = ar.data[i];
+        if (data["id"] == id )
+            r += '<option value="' + data["id"] + ' selected>' + data["name"] + '</option>';
+        else
+            r += '<option value="' + data["id"] + '>' + data["name"] + '</option>';
+    }
+    return r;
+}
+
 function ID2Name(ar, idx) {
-    var param = [];
+    var param = new Array();
     for (var i in ar.fields)
-        if (ar.fields[i].name.find("_") != -1 )
-            param[ar.fields[i].name] = ar.data[idx][ar.fields[i].name];
+        if (ar.fields[i].name.find("_") != -1)
+            param.push(ar.fields[i].name+"="+ar.data[idx][ar.fields[i].name]);
     if (param.length == 0)
         return;
 
     Request("/id2name?" + param.join("&"), function (d) {
         if (d.result != "ok")
             return;
-        for (var j in d)
-            if (j != "result")
+        for (var j in d) {
+            if (j != "result") {
                 $(j).html(d[j]);
+                $(j).removeAttr("id"); // 清除ID属性是因为弹出表单时，有可能导致ID重复
+            }
+        }
     });
 }
 
 function fillselect(ar, idx) {
-    var param = [];
-    for (var i in ar.fields)
-        if (ar.fields[i].ftype == "select")
-            Request("/id2name?" + param.join("&"), function (d) {
-    if (param.length == 0)
-        return;
-
-    Request("/id2name?" + param.join("&"), function (d) {
-        if (d.result != "ok")
-            return;
-        for (var j in d)
-            if (j != "result")
-                $(j).html(d[j]);
-    });
+    for (var i in ar.fields) {
+        var fields = ar.fields[i];
+        if (fields.ftype == "select") {
+            var at = fields.name.split("_");
+            Request("/query?type=" + at[0], function (d) {
+                var selid = ar.data[idx][fields.name];
+                $("#" + fields.name + "_" + selid).html(RenderSelect(d, selid));
+            });
+        }
+    }
 }
 
 function Request(url, fun) {
+    if (cache[url]) {   // 优先使用缓冲数据
+        fun(cache[url]);
+        return;
+    }
+
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("GET", url, true);
     xmlhttp.onreadystatechange = function () {

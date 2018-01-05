@@ -26,24 +26,24 @@ base=table["base"]
 base.sl = [base.c.title, base.c.name, base.c.type, base.c.ftype, base.c.twidth, base.c.tstyle]
 organ = { "root": "winderco", "winderco": "winderprov", "winderprov": "winder", "winder":"winderarea","winderarea":"efan" }
 
-def to_array( qa ):
-    return "["+ ",\n".join(["{"+",".join(['"'+str(t[0])+'":"'+str(t[1])+'"' for t in zip(row._parent.keys,row._row)])+"}" for row in qa ]) + "]"
+#def to_array( qa ):
+#    return "["+ ",\n".join(["{"+",".join(['"'+str(t[0])+'":"'+str(t[1])+'"' for t in zip(row._parent.keys,row._row)])+"}" for row in qa ]) + "]"
 def to_json( qa ):
     return "["+ ",\n".join(["{"+",".join(['"'+str(t[0])+'":"'+str(t[1])+'"' for t in zip(row._parent.keys,row._row)])+"}" for row in qa ]) + "]"
-def query(s1, s2, s3=None):
-    q1 = conn.execute(s1).fetchall()
-    q2 = conn.execute(s2).fetchall()
-    if s3 is not None:
-        q3 = conn.execute(s3).fetchall()
-        return '{"result":200,\n"fields":'+ to_json(q1) + ',\n"data":' + to_json(q2) + ',\n"addit":' + to_json(q3)+ "\n}\n";
-    return '{"result":200,\n"fields":'+ to_json(q1) + ',\n"data":' + to_json(q2) + "\n}\n";
+#def query(s1, s2, s3=None):
+#    q1 = conn.execute(s1).fetchall()
+#    q2 = conn.execute(s2).fetchall()
+#    if s3 is not None:
+#        q3 = conn.execute(s3).fetchall()
+#        return '{"result":200,\n"fields":'+ to_json(q1) + ',\n"data":' + to_json(q2) + ',\n"addit":' + to_json(q3)+ "\n}\n";
+#    return '{"result":200,\n"fields":'+ to_json(q1) + ',\n"data":' + to_json(q2) + "\n}\n";
 
-def query2(**kw):
-    r = '{"result":200,\n'
-    r += ",\n".join([ '"' + k + '":'+ to_json(conn.execute(v).fetchall()) for k,v in kw.items()] )
-    r += "\n}\n"
-    print("query2")
-    return r
+#def query2(**kw):
+#    r = '{"result":200,\n'
+#    r += ",\n".join([ '"' + k + '":'+ to_json(conn.execute(v).fetchall()) for k,v in kw.items()] )
+#    r += "\n}\n"
+#    print("query2")
+#    return r
 
 def query3(**kw):
     r = '{"result":200,\n'
@@ -54,13 +54,14 @@ def query3(**kw):
 #查询
 #测试链接 http://127.0.0.1:5000/query?type=[表名]&key1=val1&key2=val2....
 @app.route("/query")
-def query():
-    pdb.set_trace()
-    type = request.args.get('type')
-    id = request.args.get('id')
-    tbl = table[type]
-    return query3(fields=select(base.sl).where(base.c.table==type),\
-        data=select([tbl]).where(tbl.c.id==id).order_by(tbl.c.id))
+def _query():
+    d = request.args.to_dict()
+    type = d["type"]
+    del d["type"]
+    sql = "select * from "+type
+    if len(d) > 0:
+        sql += " where "+"and ".join([ k+"="+v for k,v in d.items()])
+    return query3(fields=select(base.sl).where(base.c.table==type),data = sql)
 
 #leaf_su8设备sheet用
 #测试链接 http://127.0.0.1:5000/itemdetail?type=winderco&id=1
@@ -69,8 +70,8 @@ def itemdetail():
     type = request.args.get('type')
     id = request.args.get('id')
     tbl = table[type]
-    return query(select(base.sl).where(base.c.table==type),\
-        select([tbl]).where(tbl.c.id==id).order_by(tbl.c.id))
+    return query3(fields=select(base.sl).where(base.c.table==type),\
+        data=select([tbl]).where(tbl.c.id==id).order_by(tbl.c.id))
 
 #leaf_su8子设备列表table用，type=root时，仅超级用户可用
 #测试链接 http://127.0.0.1:5000/sublistdetail?type=root&id=1
@@ -89,9 +90,9 @@ def sublistdetail():
     if subtype == "efan":
         sub = table["leaf"]
         s3 = select([sub]).where(sub.c.winderarea_id==id).order_by(sub.c.id)
-        return query(s1,s2,s3)
+        return query3(fields=s1,data=s2,addit=s3)
     else:
-        return query(s1,s2)
+        return query3(fields=s1,data=s2)
 
 #leaf_su8设备树用，【暂废：winder补充了position，用来在】
 #测试链接 http://127.0.0.1:5000/sublist?type=root&id=1

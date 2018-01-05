@@ -48,7 +48,6 @@
         </div><!-- /.modal -->
     </div>
 
-
     <script id="tpl_efan_list" type="text/template">
         {% for (var i in it.data) { %}
         <div class="xPanel" style="margin: 5px; width: 485px; display: inline-block;">
@@ -84,6 +83,7 @@
     <script type="text/javascript">
         var cur = null; // 面板当前显示的元素
         var sublist = null;// 表格当前显示的列表
+        var cache = new Object(); // 缓存
 
         request("root");
         function request(tag) {
@@ -129,7 +129,7 @@
         function itemexpand() {
             var siblings = $(this).siblings("div");
             if (siblings.length == 0) {
-                id = $(this).parent().attr("id");
+                var id = $(this).parent().attr("id");
                 request(id);
             }
             else if (siblings.css("display") == "none") {
