@@ -22,7 +22,7 @@
         }
     </style>
     <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=nSxiPohfziUaCuONe4ViUP2N"></script>
-    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
     <link rel="stylesheet" href="css/bootstrap.css" />
     <link rel="stylesheet" href="css/xpecker.css" />
@@ -85,7 +85,7 @@
     function openInfo(detail, e) {
         var p = e.target;
         var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
-        var content = '<div class="xRndAngle" style="overflow-y: scroll;height:290px;padding:5px 0px">' + RenderForm2(detail, 0) + '</div>';
+        var content = '<div class="xRndAngle x2Form" style="overflow-y: scroll;height:290px;padding:5px 0px">' + RenderPane(detail, 0) + '</div>';
         var infoWindow = new BMap.InfoWindow(content, {
             width: 619,     // 信息窗口宽度
             height: 320,     // 信息窗口高度
@@ -93,6 +93,7 @@
             enableMessage: true//设置允许信息窗发送短息
         });  // 创建信息窗口对象 
         map.openInfoWindow(infoWindow, point); //开启信息窗口
+        ID2Name(detail, 0);
     }
 
 

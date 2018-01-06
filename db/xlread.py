@@ -38,10 +38,16 @@ class xlread(object):
                 cc=cc+1
         rt = []
         for y in range(rc):
-            row = []
-            for x in range(cc):
-                row.append( sh.cell(r+y,c+x).value)
-            rt.append(row)
+            #row = []
+            #for x in range(cc):
+            #    val = sh.cell(r+y,c+x).value
+            #    if isinstance(val,type('')):
+            #        val = .strip(" \t")
+            #    row.append(val)
+            #rt.append(row)
+            row = [sh.cell(r+y,c+x).value for x in range(cc)]
+            row = map(lambda x : x if not isinstance(x,type('')) else x.strip(" \t"), row)
+            rt.append(list(row))
         return rt
 
     def xReadTable( sh,r,c ):

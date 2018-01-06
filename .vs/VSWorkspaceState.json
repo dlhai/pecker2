@@ -3,8 +3,9 @@
     "",
     "\\db",
     "\\static",
+    "\\static\\css",
     "\\static\\js"
   ],
-  "SelectedNode": "\\static\\js\\xpecker.js",
+  "SelectedNode": "\\db\\buildarea.py",
   "PreviewInSolutionExplorer": false
 }

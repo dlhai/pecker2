@@ -1,4 +1,4 @@
-//±í¸ñµã»÷·´É« 
+ï»¿//è¡¨æ ¼ç‚¹å‡»åè‰² 
 function TableBindClick() {
     var tbc_currow = -1;
     $("tr").click(function () {
@@ -17,7 +17,7 @@ function TableBindClick() {
     });
 }
 
-//ÎÄµµ¿Ø¼ş
+//æ–‡æ¡£æ§ä»¶
 $(function () {
     $(".x3Doc>.x3Doc-handle").on("click", function ()
     {
@@ -65,7 +65,7 @@ function RenderTable2(it, style) {
 
 function RenderForm3(ar, idx) {
     var r = "";
-    for (var i = 0; i < ar.fields.length; x++) {
+    for (var i = 0; i < ar.fields.length; i++) {
         var field = ar.fields[i];
         var val = ar.data[idx][field.name];
 
@@ -77,7 +77,7 @@ function RenderForm3(ar, idx) {
         else if (field.ftype == "input_long")
             r += '<input style="width:500px;" name="' + field.name + '" value="' + val + '" />';
         else if (field.ftype == "textarea")
-            r += '<textarea style="resize:none;width:500px;max-height:45px;" name="' + field.name + '>' + val + '"</textarea>';
+            r += '<textarea style="resize:none;width:500px;max-height:45px;" name="' + field.name + '">' + val + '"</textarea>';
         else if (field.ftype == "select")
             r += '<select id="' + field.name +'_'+val+'" name="' + field.name + '>"</select>';
         r += "</div>";
@@ -87,18 +87,22 @@ function RenderForm3(ar, idx) {
 
 function RenderPane(ar, idx){
     var r = "";
-    for (var i = 0; i < ar.fields.length; x++) {
+    ar.fields.sort(function (a, b) { return parseInt(a.forder) - parseInt(b.forder); });
+    for (var i = 0; i < ar.fields.length; i++) {
+        var field = ar.fields[i];
+        if (field.name == "id")
+            continue;
+        var val = ar.data[idx][field.name];
         var attr = "";
-        if (ar.fields[i].name.find("_") != -1)
-            attr = 'id="' + ar.fields[i].name + "_" + ar.data[idx][ar.fields[i].name] + '" ';
+        if (field.name.indexOf("_") != -1)
+            attr = 'id="' + field.name + "_" + val + '" ';
 
-        if (ar.fields[i].ftype == "input_long")
+        if (field.ftype == "input_long")
             attr += 'style="width:500px;"';
-        else if (ar.fields[i].ftype == "textarea")
+        else if (field.ftype == "textarea")
             attr += 'style="overflow-y: scroll;width:500px;max-height:45px;"';
 
-        r += "<div><label>" + ar.fields[i].title + "</label><div " + attr + ">"
-            + ar.data[idx][ar.fields[i].name] + "</div></div>";
+        r += "<div><label>" + field.title + "</label><div " + attr + ">"+ val + "</div></div>";
     }
     return r;
 }
@@ -118,19 +122,15 @@ function RenderSelect(ar, id) {
 function ID2Name(ar, idx) {
     var param = new Array();
     for (var i in ar.fields)
-        if (ar.fields[i].name.find("_") != -1)
+        if (ar.fields[i].name.indexOf("_") != -1)
             param.push(ar.fields[i].name+"="+ar.data[idx][ar.fields[i].name]);
     if (param.length == 0)
         return;
 
     Request("/id2name?" + param.join("&"), function (d) {
-        if (d.result != "ok")
-            return;
         for (var j in d) {
-            if (j != "result") {
-                $(j).html(d[j]);
-                $(j).removeAttr("id"); // Çå³ıIDÊôĞÔÊÇÒòÎªµ¯³ö±íµ¥Ê±£¬ÓĞ¿ÉÄÜµ¼ÖÂIDÖØ¸´
-            }
+            $("#"+j).html(d[j]);
+            $("#"+j).removeAttr("id"); // æ¸…é™¤IDå±æ€§æ˜¯å› ä¸ºå¼¹å‡ºè¡¨å•æ—¶ï¼Œæœ‰å¯èƒ½å¯¼è‡´IDé‡å¤
         }
     });
 }
@@ -148,8 +148,9 @@ function fillselect(ar, idx) {
     }
 }
 
+cache = new Object()
 function Request(url, fun) {
-    if (cache[url]) {   // ÓÅÏÈÊ¹ÓÃ»º³åÊı¾İ
+    if (cache[url]) {   // ä¼˜å…ˆä½¿ç”¨ç¼“å†²æ•°æ®
         fun(cache[url]);
         return;
     }
@@ -160,13 +161,15 @@ function Request(url, fun) {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             jdata = $.parseJSON(xmlhttp.responseText);
             fun(jdata);
+            if (url.indexOf("/id2name") >= 0)
+                cache[url] = jdata;
         }
     };
     xmlhttp.send();
 }
 
 function RenderForm2(ar, i) {
-    alert("Ê¹ÓÃÁË¾É½Ó¿Ú£ºRenderForm2ÒÑ±»RenderPane");
+    alert("ä½¿ç”¨äº†æ—§æ¥å£ï¼šRenderForm2å·²è¢«RenderPane");
     return "";
     //var r = "";
     //for (var x = 0; x < ar.fields.length; x++) {

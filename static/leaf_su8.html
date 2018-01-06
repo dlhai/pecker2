@@ -18,7 +18,7 @@
     <div id="curitem" class="xFCscol" >
         <section class="xPanel2 xFIfixed">
             <header>节点信息<div style="float: right;"><a href="javascript:EditShow()">编辑</a></div></header>
-            <div id="item_detail" style="padding:5px;"></div>
+            <div id="item_detail" class="x2Form" style="padding:5px;"></div>
         </section>
         <section class="xPanel2">
             <header>下级列表<div style="float: right;"><a href="javascript:ImportData()">导入</a><a href="javascript:AddChild()">添加</a></div></header>
@@ -83,7 +83,6 @@
     <script type="text/javascript">
         var cur = null; // 面板当前显示的元素
         var sublist = null;// 表格当前显示的列表
-        var cache = new Object(); // 缓存
 
         request("root");
         function request(tag) {
@@ -141,20 +140,22 @@
                 siblings.css("display", "none");
             }
         }
+        //点击树节点
         function itemclick() {
             var at = $(this).parent().attr("id").split("_");
-            Request("/itemdetail?id=" + at[1] + "&type=" + at[0], function (d) {
+            Request("/itemdetail?type=" + at[0] + "&id=" + at[1], function (d) {
                 cur = d;
                 $("#item_detail").html(RenderPane(d, 0));
+                ID2Name(d, 0);
             });
             if ( at[0]!="winderarea"){
-                Request("/sublistdetail?id=" + at[1] + "&type=" + at[0], function (d) {
+                Request("/sublistdetail?type=" + at[0] + "&id=" + at[1], function (d) {
                     cursub = d;
                     $("#subitem_list").html(RenderTable2(d, 0));
                 });
             }
             else {
-                Request("/sublistdetail?id=" + at[1] + "&type=" + at[0], function (d) {
+                Request("/sublistdetail?type=" + at[0] + "&id=" + at[1], function (d) {
                     cursub = d;
                     var tpl_efan_list = doT.template(document.getElementById('tpl_efan_list').innerHTML);
                     $("#subitem_list").html(tpl_efan_list(d));
@@ -163,14 +164,10 @@
         }
 
         function EditShow() {
-            $("ModalDlgContent").html(RenderForm3(cur));
-            $('#myModal').modal('show');
-            //var it = $("#curitem");
-            //Request("/itemdetail?id=" + it.attr("data_id") + "&type=" + it.attr("data_type"), function (d) {
-            //    var text = RenderForm2(d, 0);
-            //    $("#item_detail").html(text);
-            //    $("#item_detail").prev().attr("data_id", at[1]);
-            //});
+            $("#ModalDlgContent").html(RenderForm3(cur,0));
+            fillselect(cur, 0);
+            ID2Name(cur, 0);
+            $('#ModalDlg').modal('show');
         }
         function AddChild() {
             alert("AddChild");

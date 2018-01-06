@@ -13,8 +13,8 @@ conn = engine.connect()
 table = {
     'base':Table('base', metadata,autoload=True),
     'user':Table('user', metadata,autoload=True),
-    'leaf_vender':Table('leaf_vender', metadata,autoload=True),
-    'efan_vender':Table('efan_vender', metadata,autoload=True),
+    'leafvender':Table('leafvender', metadata,autoload=True),
+    'efanvender':Table('efanvender', metadata,autoload=True),
     'winderco':Table('winderco', metadata,autoload=True),
     'winderprov':Table('winderprov', metadata,autoload=True),
     'winder':Table('winder', metadata,autoload=True),
@@ -23,7 +23,7 @@ table = {
     'leaf':Table('leaf', metadata,autoload=True)
     }
 base=table["base"]
-base.sl = [base.c.title, base.c.name, base.c.type, base.c.ftype, base.c.twidth, base.c.tstyle]
+base.sl = [base.c.title, base.c.name, base.c.forder, base.c.ftype, base.c.twidth, base.c.tstyle]
 organ = { "root": "winderco", "winderco": "winderprov", "winderprov": "winder", "winder":"winderarea","winderarea":"efan" }
 
 #def to_array( qa ):
@@ -45,9 +45,19 @@ def to_json( qa ):
 #    print("query2")
 #    return r
 
+#查询结果为json
+def jquery(q):
+#    return to_json(conn.execute(q).fetchall())
+    a = conn.execute(q).fetchall()
+    seq=[]
+    for r in a:
+        row = ['"'+str(t[0])+'":"'+str(t[1])+'"' for t in zip(r._parent.keys,r._row)]
+        seq.append("{"+",".join(row)+"}")
+    return "["+",\n".join(seq)+"]"
+
 def query3(**kw):
     r = '{"result":200,\n'
-    r += ",\n".join([ '"' + k + '":'+ to_json(conn.execute(v).fetchall()) for k,v in kw.items()] )
+    r += ",\n".join([ '"' + k + '":'+ jquery(v) for k,v in kw.items()] )
     r += "\n}\n"
     return Response(r, mimetype='application/json')
 
@@ -58,10 +68,21 @@ def _query():
     d = request.args.to_dict()
     type = d["type"]
     del d["type"]
+
+    tbl = table[type]
     sql = "select * from "+type
     if len(d) > 0:
-        sql += " where "+"and ".join([ k+"="+v for k,v in d.items()])
+        sql += " where "+" and ".join([ k+"='"+v+"'" for k,v in d.items()])
     return query3(fields=select(base.sl).where(base.c.table==type),data = sql)
+
+@app.route("/id2name")
+def id2name():
+    r = {}
+    for k,v in request.args.to_dict().items():
+        ar = k.split("_")
+        qa = conn.execute( "select name from " + ar[0] + ' where id="' + v+'"').fetchall()
+        r[k+"_"+v]=qa[0][0]
+    return jsonify(r)
 
 #leaf_su8设备sheet用
 #测试链接 http://127.0.0.1:5000/itemdetail?type=winderco&id=1
@@ -145,4 +166,5 @@ def index():
     return app.send_static_file('index.html')
 
 if __name__ == "__main__":
+    app.config['JSON_AS_ASCII'] = False
     app.run()
