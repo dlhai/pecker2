@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/bootstrap.css" />
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
+    <script src="laydate/laydate.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
     <style>
@@ -22,13 +23,13 @@
             margin: 0px 20px 0px 5px;
         }
         .xEFanForm>table{width:568px;margin-top:10px;}
-        .xEFanForm>table th{background:#f0f0f0;text-align:center;}
         .xEFanForm>table>thead {border-right: 1px solid #dddddd;}
+        .xEFanForm>table>thead>th{background:#f0f0f0;text-align:center;}
         .xEFanForm>table>tbody {
             border-right: 1px solid #95b7ff;
             border-bottom: 1px solid #95b7ff;
         }
-        .xEFanForm>table input, .xEFanForm>table select {
+        .xEFanForm>table>tbody>tr>td>input, .xEFanForm>table>tbody>tr>td>select {
             border-left: 1px solid #95b7ff;
             border-top: 1px solid #95b7ff;
             padding: 2px 5px;
@@ -37,7 +38,7 @@
             box-sizing：border-box;
         }
 
-        /*风电机表单*/
+        /*风电机面板*/
         .xEFanPanel {
             border-radius: 4px;
             background-color: #ffffff;
@@ -51,12 +52,8 @@
             border-bottom: 1px solid #dddddd;
             padding: 5px;
         }
-        .xEFanPanel header strong {
-            padding-left: 10px;
-        }
-        .xEFanPanel table {
-            width: 100%;
-        }
+        .xEFanPanel header strong {padding-left: 10px;}
+        .xEFanPanel table {width: 100%;}
         .xEFanPanel table>thead> tr > th {
             text-align: center;
             background-color: #f0f0f0;
@@ -68,7 +65,11 @@
             padding: 2px 4px;
             vertical-align: top;
         }
-        
+
+        /*为了解决BootStrap中css和layDate的css样式冲突*/
+        .laydate_box, .laydate_box * {
+            box-sizing: content-box;
+        }
     </style>
 </head>
 <body class="xFCsrow">
@@ -81,7 +82,7 @@
             <div id="item_detail" class="x2Form" style="padding:5px;"></div>
         </section>
         <section class="xPanel2">
-            <header>下级列表<div style="float: right;"><a href="javascript:ImportData()">导入</a> <a href="javascript:AddChild()">添加</a></div></header>
+            <header>下级列表<div style="float: right;"> <a href="javascript:ImportData()">导入</a> <a href="javascript:AddChild()">添加</a></div></header>
             <div class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"><div id="subitem_list"></div></div>
         </section>
     </div>
@@ -156,8 +157,8 @@
                     <tr>
                         <td><input form="nameform" name="code" value="{%=additlist.data[j].code%}" /></td>
                         <td><input form="nameform" name="mat" value="{%=additlist.data[j].mat%}" /></td>
-                        <td><input form="nameform" name="producedate" value="{%=additlist.data[j].producedate%}" /></td>
-                        <td><input form="nameform" name="putondate" value="{%=additlist.data[j].putondate%}" /></td>
+                        <td><input form="nameform" name="producedate" value="{%=additlist.data[j].producedate%}" onClick="laydate()"/></td>
+                        <td><input form="nameform" name="putondate" value="{%=additlist.data[j].putondate%}" onClick="laydate()"/></td>
                         <td><select form="nameform" name="leafvender_id" data-id="{%=additlist.data[j].leafvender_id%}" ></select></td>
                     </tr>
                     {% } %}
