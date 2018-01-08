@@ -10,6 +10,66 @@
     <script src="js/bootstrap.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
+    <style>
+        .xEFanForm {margin: 0px 15px;}
+        .xEFanForm>*{margin: 5px;}
+        .xEFanForm>form>input, .xEFanForm>form>select {
+            border-radius: 4px;
+            border: 1px solid #95b7ff;
+            display: inline-block;
+            padding: 2px 10px;
+            width: 126px;
+            margin: 0px 20px 0px 5px;
+        }
+        .xEFanForm>table{width:568px;margin-top:10px;}
+        .xEFanForm>table th{background:#f0f0f0;text-align:center;}
+        .xEFanForm>table>thead {border-right: 1px solid #dddddd;}
+        .xEFanForm>table>tbody {
+            border-right: 1px solid #95b7ff;
+            border-bottom: 1px solid #95b7ff;
+        }
+        .xEFanForm>table input, .xEFanForm>table select {
+            border-left: 1px solid #95b7ff;
+            border-top: 1px solid #95b7ff;
+            padding: 2px 5px;
+            width: 100%;
+            margin: 0px;
+            box-sizing：border-box;
+        }
+
+        /*风电机表单*/
+        .xEFanPanel {
+            border-radius: 4px;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-color: #e0e4e8;
+            margin: 5px;
+            width: 485px;
+            display: inline-block;
+        }
+        .xEFanPanel header {
+            border-bottom: 1px solid #dddddd;
+            padding: 5px;
+        }
+        .xEFanPanel header strong {
+            padding-left: 10px;
+        }
+        .xEFanPanel table {
+            width: 100%;
+        }
+        .xEFanPanel table>thead> tr > th {
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+        .xEFanPanel table>tbody > tr:nth-child(2n) > td {
+            background-color: #f5f5f5;
+        }
+        .xEFanPanel table>thead > tr > th, .d_table tbody > tr > td{
+            padding: 2px 4px;
+            vertical-align: top;
+        }
+        
+    </style>
 </head>
 <body class="xFCsrow">
     <section class="xPanel2 xFIfixed xScroll" style="width: 300px;padding:5px;">
@@ -21,7 +81,7 @@
             <div id="item_detail" class="x2Form" style="padding:5px;"></div>
         </section>
         <section class="xPanel2">
-            <header>下级列表<div style="float: right;"><a href="javascript:ImportData()">导入</a><a href="javascript:AddChild()">添加</a></div></header>
+            <header>下级列表<div style="float: right;"><a href="javascript:ImportData()">导入</a> <a href="javascript:AddChild()">添加</a></div></header>
             <div class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"><div id="subitem_list"></div></div>
         </section>
     </div>
@@ -33,7 +93,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                     <h4 class="modal-title" id="ModalDlgTitle">模态框（Modal）标题</h4>
                 </div>
-                <div id="ModalDlgContent" class="modal-body x2Form" style="padding:5px 0px">
+                <div id="ModalDlgContent" class="modal-body" style="padding:5px 0px">
                     <div><label>标识</label><input name="id" value="1234"></div>
                     <div><label>所属风场</label><input value="69"/></div>
                     <div><label>名称</label><input value="达尔罕茂明安联合旗风区"/></div>
@@ -41,8 +101,9 @@
                     <div><label>位置</label><textarea name="a" style="resize:none;width:500px;max-height:45px;">109.790407 40.523169,109.857074 40.523169,109.857074 40.613169,109.790407 40.613169</textarea></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <div style="float:left;"><button type="button" class="btn btn-default" style="color:#aaaaaa">删除</button></div>
                     <button type="button" class="btn btn-primary">提交</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal -->
@@ -50,27 +111,27 @@
 
     <script id="tpl_efan_list" type="text/template">
         {% for (var i in it.data) { %}
-        <div class="xPanel" style="margin: 5px; width: 485px; display: inline-block;">
-            <header class="heading2" style="flex-grow: 0;">
+        <div class="xEFanPanel">
+            <header>
                 <img src="img/diy/3.png" />
                 <strong>编号:</strong><span>{%=it.data[i].code%}</span>
                 <strong>型号:</strong><span>{%=it.data[i].type%}</span>
-                <strong>生产厂家:</strong><span>{%=it.data[i].efan_vender_id%}</span>
+                <strong>生产厂家:</strong><span class="efanvender_id">{%=it.data[i].efanvender_id%}</span>
                 <div style="float: right;">
-                    <a id="{%=it.data[i].id%}" href="javascript:EditEfan()">编辑</a>
+                    <a id="{%=it.data[i].id%}" onClick="EditEfan(this)">编辑</a>
                 </div>
             </header>
-            <table class="d_table">
+            <table>
                 <thead><tr><th>编号</th><th>主要材料</th><th>出厂时间</th><th>挂机时间</th><th>生产厂家</th></tr></thead>
                 <tbody>
-                    {% for (var j in it.addit) { %}
-                    {% if (it.addit[j].efan_id==it.data[i].id) { %}
+                    {% for (var j in additlist.data) { %}
+                    {% if (additlist.data[j].efan_id==it.data[i].id) { %}
                     <tr>
-                        <td>{%=it.addit[j].code%}</td>
-                        <td>{%=it.addit[j].mat%}</td>
-                        <td>{%=it.addit[j].producedate%}</td>
-                        <td>{%=it.addit[j].putondate%}</td>
-                        <td>{%=it.addit[j].leaf_vender_id%}</td>
+                        <td>{%=additlist.data[j].code%}</td>
+                        <td>{%=additlist.data[j].mat%}</td>
+                        <td>{%=additlist.data[j].producedate%}</td>
+                        <td>{%=additlist.data[j].putondate%}</td>
+                        <td class="leafvender_id">{%=additlist.data[j].leafvender_id%}</td>
                     </tr>
                     {% } %}
                     {% } %}
@@ -80,56 +141,76 @@
         {% } %}
     </script>
 
+    <script id="tpl_efan_edit" type="text/template">
+        <div class="xEFanForm">
+            <form>
+                <strong>编号:</strong><input name="code" value="{%=it.code%}" />
+                <strong>型号:</strong><input name="type" value="{%=it.type%}" />
+                <strong>生产厂家:</strong><select data-id="{%=it.efanvender_id%}" name="efanvender_id" style="margin-right:0px;"></select>
+            </form>
+            <table>
+                <thead><tr><th>编号</th><th>主要材料</th><th>出厂时间</th><th>挂机时间</th><th>生产厂家</th></tr></thead>
+                <tbody>
+                    {% for (var j in additlist.data) { %}
+                    {% if (additlist.data[j].efan_id==it.id) { %}
+                    <tr>
+                        <td><input form="nameform" name="code" value="{%=additlist.data[j].code%}" /></td>
+                        <td><input form="nameform" name="mat" value="{%=additlist.data[j].mat%}" /></td>
+                        <td><input form="nameform" name="producedate" value="{%=additlist.data[j].producedate%}" /></td>
+                        <td><input form="nameform" name="putondate" value="{%=additlist.data[j].putondate%}" /></td>
+                        <td><select form="nameform" name="leafvender_id" data-id="{%=additlist.data[j].leafvender_id%}" ></select></td>
+                    </tr>
+                    {% } %}
+                    {% } %}
+                </tbody>
+            </table>
+        </div>
+    </script>
+
     <script type="text/javascript">
         var cur = null; // 面板当前显示的元素
         var sublist = null;// 表格当前显示的列表
+        var additlist = null; // 表格元素中的子元素列表（叶片列表）
+        var subtype = { "root": "winderco", "winderco": "winderprov", "winderprov": "winder", "winder": "winderarea", "winderarea": "efan" }
 
-        request("root");
-        function request(tag) {
-            var at = tag.split("_");
-            var node = $("#" + tag);
+        request2("root");
 
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.open("GET", "/sublist?id=" + at[1] + "&type=" + at[0], true);
-            xmlhttp.onreadystatechange = function () {
-                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                    node.append(totreeitem(at[0], xmlhttp.responseText));
-                    node.children("img").attr("src", "img/nolines_minus.gif");
-                    $(".xTree div>img").unbind("click", itemexpand);
-                    $(".xTree div>span").unbind("click", itemclick);
-                    $(".xTree div>img").bind("click", itemexpand);
-                    $(".xTree div>span").bind("click", itemclick);
-                }
-            };
-            xmlhttp.send();
-        }
+        // 给出文档节点ID，展开下级列表 id格式：root或winderco_1
+        function request2(id) {
+            var at = id.split("_");
+            var type = subtype[at[0]];
+            Request("/query?type=" + type + (at[1] ? "&"+at[0]+"_id=" + at[1] : ""), function (res) {
+                var treeimg = { "winderco": "img/diy/1_open.png", "winderprov": "img/folder.gif", "winder": "img/diy/3.png", "winderarea": "img/page.gif" }
 
-        function totreeitem(type, rdata) {
-            var treeimg = { "winderco": "img/diy/1_open.png", "winderprov": "img/folder.gif", "winder": "img/diy/3.png", "winderarea":"img/page.gif" }
-            var subtype = { "root": "winderco", "winderco": "winderprov", "winderprov": "winder", "winder": "winderarea" }
-            var type = subtype[type];
-            var r = "";
-            data = $.parseJSON(rdata);
-            for (i in data) {
-                if (type != "winderarea") {
-                    t = "<div id=\"" + type + "_" + data[i].id + "\">"
-                        + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
-                        + treeimg[type] + "\">" + data[i].name + "</span></div>"
+                var html = "";
+                var data = res.data;
+                for (var i in data) {
+                    if (type != "winderarea") {
+                        html += "<div id=\"" + type + "_" + data[i].id + "\">"
+                            + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
+                            + treeimg[type] + "\">" + data[i].name + "</span></div>\n"
+                    }
+                    else { // 少了左边的加号，为缩进对齐加了一层div
+                        html += "<div><div id=\"" + type + "_" + data[i].id + "\"><span><img src=\""
+                            + treeimg[type] + "\">" + data[i].name + "</span></div></div>\n"
+                    }
                 }
-                else {
-                    t = "<div><div id=\"" + type + "_" + data[i].id + "\"><span><img src=\""
-                        + treeimg[type] + "\">" + data[i].name + "</span></div></div>"
-                }
-                r += t + "\n"
-            }
-            return r;
+
+                $("#" + id).append(html);
+                $("#" + id).children("img").attr("src", "img/nolines_minus.gif");
+
+                $(".xTree div>img").unbind("click", itemexpand);
+                $(".xTree div>span").unbind("click", itemclick);
+                $(".xTree div>img").bind("click", itemexpand);
+                $(".xTree div>span").bind("click", itemclick);
+            });
         }
 
         function itemexpand() {
             var siblings = $(this).siblings("div");
             if (siblings.length == 0) {
                 var id = $(this).parent().attr("id");
-                request(id);
+                request2(id);
             }
             else if (siblings.css("display") == "none") {
                 $(event.srcElement).attr("src", "img/nolines_minus.gif");
@@ -142,25 +223,41 @@
         }
         //点击树节点
         function itemclick() {
+            $("#subitem_list").html("");
             var at = $(this).parent().attr("id").split("_");
-            Request("/itemdetail?type=" + at[0] + "&id=" + at[1], function (d) {
+
+            // 显示节点详细，这步的查询有优化掉的可能
+            Request("/query?type=" + at[0] + "&id=" + at[1], function (d) {
                 cur = d;
                 $("#item_detail").html(RenderPane(d, 0));
                 ID2Name(d, 0);
             });
-            if ( at[0]!="winderarea"){
-                Request("/sublistdetail?type=" + at[0] + "&id=" + at[1], function (d) {
-                    cursub = d;
-                    $("#subitem_list").html(RenderTable2(d, 0));
-                });
-            }
-            else {
-                Request("/sublistdetail?type=" + at[0] + "&id=" + at[1], function (d) {
-                    cursub = d;
-                    var tpl_efan_list = doT.template(document.getElementById('tpl_efan_list').innerHTML);
-                    $("#subitem_list").html(tpl_efan_list(d));
-                });
-            }
+
+            // 显示节点下级列表
+            var type = subtype[at[0]];
+            Request("/query?type=" + type + "&" + at[0] + "_id=" + at[1], function (d2) {
+                sublist = d2;
+                if (at[0] != "winderarea") // 普通列表
+                    $("#subitem_list").html(RenderTable2(d2, 0));   
+                else {                     // 风机列表
+                    Request("/query?type=leaf&" + at[0] + "_id=" + at[1], function (d3) {
+                        additlist = d3;
+                        var tpl_efan_list = doT.template(document.getElementById('tpl_efan_list').innerHTML);
+                        $("#subitem_list").html(tpl_efan_list(d2));
+
+                        Request("/query?type=efanvender", function (d4) {
+                            var nodes = $(".efanvender_id");
+                            for (var i in nodes)
+                                nodes[i].html(EFan_ID2Name(d4.data, nodes[i].html()));
+                        });
+                        Request("/query?type=leafvender", function (d5) {
+                            var nodes = $(".leafvender_id");
+                            for (var i in nodes)
+                                nodes[i].html(EFan_ID2Name(d4.data, nodes[i].html()));
+                        });
+                    });
+                }
+            });
         }
 
         function EditShow() {
@@ -176,9 +273,27 @@
             alert("ImportData");
         }
 
-        function EditEfan() {
-            alert("EditEfan");
+        function EditEfan(t) {
+            var tpl_efan_edit = doT.template(document.getElementById('tpl_efan_edit').innerHTML);
+            var id = $(t).attr("id");
+            for (var i in sublist.data) {
+                if (sublist.data[i].id == id) {
+                    $("#ModalDlgContent").html(tpl_efan_edit(sublist.data[i]));
+                    $('#ModalDlg').modal('show');
+                    break;
+                }
+            }
         }
+
+        function EFan_ID2Name(ar, id) {
+            for (var i in ar) {
+                if (ar[i].id == id)
+                    return ar[i].name;
+            }
+            return "";
+        }
+        // 表单验证的几种方法： http://www.jb51.net/article/92741.htm
     </script>
 </body>
 </html>
+

@@ -144,16 +144,18 @@ body {
     margin: 5px 5px;
 }
 .x2Form>div>div,
-.x2Form > div > input,
-.x2Form > div > select,
-.x2Form > div > textarea {
+.x2Form>div>input,
+.x2Form>div>select,
+.x2Form>div>textarea {
     border-radius: 4px;
-    border: 1px solid #dddddd;
+    border: 1px solid #95b7ff;
     display: inline-block;
     padding: 5px 10px;
     margin: 0px 5px;
     width: 200px;
 }
+.x2Form>div>div{border: 1px solid #dddddd;}
+
 
 /*文档控件，需要js配合*/
 .x3Doc {

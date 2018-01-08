@@ -64,24 +64,31 @@ function RenderTable2(it, style) {
 }
 
 function RenderForm3(ar, idx) {
-    var r = "";
+    var r = '<div class="x2Form">';
     for (var i = 0; i < ar.fields.length; i++) {
         var field = ar.fields[i];
         var val = ar.data[idx][field.name];
+        if (field.name == "id")
+            continue;
+
+        var attr = "";
+        if (field.name.indexOf("_") != -1)
+            attr = 'id="' + field.name + "_" + val + '"';
 
         r += "<div><label>" + field.title + "</label>";
         if (field.ftype == "div")
-            r += "<div>"+val + "</div>";
+            r += "<div "+attr+">"+val + "</div>";
         else if (field.ftype == "input")
-            r += '<input name="' + field.name+'" value="'+ val + '"/>';
+            r += '<input '+attr+' name="' + field.name+'" value="'+ val + '"/>';
         else if (field.ftype == "input_long")
-            r += '<input style="width:500px;" name="' + field.name + '" value="' + val + '" />';
+            r += '<input ' + attr +' style="width:500px;" name="' + field.name + '" value="' + val + '" />';
         else if (field.ftype == "textarea")
-            r += '<textarea style="resize:none;width:500px;max-height:45px;" name="' + field.name + '">' + val + '"</textarea>';
+            r += '<textarea ' + attr +' style="resize:none;width:500px;max-height:45px;" name="' + field.name + '">' + val + '"</textarea>';
         else if (field.ftype == "select")
-            r += '<select id="' + field.name +'_'+val+'" name="' + field.name + '>"</select>';
+            r += '<select '+attr+' name="'+field.name+'"></select>';
         r += "</div>";
     }
+    r += "</div>";
     return r;
 }
 
@@ -161,8 +168,7 @@ function Request(url, fun) {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             jdata = $.parseJSON(xmlhttp.responseText);
             fun(jdata);
-            if (url.indexOf("/id2name") >= 0)
-                cache[url] = jdata;
+            cache[url] = jdata;
         }
     };
     xmlhttp.send();

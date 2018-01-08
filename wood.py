@@ -75,6 +75,7 @@ def _query():
         sql += " where "+" and ".join([ k+"='"+v+"'" for k,v in d.items()])
     return query3(fields=select(base.sl).where(base.c.table==type),data = sql)
 
+#id到名字的转换
 @app.route("/id2name")
 def id2name():
     r = {}
@@ -83,6 +84,8 @@ def id2name():
         qa = conn.execute( "select name from " + ar[0] + ' where id="' + v+'"').fetchall()
         r[k+"_"+v]=qa[0][0]
     return jsonify(r)
+
+#-----------------------以下接口将被废弃-------------------------------
 
 #leaf_su8设备sheet用
 #测试链接 http://127.0.0.1:5000/itemdetail?type=winderco&id=1
@@ -159,6 +162,8 @@ def efanlist():
     tbl = table["efan"]
     s = select([tbl.c.id, tbl.c.position]).where(tbl.c.winder_id==winder_id).order_by(tbl.c.id)
     return query3(efanlist=s)
+
+#---------------------以上接口将被废弃---------------------------------------
 
 #登录
 @app.route("/")
