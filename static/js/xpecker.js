@@ -83,7 +83,7 @@ function RenderForm3(ar, idx) {
         else if (field.ftype == "input_long")
             r += '<input ' + attr +' style="width:500px;" name="' + field.name + '" value="' + val + '" />';
         else if (field.ftype == "textarea")
-            r += '<textarea ' + attr +' style="resize:none;width:500px;max-height:45px;" name="' + field.name + '">' + val + '"</textarea>';
+            r += '<textarea ' + attr +' style="resize:none;width:500px;max-height:45px;" name="' + field.name + '">' + val + '</textarea>';
         else if (field.ftype == "select")
             r += '<select '+attr+' name="'+field.name+'"></select>';
         r += "</div>";
@@ -114,23 +114,26 @@ function RenderPane(ar, idx){
     return r;
 }
 
-function RenderSelect(ar, id) {
+function RenderSelect(ar, selid) {
     var r = "";
-    for (var i in ar.data) {
-        var data = ar.data[i];
-        if (data["id"] == id )
-            r += '<option value="' + data["id"] + ' selected>' + data["name"] + '</option>';
+    for (var i in ar) {
+        var x = ar[i];
+        if (x["id"] == selid )
+            r += '<option value="' + x["id"] + ' selected>' + x["name"] + '</option>';
         else
-            r += '<option value="' + data["id"] + '>' + data["name"] + '</option>';
+            r += '<option value="' + x["id"] + '>' + x["name"] + '</option>';
     }
     return r;
 }
 
 function ID2Name(ar, idx) {
     var param = new Array();
-    for (var i in ar.fields)
-        if (ar.fields[i].name.indexOf("_") != -1)
-            param.push(ar.fields[i].name+"="+ar.data[idx][ar.fields[i].name]);
+    for (var i in ar.fields) {
+        var name = ar.fields[i].name;
+        var val = ar.data[idx][name];
+        if (name.indexOf("_") != -1 && val != "" && ar.fields[i].type != "select" )
+            param.push(name + "=" + val);
+    }
     if (param.length == 0)
         return;
 
@@ -190,3 +193,26 @@ function RenderForm2(ar, i) {
     //return r;
 }
 
+function FindSub(ar, id) {
+    for (var i in ar) {
+        if (ar[i].id == id)
+            return ar[i];
+    }
+    return null;
+}
+
+function Clone(obj) {
+    var r = new Object();
+    for (var k in obj) {
+        var val = obj[k];
+        r[k] = typeof val === 'object' ? cloneObj(val) : val;
+    }
+    return r;
+}
+
+function Create(fields) {
+    var r = new Object();
+    for (var k in fields)
+        r[fields[k].name] = "";
+    return r;
+}

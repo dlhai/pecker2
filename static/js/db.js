@@ -184,6 +184,19 @@ var db_roles = [
     { type: "技工", act: "leiyixuan", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
 ];
 
+var branch = {
+    "root": { "type":"root", "name": "企业列表", "sub": "winderco", "image": "" },
+    "winderco": { "type": "winderco", "name": "风电企业", "sub": "winderprov", "image": "img/diy/1_open.png" },
+    "winderprov": { "type": "winderprov", "name": "省区", "sub": "winder", "image": "img/folder.gif" },
+    "winder": { "type": "winder", "name": "风场", "sub": "winderarea", "image": "img/diy/3.png" },
+    "winderarea": { "type": "winderarea", "name": "风区", "sub": "efan", "image": "img/page.gif" },
+    "efan": { "type": "efan", "name": "风电机", "sub": "leaf", "image": "" },
+    "sub": function (type) {
+        return this[this[type].sub]
+    }
+}
+
+
 var db_leafvender =
 [
 { "name": "重庆复合", "fname": "重庆国际复合材料有限公司", "addr": "北京市顺义区新顺南大街8号院1幢F1-51B ", "atten": "顾冰薇", "tel": "0532-86011111", "leader": "常辰淋", "fax": "023-63862607" },

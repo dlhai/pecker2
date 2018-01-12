@@ -1,6 +1,7 @@
 #encoding:utf8
 from sqlalchemy import *
 from flask import Flask,request, Response, jsonify
+from werkzeug.utils import secure_filename
 import pdb
 
 app = Flask(__name__) 
@@ -55,8 +56,8 @@ def jquery(q):
         seq.append("{"+",".join(row)+"}")
     return "["+",\n".join(seq)+"]"
 
-def query3(**kw):
-    r = '{"result":200,\n'
+def query3(type,**kw):
+    r = '{"result":200,"type":"'+type+'",\n'
     r += ",\n".join([ '"' + k + '":'+ jquery(v) for k,v in kw.items()] )
     r += "\n}\n"
     return Response(r, mimetype='application/json')
@@ -73,7 +74,7 @@ def _query():
     sql = "select * from "+type
     if len(d) > 0:
         sql += " where "+" and ".join([ k+"='"+v+"'" for k,v in d.items()])
-    return query3(fields=select(base.sl).where(base.c.table==type),data = sql)
+    return query3(type,fields=select(base.sl).where(base.c.table==type),data = sql)
 
 #id到名字的转换
 @app.route("/id2name")
@@ -85,6 +86,12 @@ def id2name():
         r[k+"_"+v]=qa[0][0]
     return jsonify(r)
 
+@app.route("/upload",methods=['POST'])
+def upload():
+    f = request.files["file"]
+    f.save("./uploads/" + f.filename)
+    return f.filename
+
 #-----------------------以下接口将被废弃-------------------------------
 
 #leaf_su8设备sheet用
@@ -94,7 +101,7 @@ def itemdetail():
     type = request.args.get('type')
     id = request.args.get('id')
     tbl = table[type]
-    return query3(fields=select(base.sl).where(base.c.table==type),\
+    return query3(type,fields=select(base.sl).where(base.c.table==type),\
         data=select([tbl]).where(tbl.c.id==id).order_by(tbl.c.id))
 
 #leaf_su8子设备列表table用，type=root时，仅超级用户可用
@@ -114,9 +121,9 @@ def sublistdetail():
     if subtype == "efan":
         sub = table["leaf"]
         s3 = select([sub]).where(sub.c.winderarea_id==id).order_by(sub.c.id)
-        return query3(fields=s1,data=s2,addit=s3)
+        return query3(type,fields=s1,data=s2,addit=s3)
     else:
-        return query3(fields=s1,data=s2)
+        return query3(type,fields=s1,data=s2)
 
 #leaf_su8设备树用，【暂废：winder补充了position，用来在】
 #测试链接 http://127.0.0.1:5000/sublist?type=root&id=1
@@ -147,11 +154,11 @@ def winderlist():
     if winder_id =="0":
         s1 = select([tbl1.c.id, tbl1.c.name,tbl1.c.position]).order_by(tbl1.c.id)
         s2 = select([tbl2.c.id, tbl2.c.name,tbl2.c.position]).order_by(tbl2.c.id)
-        return query3(winder=s1,winderarea=s2)
+        return query3("winder",winder=s1,winderarea=s2)
     else:
         s1 = select([tbl1.c.id, tbl1.c.name,tbl1.c.position]).order_by(tbl1.c.id).where(tbl1.c.id==winder_id)
         s2 = select([tbl2.c.id, tbl2.c.name,tbl2.c.position]).order_by(tbl2.c.id).where(tbl2.c.winder_id==winder_id)
-        return query3(winder=s1,winderarea=s2)
+        return query3("winder", winder=s1,winderarea=s2)
 
 #leafmap用来显示地图上风电机分布，除su外，仅本风场人员可访问
 #与sublist之区别是这是无下级叶片列表，仅efan, sublist无gps
@@ -161,7 +168,7 @@ def efanlist():
     winder_id = request.args.get('winder_id')
     tbl = table["efan"]
     s = select([tbl.c.id, tbl.c.position]).where(tbl.c.winder_id==winder_id).order_by(tbl.c.id)
-    return query3(efanlist=s)
+    return query3("efan", efanlist=s)
 
 #---------------------以上接口将被废弃---------------------------------------
 

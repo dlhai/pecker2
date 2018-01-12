@@ -4,8 +4,9 @@
     "\\db",
     "\\static",
     "\\static\\css",
-    "\\static\\js"
+    "\\static\\js",
+    "\\static\\laydate"
   ],
-  "SelectedNode": "\\db\\buildarea.py",
+  "SelectedNode": "\\static\\leaf_su8.html",
   "PreviewInSolutionExplorer": false
 }
