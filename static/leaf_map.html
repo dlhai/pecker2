@@ -15,7 +15,7 @@
 
     </style>
 </head>
-<body>
+<body onbeforeunload="UpdateCurData()">
     <div id="allmap" style="height: 100%;width: 100%;"></div>
 </body>
 </html>
@@ -30,51 +30,134 @@
     var winders = new Object();
     var winderareas = new Object();
     var efans = new Object();
-    var editmode = false;
-    var curarea = null;
+
+    function UpdateCurData(type, data) {
+        if (curdata)
+        {
+            if (curdata.type == "winder") {
+
+            }
+            else if (curdata.type == "winderarea") {
+
+            }
+            else if (curdata.type == "efan") {
+
+            }
+            alert("save " + curdata.type);
+        }
+        curdata = new Object();
+        curdata.type = type;
+        curdata.data = data;
+    }
 
     // 在地图上显示风场
     Request("/query?type=winder", function (d1) {
         var flower = new BMap.Icon("img/diy/3.png", new BMap.Size(16, 16));
+        var efan_icon = new BMap.Icon("img/efan.png", new BMap.Size(16, 16));
         winders = d1;
         for (var x in d1.data) {
             var marker = new BMap.Marker(CreatePoint(d1.data[x].position), { icon: flower });
             var label = new BMap.Label(d1.data[x].name, { offset: new BMap.Size(20, -1) });
-            label.setStyle({ border: "1px solid blue", color: "blue", padding:"0px 4px" });
+            label.setStyle({ border: "0px", color: "blue" });
             marker.setLabel(label);
             map.addOverlay(marker);
             d1.data[x].mk = marker;
-            marker.addEventListener("dragend", function (type, target, pixel, point) {
-                alert("dragend");
-            });
-            marker.addEventListener("click", function (e) { ShowInfoWindow(d1, x, e); });
-            label.addEventListener("click", function (e) { ShowInfoWindow(d1, x, e); });
-
-         //   addClickHandler(d1.data[x].id, marker);
-         //   addClickHandler(d1.data[x].id, label);
+            BindWinderEvent(marker, label, d1.data, x);
         }
     });
+    function BindWinderEvent(mk,lbl,ar,idx) {
+        mk.addEventListener("dragend", function (type, target, pixel, point) {
+            UpdateCurData("winder", ar[idx]);
+        });
+        mk.addEventListener("click", function (e) { ShowInfoWindow(ar, idx, e); });
+        lbl.addEventListener("click", function (e) { ShowInfoWindow(ar, idx, e); });
+    }
 
     // 在地图上显示风区
     Request("/query?type=winderarea", function (d2) {
         winderareas = d2;
         for (var x in winderareas.data) {
             var plg = CreatePolygon(winderareas.data[x].position);
-            plg.addEventListener("click", function (type, target, point, pixel) {
-                if (editmode){
-                    plg.enableEditing();
-                    alert("winderareas click");
-                }
-            });
-            plg.addEventListener("lineupdate", function (type, target) {
-               // alert("winderareas lineupdate");
-            });
             winderareas.data[x].plg = plg;
             map.addOverlay(plg);
+
+            var label = CreateAreaLabel(winderareas.data[x]);
+            winderareas.data[x].lbl = label;
+            map.addOverlay(label);
+
+            BindAreaEvent(winderareas.data[x]);
         }
     });
+    // 计算中心点位置
+    function CalCenter(path) {
+        var lng = 0, lat = 0;
+        for (var i in path) {
+            lng += path[i].lng;
+            lat += path[i].lat;
+        }
+        return new BMap.Point(lng / path.length, lat / path.length);
+    }
+    function CreateAreaLabel(area) {
+        var opts = {
+            position: CalCenter(area.plg.getPath()),
+            offset: new BMap.Size(-6 * area.name.length, -6)    //设置文本偏移量
+        }
+        var label = new BMap.Label(area.name, opts);  // 创建文本标注对象
+        label.setStyle({
+            border: "0px",
+            color: "Chocolate",
+            fontSize: "12px",
+            height: "20px",
+            lineHeight: "20px",
+            fontFamily: "微软雅黑"
+        });
+        map.addOverlay(label);   
+        return label;
+    }
+    function BindAreaEvent(area) {
+        area.plg.addEventListener("click", function (type, target, point, pixel) {
+            // 显示本风区的风电机
+            Request("/query?type=efan&winderarea_id=" + area.id, function (d2) {
+                efans = d2;
+                for (var x in d2.data) {
+                    var marker = new BMap.Marker(CreatePoint(d2.data[x].position), { icon: efan_icon });
+                    var label = new BMap.Label(d2.data[x].code, { offset: new BMap.Size(20, -1) });
+                    label.setStyle({ border: "0px", color: "Chocolate" });
+                    marker.setLabel(label);
+                    map.addOverlay(marker);
+                    d2.data[x].mk = marker;
+                    BindEfanEvent(marker, label, d2.data, x);
+                }
+            });
+            // 更新当前对象为自己
+            UpdateCurData("winderarea", area);
+        });
+        area.plg.addEventListener("lineupdate", function (type, target) {
+            area.plg.lbl.setPosition(CalCenter(area.plg.getPath()));
+        });
+    }
+    function BindEfanEvent(mk, lbl, ar, idx) {
+        mk.addEventListener("dragend", function (type, target, pixel, point) {
+            UpdateCurData("efan", ar[idx]);
+        });
+        mk.addEventListener("click", function (e) { ShowEfanWindow(ar, idx, e); });
+        lbl.addEventListener("click", function (e) { ShowEfanWindow(ar, idx, e); });
+    }
+    function ShowEfanWindow(ar, i, e) {
+        // ...
 
-    function BindEvent( obj, event,  )
+        //var p = e.target;
+        //var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+        //var content = '<div class="xRndAngle x2Form" style="overflow-y: scroll;height:290px;padding:5px 0px">' + RenderPane(ar, i) + '</div>';
+        //var infoWindow = new BMap.InfoWindow(content, {
+        //    width: 619,     // 信息窗口宽度
+        //    height: 320,     // 信息窗口高度
+        //    title: "风场信息", // 信息窗口标题
+        //    enableMessage: true//设置允许信息窗发送短息
+        //});  // 创建信息窗口对象 
+        //map.openInfoWindow(infoWindow, point); //开启信息窗口
+        //ID2Name(ar, i);
+    }
 
     //-----------------OrganTreeControl begin------------------------------------------------
     // 定义组织机构控件,即function
@@ -83,10 +166,8 @@
         this.defaultAnchor = BMAP_ANCHOR_TOP_LEFT;
         this.defaultOffset = new BMap.Size(10, 10);
     }
-
     // 通过JavaScript的prototype属性继承于BMap.Control
     OrganTreeControl.prototype = new BMap.Control();
-
     // 自定义控件必须实现自己的initialize方法,并且将控件的DOM元素返回
     // 在本方法中创建个div元素作为控件的容器,并将其添加到地图容器中
     OrganTreeControl.prototype.initialize = function (map) {
@@ -120,10 +201,8 @@
         this.defaultAnchor = BMAP_ANCHOR_TOP_LEFT;
         this.defaultOffset = new BMap.Size(270, 10);
     }
-
     // 通过JavaScript的prototype属性继承于BMap.Control
     ModeControl.prototype = new BMap.Control();
-
     // 自定义控件必须实现自己的initialize方法,并且将控件的DOM元素返回
     // 在本方法中创建个div元素作为控件的容器,并将其添加到地图容器中
     ModeControl.prototype.initialize = function (map) {
@@ -160,13 +239,6 @@
     map.addControl(modectrl);
     // -----------------ModeControl end---------------------------
 
-    //Request("/efanlist?winder_id=0", function (d2) {
-    //    for (var x in d2.efanlist) {
-    //        var marker2 = new BMap.Marker(CreatePoint(d2.efanlist[x].position));
-    //        map.addOverlay(marker2);
-    //    }
-    //});
-
     function CreatePoint( pos ) {
         var ar = pos.split(" ");
         return new BMap.Point(parseFloat(ar[0]), parseFloat(ar[1]));
@@ -177,7 +249,7 @@
         var arr = [];
         for (var i in ar)
             arr.push(CreatePoint(ar[i]));
-        return new BMap.Polygon(arr, { strokeColor: "blue", strokeWeight: 2, strokeOpacity: 0.5 });
+        return new BMap.Polygon(arr, { strokeColor: "Chocolate", strokeWeight: 2, strokeOpacity: 0.5 });
     }
 
     function addClickHandler(id, marker) {
@@ -261,7 +333,6 @@
         if (at[0] == "winder") {
             mk = FindSub(winders.data, at[1]).mk;
             mk.setAnimation(BMAP_ANIMATION_BOUNCE);
-            mk.enableDragging();
             map.centerAndZoom(mk.getPosition(), 6); //设置中心点坐标和地图级别
         }
         else if (at[0] == "winderarea") {
