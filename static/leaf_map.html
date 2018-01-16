@@ -30,20 +30,22 @@
     var winders = new Object();
     var winderareas = new Object();
     var efans = new Object();
+    var curdata = new Object();
+    curdata.type == "";
+    var editmode = false;
+    var flower = new BMap.Icon("img/diy/3.png", new BMap.Size(16, 16));
+    var efan_icon = new BMap.Icon("img/efan.png", new BMap.Size(16, 16));
+
 
     function UpdateCurData(type, data) {
-        if (curdata)
-        {
-            if (curdata.type == "winder") {
-
-            }
-            else if (curdata.type == "winderarea") {
-
-            }
-            else if (curdata.type == "efan") {
-
-            }
-            alert("save " + curdata.type);
+        if (curdata.type == "winder") {
+            curdata.data.mk.disableDragging();
+        }
+        else if (curdata.type == "winderarea") {
+            curdata.data.plg.disableEditing();
+        }
+        else if (curdata.type == "efan") {
+            curdata.data.mk.disableDragging();
         }
         curdata = new Object();
         curdata.type = type;
@@ -52,8 +54,6 @@
 
     // 在地图上显示风场
     Request("/query?type=winder", function (d1) {
-        var flower = new BMap.Icon("img/diy/3.png", new BMap.Size(16, 16));
-        var efan_icon = new BMap.Icon("img/efan.png", new BMap.Size(16, 16));
         winders = d1;
         for (var x in d1.data) {
             var marker = new BMap.Marker(CreatePoint(d1.data[x].position), { icon: flower });
@@ -131,9 +131,12 @@
             });
             // 更新当前对象为自己
             UpdateCurData("winderarea", area);
+            if (editmode) {
+                area.plg.enableEditing();
+            }
         });
         area.plg.addEventListener("lineupdate", function (type, target) {
-            area.plg.lbl.setPosition(CalCenter(area.plg.getPath()));
+            area.lbl.setPosition(CalCenter(area.plg.getPath()));
         });
     }
     function BindEfanEvent(mk, lbl, ar, idx) {
