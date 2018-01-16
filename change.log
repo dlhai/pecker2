@@ -2,3 +2,7 @@
 1.为db.efan增加code字段，并与db.leaf.code绑定成abc关系
 2.增加leaf_su8对风机列表显示的支持
 3.wood查询winder列表的增加了gps信息
+
+2018年1月16日星期二
+1.leaf_map基本完成，余保存功能
+2.leaf_su8基本完成，余a.风场主管、驻场人员没显示在表单上，b.保存功能

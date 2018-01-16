@@ -34,8 +34,7 @@
     curdata.type == "";
     var editmode = false;
     var flower = new BMap.Icon("img/diy/3.png", new BMap.Size(16, 16));
-    var efan_icon = new BMap.Icon("img/efan.png", new BMap.Size(16, 16));
-
+    var efan_icon = new BMap.Icon("img/efan32.png", new BMap.Size(32, 32));
 
     function UpdateCurData(type, data) {
         if (curdata.type == "winder") {
@@ -88,51 +87,33 @@
             BindAreaEvent(winderareas.data[x]);
         }
     });
-    // 计算中心点位置
-    function CalCenter(path) {
-        var lng = 0, lat = 0;
-        for (var i in path) {
-            lng += path[i].lng;
-            lat += path[i].lat;
-        }
-        return new BMap.Point(lng / path.length, lat / path.length);
-    }
-    function CreateAreaLabel(area) {
-        var opts = {
-            position: CalCenter(area.plg.getPath()),
-            offset: new BMap.Size(-6 * area.name.length, -6)    //设置文本偏移量
-        }
-        var label = new BMap.Label(area.name, opts);  // 创建文本标注对象
-        label.setStyle({
-            border: "0px",
-            color: "Chocolate",
-            fontSize: "12px",
-            height: "20px",
-            lineHeight: "20px",
-            fontFamily: "微软雅黑"
-        });
-        map.addOverlay(label);   
-        return label;
-    }
     function BindAreaEvent(area) {
         area.plg.addEventListener("click", function (type, target, point, pixel) {
-            // 显示本风区的风电机
-            //Request("/query?type=efan&winderarea_id=" + area.id, function (d2) {
-            //    efans = d2;
-            //    for (var x in d2.data) {
-            //        var marker = new BMap.Marker(CreatePoint(d2.data[x].position), { icon: efan_icon });
-            //        var label = new BMap.Label(d2.data[x].code, { offset: new BMap.Size(20, -1) });
-            //        label.setStyle({ border: "0px", color: "Chocolate" });
-            //        marker.setLabel(label);
-            //        map.addOverlay(marker);
-            //        d2.data[x].mk = marker;
-            //        BindEfanEvent(marker, label, d2.data, x);
-            //    }
-            //});
-            // 更新当前对象为自己
-            UpdateCurData("winderarea", area);
-            if (editmode) {
+            if (curdata.data != area) {
+                // 显示本风区的风电机
+                Request("/query?type=efan&winderarea_id=" + area.id, function (darea) {
+                    if (efans.data) {
+                        for (var i in efans.data)
+                            map.removeOverlay(efans.data[i].mk);
+                    }
+                    efans = darea;
+                    for (var x in efans.data) {
+                        var marker = new BMap.Marker(CreatePoint(efans.data[x].position), { icon: efan_icon });
+                        var label = new BMap.Label(efans.data[x].code, { offset: new BMap.Size(20, 20) });
+                        label.setStyle({ border: "0px", color: "Chocolate" });
+                        marker.setLabel(label);
+                        map.addOverlay(marker);
+                        efans.data[x].mk = marker;
+                        BindEfanEvent(marker, label, efans.data, x);
+                    }
+                });
+                // 更新当前对象为自己
+                UpdateCurData("winderarea", area);
+            }
+            if (editmode){
                 area.plg.enableEditing();
+                for (var i in efans.data)
+                    efans.data[i].mk.enableDragging();
             }
         });
         area.plg.addEventListener("lineupdate", function (type, target) {
@@ -160,6 +141,32 @@
         //});  // 创建信息窗口对象 
         //map.openInfoWindow(infoWindow, point); //开启信息窗口
         //ID2Name(ar, i);
+    }
+    // 计算中心点位置
+    function CalCenter(path) {
+        var lng = 0, lat = 0;
+        for (var i in path) {
+            lng += path[i].lng;
+            lat += path[i].lat;
+        }
+        return new BMap.Point(lng / path.length, lat / path.length);
+    }
+    function CreateAreaLabel(area) {
+        var opts = {
+            position: CalCenter(area.plg.getPath()),
+            offset: new BMap.Size(-6 * area.name.length, -6)    //设置文本偏移量
+        }
+        var label = new BMap.Label(area.name, opts);  // 创建文本标注对象
+        label.setStyle({
+            border: "0px",
+            color: "Chocolate",
+            fontSize: "12px",
+            height: "20px",
+            lineHeight: "20px",
+            fontFamily: "微软雅黑"
+        });
+        map.addOverlay(label);
+        return label;
     }
 
     //-----------------OrganTreeControl begin------------------------------------------------
@@ -223,6 +230,8 @@
                 div.innerHTML = '编辑';
                 for (var i in winders.data)
                     winders.data[i].mk.enableDragging();
+                for (var i in efans.data)
+                    efans.data[i].mk.enableDragging();
             }
             else {
                 div.innerHTML = '浏览';

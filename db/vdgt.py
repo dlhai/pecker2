@@ -157,7 +157,7 @@ def rndgpsarea(pos,xr,yr):
 
 def rndgps( position ):
     lt= position.split(",")[0].split(" ")
-    rb= position.split(",")[1].split(" ") 
+    rb= position.split(",")[2].split(" ") 
     l = float(lt[0])
     t = float(lt[1])
     r = float(rb[0])
