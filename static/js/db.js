@@ -191,6 +191,8 @@ var branch = {
     "winder": { "type": "winder", "name": "风场", "sub": "winderarea", "image": "img/diy/3.png" },
     "winderarea": { "type": "winderarea", "name": "风区", "sub": "efan", "image": "img/page.gif" },
     "efan": { "type": "efan", "name": "风电机", "sub": "leaf", "image": "" },
+    "efanvender": { "type": "efanvender", "name": "整机供应商", "image": "" },
+    "leafvender": { "type": "leafvender", "name": "叶片供应商", "image": "" },
     "sub": function (type) {
         return this[this[type].sub]
     }

@@ -19,19 +19,20 @@ function TableBindClick() {
 //表格点击反色 
 var g_TableCurRow = new Object();
 function TableBindClick2(tableid) {
-    g_TableCurRow[tableid] = -1;
+    var currow = -1;
     $("#"+tableid+" tr").click(function () {
         var tag = $(this).parent()[0].localName;
         if (tag.toLowerCase() == "thead")
             return;
-        if (g_TableCurRow[tableid] != -1) {
-            g_TableCurRow[tableid]++;
-            if (g_TableCurRow[tableid] % 2 == 0)
-                $(this).parent().children(":nth-child(" + g_TableCurRow[tableid] + ")").children().css("background-color", "#f5f5f5");
+        if (currow != -1) {
+            currow++;
+            if (currow % 2 == 0)
+                $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#f5f5f5");
             else
-                $(this).parent().children(":nth-child(" + g_TableCurRow[tableid] + ")").children().css("background-color", "#ffffff");
+                $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#ffffff");
         }
-        g_TableCurRow[tableid] = $(this).index();
+        currow = $(this).index();
+        g_TableCurRow[tableid] = $(this).attr("data_id");
         $(this).children().css("background-color", "#00f0f5");
     });
 }
@@ -68,7 +69,7 @@ function RenderTable2(it, style) {
 
     r += "<tbody>";
     for (var x in it.data) {
-        r += "<tr>";
+        r += "<tr data_id=\""+it.data[x].id+"\">";
         for (c in it.fields) {
             if (!it.fields[c].twidth || it.fields[c].twidth && parseInt(it.fields[c].twidth) > 0) {
                 if (it.fields[c].tstyle)
@@ -242,5 +243,17 @@ function Create(fields) {
     var r = new Object();
     for (var k in fields)
         r[fields[k].name] = "";
+    return r;
+}
+
+function Create2(ar) {
+    var r = new Object();
+    r.type = ar.type;
+    r.fields = ar.fields;
+    r.data = new Array();
+    t = new Object();
+    for (var k in ar.fields)
+        t[ar.fields[k].name] = "";
+    r.data.push(t);
     return r;
 }

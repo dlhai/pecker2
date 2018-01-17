@@ -10,14 +10,15 @@
     <script src="js/bootstrap.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
+    <script src="js/db.js"></script>
 </head>
 <body class="xFCsrow" >
     <section class="xPanel2" >
-        <header class="heading">整机供应商<div style="float: right;"><a href="#" onClick="EditEfanV(this)" >添加</a></div></header>
+        <header class="heading">整机供应商<div style="float: right;"><a href="#" onClick="EfanVEdit(this)">修改</a><a href="#" onClick="EfanVNew(this)" >新建</a></div></header>
         <div id="efan_vender_list" class="xScroll" style=" padding:5px;height:100px;flex-grow: 1;"></div>
     </section>
     <section class="xPanel2">
-        <header class="heading">叶片供应商<div style="float: right;"><a href="#" onClick="EditLeafV(this)">添加</a></div></header>
+        <header class="heading">叶片供应商<div style="float: right;"><a href="#" onClick="LeafVEdit(this)">修改</a><a href="#" onClick="LeafVNew(this)">新建</a></div></header>
         <div id="leaf_vender_list" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
     </section>
     <div class="modal fade" id="ModalDlg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">
@@ -57,19 +58,31 @@
             TableBindClick2(leafVs.type);
         });
 
-        function EditEfanV(This) {
-            $("#efanvender").
-            var idx = FindSub2(g_efanVs, $(This).parent().attr("id"));
+        function EfanVEdit(This) {
+            var idx = FindSub2(g_efanVs, g_TableCurRow[g_efanVs.type]);
             $("#ModalDlgContent").html(RenderForm3(g_efanVs, idx));
             $("#ModalDlgTitle").html("编辑 " + branch[g_efanVs.type].name);
             $('#ModalDlg').modal('show');
         }
-        function EditLeafV(This) {
-            var idx = FindSub2(g_leafVs, $(This).parent().attr("id"));
+        function LeafVEdit(This) {
+            var idx = FindSub2(g_leafVs, g_TableCurRow[g_leafVs.type]);
             $("#ModalDlgContent").html(RenderForm3(g_leafVs, idx));
             $("#ModalDlgTitle").html("编辑 " + branch[g_leafVs.type].name);
             $('#ModalDlg').modal('show');
         }
+
+        function EfanVNew(This) {
+            $("#ModalDlgContent").html(RenderForm3(Create2(g_efanVs), 0));
+            $("#ModalDlgTitle").html("新建 " + branch[g_efanVs.type].name);
+            $('#ModalDlg').modal('show');
+        }
+        function LeafVNew(This) {
+            var idx = FindSub2(g_leafVs, g_TableCurRow[g_leafVs.type]);
+            $("#ModalDlgContent").html(RenderForm3(g_leafVs, idx));
+            $("#ModalDlgTitle").html("新建 " + branch[g_leafVs.type].name);
+            $('#ModalDlg').modal('show');
+        }
+
 
     </script>
 </body>
