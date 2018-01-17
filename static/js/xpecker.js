@@ -16,6 +16,26 @@ function TableBindClick() {
         $(this).children().css("background-color", "#00f0f5");
     });
 }
+//表格点击反色 
+var g_TableCurRow = new Object();
+function TableBindClick2(tableid) {
+    g_TableCurRow[tableid] = -1;
+    $("#"+tableid+" tr").click(function () {
+        var tag = $(this).parent()[0].localName;
+        if (tag.toLowerCase() == "thead")
+            return;
+        if (g_TableCurRow[tableid] != -1) {
+            g_TableCurRow[tableid]++;
+            if (g_TableCurRow[tableid] % 2 == 0)
+                $(this).parent().children(":nth-child(" + g_TableCurRow[tableid] + ")").children().css("background-color", "#f5f5f5");
+            else
+                $(this).parent().children(":nth-child(" + g_TableCurRow[tableid] + ")").children().css("background-color", "#ffffff");
+        }
+        g_TableCurRow[tableid] = $(this).index();
+        $(this).children().css("background-color", "#00f0f5");
+    });
+}
+
 
 //文档控件
 $(function () {
@@ -33,9 +53,9 @@ $(function () {
 });
 
 function RenderTable2(it, style) {
-    var r = "<table class=\"xTable\"><thead><tr>";
+    var r = "<table id=\"" +it.type+ "\" class=\"xTable\"><thead><tr>";
     if (style)
-        r = "<table class=\""+style+"\"><thead><tr>";
+        r = "<table id=\"" +it.type+ "\" class=\""+style+"\"><thead><tr>";
     for (var c in it.fields) {
         if (it.fields[c].twidth) {
             if (parseInt(it.fields[c].twidth) > 0)
@@ -199,6 +219,14 @@ function FindSub(ar, id) {
             return ar[i];
     }
     return null;
+}
+
+function FindSub2(ar, id) {
+    for (var i in ar.data) {
+        if (ar.data[i].id == id)
+            return i;
+    }
+    return -1;
 }
 
 function Clone(obj) {

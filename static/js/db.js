@@ -153,7 +153,7 @@ function  RenderForm(ar, i) {
 }
 
 var db_roles = [
-    { type: "叶片超级帐号", act: "叶片su", modules: [{ name: "测试", url: "ajextest.html" }, { name: "地图", url: "bdmap.html?type=风场&range=all" }, { name: "风场", url: "leaf_su8.html" }, { name: "人员", url: "person.html?type=风场|驻场" }, { name: "厂家", url: "leaf_su_vender.html" }]},
+    { type: "叶片超级帐号", act: "叶片su", modules: [{ name: "地图", url: "leaf_map.html?type=风场&range=all" }, { name: "风场", url: "leaf_su8.html" }, { name: "人员", url: "person.html?type=风场|驻场" }, { name: "厂家", url: "leaf_su_vender.html" }]},
     {type: "风场主管", act: "chenjiamu", modules: [
            { name: "地图", url: "bdmap.html?type=风场&range=all" },
            { name: "设备", url: "winder.html", submod: [{ name: "区域1", url: "winder.html" }, { name: "区域2", url: "winder.html" }, { name: "区域3", url: "winder.html" }]},
