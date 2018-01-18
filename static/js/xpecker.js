@@ -37,6 +37,29 @@ function TableBindClick2(tableid) {
     });
 }
 
+function TableBindClick3(tableid, callback) {
+    var currow = -1;
+    $("#" + tableid + " tr").click(function () {
+        var tag = $(this).parent()[0].localName;
+        if (tag.toLowerCase() == "thead")
+            return;
+        if (currow != -1) {
+            currow++;
+            if (currow % 2 == 0)
+                $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#f5f5f5");
+            else
+                $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#ffffff");
+        }
+        $(this).children().css("background-color", "#00f0f5");
+
+        currow = $(this).index();
+        g_TableCurRow[tableid] = $(this).attr("data_id");
+
+        if (callback)
+            callback($(this).attr("data_id"));
+    });
+}
+
 
 //文档控件
 $(function () {
@@ -222,7 +245,12 @@ function FindSub(ar, id) {
     return null;
 }
 
+// 本接口已被GetIdx代替
 function FindSub2(ar, id) {
+    return GetIdx(ar,id);
+}
+
+function GetIdx(ar, id) {
     for (var i in ar.data) {
         if (ar.data[i].id == id)
             return i;

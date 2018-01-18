@@ -29,6 +29,10 @@ tbl_user=Table('user', metadata,
 	Column('account',String(32)),
 	Column('pwd',String(32)),
 	Column('face',String(32)),
+	Column('depart_id',Integer),
+	Column('depart_table',String(16)),
+	Column('job',String(16)),
+	Column('skill',String(64)),
 	Column('name',String(32)),
 	Column('idc',String(32)),
 	Column('sex',String(8)),
@@ -40,11 +44,7 @@ tbl_user=Table('user', metadata,
 	Column('qq',String(32)),
 	Column('mail',String(32)),
 	Column('wechat',String(32)),
-	Column('addr',String(64)),
-	Column('job',String(16)),
-	Column('skill',String(64)),
-	Column('depart_id',Integer),
-	Column('depart_table',String(16)))
+	Column('addr',String(64)))
 
 tbl_leafvender=Table('leafvender', metadata,
 	Column('id',Integer,primary_key=True),
@@ -134,19 +134,19 @@ def dict_base():
 def dict_user(depart_id,depart_table,job,skill):
     person=rnditem("_person")
     mail=rndmail(person)
-    return dict(account=person.pinyin,pwd=person.pinyin,face=rnditem("_faceimage"),name=person.name,idc=person.id,sex=id2sex(person.id),ethnic=rnditem("_ethnic"),birth=id2birth(person.id),origin=person.origin,idimg=rndaddition("身份证"),phone=str(int(person.phone)),qq=str(int(person.qq)),mail=mail,wechat=rndwechat(person,mail),addr=rnditem("_麦当劳门店").门店地址,job=job,skill=skill,depart_id=depart_id,depart_table=depart_table)
+    return dict(account=person.pinyin,pwd=person.pinyin,face=rnditem("_faceimage"),depart_id=depart_id,depart_table=depart_table,job=job,skill=skill,name=person.name,idc=person.id,sex=id2sex(person.id),ethnic=rnditem("_ethnic"),birth=id2birth(person.id),origin=person.origin,idimg=rndaddition("身份证"),phone=str(int(person.phone)),qq=str(int(person.qq)),mail=mail,wechat=rndwechat(person,mail),addr=rnditem("_麦当劳门店").门店地址)
 
 def dict_leafvender(x):
     p1=rnditem("_person")
-    p2=rnditem("_person")
-    return dict(name=x.name,fname=x.fname,atten=p1.name,tel=p1.phone,leader=p2.name,fax=p2.phone,addr=p1.origin)
+    p2=rnditem("_station")
+    return dict(name=x.name,fname=x.fname,atten=p1.name,tel=str(int(p1.phone)),leader=p2.name,fax=p2.phone,addr=p1.origin)
 conn.execute(tbl_leafvender.insert(),[dict_leafvender(x) for x in data("_leaf_vender")])
 QueryAll(tbl_leafvender)
 
 def dict_efanvender(x):
     p1=rnditem("_person")
-    p2=rnditem("_person")
-    return dict(name=x.name,fname=x.fname,atten=p1.name,tel=p1.phone,leader=p2.name,fax=p2.phone,addr=p1.origin)
+    p2=rnditem("_station")
+    return dict(name=x.name,fname=x.fname,atten=p1.name,tel=str(int(p1.phone)),leader=p2.name,fax=p2.phone,addr=p1.origin)
 conn.execute(tbl_efanvender.insert(),[dict_efanvender(x) for x in data("_efan_vender")])
 QueryAll(tbl_efanvender)
 
@@ -196,31 +196,31 @@ dict(table="base",title="表格风格",name="tstyle",forder="",ftype="",twidth="
 dict(table="base",title="类型",name="dtype",forder="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="x",remark="",),
 dict(table="base",title="生成规则",name="drule",forder="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="x",remark="",),
 dict(table="base",title="说明",name="remark",forder="",ftype="bigtext",twidth="",tstyle="",dtype="String(2048)",drule="x",remark="",),
-dict(table="user",title="标识",name="id",forder="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
-dict(table="user",title="帐号",name="account",forder="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="person.pinyin",remark="",),
-dict(table="user",title="密码",name="pwd",forder="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="person.pinyin",remark="",),
-dict(table="user",title="头像",name="face",forder="",ftype="image",twidth="",tstyle="",dtype="String(32)",drule="rnditem:_faceimage",remark="",),
+dict(table="user",title="标识",name="id",forder="",ftype="",twidth="0.0",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
+dict(table="user",title="帐号",name="account",forder="",ftype="",twidth="0.0",tstyle="",dtype="String(32)",drule="person.pinyin",remark="",),
+dict(table="user",title="密码",name="pwd",forder="",ftype="",twidth="0.0",tstyle="",dtype="String(32)",drule="person.pinyin",remark="",),
+dict(table="user",title="头像",name="face",forder="",ftype="image",twidth="0.0",tstyle="",dtype="String(32)",drule="rnditem:_faceimage",remark="",),
+dict(table="user",title="所在单位",name="depart_id",forder="",ftype="",twidth="",tstyle="",dtype="Integer",drule="depart_id",remark="",),
+dict(table="user",title="单位表名",name="depart_table",forder="",ftype="",twidth="0.0",tstyle="",dtype="String(16)",drule="depart_table",remark="",),
+dict(table="user",title="职位",name="job",forder="",ftype="",twidth="",tstyle="",dtype="String(16)",drule="job",remark="专家、队长、技工、驻场、风场主管、调度、调度主管、仓管、仓管主管、设备司机、设备主管、公众",),
+dict(table="user",title="领域",name="skill",forder="",ftype="",twidth="0.0",tstyle="",dtype="String(64)",drule="skill",remark="避雷、工艺设计、工艺生产、材料、安全",),
 dict(table="user",title="姓名",name="name",forder="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="person.name",remark="",),
 dict(table="user",title="身份证号",name="idc",forder="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="person.id",remark="",),
 dict(table="user",title="性别",name="sex",forder="",ftype="",twidth="",tstyle="",dtype="String(8)",drule="id2sex(person.id)",remark="身份证住址信息",),
-dict(table="user",title="民族",name="ethnic",forder="",ftype="",twidth="",tstyle="",dtype="String(16)",drule="rnditem:_ethnic",remark="",),
-dict(table="user",title="出生年月",name="birth",forder="",ftype="",twidth="",tstyle="",dtype="String(16)",drule="id2birth(person.id)",remark="",),
-dict(table="user",title="籍贯",name="origin",forder="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="person.origin",remark="",),
-dict(table="user",title="身份证扫描件",name="idimg",forder="",ftype="image",twidth="",tstyle="",dtype="String(64)",drule='rndaddition("身份证")',remark="",),
+dict(table="user",title="民族",name="ethnic",forder="",ftype="",twidth="0.0",tstyle="",dtype="String(16)",drule="rnditem:_ethnic",remark="",),
+dict(table="user",title="出生年月",name="birth",forder="",ftype="",twidth="0.0",tstyle="",dtype="String(16)",drule="id2birth(person.id)",remark="",),
+dict(table="user",title="籍贯",name="origin",forder="",ftype="",twidth="0.0",tstyle="",dtype="String(64)",drule="person.origin",remark="",),
+dict(table="user",title="身份证扫描件",name="idimg",forder="",ftype="image",twidth="0.0",tstyle="",dtype="String(64)",drule='rndaddition("身份证")',remark="",),
 dict(table="user",title="联系电话",name="phone",forder="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="str(int(person.phone))",remark="",),
-dict(table="user",title="QQ号码",name="qq",forder="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="str(int(person.qq))",remark="",),
-dict(table="user",title="邮箱",name="mail",forder="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="mail",remark="",),
-dict(table="user",title="微信号",name="wechat",forder="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="rndwechat(person,mail)",remark="",),
+dict(table="user",title="QQ号码",name="qq",forder="",ftype="",twidth="0.0",tstyle="",dtype="String(32)",drule="str(int(person.qq))",remark="",),
+dict(table="user",title="邮箱",name="mail",forder="",ftype="",twidth="0.0",tstyle="",dtype="String(32)",drule="mail",remark="",),
+dict(table="user",title="微信号",name="wechat",forder="",ftype="",twidth="0.0",tstyle="",dtype="String(32)",drule="rndwechat(person,mail)",remark="",),
 dict(table="user",title="联系地址",name="addr",forder="",ftype="text",twidth="",tstyle="",dtype="String(64)",drule="rnditem:_麦当劳门店:门店地址",remark="当前实际居住地址",),
-dict(table="user",title="职位",name="job",forder="",ftype="",twidth="",tstyle="",dtype="String(16)",drule="job",remark="专家、队长、技工、驻场、风场主管、调度、调度主管、仓管、仓管主管、设备司机、设备主管、公众",),
-dict(table="user",title="领域",name="skill",forder="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="skill",remark="避雷、工艺设计、工艺生产、材料、安全",),
-dict(table="user",title="s.所在单位ID",name="depart_id",forder="",ftype="",twidth="",tstyle="",dtype="Integer",drule="depart_id",remark="",),
-dict(table="user",title="s.单位表名",name="depart_table",forder="",ftype="",twidth="",tstyle="",dtype="String(16)",drule="depart_table",remark="",),
 dict(table="leafvender",title="标识",name="id",forder="-1.0",ftype="div",twidth="15.0",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
 dict(table="leafvender",title="名称",name="name",forder="0.0",ftype="input",twidth="60.0",tstyle="",dtype="String(32)",drule="x.name",remark="",),
 dict(table="leafvender",title="完整名称",name="fname",forder="1.0",ftype="input",twidth="120.0",tstyle="",dtype="String(64)",drule="x.fname",remark="",),
 dict(table="leafvender",title="联系人",name="atten",forder="3.0",ftype="input",twidth="",tstyle="",dtype="String(32)",drule="p1.name",remark="",),
-dict(table="leafvender",title="电话",name="tel",forder="4.0",ftype="input",twidth="",tstyle="",dtype="String(32)",drule="p1.phone",remark="",),
+dict(table="leafvender",title="电话",name="tel",forder="4.0",ftype="input",twidth="",tstyle="",dtype="String(32)",drule="str(int(p1.phone))",remark="",),
 dict(table="leafvender",title="主要负责人",name="leader",forder="5.0",ftype="input",twidth="",tstyle="",dtype="String(32)",drule="p2.name",remark="",),
 dict(table="leafvender",title="传真",name="fax",forder="6.0",ftype="input",twidth="",tstyle="",dtype="String(32)",drule="p2.phone",remark="",),
 dict(table="leafvender",title="地址",name="addr",forder="2.0",ftype="input_long",twidth="",tstyle="",dtype="String(128)",drule="p1.origin",remark="",),
@@ -228,7 +228,7 @@ dict(table="efanvender",title="标识",name="id",forder="-1.0",ftype="div",twidt
 dict(table="efanvender",title="名称",name="name",forder="0.0",ftype="input",twidth="60.0",tstyle="",dtype="String(32)",drule="x.name",remark="",),
 dict(table="efanvender",title="完整名称",name="fname",forder="1.0",ftype="input",twidth="120.0",tstyle="",dtype="String(64)",drule="x.fname",remark="",),
 dict(table="efanvender",title="联系人",name="atten",forder="3.0",ftype="input",twidth="",tstyle="",dtype="String(32)",drule="p1.name",remark="",),
-dict(table="efanvender",title="电话",name="tel",forder="4.0",ftype="input",twidth="",tstyle="",dtype="String(32)",drule="p1.phone",remark="",),
+dict(table="efanvender",title="电话",name="tel",forder="4.0",ftype="input",twidth="",tstyle="",dtype="String(32)",drule="str(int(p1.phone))",remark="",),
 dict(table="efanvender",title="主要负责人",name="leader",forder="5.0",ftype="input",twidth="",tstyle="",dtype="String(32)",drule="p2.name",remark="",),
 dict(table="efanvender",title="传真",name="fax",forder="6.0",ftype="input",twidth="",tstyle="",dtype="String(32)",drule="p2.phone",remark="",),
 dict(table="efanvender",title="地址",name="addr",forder="2.0",ftype="input_long",twidth="",tstyle="",dtype="String(128)",drule="p1.origin",remark="",),
