@@ -8,9 +8,9 @@
     <script type="text/javascript" src="js/doTe.js"></script>
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.js"></script>
-    <link rel="StyleSheet" href="css/dtree.css" type="text/css" />
-    <script type="text/javascript" src="js/dtree.js"></script>
-    <script src="js/db.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/xpecker.js"></script>
+    <script src="js/db.js"></script> <!--用到branch-->
 
     <style>
         html, body {
@@ -111,10 +111,10 @@
 
     </style> 
 </head>
-<body style="display: flex; flex-direction: row; align-items: stretch; padding:5px;">
-    <section class="d_panel" style="width: 100px; margin:5px; flex-shrink: 1; flex-grow:1;">
+<body class="xFCsrow" >
+    <section class="xPanel2" >
         <header class="heading">列表<div style="float: right;"><a href="#">添加</a></div></header>
-        <div id="d_table_item" class="d_dtree-scroll" style="padding:5px;">
+        <div id="d_table_item" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;">
             <table  class="d_table table-hover">
                 <thead><tr><th id="X">姓名</th><th>身份证号</th><th>性别</th><th>年龄</th><th>联系电话</th><th>维修队长</th><th>居住地址</th></tr></thead>
                 <tbody >
@@ -123,7 +123,7 @@
         </div>
     </section>
 
-    <div class="" style="overflow-y: scroll; overflow-x: scroll; width: 100px; margin: 5px;flex-shrink: 2; flex-grow: 1; ">
+    <div class="xPanel2 xScroll" style="padding:5px;flex-grow: 1;">
         <section class="d_panel d_detail">
             <header class="heading">基本信息<div style="float: right;"><a href="#">编辑</a></div></header>
             <div id="d_baseinf" style="padding: 5px; "></div>
@@ -210,21 +210,19 @@
             var r = url.substr(1).match(reg);
             if (r != null) return unescape(r[2]); return null;
         }
-        var url = "/query?type=person";
+        var url = "/query?type=user";
         var job = GetParam("type");
-        if (job != "") url += "&job=" + job;
+        if (job ) url += "&job=" + job;
         var depart = GetParam("depart");
-        if (depart != "") url += "&depart=" + job;
+        if (depart) url += "&depart=" + job;
 
-        var g_persons = new Object();
-        Request(url, function (persons) {
-            g_persons = persons;
-            $("#d_table_item").html(RenderTable2(g_persons));
-            TableBindClick2(g_persons.type);
-        });
-    </script>
+        //var g_persons = new Object();
+        //Request(url, function(persons) {
+        //    g_persons = persons;
+        //    $("#d_table_item").html(RenderTable2(g_persons));
+        //    TableBindClick2(g_persons.type);
+        //});
 
-    <script type="text/javascript">
         var tpl_certiflist = doT.template(document.getElementById('tpl_certiflist').innerHTML);
         var tpl_edulist = doT.template(document.getElementById('tpl_edulist').innerHTML);
         var tpl_employlist = doT.template(document.getElementById('tpl_employlist').innerHTML);
