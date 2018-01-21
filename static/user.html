@@ -135,14 +135,14 @@
 </head>
 <body class="xFCsrow" >
     <section class="xPanel2" style="width:100px"><!--两个子项都固定宽度100，使它们获得相同的增量-->
-        <header class="heading">列表<div style="float: right;"><a href="#">添加</a></div></header>
+        <header class="heading">列表<div style="float: right;"><a onClick="onAddUser(this)">添加</a></div></header>
         <div id="d_table_item" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;">
         </div>
     </section>
 
     <div class="xPanel2 xScroll" style="width:100px;border:0px;">
         <section class="d_panel d_detail">
-            <header class="heading">基本信息<div style="float: right;"><a href="#">添加</a> <a href="#">编辑</a></div></header>
+            <header class="heading">基本信息<div style="float: right;"><a onClick="onAddUser(this)">添加</a> <a onClick="onEditUser(this)">编辑</a></div></header>
             <div id="d_baseinf" class="x2Form" style="padding:5px;"></div>
         </section>
         <section id="d_certiflist" class="d_panel d_detail">
@@ -157,6 +157,29 @@
         <section id="d_opuslist" class="d_panel d_detail">
             <header class="heading">发表作品<div style="float: right;"><a href="#">编辑</a></div></header>
         </section>
+    </div>
+
+    <div class="modal fade" id="ModalDlg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">
+        <div class="modal-dialog" style="width:610px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="ModalDlgTitle">模态框（Modal）标题</h4>
+                </div>
+                <div id="ModalDlgContent" class="modal-body" style="padding:5px 0px">
+                    <div><label>标识</label><input name="id" value="1234"></div>
+                    <div><label>所属风场</label><input value="69" /></div>
+                    <div><label>名称</label><input value="达尔罕茂明安联合旗风区" /></div>
+                    <div><label>备注</label><textarea name="a" style="resize:none;width:500px;max-height:45px;">小重山章良能柳暗花明春事深,小阑红芍药,已抽簪。雨馀风软碎鸣禽,迟迟日,犹带一分阴。往事莫沉吟，身闲时序好、且凳临。旧游无处不堪寻，无寻处、惟有少年心。</textarea></div>
+                    <div><label>位置</label><textarea name="a" style="resize:none;width:500px;max-height:45px;">109.790407 40.523169,109.857074 40.523169,109.857074 40.613169,109.790407 40.613169</textarea></div>
+                </div>
+                <div class="modal-footer">
+                    <div style="float:left;"><button type="button" class="btn btn-default" style="color:#aaaaaa">删除</button></div>
+                    <button type="button" class="btn btn-primary">提交</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
     </div>
 
     <script id="tpl_image_in_pane" type="text/template">
@@ -238,10 +261,15 @@
         var tpl_opuslist = doT.template(document.getElementById('tpl_opuslist').innerHTML);
         var tpl_image_in_pane = doT.template(document.getElementById('tpl_image_in_pane').innerHTML);
 
+        var g_users = new Object();
+        var g_curid = -1;
+
         Request("/queryuser?type=" + GetParam("type"), function(users) {
-            $("#d_table_item").html(RenderTableUser(users));
+            g_users = users;
+            $("#d_table_item").html(RenderUserTable(users));
             TableBindClick3(users.type, function (data_id) {
-                $("#d_baseinf").html( RenderPaneUser(users, data_id));
+                g_curid = data_id;
+                $("#d_baseinf").html( RenderUserPane(users, data_id));
 
                 // 以下为虚拟数据
                 var idx = rndrange(0, db_addition.length);
@@ -252,6 +280,19 @@
             });
         });
 
+        function onAddUser(This) {
+            $("#ModalDlgContent").html(RenderUserForm(Create2(g_efanVs), 0));
+            $("#ModalDlgTitle").html($(This).html() + " " + branch[g_efanVs.type].name);
+            $('#ModalDlg').modal('show');
+        }
+
+        function onEditUser(This) {
+            var idx = GetIdxbyId(g_users, g_curid);
+            $("#ModalDlgContent").html(RenderUserForm(g_users, idx));
+            $("#ModalDlgTitle").html($(This).html()+" " + branch[g_users.type].name);
+            $('#ModalDlg').modal('show');
+        }
+
         function GetParam(name) {
             var url = decodeURI(window.location.search);
             var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
@@ -259,7 +300,7 @@
             if (r != null) return unescape(r[2]); return null;
         }
 
-        function RenderTableUser(it) {
+        function RenderUserTable(it) {
             var r = "<table id=\"" + it.type + "\" class=\"xTable\"><thead><tr>";
             for (var c in it.fields) {
                 if (it.fields[c].twidth) {
@@ -278,12 +319,15 @@
                     var field = it.fields[c];
                     if (!field.twidth || field.twidth && parseInt(field.twidth) > 0) {
                         var val = it.data[x][field.name];
+
+                        // 用户特别处理
                         if (field.name == "depart_id")
                             val = it.data[x]["depart_name"]
                         else if (field.name == "sex") {
                             if (val == "0") val = "女";
                             else val = "男";
                         }
+
                         if (it.fields[c].tstyle)
                             r += "<td style=\"" + it.fields[c].tstyle + "\">" +val+ "</td>";
                         else
@@ -296,15 +340,15 @@
             return r;
 
         }
-        function RenderPaneUser(ar, id) {
+        function RenderUserPane(ar, id) {
             var idx = GetIdx(ar,id);
-            var r = tpl_image_in_pane(ar.data[idx]);
+            var r = tpl_image_in_pane(ar.data[idx]); //用户特别处理
             for (var i = 0; i < ar.fields.length; i++) {
                 var field = ar.fields[i];
-
                 if (field.ftype == "none")
                     continue;
 
+                //用户特别处理
                 //这几个字段在tpl_image_in_pane中处理
                 if (field.name == "pwd" || field.name == "name" || field.name == "account"
                     || field.name == "face" || field.name == "idimg")
@@ -333,6 +377,38 @@
             return r;
 
         }
+
+        function RenderUserForm(ar, idx) {
+            var r = '<div class="x2Form">';
+            for (var i = 0; i < ar.fields.length; i++) {
+                var field = ar.fields[i];
+                var val = ar.data[idx][field.name];
+                if (field.ftype == "none")
+                    continue;
+
+                var attr = "";
+                if (field.name.indexOf("_") != -1)
+                    attr = 'id="' + field.name + "_" + val + '"';
+
+                r += "<div><label>" + field.title + "</label>";
+                if (field.ftype == "div")
+                    r += "<div " + attr + ">" + val + "</div>";
+                else if (field.ftype == "input")
+                    r += '<input ' + attr + ' name="' + field.name + '" value="' + val + '"/>';
+                else if (field.ftype == "input_long")
+                    r += '<input ' + attr + ' style="width:490px;" name="' + field.name + '" value="' + val + '" />';
+                else if (field.ftype == "textarea")
+                    r += '<textarea ' + attr + ' style="resize:none;width:490px;max-height:45px;" name="' + field.name + '">' + val + '</textarea>';
+                else if (field.ftype == "select")
+                    r += '<select ' + attr + ' name="' + field.name + '"></select>';
+                else
+                    r += "<div " + attr + ">未定义类型:" + field.ftype + "</div>";
+                r += "</div>";
+            }
+            r += "</div>";
+            return r;
+        }
+
     </script>
 </body>
 </html>

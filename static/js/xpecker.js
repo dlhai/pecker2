@@ -247,16 +247,24 @@ function FindSub(ar, id) {
 
 // 本接口已被GetIdx代替
 function FindSub2(ar, id) {
+    alert( "调用了旧接口FindSub2" );
     return GetIdx(ar,id);
 }
 
+// 本接口已被GetIdxbyId代替
 function GetIdx(ar, id) {
+    alert("调用了旧接口GetIdx");
+    return GetIdxbyId(ar, id);
+    return -1;
+}
+function GetIdxbyId(ar, id) {
     for (var i in ar.data) {
         if (ar.data[i].id == id)
             return i;
     }
     return -1;
 }
+
 
 function Clone(obj) {
     var r = new Object();
