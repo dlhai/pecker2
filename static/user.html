@@ -13,6 +13,29 @@
     <script src="js/db.js"></script> <!--用到branch-->
 
     <style>
+        .pane_image>div {
+            margin: 5px 0px 5px 5px;
+            display: inline-flex;
+            flex-direction: row;
+            align-items: flex-start;
+            border: 0px;
+        }
+        .pane_image>div>label {
+            width: 40px;
+            text-align: right;
+            margin: 5px;
+        }
+        .pane_image>div>div {
+            border-radius: 4px;
+            border: 1px solid #dddddd;
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 0px 5px;
+            width: 137px;
+        }
+    </style>
+
+    <style>/*旧的style，在更新完用户详细信息后将被删除*/
         html, body {
             height: 100%;
             overflow: hidden;
@@ -108,20 +131,19 @@
             border-color: #66afe9;
             box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
         }
-
     </style> 
 </head>
 <body class="xFCsrow" >
-    <section class="xPanel2" >
+    <section class="xPanel2" style="width:100px"><!--两个子项都固定宽度100，使它们获得相同的增量-->
         <header class="heading">列表<div style="float: right;"><a href="#">添加</a></div></header>
         <div id="d_table_item" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;">
         </div>
     </section>
 
-    <div class="xPanel2 xScroll" style="padding:5px;flex-grow: 1;">
+    <div class="xPanel2 xScroll" style="width:100px;border:0px;">
         <section class="d_panel d_detail">
-            <header class="heading">基本信息<div style="float: right;"><a href="#">编辑</a></div></header>
-            <div id="d_baseinf" style="padding: 5px; "></div>
+            <header class="heading">基本信息<div style="float: right;"><a href="#">添加</a> <a href="#">编辑</a></div></header>
+            <div id="d_baseinf" class="x2Form" style="padding:5px;"></div>
         </section>
         <section id="d_certiflist" class="d_panel d_detail">
             <header class="heading">证件信息<div style="float: right;"><a href="#">编辑</a></div></header>
@@ -136,6 +158,17 @@
             <header class="heading">发表作品<div style="float: right;"><a href="#">编辑</a></div></header>
         </section>
     </div>
+
+    <script id="tpl_image_in_pane" type="text/template">
+        <div style="height:240px;width:282px;float: left; display:block;">
+            <div class="pane_image" style="width: 100%; height: 80px; margin: 0px; padding:0px; display:block;border:0px;">
+                <div style="float: left; margin:0px;"><img style="width: 78px; height: 78px;" src="{%=it.face%}" /></div>
+                <div style="margin-top:0px;"><label>帐号</label><div style="display:inline-block;">{%=it.account%}</div></div>
+                <div><label>姓名</label><div>{%=it.name%}</div></div>
+            </div>
+            <img style="width: 280px; height: 160px;" src="{%=it.idimg%}" />
+        </div>
+    </script>
 
     <script id="tpl_certiflist" type="text/template">
         <header class="heading">证件信息<div style="float: right;"><a href="#">编辑</a></div></header>
@@ -203,17 +236,14 @@
         var tpl_edulist = doT.template(document.getElementById('tpl_edulist').innerHTML);
         var tpl_employlist = doT.template(document.getElementById('tpl_employlist').innerHTML);
         var tpl_opuslist = doT.template(document.getElementById('tpl_opuslist').innerHTML);
+        var tpl_image_in_pane = doT.template(document.getElementById('tpl_image_in_pane').innerHTML);
 
-        var url = "/query?type=user";
-        var job = GetParam("type");
-        if (job ) url += "&job=" + job;
-        var depart = GetParam("depart");
-        if (depart) url += "&depart=" + job;
+        Request("/queryuser?type=" + GetParam("type"), function(users) {
+            $("#d_table_item").html(RenderTableUser(users));
+            TableBindClick3(users.type, function (data_id) {
+                $("#d_baseinf").html( RenderPaneUser(users, data_id));
 
-        Request(url, function(persons) {
-            $("#d_table_item").html(RenderTable2(persons));
-            TableBindClick3(persons.type, function (data_id) {
-                $("#d_baseinf").html(RenderPane(persons, GetIdx(person, data_id)));
+                // 以下为虚拟数据
                 var idx = rndrange(0, db_addition.length);
                 $("#d_certiflist").html(tpl_certiflist(db_addition[idx].certif));
                 $("#d_edulist").html(tpl_edulist(db_addition[idx].edu));
@@ -227,6 +257,81 @@
             var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
             var r = url.substr(1).match(reg);
             if (r != null) return unescape(r[2]); return null;
+        }
+
+        function RenderTableUser(it) {
+            var r = "<table id=\"" + it.type + "\" class=\"xTable\"><thead><tr>";
+            for (var c in it.fields) {
+                if (it.fields[c].twidth) {
+                    if (parseInt(it.fields[c].twidth) > 0)
+                        r += "<th width=\"" + it.fields[c].twidth + "\">" + it.fields[c].title + "</th>";
+                }
+                else
+                    r += "<th>" + it.fields[c].title + "</th>";
+            }
+            r += "</tr></thead>\n";
+
+            r += "<tbody>";
+            for (var x in it.data) {
+                r += "<tr data_id=\"" + it.data[x].id + "\">";
+                for (c in it.fields) {
+                    var field = it.fields[c];
+                    if (!field.twidth || field.twidth && parseInt(field.twidth) > 0) {
+                        var val = it.data[x][field.name];
+                        if (field.name == "depart_id")
+                            val = it.data[x]["depart_name"]
+                        else if (field.name == "sex") {
+                            if (val == "0") val = "女";
+                            else val = "男";
+                        }
+                        if (it.fields[c].tstyle)
+                            r += "<td style=\"" + it.fields[c].tstyle + "\">" +val+ "</td>";
+                        else
+                            r += "<td>" + val+ "</td>";
+                    }
+                }
+                r += "</tr>";
+            }
+            r += "</tbody></table>";
+            return r;
+
+        }
+        function RenderPaneUser(ar, id) {
+            var idx = GetIdx(ar,id);
+            var r = tpl_image_in_pane(ar.data[idx]);
+            for (var i = 0; i < ar.fields.length; i++) {
+                var field = ar.fields[i];
+
+                if (field.ftype == "none")
+                    continue;
+
+                //这几个字段在tpl_image_in_pane中处理
+                if (field.name == "pwd" || field.name == "name" || field.name == "account"
+                    || field.name == "face" || field.name == "idimg")
+                    continue;
+                if (field.name == "skill" && ar.data[idx]["job"] != "专家")
+                    continue;
+
+                var val = ar.data[idx][field.name];
+                if (field.name == "depart_id")
+                    val = ar.data[idx]["depart_name"]
+                else if (field.name == "sex") {
+                    if (val == "0") val = "女";
+                    else val = "男";
+                }
+                var attr = "";
+                if (field.name.indexOf("_") != -1)
+                    attr = 'id="' + field.name + "_" + val + '" ';
+
+                if (field.ftype == "input_long")
+                    attr += 'style="width:490px;"';
+                else if (field.ftype == "textarea")
+                    attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
+
+                r += "<div><label>" + field.title + "</label><div " + attr + ">" + val + "</div></div>";
+            }
+            return r;
+
         }
     </script>
 </body>

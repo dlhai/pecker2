@@ -133,7 +133,7 @@ body {
 
 }
 .x2Form>div {
-    margin: 5px 10px;
+    margin: 5px;
     display: inline-flex;
     flex-direction: row;
     align-items: flex-start;
@@ -141,7 +141,7 @@ body {
 .x2Form>div>label {
     width: 60px;
     text-align: right;
-    margin: 5px 5px;
+    margin: 5px;
 }
 .x2Form>div>div,
 .x2Form>div>input,

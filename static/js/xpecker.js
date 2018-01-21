@@ -125,9 +125,9 @@ function RenderForm3(ar, idx) {
         else if (field.ftype == "input")
             r += '<input '+attr+' name="' + field.name+'" value="'+ val + '"/>';
         else if (field.ftype == "input_long")
-            r += '<input ' + attr +' style="width:500px;" name="' + field.name + '" value="' + val + '" />';
+            r += '<input ' + attr +' style="width:490px;" name="' + field.name + '" value="' + val + '" />';
         else if (field.ftype == "textarea")
-            r += '<textarea ' + attr +' style="resize:none;width:500px;max-height:45px;" name="' + field.name + '">' + val + '</textarea>';
+            r += '<textarea ' + attr +' style="resize:none;width:490px;max-height:45px;" name="' + field.name + '">' + val + '</textarea>';
         else if (field.ftype == "select")
             r += '<select '+attr+' name="'+field.name+'"></select>';
         r += "</div>";
@@ -149,9 +149,9 @@ function RenderPane(ar, idx){
             attr = 'id="' + field.name + "_" + val + '" ';
 
         if (field.ftype == "input_long")
-            attr += 'style="width:500px;"';
+            attr += 'style="width:490px;"';
         else if (field.ftype == "textarea")
-            attr += 'style="overflow-y: scroll;width:500px;max-height:45px;"';
+            attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
 
         r += "<div><label>" + field.title + "</label><div " + attr + ">"+ val + "</div></div>";
     }

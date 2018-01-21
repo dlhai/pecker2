@@ -31,20 +31,6 @@ organ = { "root": "winderco", "winderco": "winderprov", "winderprov": "winder", 
 #    return "["+ ",\n".join(["{"+",".join(['"'+str(t[0])+'":"'+str(t[1])+'"' for t in zip(row._parent.keys,row._row)])+"}" for row in qa ]) + "]"
 def to_json( qa ):
     return "["+ ",\n".join(["{"+",".join(['"'+str(t[0])+'":"'+str(t[1])+'"' for t in zip(row._parent.keys,row._row)])+"}" for row in qa ]) + "]"
-#def query(s1, s2, s3=None):
-#    q1 = conn.execute(s1).fetchall()
-#    q2 = conn.execute(s2).fetchall()
-#    if s3 is not None:
-#        q3 = conn.execute(s3).fetchall()
-#        return '{"result":200,\n"fields":'+ to_json(q1) + ',\n"data":' + to_json(q2) + ',\n"addit":' + to_json(q3)+ "\n}\n";
-#    return '{"result":200,\n"fields":'+ to_json(q1) + ',\n"data":' + to_json(q2) + "\n}\n";
-
-#def query2(**kw):
-#    r = '{"result":200,\n'
-#    r += ",\n".join([ '"' + k + '":'+ to_json(conn.execute(v).fetchall()) for k,v in kw.items()] )
-#    r += "\n}\n"
-#    print("query2")
-#    return r
 
 #查询结果为json
 def jquery(q):
@@ -70,11 +56,35 @@ def _query():
     type = d["type"]
     del d["type"]
 
+    # 限制对部分表的查询
+    if type== "base" or type == "user":
+        return 404
+
     tbl = table[type]
     sql = "select * from "+type
     if len(d) > 0:
         sql += " where "+" and ".join([ k+"='"+v+"'" for k,v in d.items()])
     return query3(type,fields=select(base.sl).where(base.c.table==type),data = sql)
+
+#查询用户
+#测试链接 http://127.0.0.1:5000/queryUser?type=winder&key1=val1&key2=val2....
+@app.route("/queryuser")
+def queryuser():
+    d = request.args.to_dict()
+    type = d["type"]
+    del d["type"]
+
+    # 限制对部分表的查询
+    if type== "":
+        return 404
+
+    d["depart_table"]=type;
+    tbl = table[type]
+    sql = "select user.id,user.account,user.face,user.depart_id, winder.name as depart_name, user.job,user.skill,user.name,user.code,user.sex,user.ethnic,user.birth,user.origin,user.idimg,user.phone,user.qq,user.mail,user.wechat,user.addr from user,winder where user.depart_id = winder.id"
+    if len(d) > 0:
+        sql += " and "+" and ".join([ k+"='"+v+"'" for k,v in d.items()])
+    return query3(type,fields=select(base.sl).where(base.c.table=="user"),data = sql)
+
 
 #id到名字的转换
 @app.route("/id2name")
@@ -180,3 +190,6 @@ def index():
 if __name__ == "__main__":
     app.config['JSON_AS_ASCII'] = False
     app.run()
+
+#暂未限制Query对User的查询
+#添加QueryUser接口，密码处理，所在单位处理
