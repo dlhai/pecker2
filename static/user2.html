@@ -131,18 +131,35 @@
             border-color: #66afe9;
             box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
         }
+
+        .editer {
+            position: absolute;
+            width: 200px;
+            height: 30px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+        .editer > input,
+        .editer > select,
+        .editer > textarea {
+            border-radius: 4px;
+            border: 1px solid #95b7ff;
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 0px 5px;
+            width: 200px;
+        }
     </style> 
 </head>
 <body class="xFCsrow" >
     <section class="xPanel2" style="width:100px"><!--两个子项都固定宽度100，使它们获得相同的增量-->
-        <header class="heading">列表<div style="float: right;"><a onClick="onAddUser(this)">添加</a></div></header>
+        <header class="heading">列表<div style="float: right;"><a onClick="onAddUser()">添加</a></div></header>
         <div id="d_table_item" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;">
         </div>
     </section>
 
     <div class="xPanel2 xScroll" style="width:100px;border:0px;">
         <section class="d_panel d_detail">
-            <header class="heading">基本信息<div style="float: right;"><a onClick="onAddUser(this)">添加</a> <a onClick="onEditUser(this)">编辑</a></div></header>
+            <header class="heading">基本信息<div style="float: right;"><a onClick="onAddUser()">添加</a> <a onClick="onEditUser(this)">编辑</a></div></header>
             <div id="d_baseinf" class="x2Form" style="padding:5px;"></div>
         </section>
         <section id="d_certiflist" class="d_panel d_detail">
@@ -254,6 +271,12 @@
         {% } %}
     </script>
 
+    <script id="tpl_editer" type="text/template">
+        <form style="position:absolute;width:200px;height:30px;border:1px solid #dddddd;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
+
+        </form>
+    </script>
+
     <script type="text/javascript">
         var tpl_certiflist = doT.template(document.getElementById('tpl_certiflist').innerHTML);
         var tpl_edulist = doT.template(document.getElementById('tpl_edulist').innerHTML);
@@ -282,23 +305,57 @@
             });
         });
 
-        function onAddUser(This) {
+        function onAddUser() {
             g_usernew = !g_usernew;
-            if (g_usernew)
+            $('form').remove();
+            if (g_usernew) {
                 $('.usernew').css("border", "1px solid #95b7ff");
-            else
+                $('.usernew').on("click", function () {
+                    var This = $(this);
+                    This.parent().css("position", "relative");
+                    This.parent().append(document.getElementById('tpl_editer').innerHTML);
+                });
+            }
+            else {
                 $('.usernew').css("border", "1px solid #dddddd");
+                $('.userfloat').off("click");
+            }
         }
-        function onEditUser(This) {
-            //var idx = GetIdxbyId(g_users, g_curid);
-            //$("#ModalDlgContent").html(RenderUserForm(g_users, idx));
-            //$("#ModalDlgTitle").html($(This).html()+" " + branch[g_users.type].name);
-            //$('#ModalDlg').modal('show');
+        function onEditUser() {
             g_userfloat = !g_userfloat;
-            if (g_userfloat)
+            $('form').remove();
+            if (g_userfloat){
                 $('.userfloat').css("border", "1px solid #95b7ff");
-            else
+                $('.userfloat').on("click", function () {
+                    var This = $(this);
+                    This.parent().css("position", "relative");
+                    This.parent().append(RenderEditer(, This.attr("data_field"), This.html(), ""));
+                });
+            }
+            else{
                 $('.userfloat').css("border", "1px solid #dddddd");
+                $('.userfloat').off("click");
+            }
+        }
+
+        function RenderEditer(type, name, val, url) {
+            var r = '<form class="editer">';
+            if (type == "input")
+                r += '<input name="' + name + '" value="' + val + '"/>';
+            else if (type == "input_long")
+                r += '<input style="width:490px;" name="' + name + '" value="' + val + '" />';
+            else if (type == "textarea")
+                r += '<textarea style="resize:none;width:490px;max-height:45px;" name="' + field.name + '">' + val + '</textarea>';
+            else if (type == "select"){
+                r += '<select id="20080122" name="' + field.name + '"></select>';
+                Request(url, function (res) {
+                    $("#20080122").html(RenderSelect(res, val));
+                });
+            }
+            else
+                alert("RenderEditer: unknown type:" + type);
+            r += "<a>保存</a></form>";
+            return r;
         }
 
         function GetParam(name) {
@@ -383,40 +440,7 @@
                 r += "<div><label>" + field.title + "</label><div " + attr + ">" + val + "</div></div>";
             }
             return r;
-
         }
-
-        function RenderUserForm(ar, idx) {
-            var r = '<div class="x2Form">';
-            for (var i = 0; i < ar.fields.length; i++) {
-                var field = ar.fields[i];
-                var val = ar.data[idx][field.name];
-                if (field.ftype == "none")
-                    continue;
-
-                var attr = "";
-                if (field.name.indexOf("_") != -1)
-                    attr = 'id="' + field.name + "_" + val + '"';
-
-                r += "<div><label>" + field.title + "</label>";
-                if (field.ftype == "div")
-                    r += "<div " + attr + ">" + val + "</div>";
-                else if (field.ftype == "input")
-                    r += '<input ' + attr + ' name="' + field.name + '" value="' + val + '"/>';
-                else if (field.ftype == "input_long")
-                    r += '<input ' + attr + ' style="width:490px;" name="' + field.name + '" value="' + val + '" />';
-                else if (field.ftype == "textarea")
-                    r += '<textarea ' + attr + ' style="resize:none;width:490px;max-height:45px;" name="' + field.name + '">' + val + '</textarea>';
-                else if (field.ftype == "select")
-                    r += '<select ' + attr + ' name="' + field.name + '"></select>';
-                else
-                    r += "<div " + attr + ">未定义类型:" + field.ftype + "</div>";
-                r += "</div>";
-            }
-            r += "</div>";
-            return r;
-        }
-
     </script>
 </body>
 </html>
