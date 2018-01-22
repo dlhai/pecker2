@@ -83,7 +83,7 @@ def queryuser():
     sql = "select user.id,user.account,user.face,user.depart_id, winder.name as depart_name, user.job,user.skill,user.name,user.code,user.sex,user.ethnic,user.birth,user.origin,user.idimg,user.phone,user.qq,user.mail,user.wechat,user.addr from user,winder where user.depart_id = winder.id"
     if len(d) > 0:
         sql += " and "+" and ".join([ k+"='"+v+"'" for k,v in d.items()])
-    return query3(queryuser+" "+type,fields=select(base.sl).where(base.c.table=="user"),data = sql)
+    return query3("queryuser_"+type,fields=select(base.sl).where(base.c.table=="user"),data = sql)
 
 
 #id到名字的转换
