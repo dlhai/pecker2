@@ -265,6 +265,14 @@ function GetIdxbyId(ar, id) {
     return -1;
 }
 
+// 与旧的GetIdx完全没有关系
+function GetIdx2(ar, attr, val) {
+    for (var i in ar) {
+        if (ar[i][attr] == val)
+            return ar[i];
+    }
+    return null;
+}
 
 function Clone(obj) {
     var r = new Object();

@@ -328,8 +328,9 @@
                 $('.userfloat').css("border", "1px solid #95b7ff");
                 $('.userfloat').on("click", function () {
                     var This = $(this);
+                    var field = This.attr("data_field");
                     This.parent().css("position", "relative");
-                    This.parent().append(RenderEditer(, This.attr("data_field"), This.html(), ""));
+                    This.parent().append(RenderEditer(g_users.type, GetIdx2(g_users.fields, "name", field).ftype, field, This.html(), ""));
                 });
             }
             else{
@@ -338,19 +339,29 @@
             }
         }
 
-        function RenderEditer(type, name, val, url) {
+        function RenderEditer(table, type, name, val, url) {
             var r = '<form class="editer">';
             if (type == "input")
                 r += '<input name="' + name + '" value="' + val + '"/>';
             else if (type == "input_long")
                 r += '<input style="width:490px;" name="' + name + '" value="' + val + '" />';
             else if (type == "textarea")
-                r += '<textarea style="resize:none;width:490px;max-height:45px;" name="' + field.name + '">' + val + '</textarea>';
+                r += '<textarea style="resize:none;width:490px;max-height:45px;" name="' + name + '">' + val + '</textarea>';
             else if (type == "select"){
-                r += '<select id="20080122" name="' + field.name + '"></select>';
+                r += '<select id="20080122" name="' + name + '"></select>';
                 Request(url, function (res) {
                     $("#20080122").html(RenderSelect(res, val));
                 });
+            }
+            else if (type == "choice")
+            {
+
+            }
+            else if (type == "date") {
+
+            }
+            else if (type == "pwd") {
+
             }
             else
                 alert("RenderEditer: unknown type:" + type);
@@ -444,3 +455,13 @@
     </script>
 </body>
 </html>
+
+<!--
+input：普通录入
+pwd：密码
+image：图片
+select：所在单位选择，职位选择，领域选择，籍贯（省地市）选择，
+input
+choice：性别选择，
+date：日历，
+image-->
