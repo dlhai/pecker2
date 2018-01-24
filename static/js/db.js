@@ -198,6 +198,34 @@ var branch = {
     }
 }
 
+var db_job = [
+    { "id": "1", "type": "expert", "name": "专家" },
+    { "id": "2", "type": "repair", "name": "队长" },
+    { "id": "3", "type": "repair", "name": "技工" },
+    { "id": "4", "type": "winder", "name": "驻场" },
+    { "id": "5", "type": "winder", "name": "风场主管" },
+    { "id": "6", "type": "coord", "name": "调度" },
+    { "id": "7", "type": "coord", "name": "调度主管" },
+    { "id": "8", "type": "wh", "name": "仓管" },
+    { "id": "9", "type": "wh", "name": "仓管主管" },
+    { "id": "10", "type": "dev", "name": "设备司机" },
+    { "id": "11", "type": "dev", "name": "设备主管" },
+    { "id": "12", "type": "public", "name": "公众" },
+]
+
+var db_skill = [
+    { "id": "1", "name": "避雷" },
+    { "id": "2", "name": "工艺设计" },
+    { "id": "3", "name": "工艺生产" },
+    { "id": "4", "name": "材料" },
+    { "id": "5", "name": "安全" },
+]
+
+var db_sex = [
+    { "id": "0", "name": "女" },
+    { "id": "1", "name": "男" },
+]
+
 
 var db_leafvender =
 [

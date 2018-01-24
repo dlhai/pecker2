@@ -11,7 +11,7 @@ engine = create_engine('sqlite:///./db/pecker.db')
 metadata = MetaData(engine)
 conn = engine.connect()
 
-table = {
+tables = {
     'base':Table('base', metadata,autoload=True),
     'user':Table('user', metadata,autoload=True),
     'leafvender':Table('leafvender', metadata,autoload=True),
@@ -21,9 +21,12 @@ table = {
     'winder':Table('winder', metadata,autoload=True),
     'winderarea':Table('winderarea', metadata,autoload=True),
     'efan':Table('efan', metadata,autoload=True),
-    'leaf':Table('leaf', metadata,autoload=True)
+    'leaf':Table('leaf', metadata,autoload=True),
+    'addit':Table('addit', metadata,autoload=True),
+    'config':Table('config', metadata,autoload=True),
+    'link':Table('link', metadata,autoload=True)
     }
-base=table["base"]
+base=tables["base"]
 base.sl = [base.c.title, base.c.name, base.c.forder, base.c.ftype, base.c.twidth, base.c.tstyle]
 organ = { "root": "winderco", "winderco": "winderprov", "winderprov": "winder", "winder":"winderarea","winderarea":"efan" }
 
@@ -43,48 +46,38 @@ def jquery(q):
     return "["+",\n".join(seq)+"]"
 
 def query3(type,**kw):
-    r = '{"result":200,"type":"'+type+'",\n'
+    r = '{"result":200,"type":"'+type+'","ls":"'+type+'",\n'
+    r += ",\n".join([ '"' + k + '":'+ jquery(v) for k,v in kw.items()] )
+    r += "\n}\n"
+    return Response(r, mimetype='application/json')
+
+def query4(ls,**kw):
+    r = '{"result":200,"ls":"'+ls+'",\n'
     r += ",\n".join([ '"' + k + '":'+ jquery(v) for k,v in kw.items()] )
     r += "\n}\n"
     return Response(r, mimetype='application/json')
 
 #查询
-#测试链接 http://127.0.0.1:5000/query?type=[表名]&key1=val1&key2=val2....
-@app.route("/query")
-def _query():
+#测试链接 http://127.0.0.1:5000/rd?ls=[表名]&key1=val1&key2=val2....
+@app.route("/rd")
+def rd():
     d = request.args.to_dict()
-    type = d["type"]
-    del d["type"]
+    ls = d["ls"]
+    del d["ls"]
 
     # 限制对部分表的查询
-    if type== "base" or type == "user":
+    if ls== "base" or ls == "user":
         return 404
 
-    tbl = table[type]
-    sql = "select * from "+type
+    if ls== "scale" or ls == "mainmat" or ls== "job" or ls== "skill" or ls=="ethnic":
+        d["type"]=ls
+        ls = "config"
+
+    tbl = tables[ls]
+    sql = "select * from "+ls
     if len(d) > 0:
         sql += " where "+" and ".join([ k+"='"+v+"'" for k,v in d.items()])
-    return query3(type,fields=select(base.sl).where(base.c.table==type),data = sql)
-
-#查询用户
-#测试链接 http://127.0.0.1:5000/queryUser?type=winder&key1=val1&key2=val2....
-@app.route("/queryuser")
-def queryuser():
-    d = request.args.to_dict()
-    type = d["type"]
-    del d["type"]
-
-    # 限制对部分表的查询
-    if type== "":
-        return 404
-
-    d["depart_table"]=type;
-    tbl = table[type]
-    sql = "select user.id,user.account,user.face,user.depart_id, winder.name as depart_name, user.job,user.skill,user.name,user.code,user.sex,user.ethnic,user.birth,user.origin,user.idimg,user.phone,user.qq,user.mail,user.wechat,user.addr from user,winder where user.depart_id = winder.id"
-    if len(d) > 0:
-        sql += " and "+" and ".join([ k+"='"+v+"'" for k,v in d.items()])
-    return query3("queryuser_"+type,fields=select(base.sl).where(base.c.table=="user"),data = sql)
-
+    return query4(ls,fields=select(base.sl).where(base.c.table==ls),data = sql)
 
 #id到名字的转换
 @app.route("/id2name")
@@ -104,17 +97,54 @@ def upload():
 
 #-----------------------以下接口将被废弃-------------------------------
 
+#查询(由于部分表有type字段与type参数作为表名冲突被废弃)
+#测试链接 http://127.0.0.1:5000/query?type=[表名]&key1=val1&key2=val2....
+@app.route("/query")
+def _query():
+    d = request.args.to_dict()
+    type = d["type"]
+    del d["type"]
+
+    # 限制对部分表的查询
+    if type== "base" or type == "user":
+        return 404
+
+    tbl = tables[type]
+    sql = "select * from "+type
+    if len(d) > 0:
+        sql += " where "+" and ".join([ k+"='"+v+"'" for k,v in d.items()])
+    return query3(type,fields=select(base.sl).where(base.c.table==type),data = sql)
+
+#查询用户
+#测试链接 http://127.0.0.1:5000/queryUser?type=winder&key1=val1&key2=val2....
+@app.route("/queryuser")
+def queryuser():
+    d = request.args.to_dict()
+    type = d["type"]
+    del d["type"]
+
+    # 限制对部分表的查询
+    if type== "":
+        return 404
+
+    d["depart_table"]=type;
+    tbl = tables[type]
+    sql = "select user.id,user.account,user.face,user.depart_id, winder.name as depart_name, user.job,user.skill,user.name,user.code,user.sex,user.ethnic,user.birth,user.origin,user.idimg,user.phone,user.qq,user.mail,user.wechat,user.addr from user,winder where user.depart_id = winder.id"
+    if len(d) > 0:
+        sql += " and "+" and ".join([ k+"='"+v+"'" for k,v in d.items()])
+    return query3("queryuser_"+type,fields=select(base.sl).where(base.c.table=="user"),data = sql)
+
 #leaf_su8设备sheet用
 #测试链接 http://127.0.0.1:5000/itemdetail?type=winderco&id=1
 @app.route("/itemdetail")
 def itemdetail():
     type = request.args.get('type')
     id = request.args.get('id')
-    tbl = table[type]
+    tbl = tables[type]
     return query3(type,fields=select(base.sl).where(base.c.table==type),\
         data=select([tbl]).where(tbl.c.id==id).order_by(tbl.c.id))
 
-#leaf_su8子设备列表table用，type=root时，仅超级用户可用
+#leaf_su8子设备列表tables用，type=root时，仅超级用户可用
 #测试链接 http://127.0.0.1:5000/sublistdetail?type=root&id=1
 #测试链接 http://127.0.0.1:5000/sublistdetail?type=winderco&id=1
 #测试链接 http://127.0.0.1:5000/sublistdetail?type=winderarea&id=1
@@ -123,13 +153,13 @@ def sublistdetail():
     type = request.args.get('type')
     id = request.args.get('id')
     subtype = organ[type]
-    tbl = table[subtype]
+    tbl = tables[subtype]
     s1 = select(base.sl).where(base.c.table==subtype).order_by(base.c.id)
     s2 = select([tbl]).order_by(tbl.c.id)
     if type != "root":
         s2 = select([tbl]).where(tbl.c[type+"_id"]==id).order_by(tbl.c.id)
     if subtype == "efan":
-        sub = table["leaf"]
+        sub = tables["leaf"]
         s3 = select([sub]).where(sub.c.winderarea_id==id).order_by(sub.c.id)
         return query3(type,fields=s1,data=s2,addit=s3)
     else:
@@ -142,7 +172,7 @@ def sublistdetail():
 def sublist():
     type = request.args.get('type')
     id = request.args.get('id')
-    tbl = table[organ[type]]
+    tbl = tables[organ[type]]
     sel = ""
     if type =="root":
         sel = select([tbl.c.id, tbl.c.name]).order_by(tbl.c.id)
@@ -158,8 +188,8 @@ def sublist():
 @app.route("/winderlist")
 def winderlist():
     winder_id = request.args.get('winder_id') #为0仅su可用，表示获得全部风场
-    tbl1 = table["winder"]
-    tbl2 = table["winderarea"]
+    tbl1 = tables["winder"]
+    tbl2 = tables["winderarea"]
 
     if winder_id =="0":
         s1 = select([tbl1.c.id, tbl1.c.name,tbl1.c.position]).order_by(tbl1.c.id)
@@ -176,7 +206,7 @@ def winderlist():
 @app.route("/efanlist")
 def efanlist():
     winder_id = request.args.get('winder_id')
-    tbl = table["efan"]
+    tbl = tables["efan"]
     s = select([tbl.c.id, tbl.c.position]).where(tbl.c.winder_id==winder_id).order_by(tbl.c.id)
     return query3("efan", efanlist=s)
 

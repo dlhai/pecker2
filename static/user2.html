@@ -8,6 +8,7 @@
     <script type="text/javascript" src="js/doTe.js"></script>
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.js"></script>
+    <script src="laydate/laydate.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
     <script src="js/db.js"></script> <!--用到branch-->
@@ -134,9 +135,13 @@
 
         .editer {
             position: absolute;
-            width: 200px;
-            height: 30px;
+            border: 2px solid #95b7ff;
+            border-radius: 4px;
+            background:#ffffff;
             box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            width: 232px;
+            left: 75px;
+            z-index:9999;
         }
         .editer > input,
         .editer > select,
@@ -144,10 +149,14 @@
             border-radius: 4px;
             border: 1px solid #95b7ff;
             display: inline-block;
-            padding: 5px 10px;
-            margin: 0px 5px;
+            padding: 5px 20px;
+            margin: 0px 2px 0px 0px;
             width: 200px;
         }
+        .editer > a>img{
+            vertical-align: middle; margin-bottom: 2px;
+        }
+
     </style> 
 </head>
 <body class="xFCsrow" >
@@ -200,11 +209,11 @@
     </div>
 
     <script id="tpl_image_in_pane" type="text/template">
-        <div style="height:240px;width:282px;float: left; display:block;">
+        <div style="height:240px;width:280px;float: left; display:block;">
             <div class="pane_image" style="width: 100%; height: 80px; margin: 0px; padding:0px; display:block;border:0px;">
                 <div style="float: left; margin:0px;"><img style="width: 78px; height: 78px;" src="{%=it.face%}" /></div>
                 <div style="margin-top:0px;"><label>帐号</label><div class="usernew" style="display:inline-block;">{%=it.account%}</div></div>
-                <div><label>姓名</label><div class="userfloat" >{%=it.name%}</div></div>
+                <div><label>密码</label><div class="userfloat" >***</div></div>
             </div>
             <img style="width: 280px; height: 160px;" src="{%=it.idimg%}" />
         </div>
@@ -271,12 +280,6 @@
         {% } %}
     </script>
 
-    <script id="tpl_editer" type="text/template">
-        <form style="position:absolute;width:200px;height:30px;border:1px solid #dddddd;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
-
-        </form>
-    </script>
-
     <script type="text/javascript">
         var tpl_certiflist = doT.template(document.getElementById('tpl_certiflist').innerHTML);
         var tpl_edulist = doT.template(document.getElementById('tpl_edulist').innerHTML);
@@ -323,14 +326,15 @@
         }
         function onEditUser() {
             g_userfloat = !g_userfloat;
-            $('form').remove();
+            onClickSubmit();
             if (g_userfloat){
                 $('.userfloat').css("border", "1px solid #95b7ff");
                 $('.userfloat').on("click", function () {
+                    onClickSubmit();
                     var This = $(this);
-                    var field = This.attr("data_field");
+                    var fieldname = This.attr("data_field");
                     This.parent().css("position", "relative");
-                    This.parent().append(RenderEditer(g_users.type, GetIdx2(g_users.fields, "name", field).ftype, field, This.html(), ""));
+                    This.parent().append(RenderEditerUser(fieldname, This.html()));
                 });
             }
             else{
@@ -338,35 +342,13 @@
                 $('.userfloat').off("click");
             }
         }
+        function onClickSubmit() {
+            var form = $('form');
+            if (form.length == 0)
+                return;
 
-        function RenderEditer(table, type, name, val, url) {
-            var r = '<form class="editer">';
-            if (type == "input")
-                r += '<input name="' + name + '" value="' + val + '"/>';
-            else if (type == "input_long")
-                r += '<input style="width:490px;" name="' + name + '" value="' + val + '" />';
-            else if (type == "textarea")
-                r += '<textarea style="resize:none;width:490px;max-height:45px;" name="' + name + '">' + val + '</textarea>';
-            else if (type == "select"){
-                r += '<select id="20080122" name="' + name + '"></select>';
-                Request(url, function (res) {
-                    $("#20080122").html(RenderSelect(res, val));
-                });
-            }
-            else if (type == "choice")
-            {
-
-            }
-            else if (type == "date") {
-
-            }
-            else if (type == "pwd") {
-
-            }
-            else
-                alert("RenderEditer: unknown type:" + type);
-            r += "<a>保存</a></form>";
-            return r;
+            form.parent().css("position", "");
+            form.remove();
         }
 
         function GetParam(name) {
@@ -439,10 +421,9 @@
                 }
                 //用户特别处理end
 
-               var attr = 'class="userfloat" data_field="' + field.name + '" ';
-                if (field.name.indexOf("_") != -1)
-                    attr = 'id="' + field.name + "_" + val + '" ';
-
+                var attr = 'data_field="' + field.name + '" ';
+                if (field.ftype != "div")
+                    attr += 'class="userfloat" '
                 if (field.ftype == "input_long")
                     attr += 'style="width:490px;"';
                 else if (field.ftype == "textarea")
@@ -452,6 +433,50 @@
             }
             return r;
         }
+
+        function RenderEditerUser(fieldname, val) {
+            type = GetIdx2(g_users.fields, "name", fieldname).ftype
+
+            var r = '<form class="editer">';
+            if (type == "input")
+                r += '<input name="' + name + '" value="' + val + '"/>';
+            else if (type == "input_long"){
+                r = '<form class="editer" style="width:522px;" >';
+                r += '<input style="width:490px;" name="' + name + '" value="' + val + '" />';
+            }
+            else if (type == "textarea"){
+                r = '<form class="editer" style="width:522px;" >';
+                r += '<textarea style="resize:none;width:490px;max-height:45px;" name="' + name + '">' + val + '</textarea>';
+            }
+            else if (type == "select") {
+                r += '<select id="editer_' + name + '" name="' + name + '">';
+                if (fieldname == "job")
+                    r += RenderSelect(db_job, val, "winder");
+                else if (fieldname == "sex")
+                    r += RenderSelect(db_sex, val);
+                else if (fieldname == "skill")
+                    r += RenderSelect(db_skill, val);
+                else if (fieldname == "ethnic")
+                    Request2("/rd?ls=ethnic", "editer_" + name, val, RenderSelect2);
+                r += '</select>';
+            }
+            else if (type == "choice") {
+
+            }
+            else if (type == "date") {
+                r += '<input name="' + name + '" value="' + val + '" onClick="laydate()"/>';
+            }
+            else if (type == "pwd") {
+                r += '<input name="' + name + '" value="' + val + '"/>';
+                r += '<input name="' + name + '1" value="' + val + '"/>';
+                r += '<input name="' + name + '2" value="' + val + '"/>';
+            }
+            else
+                alert("RenderEditer: unknown type:" + type);
+            r += '<a onClick="onClickSubmit()"><img style="width:24px;height:24px" src="img/submit.png"></a></form>';
+            return r;
+        }
+
     </script>
 </body>
 </html>

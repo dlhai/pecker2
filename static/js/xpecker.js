@@ -158,14 +158,29 @@ function RenderPane(ar, idx){
     return r;
 }
 
-function RenderSelect(ar, selid) {
+function RenderSelect(ar, selid, type) {
     var r = "";
     for (var i in ar) {
         var x = ar[i];
-        if (x["id"] == selid )
-            r += '<option value="' + x["id"] + ' selected>' + x["name"] + '</option>';
+        if (typeof (type) != "undefined" && x.type != type)
+            continue;
+
+        if (x["id"] == selid || x["name"] == selid )
+            r += '<option value="' + x["id"] + '" selected>' + x["name"] + '</option>';
         else
-            r += '<option value="' + x["id"] + '>' + x["name"] + '</option>';
+            r += '<option value="' + x["id"] + '">' + x["name"] + '</option>';
+    }
+    return r;
+}
+
+function RenderSelect2(res, selid) {
+    var r = "";
+    for (var i in res.data) {
+        var x = res.data[i];
+        if (x["id"] == selid || x["name"] == selid)
+            r += '<option value="' + x["id"] + '" selected>' + x["name"] + '</option>';
+        else
+            r += '<option value="' + x["id"] + '">' + x["name"] + '</option>';
     }
     return r;
 }
@@ -204,7 +219,7 @@ function fillselect(ar, idx) {
 
 cache = new Object()
 function Request(url, fun) {
-    if (cache[url]) {   // 优先使用缓冲数据
+    if (cache[url]) { // 优先使用缓冲数据
         fun(cache[url]);
         return;
     }
@@ -220,6 +235,26 @@ function Request(url, fun) {
     };
     xmlhttp.send();
 }
+
+// 回调函数格式：render_fun(ar, id)
+function Request2(url, id, val, render_fun) {
+    if (cache[url]) { // 优先使用缓冲数据
+        return $("#" + id).html(render_fun(cache[url],val));
+    }
+
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("GET", url, true);
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            jdata = $.parseJSON(xmlhttp.responseText);
+            $("#" + id).html(render_fun(jdata, val));
+            cache[url] = jdata;
+        }
+    };
+    xmlhttp.send();
+    return "";
+}
+
 
 function RenderForm2(ar, i) {
     alert("使用了旧接口：RenderForm2已被RenderPane");
