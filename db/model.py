@@ -116,6 +116,28 @@ tbl_leaf=Table('leaf', metadata,
 	Column('producedate',Date),
 	Column('putondate',Date))
 
+tbl_addit=Table('addit', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('type',String(32)),
+	Column('type_id',Integer),
+	Column('name',String(32)),
+	Column('user_id',Integer),
+	Column('order',Integer),
+	Column('date',Date))
+
+tbl_link=Table('link', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('type',String(32)),
+	Column('type_id',Integer),
+	Column('name',String(32)),
+	Column('refer_id',Integer),
+	Column('date',Date))
+
+tbl_config=Table('config', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('type',String(32)),
+	Column('name',String(32)))
+
 
 metadata.create_all(engine)
 conn = engine.connect()
@@ -182,9 +204,24 @@ def dict_leaf(x,y):
 conn.execute(tbl_leaf.insert(),[dict_leaf(x,y) for x in data("efan") for y in range(3)])
 QueryAll(tbl_leaf)
 
+def dict_addit(x,y):
+    return dict(type="",type_id="",name="",user_id="",order="",date="")
+
+def dict_link(x,y):
+    return dict(type="",type_id="",name="",refer_id="",date="")
+
+def dict_config(type,name):
+    return dict(type=type,name=name)
+
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","叶片超级帐号","")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"winder","风场主管","") for x in data("winder")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"winder","驻场","") for x in data("winder") for y in range(rndnum(2,3))])
+conn.execute(tbl_config.insert(),[dict_config("scale",x[0]) for x in data("_scale").data])
+conn.execute(tbl_config.insert(),[dict_config("mainmat",x[0]) for x in data("_mainmat").data])
+conn.execute(tbl_config.insert(),[dict_config("scale",x[0]) for x in data("_scale").data])
+conn.execute(tbl_config.insert(),[dict_config("job",x[0]) for x in data("_job").data])
+conn.execute(tbl_config.insert(),[dict_config("skill",x[0]) for x in data("_skill").data])
+conn.execute(tbl_config.insert(),[dict_config("ethnic",x[0]) for x in data("_ethnic").data])
 conn.execute(tbl_base.insert(),[dict(table="base",title="标识",name="id",forder="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
 dict(table="base",title="表名",name="table",forder="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="x",remark="",),
 dict(table="base",title="标题",name="title",forder="",ftype="",twidth="",tstyle="",dtype="String(64)",drule="x",remark="",),
@@ -270,4 +307,20 @@ dict(table="leaf",title="生产厂家",name="leafvender_id",forder="4.0",ftype="
 dict(table="leaf",title="主要材料",name="mat",forder="5.0",ftype="input",twidth="",tstyle="",dtype="String(32)",drule="rnditem:_mainmat",remark="",),
 dict(table="leaf",title="出厂时间",name="producedate",forder="6.0",ftype="date",twidth="",tstyle="",dtype="Date",drule="pdt",remark="",),
 dict(table="leaf",title="挂机时间",name="putondate",forder="7.0",ftype="date",twidth="",tstyle="",dtype="Date",drule="rnddatespan(pdt,30,365)",remark="",),
+dict(table="addit",title="标识",name="id",forder="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
+dict(table="addit",title="类型",name="type",forder="",ftype="",twidth="",tstyle="",dtype="String(32)",drule='""',remark="可以是face(头像)，idimg(身份证扫描件)，用户信息中的各种证件照，报修单中的图片列表，维修记录中的图片列表，维修评估中的文档列表，维修报告中的文档列表",),
+dict(table="addit",title="引用者",name="type_id",forder="",ftype="",twidth="",tstyle="",dtype="Integer",drule='""',remark="指信息主体的id",),
+dict(table="addit",title="附件名称",name="name",forder="",ftype="",twidth="",tstyle="",dtype="String(32)",drule='""',remark="文件名",),
+dict(table="addit",title="上传者",name="user_id",forder="",ftype="",twidth="",tstyle="",dtype="Integer",drule='""',remark="",),
+dict(table="addit",title="顺序号",name="order",forder="",ftype="",twidth="",tstyle="",dtype="Integer",drule='""',remark="若对应列表，即为列表的序号",),
+dict(table="addit",title="上传日期",name="date",forder="",ftype="",twidth="",tstyle="",dtype="Date",drule='""',remark="",),
+dict(table="link",title="标识",name="id",forder="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
+dict(table="link",title="类型",name="type",forder="",ftype="",twidth="",tstyle="",dtype="String(32)",drule='""',remark="比如处理案件的专家列表、案件使用的用料单、设备调用单等。",),
+dict(table="link",title="引用者",name="type_id",forder="",ftype="",twidth="",tstyle="",dtype="Integer",drule='""',remark="指信息主体的id",),
+dict(table="link",title="附件名称",name="name",forder="",ftype="",twidth="",tstyle="",dtype="String(32)",drule='""',remark="文件名",),
+dict(table="link",title="被引用者",name="refer_id",forder="",ftype="",twidth="",tstyle="",dtype="Integer",drule='""',remark="",),
+dict(table="link",title="上传日期",name="date",forder="",ftype="",twidth="",tstyle="",dtype="Date",drule='""',remark="",),
+dict(table="config",title="标识",name="id",forder="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
+dict(table="config",title="类型",name="type",forder="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="type",remark="",),
+dict(table="config",title="名称",name="name",forder="",ftype="",twidth="",tstyle="",dtype="String(32)",drule="name",remark="",),
 ])
