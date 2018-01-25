@@ -153,19 +153,49 @@ function  RenderForm(ar, i) {
 }
 
 var db_roles = [
-    { type: "叶片超级帐号", act: "叶片su", modules: [{ name: "地图", url: "leaf_map.html?type=风场&range=all" }, { name: "风场", url: "leaf_su8.html" }, { name: "人员", url: "user.html?type=winder" }, { name: "厂家", url: "leaf_su_vender.html" }]},
+    {type: "叶片超级帐号", act: "叶片su", modules: [
+        { name: "地图", url: "leaf_su_map.html?type=风场&range=all" },
+        { name: "风场", url: "leaf_su8.html" },
+        { name: "人员", url: "user2.html?type=winder" },
+        { name: "厂家", url: "leaf_su_vender.html" }]
+    },
     {type: "风场主管", act: "chenjiamu", modules: [
-           { name: "地图", url: "bdmap.html?type=风场&range=all" },
-           { name: "设备", url: "winder.html", submod: [{ name: "区域1", url: "winder.html" }, { name: "区域2", url: "winder.html" }, { name: "区域3", url: "winder.html" }]},
-           { name: "案件", url: "coord.html",submod: [{ name: "区域1", url: "coord.html" }, { name: "区域2", url: "coord.html" }, { name: "区域3", url: "coord.html" }]},
-           { name: "记录", url: "repairlog.html", submod: [{ name: "区域1", url: "repairlog.html" }, { name: "区域2", url: "repairlog.html" }, { name: "区域3", url: "repairlog.html" }] }
+        { name: "地图", url: "windermap.html?id=all" },
+           { name: "设备", url: "winder.html", submod: [
+               { name: "区域1", url: "winder.html" },
+               { name: "区域2", url: "winder.html" },
+               { name: "区域3", url: "winder.html" }]
+           },
+           { name: "案件", url: "coord.html", submod: [
+               { name: "区域1", url: "coord.html" },
+               { name: "区域2", url: "coord.html" },
+               { name: "区域3", url: "coord.html" }]
+           },
+           { name: "记录", url: "repairlog.html", submod: [
+               { name: "区域1", url: "repairlog.html" },
+               { name: "区域2", url: "repairlog.html" },
+               { name: "区域3", url: "repairlog.html" }]
+           }
+           { name: "人员", url: "user2.html?type=winder" },
         ]
    },
     {type: "驻场人员", act: "chenjiamu", modules: [
             { name: "地图", url: "bdmap.html?type=风场&range=all" },
-            { name: "设备", url: "winder.html", submod: [{ name: "区域1", url: "winder.html" }, { name: "区域2", url: "winder.html" }, { name: "区域3", url: "winder.html" }]},
-            { name: "案件", url: "coord.html",submod: [{ name: "区域1", url: "coord.html" }, { name: "区域2", url: "coord.html" }, { name: "区域3", url: "coord.html" }]},
-            { name: "记录", url: "repairlog.html", submod: [{ name: "区域1", url: "repairlog.html" }, { name: "区域2", url: "repairlog.html" }, { name: "区域3", url: "repairlog.html" }] }
+            { name: "设备", url: "winder.html", submod: [
+                { name: "区域1", url: "winder.html" },
+                { name: "区域2", url: "winder.html" },
+                { name: "区域3", url: "winder.html" }]
+            },
+            {name: "案件", url: "coord.html", submod: [
+                { name: "区域1", url: "coord.html" },
+                { name: "区域2", url: "coord.html" },
+                { name: "区域3", url: "coord.html" }]
+            },
+            {name: "记录", url: "repairlog.html", submod: [
+                { name: "区域1", url: "repairlog.html" },
+                { name: "区域2", url: "repairlog.html" },
+                { name: "区域3", url: "repairlog.html" }]
+            }
         ]
    },
     { type: "设备超级帐号", act: "设备su", modules: [{ name: "地图", url: "bdmap.html?type=司机|总备&range=all" }, { name: "驻地", url: "devwh_su.html" }, { name: "人员", url: "person.html?type=司机|总备&depart=db_devwh_list" }] },

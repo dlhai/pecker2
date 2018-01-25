@@ -57,6 +57,18 @@ def query4(ls,**kw):
     r += "\n}\n"
     return Response(r, mimetype='application/json')
 
+#登录
+@app.route("/")
+def index():
+    return app.send_static_file('index.html')
+
+@app.route("/login")
+def index():
+    param = request.args.to_dict()
+
+    return app.send_static_file('index.html')
+
+
 #查询
 #测试链接 http://127.0.0.1:5000/rd?ls=[表名]&key1=val1&key2=val2....
 @app.route("/rd")
@@ -211,11 +223,6 @@ def efanlist():
     return query3("efan", efanlist=s)
 
 #---------------------以上接口将被废弃---------------------------------------
-
-#登录
-@app.route("/")
-def index():
-    return app.send_static_file('index.html')
 
 if __name__ == "__main__":
     app.config['JSON_AS_ASCII'] = False
