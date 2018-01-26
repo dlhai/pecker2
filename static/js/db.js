@@ -153,33 +153,20 @@ function  RenderForm(ar, i) {
 }
 
 var db_roles = [
-    {type: "叶片超级帐号", act: "叶片su", modules: [
+    {"id": "1", "type": "winder", "name": "叶片超级帐号", modules: [
         { name: "地图", url: "leaf_su_map.html?type=风场&range=all" },
         { name: "风场", url: "leaf_su8.html" },
         { name: "人员", url: "user2.html?type=winder" },
         { name: "厂家", url: "leaf_su_vender.html" }]
     },
-    {type: "风场主管", act: "chenjiamu", modules: [
+    {"id": "2", "type": "winder", "name": "风场主管", modules: [
         { name: "地图", url: "windermap.html?id=all" },
-           { name: "设备", url: "winder.html", submod: [
-               { name: "区域1", url: "winder.html" },
-               { name: "区域2", url: "winder.html" },
-               { name: "区域3", url: "winder.html" }]
-           },
-           { name: "案件", url: "coord.html", submod: [
-               { name: "区域1", url: "coord.html" },
-               { name: "区域2", url: "coord.html" },
-               { name: "区域3", url: "coord.html" }]
-           },
-           { name: "记录", url: "repairlog.html", submod: [
-               { name: "区域1", url: "repairlog.html" },
-               { name: "区域2", url: "repairlog.html" },
-               { name: "区域3", url: "repairlog.html" }]
-           }
-           { name: "人员", url: "user2.html?type=winder" },
-        ]
-   },
-    {type: "驻场人员", act: "chenjiamu", modules: [
+        { name: "设备", url: "winder.html" },
+        { name: "案件", url: "coord.html" },
+        { name: "记录", url: "repairlog.html" },
+        { name: "人员", url: "user2.html?type=winder" }
+    },
+    {"id": "3", "type": "winder", "name": "驻场", modules: [
             { name: "地图", url: "bdmap.html?type=风场&range=all" },
             { name: "设备", url: "winder.html", submod: [
                 { name: "区域1", url: "winder.html" },
@@ -197,21 +184,21 @@ var db_roles = [
                 { name: "区域3", url: "repairlog.html" }]
             }
         ]
-   },
-    { type: "设备超级帐号", act: "设备su", modules: [{ name: "地图", url: "bdmap.html?type=司机|总备&range=all" }, { name: "驻地", url: "devwh_su.html" }, { name: "人员", url: "person.html?type=司机|总备&depart=db_devwh_list" }] },
-    { type: "驻地主管", act: "buzixian", modules: [{ name: "地图", url: "bdmap.html?type=司机" },{ name: "驻地", url: "devwh.html" },{ name: "人员", url: "person.html?type=司机&depart=塔里木驻" }] },
-    { type: "设备司机", act: "sungangyi", modules: [{ name: "设备", url: "driver.html" }] },
-    { type: "仓库超级帐号", act: "仓库su", modules: [{ name: "仓库", url: "matwh_su.html" }, { name: "人员", url: "person.html?type=仓管|仓主" }, { name: "材料", url: "material.html" }] },
-    { type: "仓库主管", act: "shimengfan", modules: [{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }] },
-    { type: "仓库管理员", act: "luohongcai", modules: [{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }] },
-    { type: "调度超级帐号", act: "调度su", modules: [{ name: "调度", url: "person.html?type=总调|调度" }] },
-    { type: "调度主管", act: "dushilei", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
-    { type: "调度", act: "zhoushaoyuan", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
-    { type: "专家超级帐号", act: "专家su", modules: [{ name: "专家", url: "person.html?type=专家" }, { name: "记录", url: "repairlog.html" }] },
-    { type: "专家", act: "gubingwei", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
-    { type: "技工超级帐号", act: "技工su", modules: [{ name: "技工", url: "person.html?type=技工|队长" }] },
-    { type: "维修队长", act: "qianzhenhai", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
-    { type: "技工", act: "leiyixuan", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
+    },
+    { "id": "4", "type": "dev", "name": "设备超级帐号",modules: [{ name: "地图", url: "bdmap.html?type=司机|总备&range=all" }, { name: "驻地", url: "devwh_su.html" }, { name: "人员", url: "person.html?type=司机|总备&depart=db_devwh_list" }] },
+    { "id": "5", "type": "dev", "name": "驻地主管",modules: [{ name: "地图", url: "bdmap.html?type=司机" },{ name: "驻地", url: "devwh.html" },{ name: "人员", url: "person.html?type=司机&depart=塔里木驻" }] },
+    { "id": "6", "type": "dev", "name": "设备司机",modules: [{ name: "设备", url: "driver.html" }] },
+    { "id": "7", "type": "wh", "name": "仓库超级帐号",modules: [{ name: "仓库", url: "matwh_su.html" }, { name: "人员", url: "person.html?type=仓管|仓主" }, { name: "材料", url: "material.html" }] },
+    { "id": "8", "type": "wh", "name": "仓库主管",modules: [{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }] },
+    { "id": "9", "type": "wh", "name": "仓库管理员",modules: [{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }] },
+    { "id": "10", "type": "coord", "name": "调度超级帐号",modules: [{ name: "调度", url: "person.html?type=总调|调度" }] },
+    { "id": "11", "type": "coord", "name": "调度主管",modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
+    { "id": "12", "type": "coord", "name": "调度",modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
+    { "id": "13", "type": "expert", "name": "专家超级帐号",modules: [{ name: "专家", url: "person.html?type=专家" }, { name: "记录", url: "repairlog.html" }] },
+    { "id": "14", "type": "expert", "name": "专家",modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
+    { "id": "15", "type": "repair", "name": "技工超级帐号",modules: [{ name: "技工", url: "person.html?type=技工|队长" }] },
+    { "id": "16", "type": "repair", "name": "维修队长",modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
+    { "id": "17", "type": "repair", "name": "技工",modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
 ];
 
 var branch = {
@@ -229,18 +216,24 @@ var branch = {
 }
 
 var db_job = [
-    { "id": "1", "type": "expert", "name": "专家" },
-    { "id": "2", "type": "repair", "name": "队长" },
-    { "id": "3", "type": "repair", "name": "技工" },
-    { "id": "4", "type": "winder", "name": "驻场" },
-    { "id": "5", "type": "winder", "name": "风场主管" },
-    { "id": "6", "type": "coord", "name": "调度" },
-    { "id": "7", "type": "coord", "name": "调度主管" },
-    { "id": "8", "type": "wh", "name": "仓管" },
-    { "id": "9", "type": "wh", "name": "仓管主管" },
-    { "id": "10", "type": "dev", "name": "设备司机" },
-    { "id": "11", "type": "dev", "name": "设备主管" },
-    { "id": "12", "type": "public", "name": "公众" },
+    { "id": "1", "type": "winder", "name": "叶片超级帐号" },
+    { "id": "2", "type": "winder", "name": "风场主管" },
+    { "id": "3", "type": "winder", "name": "驻场" },
+    { "id": "4", "type": "dev", "name": "设备超级帐号" },
+    { "id": "5", "type": "dev", "name": "驻地主管" },
+    { "id": "6", "type": "dev", "name": "设备司机" },
+    { "id": "7", "type": "wh", "name": "仓库超级帐号" },
+    { "id": "8", "type": "wh", "name": "仓库主管" },
+    { "id": "9", "type": "wh", "name": "仓库管理员" },
+    { "id": "10", "type": "coord", "name": "调度超级帐号" },
+    { "id": "11", "type": "coord", "name": "调度主管" },
+    { "id": "12", "type": "coord", "name": "调度" },
+    { "id": "13", "type": "expert", "name": "专家超级帐号" },
+    { "id": "14", "type": "expert", "name": "专家" },
+    { "id": "15", "type": "repair", "name": "技工超级帐号" },
+    { "id": "16", "type": "repair", "name": "维修队长" },
+    { "id": "17", "type": "repair", "name": "技工" },
+    { "id": "18", "type": "public", "name": "公众" },
 ]
 
 var db_skill = [

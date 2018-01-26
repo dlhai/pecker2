@@ -8,8 +8,8 @@
     <script type="text/javascript" src="js/doTe.js"></script>
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.js"></script>
-    <script src="js/app.js"></script>
     <script src="js/db.js"></script>
+    <script src="js/xpecker.js"></script>
     <script type="text/javascript">
         function navto(url) {
             $('#modulelist').children().removeClass("active");
@@ -39,7 +39,7 @@
         <ul id="modulelist" class="nav navbar-nav" style="margin-left: 10px; font-size: 16px; "></ul>
         <ul id="submodulelist" class="nav navbar-nav" style="margin-top: 20px; margin-left: 200px; font-size: 16px; "></ul>
         <ul class="nav navbar-nav navbar-avatar pull-right">
-            <li style="margin-right:30px;">切换为：<select id="rolelist2" style="margin-top:10px;width:130px;" onchange="RoleChange();"></select></li>
+            <li style="margin-right:30px;">切换为：<select id="rolelist2" style="margin-top:10px;width:130px;" onchange="OnRoleChange();"></select></li>
             <li ><input class="d_rAngle" type="text" placeholder="搜索" /></li>
             <li><a href="#"><span class="badge bg-danger pull-right">3</span><img src="img/mail.jpg" style="height:32px;width:32px;"></a></li>
             <li class="dropdown">
@@ -73,16 +73,39 @@
 
     <script type="text/javascript">
         var tpl_module = doT.template(document.getElementById('tpl_module').innerHTML);
+        document.getElementById("rolelist2").innerHTML = RenderSelect(db_job);
 
-        var tpl_rolelist2 = '{% for (var i = 0, l = it.length; i < l; i++) { %}<option>{%=it[i].type%}</option>{% } %}';
-        document.getElementById("rolelist2").innerHTML = doT.template(tpl_rolelist2)(db_roles);
-        RoleChange();
+        var role = new Object();
+        Reqdata("roleuser", function (res) {
+            for (var i = 0; i < db_roles.length; i++)
+                db_roles[i].user = FindSub(users.data, db_roles[i].id);
+        });
+        if (GetParam("account")!= ""){
+            Reqdata("rd?ls=user&account=" + GetParam("account"), function (res) {
+                var user = res.data[0];
+                role = FindSub(db_roles, user.job);
+                role.user = user;
+                $("#rolelist2").val = user.job;
+                OnRoleChange();
+            });
+        }
 
-        function RoleChange() {
-            var usr_type = GetArItem(db_roles, "type", $('#rolelist2').val());
-            $('#modulelist').html(tpl_module(usr_type.modules));
-            if (usr_type.modules[0].submod)
-                $('#submodulelist').html(tpl_module(usr_type.modules[0].submod));
+        function OnRoleChange() {
+            role = GetArItem(db_roles, "id", $('#rolelist2').val());
+            $('#modulelist').html(tpl_module(role.modules));
+            if (role.id == "2" || role.id == "3") { // 风场主管或驻场
+                Reqdata("rd?ls=winderarea&winder_id=" + role.user.winder_id, function (res) {
+                    for (var i in res.data) {
+                        res.data[i].url = "/"rol
+                    }
+                    $('#submodulelist').html(tpl_module(role.modules[0].submod));
+                    var user = res.data[0];
+                    role = FindSub(db_roles, user.job);
+                    role.user = user;
+                    $("#rolelist2").val = user.job;
+                    OnRoleChange();
+                });
+            }
             else
                  $('#submodulelist').html("");
             $('#mainframe').attr("src", usr_type.modules[0].url);

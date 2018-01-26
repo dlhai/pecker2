@@ -1,4 +1,12 @@
-﻿//表格点击反色 
+﻿// 取url中的参数
+function GetParam(name) {
+    var url = decodeURI(window.location.search);
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+    var r = url.substr(1).match(reg);
+    if (r != null) return unescape(r[2]); return null;
+}
+
+//表格点击反色
 function TableBindClick() {
     var tbc_currow = -1;
     $("tr").click(function () {
@@ -218,7 +226,9 @@ function fillselect(ar, idx) {
 }
 
 cache = new Object()
-function Request(url, fun) {
+// 已改名为Reqdata
+function Request(url, fun) { return Reqdata(url, fun) }
+function Reqdata(url, fun) {
     if (cache[url]) { // 优先使用缓冲数据
         fun(cache[url]);
         return;
@@ -236,8 +246,10 @@ function Request(url, fun) {
     xmlhttp.send();
 }
 
+// 已改名为ReqRender
+function Request2(url, id, val, render_fun) { ReqRender(url, id, val, render_fun) }
 // 回调函数格式：render_fun(ar, id)
-function Request2(url, id, val, render_fun) {
+function ReqRender(url, id, val, render_fun) {
     if (cache[url]) { // 优先使用缓冲数据
         return $("#" + id).html(render_fun(cache[url],val));
     }

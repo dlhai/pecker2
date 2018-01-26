@@ -11,17 +11,21 @@
 
 		<script type="application/x-javascript"> 
             addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); 
-            function hideURLbar(){ window.scrollTo(0,1); 
-            } 
+            function hideURLbar(){ window.scrollTo(0,1); } 
         </script>
         <link rel="stylesheet" href="static/login/style.css" type="text/css" media="all">
     <script type="text/javascript">
         function Login() {
             var form = document.getElementById("plogin");
             var formdata = new FormData(form);
-            var url = '/login?user=' + formdata.get("username") + "&pwd=" + formdata.get("password");
-            alert(url);
-            Request(url);
+            Request('/login?account=' + formdata.get("username") + "&pwd=" + formdata.get("password"), function (res) {
+                if (res.result == 200){
+                    window.location.href = 'static/index-frame5.html?account='+formdata.get("username")
+                }
+                else {
+                    alert("用户名或密码错");
+                }
+            });
         }
 
     </script>

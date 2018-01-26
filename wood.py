@@ -4,6 +4,9 @@ from flask import Flask,request, Response, jsonify
 from werkzeug.utils import secure_filename
 import pdb
 
+class obj:
+    pass;
+
 app = Flask(__name__) 
 
 engine = create_engine('sqlite:///./db/pecker.db')
@@ -29,6 +32,15 @@ tables = {
 base=tables["base"]
 base.sl = [base.c.title, base.c.name, base.c.forder, base.c.ftype, base.c.twidth, base.c.tstyle]
 organ = { "root": "winderco", "winderco": "winderprov", "winderprov": "winder", "winder":"winderarea","winderarea":"efan" }
+
+def QueryObj( sql ):
+    result = conn.execute(sql).fetchall()
+    r = obj();
+    for row in result:
+        for t in row.items():
+            setattr( r, t[0], t[1])
+        break;
+    return r;
 
 #def to_array( qa ):
 #    return "["+ ",\n".join(["{"+",".join(['"'+str(t[0])+'":"'+str(t[1])+'"' for t in zip(row._parent.keys,row._row)])+"}" for row in qa ]) + "]"
@@ -57,17 +69,27 @@ def query4(ls,**kw):
     r += "\n}\n"
     return Response(r, mimetype='application/json')
 
-#登录
+#登录表单
 @app.route("/")
 def index():
     return app.send_static_file('index.html')
 
 @app.route("/login")
-def index():
+def login():
     param = request.args.to_dict()
+    user = QueryObj( "select * from user where account='%s'"%param["account"])
+    if hasattr( user, "account" ) and user.pwd == param["pwd"]:
+        return '{"login":"'+param['account']+'","result":200}\n'
+    else:
+        return '{"login":"'+param['account']+'","result":404}\n'
 
-    return app.send_static_file('index.html')
-
+@app.route("/roleuser")
+def roleuser():
+    param = request.args.to_dict()
+    ls = "user"
+    return query4(ls,fields=select(base.sl).where(base.c.table==ls),
+                  data = "select *, min(depart_id) from user group by job")
+   
 
 #查询
 #测试链接 http://127.0.0.1:5000/rd?ls=[表名]&key1=val1&key2=val2....
@@ -223,7 +245,6 @@ def efanlist():
     return query3("efan", efanlist=s)
 
 #---------------------以上接口将被废弃---------------------------------------
-
 if __name__ == "__main__":
     app.config['JSON_AS_ASCII'] = False
     app.run()

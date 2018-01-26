@@ -351,13 +351,6 @@
             form.remove();
         }
 
-        function GetParam(name) {
-            var url = decodeURI(window.location.search);
-            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
-            var r = url.substr(1).match(reg);
-            if (r != null) return unescape(r[2]); return null;
-        }
-
         function RenderUserTable(it) {
             var r = "<table id=\"" + it.type + "\" class=\"xTable\"><thead><tr>";
             for (var c in it.fields) {
