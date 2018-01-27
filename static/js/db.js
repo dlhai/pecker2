@@ -161,10 +161,10 @@ var db_roles = [
     },
     {"id": "2", "type": "winder", "name": "风场主管", modules: [
         { name: "地图", url: "windermap.html?id=all" },
-        { name: "设备", url: "winder.html" },
-        { name: "案件", url: "coord.html" },
-        { name: "记录", url: "repairlog.html" },
-        { name: "人员", url: "user2.html?type=winder" }
+        { name: "设备", usesub:true, url: "winder.html" },
+        { name: "案件", usesub:true, url: "coord.html" },
+        { name: "记录", usesub:true, url: "repairlog.html" },
+        { name: "人员", url: "user2.html?type=winder" }]
     },
     {"id": "3", "type": "winder", "name": "驻场", modules: [
             { name: "地图", url: "bdmap.html?type=风场&range=all" },

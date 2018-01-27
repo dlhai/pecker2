@@ -269,7 +269,7 @@ function ReqRender(url, id, val, render_fun) {
 
 
 function RenderForm2(ar, i) {
-    alert("使用了旧接口：RenderForm2已被RenderPane");
+    alert("使用了旧接口：RenderForm2已被RenderPane替代");
     return "";
     //var r = "";
     //for (var x = 0; x < ar.fields.length; x++) {
@@ -284,13 +284,14 @@ function RenderForm2(ar, i) {
     //return r;
 }
 
-function FindSub(ar, id) {
+function FindSub(ar, attr, val ) {
     for (var i in ar) {
-        if (ar[i].id == id)
+        if (ar[i][attr] == val)
             return ar[i];
     }
     return null;
 }
+
 
 // 本接口已被GetIdx代替
 function FindSub2(ar, id) {

@@ -20,7 +20,7 @@
             var formdata = new FormData(form);
             Request('/login?account=' + formdata.get("username") + "&pwd=" + formdata.get("password"), function (res) {
                 if (res.result == 200){
-                    window.location.href = 'static/index-frame5.html?account='+formdata.get("username")
+                    window.location.href = 'static/frame.html?account='+formdata.get("username")
                 }
                 else {
                     alert("用户名或密码错");
@@ -76,7 +76,7 @@
 				<input type="text" Name="Phone Number" placeholder="手机号码" required="">
 			</form>
 			<div class="send-button w3layouts agileits">
-					<input type="button" style='margin:0px 80px;' value="免费注册" onClick="window.location.href ='static/index-frame5.html'">
+					<input type="button" style='margin:0px 80px;' value="免费注册" onClick="window.location.href ='static/frame.html'">
 			</div>
 			<div class="clear"></div>
 		</div>

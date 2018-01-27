@@ -31,11 +31,11 @@ tbl_user=Table('user', metadata,
 	Column('face',String(32)),
 	Column('depart_id',Integer),
 	Column('depart_table',String(16)),
-	Column('job',String(16)),
+	Column('job',Integer),
 	Column('skill',String(64)),
 	Column('name',String(32)),
 	Column('code',String(32)),
-	Column('sex',String(8)),
+	Column('sex',Integer),
 	Column('ethnic',String(16)),
 	Column('birth',String(16)),
 	Column('origin',String(64)),
@@ -123,7 +123,8 @@ tbl_addit=Table('addit', metadata,
 	Column('name',String(32)),
 	Column('user_id',Integer),
 	Column('order',Integer),
-	Column('date',Date))
+	Column('date',Date),
+	Column('remark',String(32)))
 
 tbl_link=Table('link', metadata,
 	Column('id',Integer,primary_key=True),
@@ -205,7 +206,7 @@ conn.execute(tbl_leaf.insert(),[dict_leaf(x,y) for x in data("efan") for y in ra
 QueryAll(tbl_leaf)
 
 def dict_addit(x,y):
-    return dict(type="",type_id="",name="",user_id="",order="",date="")
+    return dict(type="",type_id="",name="",user_id="",order="",date="",remark="")
 
 def dict_link(x,y):
     return dict(type="",type_id="",name="",refer_id="",date="")
@@ -213,12 +214,11 @@ def dict_link(x,y):
 def dict_config(type,name):
     return dict(type=type,name=name)
 
-conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","叶片超级帐号","")])
-conn.execute(tbl_user.insert(),[dict_user(x.id,"winder","风场主管","") for x in data("winder")])
-conn.execute(tbl_user.insert(),[dict_user(x.id,"winder","驻场","") for x in data("winder") for y in range(rndnum(2,3))])
+conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","1","")])
+conn.execute(tbl_user.insert(),[dict_user(x.id,"winder","2","") for x in data("winder")])
+conn.execute(tbl_user.insert(),[dict_user(x.id,"winder","3","") for x in data("winder") for y in range(rndnum(2,3))])
 conn.execute(tbl_config.insert(),[dict_config("scale",x[0]) for x in data("_scale").data])
 conn.execute(tbl_config.insert(),[dict_config("mainmat",x[0]) for x in data("_mainmat").data])
-conn.execute(tbl_config.insert(),[dict_config("scale",x[0]) for x in data("_scale").data])
 conn.execute(tbl_config.insert(),[dict_config("job",x[0]) for x in data("_job").data])
 conn.execute(tbl_config.insert(),[dict_config("skill",x[0]) for x in data("_skill").data])
 conn.execute(tbl_config.insert(),[dict_config("ethnic",x[0]) for x in data("_ethnic").data])
@@ -239,21 +239,21 @@ dict(table="user",title="密码",name="pwd",forder="",ftype="pwd",twidth="0.0",t
 dict(table="user",title="头像",name="face",forder="",ftype="image",twidth="0.0",tstyle="",dtype="String(32)",drule="rnditem:_faceimage",remark="",),
 dict(table="user",title="所在单位",name="depart_id",forder="",ftype="select",twidth="80.0",tstyle="",dtype="Integer",drule="depart_id",remark="",),
 dict(table="user",title="单位表名",name="depart_table",forder="",ftype="none",twidth="0.0",tstyle="",dtype="String(16)",drule="depart_table",remark="",),
-dict(table="user",title="职位",name="job",forder="",ftype="select",twidth="",tstyle="",dtype="String(16)",drule="job",remark="专家、队长、技工、驻场、风场主管、调度、调度主管、仓管、仓管主管、设备司机、设备主管、公众",),
+dict(table="user",title="职位",name="job",forder="",ftype="select",twidth="",tstyle="",dtype="Integer",drule="job",remark="专家、队长、技工、驻场、风场主管、调度、调度主管、仓管、仓管主管、设备司机、设备主管、公众",),
 dict(table="user",title="领域",name="skill",forder="",ftype="select",twidth="0.0",tstyle="",dtype="String(64)",drule="skill",remark="避雷、工艺设计、工艺生产、材料、安全",),
 dict(table="user",title="姓名",name="name",forder="",ftype="input",twidth="",tstyle="",dtype="String(32)",drule="person.name",remark="",),
 dict(table="user",title="身份证号",name="code",forder="",ftype="input",twidth="",tstyle="",dtype="String(32)",drule="person.id",remark="",),
-dict(table="user",title="性别",name="sex",forder="",ftype="choice",twidth="",tstyle="",dtype="String(8)",drule="id2sex(person.id)",remark="身份证住址信息",),
+dict(table="user",title="性别",name="sex",forder="",ftype="select",twidth="",tstyle="",dtype="Integer",drule="id2sex(person.id)",remark="身份证住址信息",),
 dict(table="user",title="民族",name="ethnic",forder="",ftype="select",twidth="0.0",tstyle="",dtype="String(16)",drule="rnditem:_ethnic",remark="",),
 dict(table="user",title="出生年月",name="birth",forder="",ftype="date",twidth="0.0",tstyle="",dtype="String(16)",drule="id2birth(person.id)",remark="",),
-dict(table="user",title="籍贯",name="origin",forder="",ftype="select",twidth="0.0",tstyle="",dtype="String(64)",drule="person.origin",remark="",),
+dict(table="user",title="籍贯",name="origin",forder="",ftype="input",twidth="0.0",tstyle="",dtype="String(64)",drule="person.origin",remark="",),
 dict(table="user",title="身份证",name="idimg",forder="",ftype="image",twidth="0.0",tstyle="",dtype="String(64)",drule='rndaddition("身份证")',remark="",),
 dict(table="user",title="联系电话",name="phone",forder="",ftype="input",twidth="",tstyle="",dtype="String(32)",drule="str(int(person.phone))",remark="",),
 dict(table="user",title="QQ号码",name="qq",forder="",ftype="input",twidth="0.0",tstyle="",dtype="String(32)",drule="str(int(person.qq))",remark="",),
 dict(table="user",title="邮箱",name="mail",forder="",ftype="input",twidth="0.0",tstyle="",dtype="String(32)",drule="mail",remark="",),
 dict(table="user",title="微信号",name="wechat",forder="",ftype="input",twidth="0.0",tstyle="",dtype="String(32)",drule="rndwechat(person,mail)",remark="",),
 dict(table="user",title="联系地址",name="addr",forder="",ftype="input_long",twidth="",tstyle="",dtype="String(64)",drule="rnditem:_麦当劳门店:门店地址",remark="当前实际居住地址",),
-dict(table="leafvender",title="标识",name="id",forder="-1.0",ftype="div",twidth="15.0",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
+dict(table="leafvender",title="标识",name="id",forder="-1.0",ftype="none",twidth="15.0",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
 dict(table="leafvender",title="名称",name="name",forder="0.0",ftype="input",twidth="60.0",tstyle="",dtype="String(32)",drule="x.name",remark="",),
 dict(table="leafvender",title="完整名称",name="fname",forder="1.0",ftype="input",twidth="120.0",tstyle="",dtype="String(64)",drule="x.fname",remark="",),
 dict(table="leafvender",title="联系人",name="atten",forder="3.0",ftype="input",twidth="",tstyle="",dtype="String(32)",drule="p1.name",remark="",),
@@ -314,6 +314,7 @@ dict(table="addit",title="附件名称",name="name",forder="",ftype="",twidth=""
 dict(table="addit",title="上传者",name="user_id",forder="",ftype="",twidth="",tstyle="",dtype="Integer",drule='""',remark="",),
 dict(table="addit",title="顺序号",name="order",forder="",ftype="",twidth="",tstyle="",dtype="Integer",drule='""',remark="若对应列表，即为列表的序号",),
 dict(table="addit",title="上传日期",name="date",forder="",ftype="",twidth="",tstyle="",dtype="Date",drule='""',remark="",),
+dict(table="addit",title="备注",name="remark",forder="",ftype="",twidth="",tstyle="",dtype="String(32)",drule='""',remark="备注，文档签字位置",),
 dict(table="link",title="标识",name="id",forder="",ftype="",twidth="",tstyle="",dtype="Integer,primary_key=True",drule="",remark="",),
 dict(table="link",title="类型",name="type",forder="",ftype="",twidth="",tstyle="",dtype="String(32)",drule='""',remark="比如处理案件的专家列表、案件使用的用料单、设备调用单等。",),
 dict(table="link",title="引用者",name="type_id",forder="",ftype="",twidth="",tstyle="",dtype="Integer",drule='""',remark="指信息主体的id",),

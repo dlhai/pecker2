@@ -5,7 +5,17 @@ from werkzeug.utils import secure_filename
 import pdb
 
 class obj:
-    pass;
+    pass
+
+def tojson(o):
+    if type(o) == type([]):
+        return "["+",".join([tojson(t) for t in o ])+"]";
+    elif type(o) == type({}):
+        return "{"+",".join(['"'+k+'":'+tojson(v) for k,v in o.items() ])+"}";
+    elif type(o) == type(obj()):
+        return tojson(o.__dict__)
+    else:
+        return '"'+str(o)+'"'
 
 app = Flask(__name__) 
 
@@ -35,21 +45,21 @@ organ = { "root": "winderco", "winderco": "winderprov", "winderprov": "winder", 
 
 def QueryObj( sql ):
     result = conn.execute(sql).fetchall()
-    r = obj();
+    ret = []
     for row in result:
+        r = obj();
         for t in row.items():
             setattr( r, t[0], t[1])
-        break;
-    return r;
+        ret.append(r)
+    return ret;
 
 #def to_array( qa ):
 #    return "["+ ",\n".join(["{"+",".join(['"'+str(t[0])+'":"'+str(t[1])+'"' for t in zip(row._parent.keys,row._row)])+"}" for row in qa ]) + "]"
-def to_json( qa ):
-    return "["+ ",\n".join(["{"+",".join(['"'+str(t[0])+'":"'+str(t[1])+'"' for t in zip(row._parent.keys,row._row)])+"}" for row in qa ]) + "]"
+#def to_json( qa ):
+#    return "["+ ",\n".join(["{"+",".join(['"'+str(t[0])+'":"'+str(t[1])+'"' for t in zip(row._parent.keys,row._row)])+"}" for row in qa ]) + "]"
 
 #查询结果为json
 def jquery(q):
-#    return to_json(conn.execute(q).fetchall())
     a = conn.execute(q).fetchall()
     seq=[]
     for r in a:
@@ -78,7 +88,7 @@ def index():
 def login():
     param = request.args.to_dict()
     user = QueryObj( "select * from user where account='%s'"%param["account"])
-    if hasattr( user, "account" ) and user.pwd == param["pwd"]:
+    if len(user)>0 and hasattr( user[0], "account" ) and user[0].pwd == param["pwd"]:
         return '{"login":"'+param['account']+'","result":200}\n'
     else:
         return '{"login":"'+param['account']+'","result":404}\n'
@@ -86,10 +96,33 @@ def login():
 @app.route("/roleuser")
 def roleuser():
     param = request.args.to_dict()
-    ls = "user"
-    return query4(ls,fields=select(base.sl).where(base.c.table==ls),
-                  data = "select *, min(depart_id) from user group by job")
-   
+    
+    #若有当前帐号，则先把它查出来
+    if "account" in param and param["account"] != "":
+        ret = QueryObj( "select * from user where account='%s'"%(param["account"]))
+        if len(ret) <= 0:
+            return '{"roleuser":"'+param['account']+'","result":404}\n'
+        user = ret[0]
+
+    #找出各角色的代表用户，当前帐号作为其角色的代表
+    rolusr = QueryObj( "select *, min(depart_id) as c0 from user group by job")
+    if 'user' in dir():
+        for i in range(len(rolusr)):
+            if rolusr[i].depart_id == user.depart_id:
+                rolusr[i] = user
+                break
+
+    #为每个代表用户的所在单位找到下级单位列表，例如风场的下级风区
+    for x in rolusr:
+        if x.depart_table == "winder":
+            x.sub = QueryObj( "select id, name from winderarea where winder_id="+str(x.depart_id))
+    ret=obj()
+    ret.fun="roleuser"
+    ret.param=param
+    ret.result = "200"
+    ret.data = rolusr
+    ss = tojson(ret)
+    return Response(ss, mimetype='application/json')
 
 #查询
 #测试链接 http://127.0.0.1:5000/rd?ls=[表名]&key1=val1&key2=val2....

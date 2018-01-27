@@ -78,6 +78,13 @@ def GetIndex(ar, v ):
             return i
     return -1
 
+def name2id(ar, name ):
+    for i,x in enumerate(ar):
+        if x.name == name:
+            return x.id
+    return -1
+
+
 def rnditem(name):
     tbl=dat_all[name]
     if name == "_person":

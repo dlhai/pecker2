@@ -36,23 +36,8 @@
     var flower = new BMap.Icon("img/diy/3.png", new BMap.Size(16, 16));
     var efan_icon = new BMap.Icon("img/efan32.png", new BMap.Size(32, 32));
 
-    function UpdateCurData(type, data) {
-        if (curdata.type == "winder") {
-            curdata.data.mk.disableDragging();
-        }
-        else if (curdata.type == "winderarea") {
-            curdata.data.plg.disableEditing();
-        }
-        else if (curdata.type == "efan") {
-            curdata.data.mk.disableDragging();
-        }
-        curdata = new Object();
-        curdata.type = type;
-        curdata.data = data;
-    }
-
     // 在地图上显示风场
-    Request("/query?type=winder", function (d1) {
+    Request("/rd?ls=winder&id=" + GetParam("winder_id"), function (d1) {
         winders = d1;
         for (var x in d1.data) {
             var marker = new BMap.Marker(CreatePoint(d1.data[x].position), { icon: flower });
@@ -63,6 +48,8 @@
             d1.data[x].mk = marker;
             BindWinderEvent(marker, label, d1.data, x);
         }
+        if (d1.data.length > 0 )
+            map.centerAndZoom(CreatePoint(d1.data[0].position), 8); //设置中心点坐标和地图级别
     });
     function BindWinderEvent(mk,lbl,ar,idx) {
         mk.addEventListener("dragend", function (type, target, pixel, point) {
@@ -73,7 +60,7 @@
     }
 
     // 在地图上显示风区
-    Request("/query?type=winderarea", function (d2) {
+    Request("/rd?ls=winderarea&winder_id=" + GetParam("winder_id"), function (d2) {
         winderareas = d2;
         for (var x in winderareas.data) {
             var plg = CreatePolygon(winderareas.data[x].position);
@@ -89,37 +76,28 @@
     });
     function BindAreaEvent(area) {
         area.plg.addEventListener("click", function (type, target, point, pixel) {
-            if (curdata.data != area) {
-                // 显示本风区的风电机
-                Request("/query?type=efan&winderarea_id=" + area.id, function (darea) {
-                    if (efans.data) {
-                        for (var i in efans.data)
-                            map.removeOverlay(efans.data[i].mk);
-                    }
-                    efans = darea;
-                    for (var x in efans.data) {
-                        var marker = new BMap.Marker(CreatePoint(efans.data[x].position), { icon: efan_icon });
-                        var label = new BMap.Label(efans.data[x].code, { offset: new BMap.Size(20, 20) });
-                        label.setStyle({ border: "0px", color: "Chocolate" });
-                        marker.setLabel(label);
-                        map.addOverlay(marker);
-                        efans.data[x].mk = marker;
-                        BindEfanEvent(marker, label, efans.data, x);
-                    }
-                });
-                // 更新当前对象为自己
-                UpdateCurData("winderarea", area);
-            }
-            if (editmode){
+            if (editmode)
                 area.plg.enableEditing();
-                for (var i in efans.data)
-                    efans.data[i].mk.enableDragging();
-            }
+            UpdateCurData("winderarea", area);
         });
         area.plg.addEventListener("lineupdate", function (type, target) {
             area.lbl.setPosition(CalCenter(area.plg.getPath()));
         });
     }
+
+    // 显示本场的风机
+    Request("/rd?ls=efan&winder_id=" + GetParam("winder_id"), function (res_efan) {
+        efans = res_efan;
+        for (var x in efans.data) {
+            var marker = new BMap.Marker(CreatePoint(efans.data[x].position), { icon: efan_icon });
+            var label = new BMap.Label(efans.data[x].code, { offset: new BMap.Size(20, 20) });
+            label.setStyle({ border: "0px", color: "Chocolate" });
+            marker.setLabel(label);
+            map.addOverlay(marker);
+            efans.data[x].mk = marker;
+            BindEfanEvent(marker, label, efans.data, x);
+        }
+    });
     function BindEfanEvent(mk, lbl, ar, idx) {
         mk.addEventListener("dragend", function (type, target, pixel, point) {
             UpdateCurData("efan", ar[idx]);
@@ -127,6 +105,26 @@
         mk.addEventListener("click", function (e) { ShowEfanWindow(ar, idx, e); });
         lbl.addEventListener("click", function (e) { ShowEfanWindow(ar, idx, e); });
     }
+
+    // 更新当前编辑对象
+    function UpdateCurData(type, data) {
+        if (curdata.type == "winder") {
+            curdata.data.mk.disableDragging();
+        }
+        else if (curdata.type == "winderarea") {
+            curdata.data.plg.disableEditing();
+        }
+        else if (curdata.type == "efan") {
+            curdata.data.mk.disableDragging();
+        }
+        if ( type != "undefine"){
+            curdata = new Object();
+            curdata.type = type;
+            curdata.data = data;
+        }
+    }
+
+
     function ShowEfanWindow(ar, i, e) {
         // ...
 
@@ -169,41 +167,6 @@
         return label;
     }
 
-    //-----------------OrganTreeControl begin------------------------------------------------
-    // 定义组织机构控件,即function
-    function OrganTreeControl() {
-        // 默认停靠位置和偏移量
-        this.defaultAnchor = BMAP_ANCHOR_TOP_LEFT;
-        this.defaultOffset = new BMap.Size(10, 10);
-    }
-    // 通过JavaScript的prototype属性继承于BMap.Control
-    OrganTreeControl.prototype = new BMap.Control();
-    // 自定义控件必须实现自己的initialize方法,并且将控件的DOM元素返回
-    // 在本方法中创建个div元素作为控件的容器,并将其添加到地图容器中
-    OrganTreeControl.prototype.initialize = function (map) {
-        // 创建一个DOM元素
-        var div = document.createElement("div");
-        div.innerHTML = '<div class="xRndAngle" style="width:250px;padding:5px 10px;"><span id="selitem">选中的项</span><div style="float: right;" onclick="clickcollapse(this)">收起</div></div><div id="root" class="xTree xScroll" style="width:250px;height:800px;padding:5px 10px;border:1px solid lavender;"></div>';
-        div.style.backgroundColor = "white";
-        div.style.boxShadow = "1px 1px 1px rgba(0,0,0,.1)";
-
-        // 这两行是解决在树上滚轮动作时，地图动而树不滚动的问题
-        $(div).on("mouseover", function () { map.disableScrollWheelZoom(); });//关闭鼠标滚轮缩放
-        $(div).on("mouseout", function () { map.enableScrollWheelZoom(); });//开启鼠标滚轮缩放
-
-        request2("root");
-
-        // 添加DOM元素到地图中
-        map.getContainer().appendChild(div);
-        // 将DOM元素返回
-        return div;
-    }
-    // 创建控件
-    var organtree = new OrganTreeControl();
-    // 添加到地图当中
-    map.addControl(organtree);
-    //-----------------OrganTreeControl end------------------------------------------------
-
     //-----------------ModeControl begin------------------------------------------------
     // 定义模式控件,即function
     function ModeControl() {
@@ -237,6 +200,9 @@
                 div.innerHTML = '浏览';
                 for (var i in winders.data)
                     winders.data[i].mk.disableDragging();
+                for (var i in efans.data)
+                    efans.data[i].mk.disableDragging();
+                UpdateCurData();
             }
         });
 
@@ -264,11 +230,6 @@
         return new BMap.Polygon(arr, { strokeColor: "Chocolate", strokeWeight: 2, strokeOpacity: 0.5 });
     }
 
-    function addClickHandler(id, marker) {
-        marker.addEventListener("click", function (e) {
-            Request("/itemdetail?type=winder&id=" + id, function (d1) { openInfo(d1, e); });
-        });
-    }
     function ShowInfoWindow(ar,i,e) {
         var p = e.target;
         var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
@@ -281,86 +242,6 @@
         });  // 创建信息窗口对象 
         map.openInfoWindow(infoWindow, point); //开启信息窗口
         ID2Name(ar, i);
-    }
-
-    // 给出文档节点ID，展开下级列表 id格式：root或winderco_1
-    function request2(id) {
-        var at = id.split("_");
-        var type = branch.sub(at[0]).type;
-        if (type == "winderco" || type == "winderprov") {
-            Request("/query?type=" + type + (at[1] ? "&" + at[0] + "_id=" + at[1] : ""),
-                function (res) {TreeAddChildren(id, res.data);});
-        }
-        else if (type == "winder") { TreeAddChildren(id, winders.data); }
-        else if (type == "winderarea") { TreeAddChildren(id, winderareas.data); }
-    }
-
-    function TreeAddChildren(id, data) {
-        var at = id.split("_");
-        var type = branch.sub(at[0]).type;
-
-        var html = "";
-        for (var i in data) {
-            if (data[i][at[0] + "_id"] != at[1])
-                continue;
-            if (type != "winderarea") {
-                html += "<div id=\"" + type + "_" + data[i].id + "\">"
-                    + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
-                    + branch[type].image + "\">" + data[i].name + "</span></div>\n"
-            }
-            else { // 少了左边的加号，为缩进对齐加了一层div
-                html += "<div><div id=\"" + type + "_" + data[i].id + "\"><span><img src=\""
-                    + branch[type].image + "\">" + data[i].name + "</span></div></div>\n"
-            }
-        }
-
-        $("#" + id).append(html);
-        $("#" + id).children("img").attr("src", "img/nolines_minus.gif");
-
-        $(".xTree div>img").unbind("click", itemexpand);
-        $(".xTree div>span").unbind("click", itemclick);
-        $(".xTree div>img").bind("click", itemexpand);
-        $(".xTree div>span").bind("click", itemclick);
-    }
-
-    function itemexpand() {
-        var siblings = $(this).siblings("div");
-        if (siblings.length == 0) {
-            var id = $(this).parent().attr("id");
-            request2(id);
-        }
-        else if (siblings.css("display") == "none") {
-            $(event.srcElement).attr("src", "img/nolines_minus.gif");
-            siblings.css("display", "block");
-        }
-        else {
-            $(event.srcElement).attr("src", "img/nolines_plus.gif");
-            siblings.css("display", "none");
-        }
-    }
-    //点击树节点
-    function itemclick() {
-        var at = $(this).parent().attr("id").split("_");
-        $("#selitem").html($(this).html());
-        if (at[0] == "winder") {
-            mk = FindSub(winders.data, at[1]).mk;
-            mk.setAnimation(BMAP_ANIMATION_BOUNCE);
-            map.centerAndZoom(mk.getPosition(), 6); //设置中心点坐标和地图级别
-        }
-        else if (at[0] == "winderarea") {
-            // 开始编辑
-        }
-    }
-
-    function clickcollapse() {
-        if ($("#root").css("display") == "none") {
-            $("#root").css("display", "block");
-            $(this).html("收起");
-        }
-        else {
-            $("#root").css("display", "none");
-            $(this).html("展开");
-        }
     }
 
 </script>

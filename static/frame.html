@@ -6,8 +6,9 @@
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/frmstyle5.css">
     <script type="text/javascript" src="js/doTe.js"></script>
-    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
+    <script src="js/app.js"></script>
     <script src="js/db.js"></script>
     <script src="js/xpecker.js"></script>
     <script type="text/javascript">
@@ -62,7 +63,6 @@
         <iframe id="mainframe" style="border:0px; width:100%;height:100%;" src="coord.html"></iframe>
     </div>
 
-
 <script id="tpl_module" type="text/template">
     {% for (var i = 0; i < it.length; i++) { %}
         <li {% if (i==0) { %} class="active" {% } %}>
@@ -75,62 +75,51 @@
         var tpl_module = doT.template(document.getElementById('tpl_module').innerHTML);
         document.getElementById("rolelist2").innerHTML = RenderSelect(db_job);
 
-        var role = new Object();
-        Reqdata("roleuser", function (res) {
+        Reqdata("/roleuser?account=" + GetParam("account"), function (res) {
             for (var i = 0; i < db_roles.length; i++)
-                db_roles[i].user = FindSub(users.data, db_roles[i].id);
-        });
-        if (GetParam("account")!= ""){
-            Reqdata("rd?ls=user&account=" + GetParam("account"), function (res) {
-                var user = res.data[0];
-                role = FindSub(db_roles, user.job);
-                role.user = user;
-                $("#rolelist2").val = user.job;
+                db_roles[i].user = FindSub(res.data, "job", db_roles[i].id);
+            if (GetParam("account") != "") {
+                var user = FindSub(res.data, "account", GetParam("account"));
+                var role = FindSub(db_roles, "id",user.job);
+                $("#rolelist2").val(user.job);
                 OnRoleChange();
-            });
-        }
+            }
+        });
 
         function OnRoleChange() {
-            role = GetArItem(db_roles, "id", $('#rolelist2').val());
+            var val = $('#rolelist2').val();
+            var role = FindSub(db_roles, "id", $('#rolelist2').val());
             $('#modulelist').html(tpl_module(role.modules));
-            if (role.id == "2" || role.id == "3") { // 风场主管或驻场
-                Reqdata("rd?ls=winderarea&winder_id=" + role.user.winder_id, function (res) {
-                    for (var i in res.data) {
-                        res.data[i].url = "/"rol
-                    }
-                    $('#submodulelist').html(tpl_module(role.modules[0].submod));
-                    var user = res.data[0];
-                    role = FindSub(db_roles, user.job);
-                    role.user = user;
-                    $("#rolelist2").val = user.job;
-                    OnRoleChange();
-                });
-            }
-            else
-                 $('#submodulelist').html("");
-            $('#mainframe').attr("src", usr_type.modules[0].url);
-            if (usr_type.type.indexOf("超级帐号") == -1)
-            {
-                var user = GetArItem(db_userlist.data, "account", usr_type.act);
-                $('#usr_name').html(user.name);
-                $('#usr_face').attr("src", src="img/face/face" + user.face+ ".jpg");
-                $('#usr_self').attr("href", "javascript:navto('self.html?account="+user.account+"')");
-            }
+            UpdateSubmode(role, 0);
         }
 
-        function ClickModule(This, m) {
+        function ClickModule(This, url) {
             $(This).parent().parent().children().removeClass("active");
             $(This).parent().addClass("active");
-            $('#mainframe').attr("src", m);
+            $('#mainframe').attr("src", url);
 
             if ("modulelist" == $(This).parent().parent().attr("id") )
             {
                 var idx = $(This).parent().index();
-                var usr_type = GetArItem(db_roles, "type", $('#rolelist2').val());
-                if (usr_type.modules[idx].submod)
-                    $('#submodulelist').html(tpl_module(usr_type.modules[idx].submod));
-                else
-                     $('#submodulelist').html("");
+                var role = FindSub(db_roles, "id", $('#rolelist2').val());
+                UpdateSubmode(role, idx);
+            }
+        }
+        function UpdateSubmode(role, idx) {
+            if (role.modules[idx].usesub) {
+                var submodule = new Array();
+                for (var i in role.user.sub) {
+                    var depart = role.user.sub[i];
+                    submodule.push({
+                        "name": depart.name, "url": role.modules[idx].url
+                        + "?" + role.user.depart_name + "_id=" + depart.id
+                        + "&user_id=" + role.user.id
+                    });
+                }
+                $('#submodulelist').html(tpl_module(submodule));
+            }
+            else {
+                $('#submodulelist').html("");
             }
         }
 
