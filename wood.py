@@ -196,9 +196,17 @@ def queryuser():
 
     d["depart_table"]=type;
     tbl = tables[type]
-    sql = "select user.id,user.account,user.face,user.depart_id, winder.name as depart_name, user.job,user.skill,user.name,user.code,user.sex,user.ethnic,user.birth,user.origin,user.idimg,user.phone,user.qq,user.mail,user.wechat,user.addr from user,winder where user.depart_id = winder.id"
+    sql = "select "+type+".name as depart_name, user.id,user.account,user.face,user.depart_id,"\
+        +"user.job,user.skill,user.name,user.code,user.sex,user.ethnic,user.birth,user.origin,"\
+        +"user.idimg,user.phone,user.qq,user.mail,user.wechat,user.addr from user,"+type\
+        +" where user.depart_id = "+type+".id"
     if len(d) > 0:
-        sql += " and "+" and ".join([ k+"='"+v+"'" for k,v in d.items()])
+        def To(k,v):
+           if v[0] == "(":
+               return k +"in (" ","join( ["'"+i+"'" for i in v.trim("()").split(",")]) + ")"
+           else:
+               return k+"='"+v+"'"
+        sql += " and "+" and ".join([ To(k,v) for k,v in d.items()])
     return query3("queryuser_"+type,fields=select(base.sl).where(base.c.table=="user"),data = sql)
 
 #leaf_su8设备sheet用
@@ -284,3 +292,7 @@ if __name__ == "__main__":
 
 #暂未限制Query对User的查询
 #添加QueryUser接口，密码处理，所在单位处理
+
+#查询代表用户的sql
+#select depart_id as c1, "" as c2, * from user where depart_table== "__sys__" union
+#select min(depart_id) as c1, winder.name as c2, user.* from user,winder where depart_table== "winder" and depart_id == winder.id group by job

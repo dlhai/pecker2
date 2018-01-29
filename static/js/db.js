@@ -154,36 +154,23 @@ function  RenderForm(ar, i) {
 
 var db_roles = [
     {"id": "1", "type": "winder", "name": "叶片超级帐号", modules: [
-        { name: "地图", url: "leaf_su_map.html?type=风场&range=all" },
-        { name: "风场", url: "leaf_su8.html" },
-        { name: "人员", url: "user2.html?type=winder" },
-        { name: "厂家", url: "leaf_su_vender.html" }]
+        { name: "地图", url: "windersumap.html" },
+        { name: "风场", url: "windersu.html" },
+        { name: "人员", url: "user3.html" },
+        { name: "厂家", url: "windersuvender.html" }]
     },
     {"id": "2", "type": "winder", "name": "风场主管", modules: [
-        { name: "地图", url: "windermap.html?id=all" },
+        { name: "地图", url: "windermap.html" },
         { name: "设备", usesub:true, url: "winder.html" },
         { name: "案件", usesub:true, url: "coord.html" },
         { name: "记录", usesub:true, url: "repairlog.html" },
         { name: "人员", url: "user2.html?type=winder" }]
     },
     {"id": "3", "type": "winder", "name": "驻场", modules: [
-            { name: "地图", url: "bdmap.html?type=风场&range=all" },
-            { name: "设备", url: "winder.html", submod: [
-                { name: "区域1", url: "winder.html" },
-                { name: "区域2", url: "winder.html" },
-                { name: "区域3", url: "winder.html" }]
-            },
-            {name: "案件", url: "coord.html", submod: [
-                { name: "区域1", url: "coord.html" },
-                { name: "区域2", url: "coord.html" },
-                { name: "区域3", url: "coord.html" }]
-            },
-            {name: "记录", url: "repairlog.html", submod: [
-                { name: "区域1", url: "repairlog.html" },
-                { name: "区域2", url: "repairlog.html" },
-                { name: "区域3", url: "repairlog.html" }]
-            }
-        ]
+        { name: "地图", url: "bdmap.html?type=风场&range=all" },
+        { name: "设备", usesub: true, url: "winder.html" },
+        { name: "案件", usesub: true, url: "coord.html" },
+        { name: "记录", usesub: true, url: "repairlog.html" }]
     },
     { "id": "4", "type": "dev", "name": "设备超级帐号",modules: [{ name: "地图", url: "bdmap.html?type=司机|总备&range=all" }, { name: "驻地", url: "devwh_su.html" }, { name: "人员", url: "person.html?type=司机|总备&depart=db_devwh_list" }] },
     { "id": "5", "type": "dev", "name": "驻地主管",modules: [{ name: "地图", url: "bdmap.html?type=司机" },{ name: "驻地", url: "devwh.html" },{ name: "人员", url: "person.html?type=司机&depart=塔里木驻" }] },

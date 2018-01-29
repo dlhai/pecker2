@@ -284,14 +284,19 @@ function RenderForm2(ar, i) {
     //return r;
 }
 
-function FindSub(ar, attr, val ) {
+// 本接口已被GetSub代替
+function FindSub(ar, attr, val) {
+    alert("调用了旧接口FindSub");
+    return GetSub(ar, attr, val);
+}
+
+function GetSub(ar, attr, val) {
     for (var i in ar) {
         if (ar[i][attr] == val)
             return ar[i];
     }
     return null;
 }
-
 
 // 本接口已被GetIdx代替
 function FindSub2(ar, id) {
@@ -349,3 +354,5 @@ function Create2(ar) {
     r.data.push(t);
     return r;
 }
+
+

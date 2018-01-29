@@ -1,21 +1,63 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
+    <title>下拉菜单实例|菜鸟教程(runoob.com)</title>
     <meta charset="utf-8">
-    <title>test</title>
-
+    <style>
+        .aaa {
+            position: relative;
+        }
+            .aaa::before {
+                content: '';
+                position: absolute;
+                width: 5px;
+                height: 50px;
+                background: Gainsboro;
+                left: 46px;
+                top: 25px;
+                border-radius: 1px;
+            }
+            .aaa::after {
+                content: '';
+                position: absolute;
+                width: 50px;
+                height: 5px;
+                background: Gainsboro;
+                top: 48px;
+                left: 24px;
+                border-radius: 1px;
+            }
+    </style>
 </head>
 <body>
-    <div id="123"></div>
+    <label class="aaa" style="display:block;" for="xFile"> <img id="preview" style="width:100px;height:100px;" /> </label>
+    <form> <input type="file" id="xFile" accept="image/*" style="position:absolute;clip:rect(0 0 0 0);" onchange="imgPreview(this)"> </form>
     <script type="text/javascript">
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.open("GET", "/windertree", true);
-        xmlhttp.onreadystatechange = function () {
-            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                document.getElementById("123").innerHTML = xmlhttp.responseText;
+        function imgPreview(fileDom) {
+            //判断是否支持FileReader
+            if (window.FileReader) {
+                var reader = new FileReader();
+            } else {
+                alert("您的设备不支持图片预览功能，如需该功能请升级您的设备！");
             }
-        };
-        xmlhttp.send();
+
+            //获取文件
+            var file = fileDom.files[0];
+            var imageType = /^image\//;
+            //是否是图片
+            if (!imageType.test(file.type)) {
+                alert("请选择图片！");
+                return;
+            }
+            //读取完成
+            reader.onload = function (e) {
+                //获取图片dom
+                var img = document.getElementById("preview");
+                //图片路径设置为读取的图片
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
     </script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
+    <!--user2与user3的区别：将inplace编辑模式改成弹出6编辑窗口式-->
     <meta charset="utf-8">
     <title>啄木鸟风电维保系统</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -208,15 +209,29 @@
         </div><!-- /.modal -->
     </div>
 
-    <script id="tpl_image_in_pane" type="text/template">
+    <script id="tpl_user_pane" type="text/template">
         <div style="height:240px;width:280px;float: left; display:block;">
             <div class="pane_image" style="width: 100%; height: 80px; margin: 0px; padding:0px; display:block;border:0px;">
                 <div style="float: left; margin:0px;"><img style="width: 78px; height: 78px;" src="{%=it.face%}" /></div>
-                <div style="margin-top:0px;"><label>帐号</label><div class="usernew" style="display:inline-block;">{%=it.account%}</div></div>
-                <div><label>密码</label><div class="userfloat" >***</div></div>
+                <div style="margin-top:0px;"><label>帐号</label><div style="display:inline-block;">{%=it.account%}</div></div>
+                <div><label>密码</label><div>***</div></div>
             </div>
             <img style="width: 280px; height: 160px;" src="{%=it.idimg%}" />
         </div>
+        <div><label>所在单位</label><div>{%=it.depart_name%}</div></div>
+        <div><label>职位</label><div>{%=GetSub(db_job,"id",it.job).name%}</div></div>
+        {% if (it.job=="14"){ %}<div><label>领域</label><div>{%=it.skill%}</div></div>{% } %}
+        <div><label>姓名</label><div>{%=it.name%}</div></div>
+        <div><label>身份证号</label><div>{%=it.code%}</div></div>
+        <div><label>性别</label><div>{%=GetSub(db_sex,"id",it.sex).name%}</div></div>
+        <div><label>民族</label><div>{%=GetSub(g_ethnic,"id",it.ethnic).name%}</div></div>
+        <div><label>出生年月</label><div>{%=it.birth%}</div></div>
+        <div><label>籍贯</label><div>{%=it.origin%}</div></div>
+        <div><label>联系电话</label><div>{%=it.phone%}</div></div>
+        <div><label>QQ号码</label><div>{%=it.qq%}</div></div>
+        <div><label>邮箱</label><div>{%=it.mail%}</div></div>
+        <div><label>微信号</label><div>{%=it.wechat%}</div></div>
+        <div><label>联系地址</label><div style="width:490px;">{%=it.addr%}</div></div>
     </script>
 
     <script id="tpl_certiflist" type="text/template">
@@ -285,19 +300,28 @@
         var tpl_edulist = doT.template(document.getElementById('tpl_edulist').innerHTML);
         var tpl_employlist = doT.template(document.getElementById('tpl_employlist').innerHTML);
         var tpl_opuslist = doT.template(document.getElementById('tpl_opuslist').innerHTML);
-        var tpl_image_in_pane = doT.template(document.getElementById('tpl_image_in_pane').innerHTML);
-
+        var tpl_user_pane = doT.template(document.getElementById('tpl_user_pane').innerHTML);
+       
         var g_usernew = false;
         var g_userfloat = false;
         var g_users = new Object();
         var g_curid = -1;
 
-        Request("/queryuser?type=" + GetParam("type"), function(users) {
-            g_users = users;
-            $("#d_table_item").html(RenderUserTable(users));
+        if (g_user.job == "1") { // 风场su
+            var filter = "&job=(2,3)"
+            Request("/rd?ls=config&type=ethnic", function (res) {g_ethnic = res;});
+        }
+        else{
+            var filter = "&job=3&" + g_user.depart_name+"_id=" + g_user.depart_id
+        }
+
+        Request("/queryuser?type=winder"+filter, function(res) {
+            g_users = res;
+            $("#d_table_item").html(RenderUserTable(g_users));
             TableBindClick3(users.type, function (data_id) {
                 g_curid = data_id;
-                $("#d_baseinf").html( RenderUserPane(users, data_id));
+                var i = GetIdxbyId(g_users.data, data_id);
+                $("#d_baseinf").html(tpl_user_pane(g_users.data, i));
 
                 // 以下为虚拟数据
                 var idx = rndrange(0, db_addition.length);
@@ -307,6 +331,7 @@
                 $("#d_opuslist").html(tpl_opuslist(db_addition[idx].opus));
             });
         });
+
 
         function onAddUser() {
             g_usernew = !g_usernew;
@@ -342,6 +367,7 @@
                 $('.userfloat').off("click");
             }
         }
+
         function onClickSubmit() {
             var form = $('form');
             if (form.length == 0)
@@ -366,18 +392,19 @@
             r += "<tbody>";
             for (var x in it.data) {
                 r += "<tr data_id=\"" + it.data[x].id + "\">";
-                for (c in it.fields) {
+                for (c in it.fields) {````````````````````````````````````
                     var field = it.fields[c];
                     if (!field.twidth || field.twidth && parseInt(field.twidth) > 0) {
                         var val = it.data[x][field.name];
 
-                        // 用户特别处理
+                        // begin 用户特别处理
                         if (field.name == "depart_id")
                             val = it.data[x]["depart_name"]
                         else if (field.name == "sex") {
                             if (val == "0") val = "女";
                             else val = "男";
                         }
+                        // end 
 
                         if (it.fields[c].tstyle)
                             r += "<td style=\"" + it.fields[c].tstyle + "\">" +val+ "</td>";
@@ -389,42 +416,13 @@
             }
             r += "</tbody></table>";
             return r;
-
         }
-        function RenderUserPane(ar, id) {
-            var idx = GetIdxbyId(ar,id);
-            var r = tpl_image_in_pane(ar.data[idx]); //用户特别处理
-            for (var i = 0; i < ar.fields.length; i++) {
-                var field = ar.fields[i];
-                if (field.ftype == "none")
-                    continue;
-                var val = ar.data[idx][field.name];
 
-                //用户特别处理begin
-                //这几个字段在tpl_image_in_pane中处理
-                if (field.name == "pwd" || field.name == "account"|| field.name == "face" || field.name == "idimg")
-                    continue;
-                if (field.name == "skill" && ar.data[idx]["job"] != "专家")
-                    continue;
-                if (field.name == "depart_id")
-                    val = ar.data[idx]["depart_name"]
-                else if (field.name == "sex") {
-                    if (val == "0") val = "女";
-                    else val = "男";
-                }
-                //用户特别处理end
-
-                var attr = 'data_field="' + field.name + '" ';
-                if (field.ftype != "div")
-                    attr += 'class="userfloat" '
-                if (field.ftype == "input_long")
-                    attr += 'style="width:490px;"';
-                else if (field.ftype == "textarea")
-                    attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
-
-                r += "<div><label>" + field.title + "</label><div " + attr + ">" + val + "</div></div>";
-            }
-            return r;
+        function sexname(sex) {
+            if (sex == "0")
+                return "女";
+            else
+                return "男";
         }
 
         function RenderEditerUser(fieldname, val) {

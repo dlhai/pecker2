@@ -4,12 +4,11 @@
     <meta charset="utf-8">
     <title>啄木鸟</title>
     <link rel="stylesheet" href="css/bootstrap.css">
-    <link rel="stylesheet" href="css/frmstyle5.css">
     <script type="text/javascript" src="js/doTe.js"></script>
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
-    <script src="js/app.js"></script>
     <script src="js/db.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
     <script type="text/javascript">
         function navto(url) {
@@ -19,6 +18,64 @@
         }
     </script>
     <style>
+        /*begin 抠出来的style*/
+        .xNavbar {
+            border-bottom: 1px solid #d1d4d7;
+            box-shadow: 0 0 5px rgba(0,0,0,.1);
+            background-color: #fff;
+            height: 50px;
+        }
+
+        .xNavbar-Brand {
+            border-right: 1px solid #d1d5d9;
+            color: #22baa0;
+            font-size: 28px;
+            width: 90px;
+            font-family: "Times New Roman", Georgia, serif;
+            font-style: italic;
+            font-weight: 700;
+            padding: 8px 0 14px 0;
+            float: left;
+            display: block;
+            height: 100%;
+        }
+        .xNavbar-Brand:hover, .xNavbar-Brand:focus {
+            color: #22baa0;
+            text-decoration: none;
+            background-color: transparent;
+        }
+        .navbar-nav {
+            cursor: pointer;
+            float: left;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        .navbar-nav > .active > a, .navbar-nav > .active > a:hover, .navbar-nav > .active > a:focus {
+            color: #555555;
+            background-color: #d5d5d5;
+        }
+        .navbar-nav > li > a {
+            padding-top: 15px;
+            padding-bottom: 15px;
+            line-height: 20px;
+            color: #777777;
+        }
+        .nav {
+            padding-left: 0;
+            margin-bottom: 0;
+            list-style: none;
+        }
+        .nav > li > a {
+            position: relative;
+            display: block;
+        }
+        .thumb img, .thumb-mini img, .thumb-small img, .thumb-large img {
+            height: 36px;
+            width: 36px;
+            vertical-align: middle;
+        }
+        /*end 抠出来的style*/
+
         #submodulelist > li > a {
             position: relative;
             display: block;
@@ -34,17 +91,21 @@
         }
     </style>
 </head>
-<body class="xFc_scol">
-    <header class="xFi_fixed xNavbar">
+<body class="xFCscol" style="padding:0px;">
+    <header class="xFIfixed xNavbar" >
         <a class="xNavbar-Brand" href="javascript:navto('system.html')">啄木鸟</a>
-        <ul id="modulelist" class="nav navbar-nav" style="margin-left: 10px; font-size: 16px; "></ul>
-        <ul id="submodulelist" class="nav navbar-nav" style="margin-top: 20px; margin-left: 200px; font-size: 16px; "></ul>
+        <ul id="modulelist" class="nav navbar-nav" style="margin-left: 10px; font-size: 16px; ">
+            <li class="active"><a>功能1</a></li><li><a>功能2</a></li><li><a>功能3</a></li>
+        </ul>
+        <ul id="submodulelist" class="nav navbar-nav" style="margin-top: 20px; margin-left: 200px; font-size: 16px; ">
+            <li class="active"><a>区域1</a></li><li><a>区域2</a></li><li><a>区域3</a></li>
+        </ul>
         <ul class="nav navbar-nav navbar-avatar pull-right">
-            <li style="margin-right:30px;">切换为：<select id="rolelist2" style="margin-top:10px;width:130px;" onchange="OnRoleChange();"></select></li>
+            <li style="margin-right:30px;">切换为：<select id="roleselect" style="margin-top:10px;width:130px;" onchange="OnRoleChange();"></select></li>
             <li ><input class="d_rAngle" type="text" placeholder="搜索" /></li>
-            <li><a href="#"><span class="badge bg-danger pull-right">3</span><img src="img/mail.jpg" style="height:32px;width:32px;"></a></li>
+            <li><a href="#" style="padding: 10px 15px;"><span class="badge bg-danger pull-right">3</span><img src="img/mail.jpg" style="height:32px;width:32px;"></a></li>
             <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding: 7px 15px;">
                     <span id="usr_name" class="hidden-sm-only">曹操</span>
                     <span class="thumb-small avatar inline"><img id="usr_face" src="img/face/face0.jpg" alt="用户头像" class="img-circle"></span>
                     <b class="caret hidden-sm-only"></b>
@@ -59,8 +120,8 @@
             </li>
         </ul>
     </header>
-    <div class="xFi_grow" style="height:100px; background:#22baa0;">
-        <iframe id="mainframe" style="border:0px; width:100%;height:100%;" src="coord.html"></iframe>
+    <div style="height:100px; background:#22baa0;">
+        <iframe id="mainframe" style="border:0px; width:100%;height:100%;" src="system.html"></iframe>
     </div>
 
 <script id="tpl_module" type="text/template">
@@ -73,53 +134,52 @@
 
     <script type="text/javascript">
         var tpl_module = doT.template(document.getElementById('tpl_module').innerHTML);
-        document.getElementById("rolelist2").innerHTML = RenderSelect(db_job);
+        var g_role = new Object(); // 当前角色
+        var g_user = new Object(); // 当前用户
+        document.getElementById("roleselect").innerHTML = RenderSelect(db_job);
 
         Reqdata("/roleuser?account=" + GetParam("account"), function (res) {
             for (var i = 0; i < db_roles.length; i++)
                 db_roles[i].user = FindSub(res.data, "job", db_roles[i].id);
             if (GetParam("account") != "") {
-                var user = FindSub(res.data, "account", GetParam("account"));
-                var role = FindSub(db_roles, "id",user.job);
-                $("#rolelist2").val(user.job);
+                g_user = FindSub(res.data, "account", GetParam("account"));
+                g_role = FindSub(db_roles, "id", g_user.job);
+                $("#roleselect").val(g_user.job);
                 OnRoleChange();
             }
         });
 
         function OnRoleChange() {
-            var val = $('#rolelist2').val();
-            var role = FindSub(db_roles, "id", $('#rolelist2').val());
-            $('#modulelist').html(tpl_module(role.modules));
-            UpdateSubmode(role, 0);
+            g_role = FindSub(db_roles, "id", $("#roleselect").val());
+            g_user = g_role.user;
+            $('#modulelist').html(tpl_module(g_role.modules));
+            UpdateSubmode(0);
         }
 
         function ClickModule(This, url) {
             $(This).parent().parent().children().removeClass("active");
             $(This).parent().addClass("active");
-            $('#mainframe').attr("src", url);
-
             if ("modulelist" == $(This).parent().parent().attr("id") )
             {
                 var idx = $(This).parent().index();
-                var role = FindSub(db_roles, "id", $('#rolelist2').val());
-                UpdateSubmode(role, idx);
+                UpdateSubmode(idx);
+            }
+            else {
+                $('#mainframe').attr("src", url);
             }
         }
-        function UpdateSubmode(role, idx) {
-            if (role.modules[idx].usesub) {
+        function UpdateSubmode(idx) {
+            if (g_role.modules[idx].usesub) {
                 var submodule = new Array();
-                for (var i in role.user.sub) {
-                    var depart = role.user.sub[i];
-                    submodule.push({
-                        "name": depart.name, "url": role.modules[idx].url
-                        + "?" + role.user.depart_name + "_id=" + depart.id
-                        + "&user_id=" + role.user.id
-                    });
+                for (var i in g_user.sub) {
+                    submodule.push({ "name": g_user.sub[i].name, "url": g_role.modules[idx].url + "?id=" + g_user.sub[i].id});
                 }
                 $('#submodulelist').html(tpl_module(submodule));
+                $('#mainframe').attr("src", submodule[0].url);
             }
             else {
                 $('#submodulelist').html("");
+                $('#mainframe').attr("src", g_role.modules[idx].url);
             }
         }
 
