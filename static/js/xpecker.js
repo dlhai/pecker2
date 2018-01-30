@@ -84,7 +84,7 @@ $(function () {
     }
 });
 
-function RenderTable2(it, style) {
+function RenderTable2(it, style, fun ) {
     var r = "<table id=\"" +it.type+ "\" class=\"xTable\"><thead><tr>";
     if (style)
         r = "<table id=\"" +it.type+ "\" class=\""+style+"\"><thead><tr>";
@@ -102,11 +102,13 @@ function RenderTable2(it, style) {
     for (var x in it.data) {
         r += "<tr data_id=\""+it.data[x].id+"\">";
         for (c in it.fields) {
-            if (!it.fields[c].twidth || it.fields[c].twidth && parseInt(it.fields[c].twidth) > 0) {
-                if (it.fields[c].tstyle)
-                    r += "<td style=\"" + it.fields[c].tstyle + "\">" + it.data[x][it.fields[c].name] + "</td>";
+            var field = it.fields[c];
+            var val = it.data[x][field.name];
+            if (!field.twidth || field.twidth && parseInt(field.twidth) > 0) {
+                if (field.tstyle)
+                    r += "<td style=\"" + field.tstyle + "\">" + (fun ? fun(it.data[x],field) : val) + "</td>";
                 else
-                    r += "<td>" + it.data[x][it.fields[c].name] + "</td>";
+                    r += "<td>" + (fun ? fun(it.data[x], field) : val) + "</td>";
             }
         }
         r += "</tr>";
@@ -144,7 +146,7 @@ function RenderForm3(ar, idx) {
     return r;
 }
 
-function RenderPane(ar, idx){
+function RenderPane(ar, idx, fun){
     var r = "";
     ar.fields.sort(function (a, b) { return parseInt(a.forder) - parseInt(b.forder); });
     for (var i = 0; i < ar.fields.length; i++) {
@@ -161,10 +163,29 @@ function RenderPane(ar, idx){
         else if (field.ftype == "textarea")
             attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
 
-        r += "<div><label>" + field.title + "</label><div " + attr + ">"+ val + "</div></div>";
+        r += "<div><label>" + field.title + "</label><div " + attr + ">" + (fun? fun(ar.data[idx],field):val) + "</div></div>";
     }
     return r;
 }
+
+function RenderPane2(entity, fields, fun) {
+    var r = "";
+    for (var i = 0; i < fields.length; i++) {
+        var field = fields[i];
+        if (field.forder == -1 || field.ftype == "none")
+            continue;
+        var attr = "";
+        if (field.ftype == "input_long")
+            attr += 'style="width:490px;"';
+        else if (field.ftype == "textarea")
+            attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
+
+        r += "<div><label>" + field.title + "</label><div " + attr + ">" +
+            (fun ? fun(entity, field) : entity[field.name]) + "</div></div>";
+    }
+    return r;
+}
+
 
 function RenderSelect(ar, selid, type) {
     var r = "";
@@ -310,9 +331,9 @@ function GetIdx(ar, id) {
     return GetIdxbyId(ar, id);
     return -1;
 }
-function GetIdxbyId(ar, id) {
-    for (var i in ar.data) {
-        if (ar.data[i].id == id)
+function GetIdxbyId(res, id) {
+    for (var i in res.data) {
+        if (res.data[i].id == id)
             return i;
     }
     return -1;

@@ -152,6 +152,21 @@ function  RenderForm(ar, i) {
     return r;
 }
 
+//初始化关联数据
+$(function () {
+    $(".x3Doc>.x3Doc-handle").on("click", function () {
+        $(this).siblings(".x3Doc-menu").css("display", "block");
+        $(this).siblings(".x3Doc-menu").addClass("x3Doc-click");
+    });
+
+    window.onclick = x3DocMenuHide;
+    function x3DocMenuHide() {
+        $(".x3Doc-menu:not(.x3Doc-click)").css("display", "none");
+        $(".x3Doc>.x3Doc-click").removeClass("x3Doc-click");
+    }
+});
+
+
 var db_roles = [
     {"id": "1", "type": "winder", "name": "叶片超级帐号", modules: [
         { name: "地图", url: "windersumap.html" },
@@ -222,6 +237,19 @@ var db_job = [
     { "id": "17", "type": "repair", "name": "技工" },
     { "id": "18", "type": "public", "name": "公众" },
 ]
+function GetSubJob(pjob){
+    var jobbranch = [{ "1": ["2", "3"] }, { "2": ["2", "3"] }, { "3": ["3"] },
+        { "4": ["5", "6"] }, { "5": ["5", "6"] }, { "6": ["6"] },
+        { "7": ["8", "9"] }, { "8": ["8", "9"] }, { "9": ["9"] },
+        { "10": ["11", "12"] }, { "11": ["11", "12"] }, { "11": ["12"] },
+        { "13": ["14"] }, { "14": ["14"] },
+        { "15": ["16", "17"] }, { "16": ["16", "17"] }, { "16": ["17"] }]
+    var r = new Array();
+    var visable = jobbranch[pjob];
+    for (var i in visable)
+        r.push(GetArItem(db_job, "id", visable[i]));
+    return r;
+}
 
 var db_skill = [
     { "id": "1", "name": "避雷" },
@@ -1057,16 +1085,3 @@ var db_troublelist = {
 ]
 };
 
-//初始化关联数据
-$(function () {
-    $(".x3Doc>.x3Doc-handle").on("click", function () {
-        $(this).siblings(".x3Doc-menu").css("display", "block");
-        $(this).siblings(".x3Doc-menu").addClass("x3Doc-click");
-    });
-
-    window.onclick = x3DocMenuHide;
-    function x3DocMenuHide() {
-        $(".x3Doc-menu:not(.x3Doc-click)").css("display", "none");
-        $(".x3Doc>.x3Doc-click").removeClass("x3Doc-click");
-    }
-});

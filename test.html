@@ -6,33 +6,16 @@
     <style>
         .aaa {
             position: relative;
+            background: url(static/img/add.png);
+            background-size: cover;
         }
-            .aaa::before {
-                content: '';
-                position: absolute;
-                width: 5px;
-                height: 50px;
-                background: Gainsboro;
-                left: 46px;
-                top: 25px;
-                border-radius: 1px;
-            }
-            .aaa::after {
-                content: '';
-                position: absolute;
-                width: 50px;
-                height: 5px;
-                background: Gainsboro;
-                top: 48px;
-                left: 24px;
-                border-radius: 1px;
-            }
     </style>
 </head>
 <body>
-    <label class="aaa" style="display:block;" for="xFile"> <img id="preview" style="width:100px;height:100px;" /> </label>
+    <label class="aaa" style="display:inline-block;" for="xFile"> <img id="preview" style="width:100px;height:100px;z-index: 999;" /> </label>
     <form> <input type="file" id="xFile" accept="image/*" style="position:absolute;clip:rect(0 0 0 0);" onchange="imgPreview(this)"> </form>
     <script type="text/javascript">
+
         function imgPreview(fileDom) {
             //判断是否支持FileReader
             if (window.FileReader) {
@@ -57,6 +40,16 @@
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
+        }
+
+        testfun(1,undefined,3);
+
+        function testfun(p1, p2, p3) {
+            if (p2 )
+                var ccc = p1 + p2 + p3;
+            else
+                var ccc = p1 + p3;
+            var r = p2 ? p1 + p2 + p3 : p1 + p3;
         }
     </script>
 </body>

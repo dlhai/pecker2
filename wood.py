@@ -186,27 +186,26 @@ def _query():
 #测试链接 http://127.0.0.1:5000/queryUser?type=winder&key1=val1&key2=val2....
 @app.route("/queryuser")
 def queryuser():
-    d = request.args.to_dict()
-    type = d["type"]
-    del d["type"]
+    param = request.args.to_dict()
+    type = param["type"]
+    del param["type"]
 
     # 限制对部分表的查询
     if type== "":
         return 404
 
-    d["depart_table"]=type;
     tbl = tables[type]
     sql = "select "+type+".name as depart_name, user.id,user.account,user.face,user.depart_id,"\
         +"user.job,user.skill,user.name,user.code,user.sex,user.ethnic,user.birth,user.origin,"\
         +"user.idimg,user.phone,user.qq,user.mail,user.wechat,user.addr from user,"+type\
-        +" where user.depart_id = "+type+".id"
-    if len(d) > 0:
+        +" where user.depart_id = "+type+".id and user.depart_table='"+type+"'"
+    if len(param) > 0:
         def To(k,v):
            if v[0] == "(":
-               return k +"in (" ","join( ["'"+i+"'" for i in v.trim("()").split(",")]) + ")"
+               return k +"in ("+",".join( ["'"+i+"'" for i in v.trim("()").split(",")]) + ")"
            else:
                return k+"='"+v+"'"
-        sql += " and "+" and ".join([ To(k,v) for k,v in d.items()])
+        sql += " and "+" and ".join([ To(k,v) for k,v in param.items()])
     return query3("queryuser_"+type,fields=select(base.sl).where(base.c.table=="user"),data = sql)
 
 #leaf_su8设备sheet用

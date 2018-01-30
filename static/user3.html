@@ -10,9 +10,10 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.js"></script>
     <script src="laydate/laydate.js"></script>
+    <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
-    <script src="js/db.js"></script>
+    <script src="js/userform.js"></script>
 
     <style>
         .pane_image>div {
@@ -35,6 +36,16 @@
             margin: 0px 5px;
             width: 137px;
         }
+
+        /*为了解决BootStrap中css和layDate的css样式冲突*/
+        .laydate_box, .laydate_box * {
+            box-sizing: content-box;
+        }
+
+            .laydate_box th {
+                text-align: center;
+            }
+
     </style>
 
     <style>/*旧的style，在更新完用户详细信息后将被删除*/
@@ -187,7 +198,7 @@
     </div>
 
     <div class="modal fade" id="ModalDlg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">
-        <div class="modal-dialog" style="width:610px">
+        <div class="modal-dialog" style="width:900px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -218,20 +229,17 @@
             </div>
             <img style="width: 280px; height: 160px;" src="{%=it.idimg%}" />
         </div>
-        <div><label>所在单位</label><div>{%=it.depart_name%}</div></div>
-        <div><label>职位</label><div>{%=GetSub(db_job,"id",it.job).name%}</div></div>
-        {% if (it.job=="14"){ %}<div><label>领域</label><div>{%=it.skill%}</div></div>{% } %}
-        <div><label>姓名</label><div>{%=it.name%}</div></div>
-        <div><label>身份证号</label><div>{%=it.code%}</div></div>
-        <div><label>性别</label><div>{%=GetSub(db_sex,"id",it.sex).name%}</div></div>
-        <div><label>民族</label><div>{%=GetSub(g_ethnic,"id",it.ethnic).name%}</div></div>
-        <div><label>出生年月</label><div>{%=it.birth%}</div></div>
-        <div><label>籍贯</label><div>{%=it.origin%}</div></div>
-        <div><label>联系电话</label><div>{%=it.phone%}</div></div>
-        <div><label>QQ号码</label><div>{%=it.qq%}</div></div>
-        <div><label>邮箱</label><div>{%=it.mail%}</div></div>
-        <div><label>微信号</label><div>{%=it.wechat%}</div></div>
-        <div><label>联系地址</label><div style="width:490px;">{%=it.addr%}</div></div>
+    </script>
+
+    <script id="tpl_user_form" type="text/template">
+        <div style="height:240px;width:280px;float: left; display:block;">
+            <div class="pane_image" style="width: 100%; height: 80px; margin: 0px; padding:0px; display:block;border:0px;">
+                <div style="float: left; margin:0px;"><img style="width: 78px; height: 78px;" src="{%=it.face%}" /></div>
+                <div style="margin-top:0px;"><label>帐号</label><div style="display:inline-block;">{%=it.account%}</div></div>
+                <div><label>密码</label><div>***</div></div>
+            </div>
+            <img style="width: 280px; height: 160px;" src="{%=it.idimg%}" />
+        </div>
     </script>
 
     <script id="tpl_certiflist" type="text/template">
@@ -302,26 +310,31 @@
         var tpl_opuslist = doT.template(document.getElementById('tpl_opuslist').innerHTML);
         var tpl_user_pane = doT.template(document.getElementById('tpl_user_pane').innerHTML);
        
-        var g_usernew = false;
-        var g_userfloat = false;
-        var g_users = new Object();
-        var g_curid = -1;
+        var g_cur = new Object();
+        var g_fields = new Array();
+        var g_ethnic = new Object();
+        var g_user = parent.g_user;
+        g_user = { "id": "2", "account": "yanlechen", "pwd": "yanlechen", "face": "img/face/face8.jpg", "depart_id": "1", "depart_table": "winder", "job": "2", "skill": "", "name": "阎乐晨", "code": "542338197908020410", "sex": "1", "ethnic": "达斡尔族", "birth": "1979-08-02", "origin": "西藏自治区日喀则地区岗巴县", "idimg": "img/person/sfz15.jpg", "phone": "13700006203", "qq": "70913564", "mail": "70913564@21cn.com", "wechat": "70913564@21cn.com", "addr": "北京市顺义站前街路北", "c0": "1", "sub": [{ "id": "1", "name": "绿园区风区" }, { "id": "2", "name": "宽城区风区" }] }
 
-        if (g_user.job == "1") { // 风场su
-            var filter = "&job=(2,3)"
-            Request("/rd?ls=config&type=ethnic", function (res) {g_ethnic = res;});
-        }
-        else{
-            var filter = "&job=3&" + g_user.depart_name+"_id=" + g_user.depart_id
-        }
+        Request("/rd?ls=config&type=ethnic", function (res) { g_ethnic = res.data; });
 
+        var filter = g_user.job == "1" ? "&job=(2,3)" : "&job=3&depart_id=" + g_user.depart_id;
         Request("/queryuser?type=winder"+filter, function(res) {
             g_users = res;
-            $("#d_table_item").html(RenderUserTable(g_users));
-            TableBindClick3(users.type, function (data_id) {
-                g_curid = data_id;
-                var i = GetIdxbyId(g_users.data, data_id);
-                $("#d_baseinf").html(tpl_user_pane(g_users.data, i));
+            for (var i in g_users.fields) {
+                if (g_users.fields[i].name == "account" || g_users.fields[i].name == "pwd"
+                    || g_users.fields[i].name == "face" || g_users.fields[i].name == "idimg")
+                    continue;
+                if (g_users.fields[i].name == "skill" && g_user.job != "13" ) // 专家su
+                    continue;
+                g_fields.push(g_users.fields[i]);
+            }
+            $("#d_table_item").html(RenderTable2(g_users, undefined, ValToView));
+            TableBindClick3(g_users.type, function (data_id) {
+                g_cur = GetSub(g_users.data, "id", data_id);
+                var pane = tpl_user_pane(g_cur);
+                pane += RenderPane2(g_cur, g_fields, ValToView);
+                $("#d_baseinf").html(pane);
 
                 // 以下为虚拟数据
                 var idx = rndrange(0, db_addition.length);
@@ -331,9 +344,20 @@
                 $("#d_opuslist").html(tpl_opuslist(db_addition[idx].opus));
             });
         });
-
+        function ValToView(user, field) {
+            var name = field.name ? field.name :field;
+            if (name == "sex")
+                return GetSub(db_sex, "id", user.sex).name;
+            else if (name == "job")
+                return GetSub(db_job, "id", user.job).name;
+            else if (name == "depart_id")
+                return user.depart_name;
+            else
+                return user[name];
+        }
 
         function onAddUser() {
+
             g_usernew = !g_usernew;
             $('form').remove();
             if (g_usernew) {
@@ -349,122 +373,59 @@
                 $('.userfloat').off("click");
             }
         }
+
         function onEditUser() {
-            g_userfloat = !g_userfloat;
-            onClickSubmit();
-            if (g_userfloat){
-                $('.userfloat').css("border", "1px solid #95b7ff");
-                $('.userfloat').on("click", function () {
-                    onClickSubmit();
-                    var This = $(this);
-                    var fieldname = This.attr("data_field");
-                    This.parent().css("position", "relative");
-                    This.parent().append(RenderEditerUser(fieldname, This.html()));
-                });
-            }
-            else{
-                $('.userfloat').css("border", "1px solid #dddddd");
-                $('.userfloat').off("click");
-            }
+            var form = new Userform();
+            $("#ModalDlgContent").html(form.render(g_cur, g_fields));
+            $("#ModalDlgTitle").html("编辑 用户");
+            $('#ModalDlg').modal('show');
         }
 
-        function onClickSubmit() {
-            var form = $('form');
-            if (form.length == 0)
-                return;
-
-            form.parent().css("position", "");
-            form.remove();
+        function Userform() {
+            // 默认停靠位置和偏移量
+            this.defaultAnchor = 0
+            this.defaultOffset = 0;
         }
+        // 通过JavaScript的prototype属性继承于BMap.Control
+        Userform.prototype = new Object();
+        Userform.prototype.render = function (user, fields) {
+            var tpl_user_form = doT.template(document.getElementById('tpl_user_form').innerHTML);
+            var r = '<div class="x2Form">';
+            r += tpl_user_form(user);
+            for (var i in fields) {
+                var field = fields[i];
+                var val = user[field.name];
+                if (field.forder == -1 || field.ftype == "none")
+                    continue;
 
-        function RenderUserTable(it) {
-            var r = "<table id=\"" + it.type + "\" class=\"xTable\"><thead><tr>";
-            for (var c in it.fields) {
-                if (it.fields[c].twidth) {
-                    if (parseInt(it.fields[c].twidth) > 0)
-                        r += "<th width=\"" + it.fields[c].twidth + "\">" + it.fields[c].title + "</th>";
+                var attr = "";
+                if (field.name.indexOf("_") != -1)
+                    attr = 'id="' + field.name + "_" + val + '"';
+
+                r += "<div><label>" + field.title + "</label>";
+                if (field.ftype == "div")
+                    r += "<div " + attr + ">" + val + "</div>";
+                else if (field.ftype == "input")
+                    r += '<input ' + attr + ' name="' + field.name + '" value="' + val + '"/>';
+                else if (field.ftype == "date")
+                    r += '<input name="' + field.name + '" value="' + val + '" onClick="laydate()" />';
+                else if (field.ftype == "input_long")
+                    r += '<input ' + attr + ' style="width:490px;" name="' + field.name + '" value="' + val + '" />';
+                else if (field.ftype == "textarea")
+                    r += '<textarea ' + attr + ' style="resize:none;width:490px;max-height:45px;" name="' + field.name + '">' + val + '</textarea>';
+                else if (field.ftype == "select") {
+                    var render = "";
+                    if (field.name == "sex")
+                        render = RenderSelect(db_sex, val);
+                    else if (field.name == "job")
+                        render = RenderSelect(GetSubJob(g_user.job), val);
+                    else if (field.name == "ethnic")
+                        render = RenderSelect(g_ethnic, val);
+                    r += '<select ' + attr + ' name="' + field.name + '">' + render + '</select>';
                 }
-                else
-                    r += "<th>" + it.fields[c].title + "</th>";
+                r += "</div>";
             }
-            r += "</tr></thead>\n";
-
-            r += "<tbody>";
-            for (var x in it.data) {
-                r += "<tr data_id=\"" + it.data[x].id + "\">";
-                for (c in it.fields) {````````````````````````````````````
-                    var field = it.fields[c];
-                    if (!field.twidth || field.twidth && parseInt(field.twidth) > 0) {
-                        var val = it.data[x][field.name];
-
-                        // begin 用户特别处理
-                        if (field.name == "depart_id")
-                            val = it.data[x]["depart_name"]
-                        else if (field.name == "sex") {
-                            if (val == "0") val = "女";
-                            else val = "男";
-                        }
-                        // end 
-
-                        if (it.fields[c].tstyle)
-                            r += "<td style=\"" + it.fields[c].tstyle + "\">" +val+ "</td>";
-                        else
-                            r += "<td>" + val+ "</td>";
-                    }
-                }
-                r += "</tr>";
-            }
-            r += "</tbody></table>";
-            return r;
-        }
-
-        function sexname(sex) {
-            if (sex == "0")
-                return "女";
-            else
-                return "男";
-        }
-
-        function RenderEditerUser(fieldname, val) {
-            type = GetIdx2(g_users.fields, "name", fieldname).ftype
-
-            var r = '<form class="editer">';
-            if (type == "input")
-                r += '<input name="' + name + '" value="' + val + '"/>';
-            else if (type == "input_long"){
-                r = '<form class="editer" style="width:522px;" >';
-                r += '<input style="width:490px;" name="' + name + '" value="' + val + '" />';
-            }
-            else if (type == "textarea"){
-                r = '<form class="editer" style="width:522px;" >';
-                r += '<textarea style="resize:none;width:490px;max-height:45px;" name="' + name + '">' + val + '</textarea>';
-            }
-            else if (type == "select") {
-                r += '<select id="editer_' + name + '" name="' + name + '">';
-                if (fieldname == "job")
-                    r += RenderSelect(db_job, val, "winder");
-                else if (fieldname == "sex")
-                    r += RenderSelect(db_sex, val);
-                else if (fieldname == "skill")
-                    r += RenderSelect(db_skill, val);
-                else if (fieldname == "ethnic")
-                    Request2("/rd?ls=ethnic", "editer_" + name, val, RenderSelect2);
-                r += '</select>';
-            }
-            else if (type == "choice") {
-
-            }
-            else if (type == "date") {
-                r += '<input name="' + name + '" value="' + val + '" onClick="laydate()"/>';
-            }
-            else if (type == "pwd") {
-                r += '<input name="' + name + '" value="' + val + '"/>';
-                r += '<input name="' + name + '1" value="' + val + '"/>';
-                r += '<input name="' + name + '2" value="' + val + '"/>';
-            }
-            else
-                alert("RenderEditer: unknown type:" + type);
-            r += '<a onClick="onClickSubmit()"><img style="width:24px;height:24px" src="img/submit.png"></a></form>';
+            r += "</div>";
             return r;
         }
 
