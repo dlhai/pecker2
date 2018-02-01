@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" href="css/bootstrap.css"/>
     <script type="text/javascript" src="js/doTe.js"></script>
-    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
     <script src="laydate/laydate.js"></script>
     <script src="js/db.js"></script>
@@ -28,7 +28,7 @@
             text-align: right;
             margin: 5px;
         }
-        .pane_image>div>div {
+        .pane_image>div>div:first-of-type {
             border-radius: 4px;
             border: 1px solid #dddddd;
             display: inline-block;
@@ -37,15 +37,37 @@
             width: 137px;
         }
 
+        /*图片框无图时的背景十字架图片*/
+        .ImgBlank {
+            position: relative;
+            background: url(img/add.png);
+            background-size: cover;
+        }
+
+        /*dropdown*/
+        .drop {
+        }
+        .dropwnd {
+            display: none;
+            position: absolute;
+            z-index: 9999;
+            left: 74px;
+            top: 100%;
+            width: 100%;
+            border: 2px solid #95b7ff;
+            border-radius: 4px;
+            background: #ffffff;
+            box-sizing: content-box;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+
         /*为了解决BootStrap中css和layDate的css样式冲突*/
         .laydate_box, .laydate_box * {
             box-sizing: content-box;
         }
-
-            .laydate_box th {
-                text-align: center;
-            }
-
+        .laydate_box th {
+            text-align: center;
+        }
     </style>
 
     <style>/*旧的style，在更新完用户详细信息后将被删除*/
@@ -140,35 +162,6 @@
             display: inline-block;
         }
 
-        input:focus {
-            border-color: #66afe9;
-            box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
-        }
-
-        .editer {
-            position: absolute;
-            border: 2px solid #95b7ff;
-            border-radius: 4px;
-            background:#ffffff;
-            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-            width: 232px;
-            left: 75px;
-            z-index:9999;
-        }
-        .editer > input,
-        .editer > select,
-        .editer > textarea {
-            border-radius: 4px;
-            border: 1px solid #95b7ff;
-            display: inline-block;
-            padding: 5px 20px;
-            margin: 0px 2px 0px 0px;
-            width: 200px;
-        }
-        .editer > a>img{
-            vertical-align: middle; margin-bottom: 2px;
-        }
-
     </style> 
 </head>
 <body class="xFCsrow" >
@@ -234,11 +227,21 @@
     <script id="tpl_user_form" type="text/template">
         <div style="height:240px;width:280px;float: left; display:block;">
             <div class="pane_image" style="width: 100%; height: 80px; margin: 0px; padding:0px; display:block;border:0px;">
-                <div style="float: left; margin:0px;"><img style="width: 78px; height: 78px;" src="{%=it.face%}" /></div>
+                <div style="float: left; margin:0px;">
+                    <label class="ImgBlank" style="display:inline-block;width:78px;margin:0px;" for="SelectFace"> <img id="viewface" style="width: 78px; height: 78px;;z-index: 999;" src="{%=it.face%}"/> </label>
+                    <input type="file" id="SelectFace" accept="image/*" style="display:none;" onchange="imgPreview(this,'viewface')">
+                </div>
                 <div style="margin-top:0px;"><label>帐号</label><div style="display:inline-block;">{%=it.account%}</div></div>
-                <div><label>密码</label><div>***</div></div>
+                <div style="position:relative;"><label>密码</label><div class="drop" style="border: 1px solid #95b7ff;"><label style="color:royalblue;">点击修改</label></div>
+                <div class="dropwnd" style="left:-6px;width:190px;height:100px;padding:5px;display:none;">
+                    <label style="margin-right:5px;">旧密码</label><input style="width:140px;height:20px;">
+                    <label style="margin-right:5px;">新密码</label><input style="width:140px;height:20px;">
+                    <label style="margin-right:5px;">新密码</label><input style="width:140px;height:20px;">
+                    <div style="float:right"><button onclick="HideWnd(this)">确定</button> <button onclick="HideWnd(this)">取消</button></div>
+                </div></div>
             </div>
-            <img style="width: 280px; height: 160px;" src="{%=it.idimg%}" />
+            <label class="ImgBlank" style="display:inline-block;" for="selectidimg"> <img id="viewidimg" style="width: 280px; height: 160px;z-index: 999;" src="{%=it.idimg%}" /> </label>
+            <input type="file" id="selectidimg" accept="image/*" style="display:none;" onchange="imgPreview(this,'viewidimg')">
         </div>
     </script>
 
@@ -377,6 +380,8 @@
         function onEditUser() {
             var form = new Userform();
             $("#ModalDlgContent").html(form.render(g_cur, g_fields));
+            $(".drop").on("click", function () { $(this).siblings("div.dropwnd").css("display", "block"); });
+            $("#job").on("click", function () {TreeAddChildren($("#job>div").attr("id"));});
             $("#ModalDlgTitle").html("编辑 用户");
             $('#ModalDlg').modal('show');
         }
@@ -386,6 +391,14 @@
             this.defaultAnchor = 0
             this.defaultOffset = 0;
         }
+
+        function imgPreview(fileDom, idimg) {
+            var file = fileDom.files[0];
+            var reader = new FileReader();
+            reader.onload = function (e) {$("#"+idimg).attr("src", e.target.result);};
+            reader.readAsDataURL(file);
+        }
+
         // 通过JavaScript的prototype属性继承于BMap.Control
         Userform.prototype = new Object();
         Userform.prototype.render = function (user, fields) {
@@ -402,9 +415,16 @@
                 if (field.name.indexOf("_") != -1)
                     attr = 'id="' + field.name + "_" + val + '"';
 
-                r += "<div><label>" + field.title + "</label>";
-                if (field.ftype == "div")
-                    r += "<div " + attr + ">" + val + "</div>";
+                r += '<div style="position:relative;" ><label>' + field.title + "</label>";
+                if (field.ftype == "div") {
+                    if (field.name == "depart_id"){
+                        attr += ' class="drop" + style="border: 1px solid #95b7ff;"';
+                        r += "<div " + attr + ">" + val + "</div>" + RenderDepart() ;
+                    }
+                    else{
+                        r += "<div " + attr + ">" + val + "</div>";
+                    }
+                }
                 else if (field.ftype == "input")
                     r += '<input ' + attr + ' name="' + field.name + '" value="' + val + '"/>';
                 else if (field.ftype == "date")
@@ -427,6 +447,72 @@
             }
             r += "</div>";
             return r;
+        }
+
+        function RenderDepart() {
+            if (g_user.job == "1") {// 风场su
+                return '<div class="dropwnd" id="root" >'
+            }
+            else if (g_user.job == "2" || g_user.job == "3") {// 风场主管、驻场
+                return '<div class="dropwnd" style="width:190px;padding:5px;"><div id="' + g_user.depart_table + "_" + g_user.depart_id + "\"><span><img src=\""
+                    + branch[g_user.depart_table].image + "\">" + g_user.depart_name + "</span></div></div>"
+            }
+
+            r += "</div>";
+            return r;
+        }
+
+        function TreeAddChildren(id) {  // id格式: 表名_{id}
+            var at = id.split("_");
+            var type = branch.sub(at[0]).type;
+            Request("/rd?ls=" + type + (at[1] ? "&" + at[0] + "_id=" + at[1] : ""), function (res) {
+                var html = "";
+                for (var i in res.data) {
+                    if (type == "winder") { // 叶节点，少了左边的加号，为缩进对齐加了一层div
+                        html += "<div><div id=\"" + type + "_" + data[i].id + "\"><span><img src=\""
+                            + branch[type].image + "\">" + data[i].name + "</span></div></div>\n"
+                    }
+                    else { // 
+                        html += "<div id=\"" + type + "_" + data[i].id + "\">"
+                            + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
+                            + branch[type].image + "\">" + data[i].name + "</span></div>\n"
+                    }
+                }
+
+                $("#" + id).append(html);
+                $("#" + id).children("img").attr("src", "img/nolines_minus.gif"); // 把加号改成减号
+                $(".xTree div>img").unbind("click", TreeItemExpand);
+                $(".xTree div>span").unbind("click", TreeItemClick);
+                $(".xTree div>img").bind("click", TreeItemExpand);
+                $(".xTree div>span").bind("click", TreeItemClick);
+            });
+        }
+
+        function TreeItemExpand() {
+            var siblings = $(this).siblings("div");
+            if (siblings.length == 0) {
+                var id = $(this).parent().attr("id");
+                TreeAddChildren(id);
+            }
+            else if (siblings.css("display") == "none") {
+                $(event.srcElement).attr("src", "img/nolines_minus.gif");
+                siblings.css("display", "block");
+            }
+            else {
+                $(event.srcElement).attr("src", "img/nolines_plus.gif");
+                siblings.css("display", "none");
+            }
+        }
+
+        function HideWnd(This) {
+            $(This).parent().parent().css("display", "none");
+        }
+
+        //点击树节点
+        function TreeItemClick() {
+            //var at = $(this).parent().attr("id").split("_");
+
+            $(this).parent().parent().css("display", "none");
         }
 
     </script>

@@ -112,10 +112,12 @@ def roleuser():
                 rolusr[i] = user
                 break
 
-    #为每个代表用户的所在单位找到下级单位列表，例如风场的下级风区
+    #为每个代表用户的所在单位找到所在单位的名称、下级单位列表，例如风场的下级风区
     for x in rolusr:
         if x.depart_table == "winder":
+            x.depart_name = QueryObj( "select id, name from "+x.depart_table+" where id="+str(x.depart_id))
             x.sub = QueryObj( "select id, name from winderarea where winder_id="+str(x.depart_id))
+
     ret=obj()
     ret.fun="roleuser"
     ret.param=param

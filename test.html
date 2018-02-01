@@ -3,18 +3,45 @@
 <head>
     <title>下拉菜单实例|菜鸟教程(runoob.com)</title>
     <meta charset="utf-8">
+    <script src="static/js/jquery.js"></script>
+
     <style>
-        .aaa {
+        .ImgBlank {
             position: relative;
             background: url(static/img/add.png);
             background-size: cover;
         }
+
+        .drop {
+            position: relative;
+        }
+
+        .drop > div {
+            display: none;
+            position: absolute;
+            border: 2px solid #95b7ff;
+            border-radius: 4px;
+            background: #ffffff;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            top: 100%;
+            box-sizing:border-box;
+            z-index: 9999;
+        }
+
     </style>
 </head>
 <body>
-    <label class="aaa" style="display:inline-block;" for="xFile"> <img id="preview" style="width:100px;height:100px;z-index: 999;" /> </label>
-    <form> <input type="file" id="xFile" accept="image/*" style="position:absolute;clip:rect(0 0 0 0);" onchange="imgPreview(this)"> </form>
+    <div class="drop" style="width:100px;height:20px;background-color:green;">
+        <div style="width:100px; height:50px;background-color:gray;display:none;"></div>
+    </div>
+
+    <br/><br /><br /><br />
+    <label class="ImgBlank" style="display:inline-block;" for="xFile"> <img id="preview" style="width:100px;height:100px;z-index: 999;" /> </label>
+    <input type="file" id="xFile" accept="image/*" style="display:none" onchange="imgPreview(this)">
     <script type="text/javascript">
+        $(".drop").on("click", function () {
+            $(this).children("div").toggle();
+        });
 
         function imgPreview(fileDom) {
             //判断是否支持FileReader
