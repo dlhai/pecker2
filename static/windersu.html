@@ -10,38 +10,9 @@
     <script src="js/bootstrap.js"></script>
     <script src="laydate/laydate.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/utils.js"></script>
     <script src="js/xpecker.js"></script>
     <script src="js/db.js"></script> <!--用到branch-->
-    <style>
-
-        /*风电机面板*/
-        .xEFanPanel {
-            border-radius: 4px;
-            background-color: #ffffff;
-            border: 1px solid #dddddd;
-            border-color: #e0e4e8;
-            margin: 5px;
-            width: 485px;
-            display: inline-block;
-        }
-        .xEFanPanel header {
-            border-bottom: 1px solid #dddddd;
-            padding: 5px;
-        }
-        .xEFanPanel header strong {padding-left: 10px;}
-        .xEFanPanel table {width: 100%;}
-        .xEFanPanel table>thead> tr > th {
-            text-align: center;
-            background-color: #f0f0f0;
-        }
-        .xEFanPanel table>tbody > tr:nth-child(2n) > td {
-            background-color: #f5f5f5;
-        }
-        .xEFanPanel table>thead > tr > th, .d_table tbody > tr > td{
-            padding: 2px 4px;
-            vertical-align: top;
-        }
-    </style>
 </head>
 <body class="xFCsrow">
     <section class="xPanel2 xFIfixed xScroll" style="width: 300px;padding:5px;">
@@ -224,13 +195,13 @@
                         Request("/query?type=efanvender", function (d4) {
                             var nodes = $(".efanvender_id");
                             for (var i = 0; i < nodes.length; i++)
-                                nodes[i].innerHTML = FindSub(d4.data, nodes[i].innerHTML).name;
+                                nodes[i].innerHTML = GetSub(d4.data, "id", nodes[i].innerHTML).name;
                             nodes.removeClass("efanvender_id");
                         });
                         Request("/query?type=leafvender", function (d5) {
                             var nodes = $(".leafvender_id");
                             for (var i = 0; i < nodes.length; i++)
-                                nodes[i].innerHTML = FindSub(d5.data, nodes[i].innerHTML).name;
+                                nodes[i].innerHTML = GetSub(d5.data, "id", nodes[i].innerHTML).name;
                             nodes.removeClass("leafvender_id");
                         });
                     });
@@ -292,7 +263,7 @@
         }
 
         function EditEfan(t) {
-            var efan = FindSub(sublist.data, $(t).attr("id"));
+            var efan = GetSub(sublist.data, "id", $(t).attr("id"));
             efan.leafs = new Array();
             for (var i in additlist.data) {
                 if (additlist.data[i].efan_id == efan.id)

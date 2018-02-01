@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.css"/>
+    <script type="text/javascript" src="js/doTe.js"></script>
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="laydate/laydate.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/xpecker.js"></script>
+    <script src="js/Cube.js"></script>
+</head>
+<body class="xFCscol">
+    <section class="xPanel2">
+        <header class="heading">风电机列表
+            <div style="float: right;">
+                <a href="#">全选</a> <a href="#">全消</a> <a href="#">反选</a> <a href="#" style="margin-left:20px;">报修</a>
+                <a href="#">记录</a> <a href="#" style="margin-left:20px;">导入</a> <a href="#">添加</a>
+            </div>
+        </header>
+        <div id="item_list" class="xScroll"></div>
+    </section>
+    <script type="text/javascript">
+        var count = 0;
+        g_winderarea_id = GetParam("id");
+        Request("/rd?ls=efanvender", function (efanv) { g_efanvenders = efanv; count += 1; if (count == 4) Render();});
+        Request("/rd?ls=leafvender", function (leafv) { g_leafvenders = leafv; count += 1; if (count == 4) Render();});
+        Request("/rd?ls=efan&winderarea_id=" + g_winderarea_id, function (efan) { g_efans = efan; count += 1; if (count == 4) Render();});
+        Request("/rd?ls=leaf&winderarea_id=" + g_winderarea_id, function (leaf) { g_leafs = leaf; count += 1; if (count == 4) Render();});
+        function Render(){
+            for (var i in g_efans.data) {
+                g_efans.data[i].leafs = new Array();
+                for (var j in g_leafs.data) {
+                    if (g_efans.data[i].id == g_leafs.data[j].efan_id ) {
+                        g_efans.data[i].leafs.push(g_leafs.data[j]);
+                    }
+                }
+            }
+            var html = "";
+            var pane = new EFanPane(true);
+            for (var i in g_efans.data) {
+                html += pane.Render(g_efans.data[i]);
+            }
+
+            $("#item_list").html(html);
+        }
+    </script>
+</body>
+</html>

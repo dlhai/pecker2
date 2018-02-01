@@ -1,12 +1,4 @@
-﻿// 取url中的参数
-function GetParam(name) {
-    var url = decodeURI(window.location.search);
-    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
-    var r = url.substr(1).match(reg);
-    if (r != null) return unescape(r[2]); return null;
-}
-
-//表格点击反色
+﻿//表格点击反色
 function TableBindClick() {
     var tbc_currow = -1;
     $("tr").click(function () {
@@ -67,7 +59,6 @@ function TableBindClick3(tableid, callback) {
             callback($(this).attr("data_id"));
     });
 }
-
 
 //文档控件
 $(function () {
@@ -305,75 +296,36 @@ function RenderForm2(ar, i) {
     //return r;
 }
 
-// 本接口已被GetSub代替
-function FindSub(ar, attr, val) {
-    alert("调用了旧接口FindSub");
-    return GetSub(ar, attr, val);
+function EFanPane(check ) {
+    var tpl = '<div class="xEFanPanel">'
+        + '    <header>';
+    if (check) tpl += '<input type="checkbox">';
+    tpl += '            <img src="img/diy/3.png" />'
+        + '          <strong>编号:</strong><span>{%=it.code%}</span>'
+        + '           <strong>型号:</strong><span>{%=it.type%}</span>'
+        + '          <strong>生产厂家:</strong><span class="efanvender_id">{%=it.efanvender_id%}</span>'
+        + '          <div style="float: right;">'
+        + '              <a id="{%=it.id%}" onClick="EditEfan(this)">编辑</a>'
+        + '          </div>'
+        + '      </header>'
+        + '      <table>'
+        + '          <thead><tr><th>编号</th><th>主要材料</th><th>出厂时间</th><th>挂机时间</th><th>生产厂家</th></tr></thead>'
+        + '          <tbody>'
+        + '              {% for (var j in it.leafs) { %}'
+        + '              <tr>'
+        + '                  <td>{%=it.leafs[j].code%}</td>'
+        + '                  <td>{%=it.leafs[j].mat%}</td>'
+        + '                  <td>{%=it.leafs[j].producedate%}</td>'
+        + '                  <td>{%=it.leafs[j].putondate%}</td>'
+        + '                  <td class="leafvender_id">{%=it.leafs[j].leafvender_id%}</td>'
+        + '              </tr>'
+        + '              {% } %}'
+        + '          </tbody>'
+        + '      </table>'
+        + '  </div>';
+    this.tpl = doT.template(tpl);
 }
 
-function GetSub(ar, attr, val) {
-    for (var i in ar) {
-        if (ar[i][attr] == val)
-            return ar[i];
-    }
-    return null;
+EFanPane.prototype.Render = function( efan ){
+    return this.tpl(efan);
 }
-
-// 本接口已被GetIdx代替
-function FindSub2(ar, id) {
-    alert( "调用了旧接口FindSub2" );
-    return GetIdx(ar,id);
-}
-
-// 本接口已被GetIdxbyId代替
-function GetIdx(ar, id) {
-    alert("调用了旧接口GetIdx");
-    return GetIdxbyId(ar, id);
-    return -1;
-}
-function GetIdxbyId(res, id) {
-    for (var i in res.data) {
-        if (res.data[i].id == id)
-            return i;
-    }
-    return -1;
-}
-
-// 与旧的GetIdx完全没有关系
-function GetIdx2(ar, attr, val) {
-    for (var i in ar) {
-        if (ar[i][attr] == val)
-            return ar[i];
-    }
-    return null;
-}
-
-function Clone(obj) {
-    var r = new Object();
-    for (var k in obj) {
-        var val = obj[k];
-        r[k] = typeof val === 'object' ? cloneObj(val) : val;
-    }
-    return r;
-}
-
-function Create(fields) {
-    var r = new Object();
-    for (var k in fields)
-        r[fields[k].name] = "";
-    return r;
-}
-
-function Create2(ar) {
-    var r = new Object();
-    r.type = ar.type;
-    r.fields = ar.fields;
-    r.data = new Array();
-    t = new Object();
-    for (var k in ar.fields)
-        t[ar.fields[k].name] = "";
-    r.data.push(t);
-    return r;
-}
-
-

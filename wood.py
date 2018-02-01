@@ -58,6 +58,12 @@ def QueryObj( sql ):
 #def to_json( qa ):
 #    return "["+ ",\n".join(["{"+",".join(['"'+str(t[0])+'":"'+str(t[1])+'"' for t in zip(row._parent.keys,row._row)])+"}" for row in qa ]) + "]"
 
+def To(k,v):
+    if v[0] == "(":
+        return k +"in ("+",".join( ["'"+i+"'" for i in v.trim("()").split(",")]) + ")"
+    else:
+        return k+"='"+v+"'"
+
 #查询结果为json
 def jquery(q):
     a = conn.execute(q).fetchall()
@@ -126,6 +132,23 @@ def roleuser():
     ss = tojson(ret)
     return Response(ss, mimetype='application/json')
 
+#id到名字的转换
+@app.route("/id2name")
+def id2name():
+    r = {}
+    for k,v in request.args.to_dict().items():
+        ar = k.split("_")
+        qa = conn.execute( "select name from " + ar[0] + ' where id="' + v+'"').fetchall()
+        r[k+"_"+v]=qa[0][0]
+    return jsonify(r)
+
+@app.route("/upload",methods=['POST'])
+def upload():
+    f = request.files["file"]
+    f.save("./uploads/" + f.filename)
+    return f.filename
+
+
 #查询
 #测试链接 http://127.0.0.1:5000/rd?ls=[表名]&key1=val1&key2=val2....
 @app.route("/rd")
@@ -145,45 +168,10 @@ def rd():
     tbl = tables[ls]
     sql = "select * from "+ls
     if len(d) > 0:
-        sql += " where "+" and ".join([ k+"='"+v+"'" for k,v in d.items()])
+        sql += " where "+" and ".join([ To(k,v) for k,v in d.items()])
     return query4(ls,fields=select(base.sl).where(base.c.table==ls),data = sql)
 
-#id到名字的转换
-@app.route("/id2name")
-def id2name():
-    r = {}
-    for k,v in request.args.to_dict().items():
-        ar = k.split("_")
-        qa = conn.execute( "select name from " + ar[0] + ' where id="' + v+'"').fetchall()
-        r[k+"_"+v]=qa[0][0]
-    return jsonify(r)
-
-@app.route("/upload",methods=['POST'])
-def upload():
-    f = request.files["file"]
-    f.save("./uploads/" + f.filename)
-    return f.filename
-
 #-----------------------以下接口将被废弃-------------------------------
-
-#查询(由于部分表有type字段与type参数作为表名冲突被废弃)
-#测试链接 http://127.0.0.1:5000/query?type=[表名]&key1=val1&key2=val2....
-@app.route("/query")
-def _query():
-    d = request.args.to_dict()
-    type = d["type"]
-    del d["type"]
-
-    # 限制对部分表的查询
-    if type== "base" or type == "user":
-        return 404
-
-    tbl = tables[type]
-    sql = "select * from "+type
-    if len(d) > 0:
-        sql += " where "+" and ".join([ k+"='"+v+"'" for k,v in d.items()])
-    return query3(type,fields=select(base.sl).where(base.c.table==type),data = sql)
-
 #查询用户
 #测试链接 http://127.0.0.1:5000/queryUser?type=winder&key1=val1&key2=val2....
 @app.route("/queryuser")
@@ -202,13 +190,26 @@ def queryuser():
         +"user.idimg,user.phone,user.qq,user.mail,user.wechat,user.addr from user,"+type\
         +" where user.depart_id = "+type+".id and user.depart_table='"+type+"'"
     if len(param) > 0:
-        def To(k,v):
-           if v[0] == "(":
-               return k +"in ("+",".join( ["'"+i+"'" for i in v.trim("()").split(",")]) + ")"
-           else:
-               return k+"='"+v+"'"
         sql += " and "+" and ".join([ To(k,v) for k,v in param.items()])
     return query3("queryuser_"+type,fields=select(base.sl).where(base.c.table=="user"),data = sql)
+
+#查询(由于部分表有type字段与type参数作为表名冲突被废弃)
+#测试链接 http://127.0.0.1:5000/query?type=[表名]&key1=val1&key2=val2....
+@app.route("/query")
+def _query():
+    d = request.args.to_dict()
+    type = d["type"]
+    del d["type"]
+
+    # 限制对部分表的查询
+    if type== "base" or type == "user":
+        return 404
+
+    tbl = tables[type]
+    sql = "select * from "+type
+    if len(d) > 0:
+        sql += " where "+" and ".join([ k+"='"+v+"'" for k,v in d.items()])
+    return query3(type,fields=select(base.sl).where(base.c.table==type),data = sql)
 
 #leaf_su8设备sheet用
 #测试链接 http://127.0.0.1:5000/itemdetail?type=winderco&id=1

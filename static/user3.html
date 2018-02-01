@@ -10,10 +10,11 @@
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
     <script src="laydate/laydate.js"></script>
+    <script src="js/utils.js"></script>
     <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
-    <script src="js/userform.js"></script>
+    <script src="js/Cube.js"></script>
 
     <style>
         .pane_image>div {
@@ -224,6 +225,15 @@
         </div>
     </script>
 
+    <script id="tpl_user_new" type="text/template">
+        <div class="x2Form" style="padding: 0px 0px 0px 30px;">
+            <div style="float: left; margin:0px;"><img style="width: 100px;height: 180px;" src="img/bird.jpg" /></div>
+            <div><label>帐号</label><input /></div>
+            <div><label>密码</label><input /></div>
+            <div><label>密码</label><input /></div>
+        </div>
+    </script>
+
     <script id="tpl_user_form" type="text/template">
         <div style="height:240px;width:280px;float: left; display:block;">
             <div class="pane_image" style="width: 100%; height: 80px; margin: 0px; padding:0px; display:block;border:0px;">
@@ -232,7 +242,7 @@
                     <input type="file" id="SelectFace" accept="image/*" style="display:none;" onchange="imgPreview(this,'viewface')">
                 </div>
                 <div style="margin-top:0px;"><label>帐号</label><div style="display:inline-block;">{%=it.account%}</div></div>
-                <div style="position:relative;"><label>密码</label><div class="drop" style="border: 1px solid #95b7ff;"><label style="color:royalblue;">点击修改</label></div>
+                <div style="position:relative;"><label>密码</label><div class="drop" style="border: 1px solid #95b7ff;"><label style="color:royalblue;margin:0px;">点击修改</label></div>
                 <div class="dropwnd" style="left:-6px;width:190px;height:100px;padding:5px;display:none;">
                     <label style="margin-right:5px;">旧密码</label><input style="width:140px;height:20px;">
                     <label style="margin-right:5px;">新密码</label><input style="width:140px;height:20px;">
@@ -360,28 +370,39 @@
         }
 
         function onAddUser() {
-
-            g_usernew = !g_usernew;
-            $('form').remove();
-            if (g_usernew) {
-                $('.usernew').css("border", "1px solid #95b7ff");
-                $('.usernew').on("click", function () {
-                    var This = $(this);
-                    This.parent().css("position", "relative");
-                    This.parent().append(document.getElementById('tpl_editer').innerHTML);
-                });
+            var tpl_user_new = doT.template(document.getElementById('tpl_user_new').innerHTML);
+            var dlg = new cbDlg();
+            dlg.title = "新建 用户";
+            var newuser = Create(g_users.fields);
+            dlg.Add(tpl_user_new(newuser));
+            dlg.submit = function () {
+                newuser.depart_name = g_user.depart_name;
+                var form = new Userform();
+                var dlg2 = new cbDlg();
+                dlg2.Add(form.render(newuser, g_fields));
+                dlg2.css = "width:900px;";
+                dlg2.Show();
+                $(".drop").on("click", function () { $(this).siblings("div.dropwnd").css("display", "block"); });
+                $("#job").on("click", function () { TreeAddChildren($("#job>div").attr("id")); });
+                $(".xTree div>img").unbind("click", TreeItemExpand);
+                $(".xTree div>span").unbind("click", TreeItemClick);
+                $(".xTree div>img").bind("click", TreeItemExpand);
+                $(".xTree div>span").bind("click", TreeItemClick);
             }
-            else {
-                $('.usernew').css("border", "1px solid #dddddd");
-                $('.userfloat').off("click");
-            }
+            dlg.Show();
         }
 
         function onEditUser() {
             var form = new Userform();
             $("#ModalDlgContent").html(form.render(g_cur, g_fields));
             $(".drop").on("click", function () { $(this).siblings("div.dropwnd").css("display", "block"); });
-            $("#job").on("click", function () {TreeAddChildren($("#job>div").attr("id"));});
+            $("#job").on("click", function () { TreeAddChildren($("#job>div").attr("id")); });
+
+            $(".xTree div>img").unbind("click", TreeItemExpand);
+            $(".xTree div>span").unbind("click", TreeItemClick);
+            $(".xTree div>img").bind("click", TreeItemExpand);
+            $(".xTree div>span").bind("click", TreeItemClick);
+
             $("#ModalDlgTitle").html("编辑 用户");
             $('#ModalDlg').modal('show');
         }
@@ -419,7 +440,7 @@
                 if (field.ftype == "div") {
                     if (field.name == "depart_id"){
                         attr += ' class="drop" + style="border: 1px solid #95b7ff;"';
-                        r += "<div " + attr + ">" + val + "</div>" + RenderDepart() ;
+                        r += "<div " + attr + ">" + user.depart_name + "</div>" + RenderDepart();
                     }
                     else{
                         r += "<div " + attr + ">" + val + "</div>";
@@ -451,10 +472,10 @@
 
         function RenderDepart() {
             if (g_user.job == "1") {// 风场su
-                return '<div class="dropwnd" id="root" >'
+                return '<div class="xTree dropwnd" id="root" >'
             }
             else if (g_user.job == "2" || g_user.job == "3") {// 风场主管、驻场
-                return '<div class="dropwnd" style="width:190px;padding:5px;"><div id="' + g_user.depart_table + "_" + g_user.depart_id + "\"><span><img src=\""
+                return '<div class="xTree dropwnd" style="width:190px;padding:5px;font-size: 12px;"><div id="' + g_user.depart_table + "_" + g_user.depart_id + "\"><span><img src=\""
                     + branch[g_user.depart_table].image + "\">" + g_user.depart_name + "</span></div></div>"
             }
 

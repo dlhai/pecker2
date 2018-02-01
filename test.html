@@ -1,83 +1,64 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>下拉菜单实例|菜鸟教程(runoob.com)</title>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap Modal</title>
+    <link rel="stylesheet" href="static/css/bootstrap.css">
     <script src="static/js/jquery.js"></script>
-
-    <style>
-        .ImgBlank {
-            position: relative;
-            background: url(static/img/add.png);
-            background-size: cover;
-        }
-
-        .drop {
-            position: relative;
-        }
-
-        .drop > div {
-            display: none;
-            position: absolute;
-            border: 2px solid #95b7ff;
-            border-radius: 4px;
-            background: #ffffff;
-            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-            top: 100%;
-            box-sizing:border-box;
-            z-index: 9999;
-        }
-
-    </style>
-</head>
-<body>
-    <div class="drop" style="width:100px;height:20px;background-color:green;">
-        <div style="width:100px; height:50px;background-color:gray;display:none;"></div>
-    </div>
-
-    <br/><br /><br /><br />
-    <label class="ImgBlank" style="display:inline-block;" for="xFile"> <img id="preview" style="width:100px;height:100px;z-index: 999;" /> </label>
-    <input type="file" id="xFile" accept="image/*" style="display:none" onchange="imgPreview(this)">
+    <script src="static/js/bootstrap.js"></script>
+    
+    
     <script type="text/javascript">
-        $(".drop").on("click", function () {
-            $(this).children("div").toggle();
-        });
-
-        function imgPreview(fileDom) {
-            //判断是否支持FileReader
-            if (window.FileReader) {
-                var reader = new FileReader();
-            } else {
-                alert("您的设备不支持图片预览功能，如需该功能请升级您的设备！");
-            }
-
-            //获取文件
-            var file = fileDom.files[0];
-            var imageType = /^image\//;
-            //是否是图片
-            if (!imageType.test(file.type)) {
-                alert("请选择图片！");
-                return;
-            }
-            //读取完成
-            reader.onload = function (e) {
-                //获取图片dom
-                var img = document.getElementById("preview");
-                //图片路径设置为读取的图片
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+        function cbDlg() {
+            this.id = "cbdlg" + Math.ceil(Math.random() * 1000000).toString();
+            this.css = "width:450px";
+            this.title = "标题";
+            this.subs = new Array();
+            this.btndel = false;
         }
+        cbDlg.prototype.Add = function (sub) {
+            this.subs.push(sub);
+        }
+        cbDlg.prototype.Show = function () {
+            var html = '<div class="modal fade" id="' + this.id + '" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">'
+                + '<div class="modal-dialog" style="' + this.css + '">'
+                + '<div class="modal-content">'
+                + '    <div class="modal-header">'
+                + '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>'
+                + '        <h4 class="modal-title" id="ModalDlgTitle">' + this.title + '</h4>'
+                + '   </div>'
+                + '    <div id="ModalDlgContent" class="modal-body" style="padding:5px 0px">';
+            for (var i in this.sub) html += this.sub[i].toString();
+            html += '    </div>'
+                + '    <div class="modal-footer">';
+            if (this.btndel) html += '        <div style="float:left;"><button type="button" class="btn btn-default" style="color:#aaaaaa">删除</button></div>';
+            html += '        <button type="button" class="btn btn-primary">提交</button>'
+                + '        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>'
+                + '        <button type="button" class="btn">关2闭</button>'
+                + '    </div>'
+                + '</div><!-- /.modal-content -->'
+                + '</div><!-- /.modal -->';
+            $("body").append(html);
+            var btn = $('#' + this.id).find("button");
+            btn.on("click", '', { id: this.id, close: this.closedlg, submit: this.submit }, function (ev) {
+                if (ev.target.innerText == "提交") submit();
+                else if (ev.target.innerText == "提交") submit();
+                $('#' + ev.data.id).remove();
+            });
+            $('#' + this.id).modal('show');
+        } 
 
-        testfun(1,undefined,3);
-
-        function testfun(p1, p2, p3) {
-            if (p2 )
-                var ccc = p1 + p2 + p3;
-            else
-                var ccc = p1 + p3;
-            var r = p2 ? p1 + p2 + p3 : p1 + p3;
+        function showDlg() {
+            var dlg = new cbDlg();
+            dlg.Show();
         }
     </script>
+
+</head>
+<body>
+    <div onclick="showDlg()">
+        asldflsdlf;lasdf
+    </div>
 </body>
-</html>

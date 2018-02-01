@@ -7,8 +7,9 @@
     <script type="text/javascript" src="js/doTe.js"></script>
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
-    <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
     <script src="js/xpecker.js"></script>
     <script type="text/javascript">
         function navto(url) {
@@ -140,17 +141,17 @@
 
         Reqdata("/roleuser?account=" + GetParam("account"), function (res) {
             for (var i = 0; i < db_roles.length; i++)
-                db_roles[i].user = FindSub(res.data, "job", db_roles[i].id);
+                db_roles[i].user = GetSub(res.data, "job", db_roles[i].id);
             if (GetParam("account") != "") {
-                g_user = FindSub(res.data, "account", GetParam("account"));
-                g_role = FindSub(db_roles, "id", g_user.job);
+                g_user = GetSub(res.data, "account", GetParam("account"));
+                g_role = GetSub(db_roles, "id", g_user.job);
                 $("#roleselect").val(g_user.job);
                 OnRoleChange();
             }
         });
 
         function OnRoleChange() {
-            g_role = FindSub(db_roles, "id", $("#roleselect").val());
+            g_role = GetSub(db_roles, "id", $("#roleselect").val());
             g_user = g_role.user;
             $('#modulelist').html(tpl_module(g_role.modules));
             UpdateSubmode(0);
