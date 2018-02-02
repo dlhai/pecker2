@@ -19,19 +19,21 @@
     <section class="xPanel2">
         <header class="heading">风电机列表
             <div style="float: right;">
-                <a href="#">全选</a> <a href="#">全消</a> <a href="#">反选</a> <a href="#" style="margin-left:20px;">报修</a>
-                <a href="#">记录</a> <a href="#" style="margin-left:20px;">导入</a> <a href="#">添加</a>
+                <a onclick="onSelect(this)">全选</a> <a onclick="onSelect(this)">全消</a> <a onclick="onSelect(this)">反选</a> <a onclick="onRepair()" style="margin-left:20px;">报修</a>
+                <a onclick="onQueryLog()">记录</a> <a onclick="onImport()" style="margin-left:20px;">导入</a> <a onclick="onNew()">添加</a>
             </div>
         </header>
-        <div id="item_list" class="xScroll"></div>
+        <div id="item_list" class="xScroll" style="padding: 5px; flex-grow: 1;"></div>
     </section>
     <script type="text/javascript">
-        var count = 0;
+        g_user = { "id": "2", "account": "yanlechen", "pwd": "yanlechen", "face": "img/face/face8.jpg", "depart_id": "1", "depart_table": "winder", "job": "2", "skill": "", "name": "阎乐晨", "code": "542338197908020410", "sex": "1", "ethnic": "达斡尔族", "birth": "1979-08-02", "origin": "西藏自治区日喀则地区岗巴县", "idimg": "img/person/sfz15.jpg", "phone": "13700006203", "qq": "70913564", "mail": "70913564@21cn.com", "wechat": "70913564@21cn.com", "addr": "北京市顺义站前街路北", "c0": "1", "sub": [{ "id": "1", "name": "绿园区风区" }, { "id": "2", "name": "宽城区风区" }] }
         g_winderarea_id = GetParam("id");
-        Request("/rd?ls=efanvender", function (efanv) { g_efanvenders = efanv; count += 1; if (count == 4) Render();});
-        Request("/rd?ls=leafvender", function (leafv) { g_leafvenders = leafv; count += 1; if (count == 4) Render();});
-        Request("/rd?ls=efan&winderarea_id=" + g_winderarea_id, function (efan) { g_efans = efan; count += 1; if (count == 4) Render();});
-        Request("/rd?ls=leaf&winderarea_id=" + g_winderarea_id, function (leaf) { g_leafs = leaf; count += 1; if (count == 4) Render();});
+
+        var count = 0;
+        Reqdata("/rd?ls=efanvender", function (efanv) { g_efanvenders = efanv; count += 1; if (count == 4) Render(); });
+        Reqdata("/rd?ls=leafvender", function (leafv) { g_leafvenders = leafv; count += 1; if (count == 4) Render();});
+        Reqdata("/rd?ls=efan&winderarea_id=" + g_winderarea_id, function (efan) { g_efans = efan; count += 1; if (count == 4) Render();});
+        Reqdata("/rd?ls=leaf&winderarea_id=" + g_winderarea_id, function (leaf) { g_leafs = leaf; count += 1; if (count == 4) Render();});
         function Render(){
             for (var i in g_efans.data) {
                 g_efans.data[i].leafs = new Array();
@@ -48,6 +50,38 @@
             }
 
             $("#item_list").html(html);
+        }
+
+        function onSelect(This) {
+            var txt = $(This).html();
+            var inputs = $("#item_list").find("input");
+            if (txt == "全选")
+                inputs.prop("checked", true);
+            else if (txt == "全消")
+                inputs.prop("checked",false);
+            else
+                inputs.each(function () {$(this).prop('checked', !$(this).prop("checked"));});
+        }
+        function onRepair() {
+            var dlg = new cbDlg();
+            dlg.title = "报修";
+            dlg.css = "width:610px";
+            dlg.Show();
+        }
+        function onQueryLog() {
+            alert("asdfs");
+        }
+        function onImport() {
+            alert("asdfs");
+        }
+        function onNew() {
+            var efan = EFanCreate(g_efans.fields, g_leafs.fields, g_user.depart_id, g_winderarea_id);
+            var form = new EfanForm();
+            var dlg = new cbDlg();
+            dlg.title = "新建 风电机";
+            dlg.css="width:610px";
+            dlg.Add(form.Render(efan));
+            dlg.Show();
         }
     </script>
 </body>

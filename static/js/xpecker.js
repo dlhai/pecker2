@@ -239,7 +239,10 @@ function fillselect(ar, idx) {
 
 cache = new Object()
 // 已改名为Reqdata
-function Request(url, fun) { return Reqdata(url, fun) }
+function Request(url, fun) {
+    alert("Request=>Reqdata");
+    return Reqdata(url, fun)
+}
 function Reqdata(url, fun) {
     if (cache[url]) { // 优先使用缓冲数据
         fun(cache[url]);
@@ -259,7 +262,10 @@ function Reqdata(url, fun) {
 }
 
 // 已改名为ReqRender
-function Request2(url, id, val, render_fun) { ReqRender(url, id, val, render_fun) }
+function Request2(url, id, val, render_fun) {
+    alert("Request2=>ReqRender");
+    ReqRender(url, id, val, render_fun);
+}
 // 回调函数格式：render_fun(ar, id)
 function ReqRender(url, id, val, render_fun) {
     if (cache[url]) { // 优先使用缓冲数据
@@ -296,11 +302,25 @@ function RenderForm2(ar, i) {
     //return r;
 }
 
+function EFanCreate(fields1, fields2, winder_id, area_id) {
+    var efan = Create(fields1);
+    efan.winder_id = g_user.depart_id;
+    efan.winderarea_id = g_winderarea_id;
+    efan.leafs = [Create(fields2), Create(fields2), Create(fields2)];
+    efan.leafs[0].winder_id = g_user.depart_id;
+    efan.leafs[0].winderarea_id = g_winderarea_id;
+    efan.leafs[1].winder_id = g_user.depart_id;
+    efan.leafs[1].winderarea_id = g_winderarea_id;
+    efan.leafs[2].winder_id = g_user.depart_id;
+    efan.leafs[2].winderarea_id = g_winderarea_id;
+    return efan;
+}
+
 function EFanPane(check ) {
     var tpl = '<div class="xEFanPanel">'
         + '    <header>';
-    if (check) tpl += '<input type="checkbox">';
-    tpl += '            <img src="img/diy/3.png" />'
+    if (check) tpl += '<input type="checkbox" style="margin-top:0px;">';
+    tpl += '            <img src="img/diy/3.png" style="vertical-align:top;"/>'
         + '          <strong>编号:</strong><span>{%=it.code%}</span>'
         + '           <strong>型号:</strong><span>{%=it.type%}</span>'
         + '          <strong>生产厂家:</strong><span class="efanvender_id">{%=it.efanvender_id%}</span>'
@@ -327,5 +347,33 @@ function EFanPane(check ) {
 }
 
 EFanPane.prototype.Render = function( efan ){
+    return this.tpl(efan);
+}
+
+function EfanForm() {
+    this.tpl = doT.template('<div class="xEFanForm">'
+        + '<form id="form_efan">'
+        + '    <strong>编号:</strong><input name="code" value="{%=it.code%}" />'
+        + '    <strong>型号:</strong><input name="type" value="{%=it.type%}" />'
+        + '   <strong>生产厂家:</strong><select class="efanvender_id" data-id="{%=it.efanvender_id%}" name="efanvender_id" style="margin-right:0px;"></select>'
+        + '</form>'
+        + '<form id="form_leaf0" /><form id="form_leaf1" /><form id="form_leaf3" />'
+        + '<table>'
+        + '    <thead><tr><th>编号</th><th>主要材料</th><th>出厂时间</th><th>挂机时间</th><th style="width:90px">生产厂家</th></tr></thead>'
+        + '    <tbody>'
+        + '        {% for (var i = 0; i < it.leafs.length; i++) { %}'
+        + '        <tr>'
+        + '            <td><input form="form_leaf{%=it.leafs[i]%}" name="code" value="{%=it.leafs[i].code%}" /></td>'
+        + '            <td><input form="form_leaf{%=it.leafs[i]%}" name="mat" value="{%=it.leafs[i].mat%}" /></td>'
+        + '            <td><input form="form_leaf{%=it.leafs[i]%}" name="producedate" value="{%=it.leafs[i].producedate%}" onClick="laydate()" /></td>'
+        + '            <td><input form="form_leaf{%=it.leafs[i]%}" name="putondate" value="{%=it.leafs[i].putondate%}" onClick="laydate()" /></td>'
+        + '            <td><select form="form_leaf{%=it.leafs[i]%}" class="leafvender_id" name="leafvender_id" data-id="{%=it.leafs[i].leafvender_id%}" ></select></td>'
+        + '        </tr>'
+        + '        {% } %}'
+        + '    </tbody>'
+        + '</table>'
+        + '</div>');
+}
+EfanForm.prototype.Render = function (efan) {
     return this.tpl(efan);
 }

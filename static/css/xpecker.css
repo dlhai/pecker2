@@ -68,6 +68,10 @@ body {
     flex-shrink: 0;
     flex-grow: 0;
 }
+.xPanel2>div {
+    padding: 5px;
+}
+
 
 /*Ê÷*/
 .xTree {

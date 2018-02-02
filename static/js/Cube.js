@@ -1,4 +1,5 @@
-﻿function cbCube( cls, css ) {
+﻿// div组件 可定制类名和style
+function cbCube(cls, css) {
     this.cls = cls;
     this.css = attr;
     this.subs = new Array();
@@ -16,6 +17,7 @@ cbCube.prototype.toString = function () {
     return ret;
 } 
 
+//对话框组件
 function cbDlg() {
     this.id = "cbdlg" + Math.ceil(Math.random() * 1000000).toString();
     this.css = "width:450px";
@@ -53,7 +55,6 @@ cbDlg.prototype.Show = function () {
     });
     $('#' + this.id).modal('show');
 }
-
 function showDlg() {
     var dlg = new cbDlg();
     dlg.Show();

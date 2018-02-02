@@ -292,9 +292,11 @@ if __name__ == "__main__":
     app.config['JSON_AS_ASCII'] = False
     app.run()
 
-#暂未限制Query对User的查询
-#添加QueryUser接口，密码处理，所在单位处理
-
 #查询代表用户的sql
 #select depart_id as c1, "" as c2, * from user where depart_table== "__sys__" union
 #select min(depart_id) as c1, winder.name as c2, user.* from user,winder where depart_table== "winder" and depart_id == winder.id group by job
+
+#暂未限制Query对User的查询
+#添加QueryUser接口，密码处理，所在单位处理
+#风场面板中还没有相关人员显示。
+
