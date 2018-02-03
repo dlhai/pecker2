@@ -2,18 +2,45 @@
 from xlread import xlread
 import random
 import datetime
-from vdgt import *
+import pickle
+
+class obj():
+    pass
+
+def GetIndex(ar, v ):
+    for i,x in enumerate(ar):
+        if x == v:
+            return i
+    return -1
+
+def T(s):
+    if ( s.count(":") == 0):
+        return s
+    ar =s.split(":")
+    if ( len(ar)==2):
+        if ( ar[0] == "rnditem" ):
+            return ar[0] + "(\"" + ar[1]+"\")"
+        else:
+            return ar[0] + "[\"" + ar[1]+"\"]"
+    else:
+        if ( ar[0] == "rnditem" ):
+            return ar[0] + "(\"" + ar[1]+"\")."+ar[2]
+        else:
+            return ar[0] + "[\"" + ",".join(ar[1:])+"\"]"
+    return r;
 
 def xBuildModel(tbls):
     model = '''#encoding:utf8
 from sqlalchemy import *
 from vdgt import *
 from buildarea import dobj,rndarea
-import time
+import time,os
 
 setdata(loadpkl('rawdata.pkl'))
 prov=loadpkl('areadata.pkl')
 
+if os.path.isfile('./pecker.db'):
+    os.remove('./pecker.db')
 engine = create_engine('sqlite:///./pecker.db')
 engine.echo = True
 metadata = MetaData(engine)
@@ -31,55 +58,70 @@ metadata.create_all(engine)
 conn = engine.connect()
 
 def QueryAll(tbl):
-    r=obj()
-    r.name=tbl.name
-    r.field=[f.name for f in tbl.columns]
-    r.data=conn.execute(select([tbl])).fetchall()
-    addtbl(r)
+    data=conn.execute(select([tbl])).fetchall()
+    adddata(tbl.name,data)
+
+def QueryData(name,tbl,field,value):
+    q = select([tbl]).where(tbl.c[field]==value)
+    data=conn.execute(q).fetchall()
+    adddata(name,data)
 
 '''
-    for t in [ x for x in tbls if x.type == "table"]:
-        model += "def dict_"+t.name+t.param+":\n    "
-        if t.define !="":
-            model += t.define.replace("\n", "\n    ")+"\n    "
-        iname = GetIndex(t.field, "name")
-        irule = GetIndex(t.field,"drule")
-        cols = [c for c in t.data if c[iname] != "id" ];
-        model += "return dict("
-        model += ",".join(map( lambda c : c[iname] + "=" + T(c[irule]), cols))
-        model += ")\n"
-        if t.cycle != "":
-            model +="conn.execute(tbl_"+t.name+".insert(),[dict_"+t.name+t.param+" "+t.cycle+"])\n"
-        if t.query == "QueryAll":
-            model += "QueryAll(tbl_"+t.name+")\n\n"
-        else:
-            model += "\n"
-
-    for t in [ x for x in tbls if x.type == "builddata"]:
-        model += "conn.execute(tbl_"+t.name+".insert(),[dict_"+t.name+t.cycle+"])\n"
-
-    model += "conn.execute(tbl_base.insert(),["
-    for t in [ x for x in tbls if x.type == "table"]:
-        for r in t.data:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
-            model += 'dict(table="' + t.name+'",'
-            for i in range(len(t.field)):
-                s=str(r[i])
-                if '"' in s:
-                    model += t.field[i] +"='" + s + "',"
-                elif "'" in s: 
-                    model += t.field[i] +'="' + s + '",'
-                else:
-                    model += t.field[i] +'="' + s + '",'
-            model += "),\n"
-    model += "])"
+    for t in tbls:
+        if t.type == "table":
+            model += "def dict_"+t.name+t.param+":\n    "
+            if t.define !="":
+                model += t.define.replace("\n", "\n    ")+"\n    "
+            iname = GetIndex(t.field, "name")
+            irule = GetIndex(t.field,"drule")
+            cols = [c for c in t.data if c[iname] != "id" ];
+            model += "return dict("
+            model += ",".join(map( lambda c : c[iname] + "=" + T(c[irule]), cols))
+            model += ")\n"
+            if t.cycle != "":
+                model +="conn.execute(tbl_"+t.name+".insert(),[dict_"+t.name+t.param+" "+t.cycle+"])\n"
+            if t.query == "QueryAll":
+                model += "QueryAll(tbl_"+t.name+")\n\n"
+            else:
+                model += "\n"
+        elif t.type == "builddata":
+            model += "conn.execute(tbl_"+t.name+".insert(),[dict_"+t.name+t.cycle+"])\n"
+        elif t.type == "py":
+            model += t.name+"\n"
     return model
+
+def gatherfields(tbls):
+    ret = []
+    for t in [ x for x in tbls if x.type == "table"]:
+        for r in t.data:
+            field = obj()
+            field.table = str(t.name)
+            field.title = str(r[0])
+            field.name = str(r[1])
+            field.forder = str(r[2])
+            field.ftype = str(r[3])
+            field.twidth = str(r[4])
+            field.tstyle = str(r[5])
+            field.dtype = str(r[6])
+            field.drule = str(r[7])
+            field.remark = str(r[8])
+            ret.append(field);
+    return ret
+
+def xFileWrite(fname,data):
+    f=open(fname,"wb+")
+    f.write(data.encode())
+    f.close()
 
 if __name__ == '__main__':
     xl = xlread('./db.xlsx')
-    f=open('rawdata.pkl','wb+')  
-    pickle.dump( xl.readraw(), f)
+    tbls = xl.readtbl();
+    raw=xl.readraw()
+    raw["_fields"]=gatherfields(tbls);
+    xFileWrite( "model.py", xBuildModel(tbls) )
+    f=open('rawdata.pkl','wb+')
+    pickle.dump( raw, f)
     f.close()  
-    xFileWrite( "model.py", xBuildModel(xl.readtbl()) )
 
 
 

@@ -1,7 +1,39 @@
 # coding : UTF-8
 
 import xlrd
-from vdgt import *
+
+class objit(object):
+    def __next__(self):
+        if self.idx < len(self.obj.data)-1:
+            self.idx = self.idx+1
+        else:
+            raise StopIteration
+        return self
+    def __getattr__(self,name):
+        if name == "编号" or name == "父级":
+            return str(int(self.obj.GetValue(self.idx,name)))
+        else:
+            return self.obj.GetValue(self.idx,name)
+
+class obj(object):
+    def __iter__(self):
+        r = objit()
+        r.obj = self
+        r.idx = -1
+        return r
+    def __getitem__(self, k):
+        r = objit()
+        r.obj = self
+        r.idx = k
+        return r
+    def GetValue( self, r, c ):
+        for i,x in enumerate(self.field):
+            if x == c:
+                return self.data[r][i]
+        else:
+            raise KeyError
+
+
 class xlread(object):
     def __init__( self, xls ):
         self.xls = xlrd.open_workbook(xls)
@@ -9,14 +41,16 @@ class xlread(object):
     def readtbl(self):
         tbls = []
         for sh in [ x for x in self.xls.sheets() if x.name.startswith("tbl")]:
-            for r in [ x for x in range(sh.nrows) if sh.cell(x,0).value == "table" ]:
-                tbl = xlread.xReadTable(sh,r,0)
-                tbl.type="table"
-                tbls.append(tbl)
-            for r in [ x for x in range(sh.nrows) if sh.cell(x,0).value == "builddata" ]:
-                tbl = xlread.xReadTable(sh,r,0)
-                tbl.type="builddata"
-                tbls.append(tbl)
+            for r in [ x for x in range(sh.nrows) if sh.cell(x,0).value in ["table", "builddata", "py"]]:
+                if sh.cell(r,0).value == "table":
+                    tbl = xlread.xReadTable(sh,r,0)
+                    tbls.append(tbl)
+                elif sh.cell(r,0).value == "builddata":
+                    tbl = xlread.xReadTable(sh,r,0)
+                    tbls.append(tbl)
+                elif sh.cell(r,0).value == "py":
+                    tbl = xlread.xReadTable(sh,r,0)
+                    tbls.append(tbl)
         return tbls
 
     def readraw(self):
@@ -73,6 +107,11 @@ class xlread(object):
             tbl.title = sh.cell(r,c+2).value
             #tbl.xxxx = sh.cell(r,c+3).value
             tbl.cycle = sh.cell(r,c+4).value
+        elif sh.cell(r,c).value == "py":
+            tbl.type = sh.cell(r,c).value
+
+        if sh.cell(r,c).value in ["builddata","py"]:
+            return tbl
 
         if sh.ncols > c+1 and sh.nrows > r+1 and sh.cell(r+1,c+1).value !="":
             tbl.field = xlread.xReadBlock(sh, r+1,c,1,-1)[0]

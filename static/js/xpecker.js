@@ -377,3 +377,65 @@ function EfanForm() {
 EfanForm.prototype.Render = function (efan) {
     return this.tpl(efan);
 }
+
+// 树控件
+
+// ID 根节点类型, 叶节点类型, 点击回调函数
+function x3Tree(id, ls, param, leaf, ItemClick ) {
+    this.leaf = leaf;
+    this.ItemClick = ItemClick;
+    this.Req(id, ls, param);
+
+    this.branch = {
+        "root_dev": { "sub": "devwh", "image": "", },
+        "devwh": { "sub": "", "image": "", },
+
+        "root": { "sub": "winderco", "image": "", },
+        "winderco": {"sub": "winderprov", "image": "img/diy/1_open.png" },
+        "winderprov": { "sub": "winder", "image": "img/folder.gif" },
+        "winder": { "sub": "winderarea", "image": "img/diy/3.png" },
+        "winderarea": { "sub": "efan", "image": "img/page.gif" },
+        "efan": { "sub": "leaf", "image": "" },
+        "leaf": { "sub": "", "image": "" },
+    }
+}
+x3Tree.prototype.Req = function (id, ls, param) {
+    Reqdata("/rd?ls=" + ls + (param ? "&" + param:""), function (res) {
+        var html = "";
+        for (var i in res.data) {
+            if (ls == this.leaf) { // 叶节点，少了左边的加号，为缩进对齐加了一层div
+                html += "<div><div id=\"" + ls + "_" + data[i].id + "\"><span><img src=\""
+                    + branch[ls].image + "\">" + data[i].name + "</span></div></div>\n"
+            }
+            else { // 
+                html += "<div id=\"" + ls + "_" + data[i].id + "\">"
+                    + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
+                    + branch[ls].image + "\">" + data[i].name + "</span></div>\n"
+            }
+        }
+
+        $("#" + id).append(html);
+        $("#" + id).children("img").attr("src", "img/nolines_minus.gif"); // 把加号改成减号
+        $(".xTree div>img").off("click", "", ItemExpand);
+        $(".xTree div>span").off("click", "", ItemClick);
+        $(".xTree div>img").on("click", "", {}, ItemExpand);
+        $(".xTree div>span").on("click", "", {}, ItemClick);
+    });
+}
+//点击树节点的加号
+function ItemExpand() {
+    var siblings = $(ev.target).siblings("div");
+    if (siblings.length == 0) {
+        var id = $(ev.target).parent().attr("id");
+        var at = id.split("_");
+        Req(id, branch[ls].sub, at[0] + "_id=" + at[1])
+    }
+    else if (siblings.css("display") == "none") {
+        $(event.srcElement).attr("src", "img/nolines_minus.gif");
+        siblings.css("display", "block");
+    }
+    else {
+        $(event.srcElement).attr("src", "img/nolines_plus.gif");
+        siblings.css("display", "none");
+    }
+}

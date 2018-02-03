@@ -290,6 +290,7 @@ def efanlist():
 #---------------------以上接口将被废弃---------------------------------------
 if __name__ == "__main__":
     app.config['JSON_AS_ASCII'] = False
+    
     app.run()
 
 #查询代表用户的sql

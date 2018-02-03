@@ -12,11 +12,12 @@ userunique = []
 def setdata(dat):
     global dat_all,userunique
     dat_all=dat
+    length = len(dat_all["_person"].data)
     userunique = [x for x in range(len(dat_all["_person"].data))]
 def data(tbl):
     return dat_all[tbl]
-def addtbl(tbl):
-    dat_all[tbl.name]=tbl
+def adddata(name,data):
+    dat_all[name]=data
 
 def loadpkl(filename):
     f=open(filename,'rb+')
@@ -56,28 +57,6 @@ class obj(object):
         else:
             raise KeyError
 
-def T(s):
-    if ( s.count(":") == 0):
-        return s
-    ar =s.split(":")
-    if ( len(ar)==2):
-        if ( ar[0] == "rnditem" ):
-            return ar[0] + "(\"" + ar[1]+"\")"
-        else:
-            return ar[0] + "[\"" + ar[1]+"\"]"
-    else:
-        if ( ar[0] == "rnditem" ):
-            return ar[0] + "(\"" + ar[1]+"\")."+ar[2]
-        else:
-            return ar[0] + "[\"" + ",".join(ar[1:])+"\"]"
-    return r;
-
-def GetIndex(ar, v ):
-    for i,x in enumerate(ar):
-        if x == v:
-            return i
-    return -1
-
 def name2id(ar, name ):
     for i,x in enumerate(ar):
         if x.name == name:
@@ -91,6 +70,9 @@ def rnditem(name):
         idx = random.choice(userunique)
         userunique.remove(idx)
         return tbl.__getitem__(idx)
+    if type(tbl) == type([]):
+        idx = random.randint(0,len(tbl)-1)
+        return tbl[idx]
     idx = random.randint(0,len(tbl.data)-1)
     if hasattr(tbl,"field"):
         return tbl.__getitem__(idx)
@@ -113,6 +95,11 @@ def rndtype(type):
         s = ''.join(random.sample(string.ascii_letters + string.digits, 8))
         s = s[0:2]+"-"+s[2:4]+"-"+s[4:6]+"-"+s[6:]
         return s
+    elif type=="car":
+        return ''.join(random.sample('京津冀晋蒙辽吉黑沪苏浙皖闽赣鲁豫鄂湘粤桂琼渝川黔滇藏陕甘青宁新台港澳',1)+
+        random.sample("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)+['.']+
+        random.sample(string.digits, 6))
+    return ""
 
 def id2sex(id):
     return int(id[16])%2
@@ -162,25 +149,32 @@ def rndgpsarea(pos,xr,yr):
     lb = l+" "+b
     return ",".join([lt,rt,rb,lb])
 
+#如果position是矩形，取其左上角和右下角，在其范围内随机生成一点
+#如果position是点，以其为中心点，半长为0.3范围内的正小形区内随机一点
 def rndgps( position ):
-    lt= position.split(",")[0].split(" ")
-    rb= position.split(",")[2].split(" ") 
-    l = float(lt[0])
-    t = float(lt[1])
-    r = float(rb[0])
-    b = float(rb[1])
-    return f2s(random.uniform(l,r))+" "+f2s(random.uniform(t,b))
+    ar=position.split(",")
+    if (len(ar)==4):
+        lt= ar[0].split(" ")
+        rb= ar[2].split(" ") 
+        l = float(lt[0])
+        t = float(lt[1])
+        r = float(rb[0])
+        b = float(rb[1])
+        return f2s(random.uniform(l,r))+" "+f2s(random.uniform(t,b))
+    else:
+        x= float(ar[0].split(" ")[0])
+        y= float(ar[0].split(" ")[1])
+        l = float(x-0.3)
+        t = float(y-0.3)
+        r = float(x+0.3)
+        b = float(y+0.3)
+        return f2s(random.uniform(l,r))+" "+f2s(random.uniform(t,b))
 
 def rnddate(min,max):
     return (datetime.datetime.now() - datetime.timedelta(days = rndnum(min,max)))
 
 def rnddatespan(dt,min,max):
     return (dt + datetime.timedelta(days = rndnum(min,max)))
-
-def xFileWrite(fname,data):
-    f=open(fname,"wb+")
-    f.write(data.encode())
-    f.close()
 
 def CreateRelationData():
     #1.风场主管、驻场
