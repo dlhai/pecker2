@@ -18,11 +18,13 @@ cbCube.prototype.toString = function () {
 } 
 
 //对话框组件
-function cbDlg() {
+function cbDlg(title, css, subs) {
     this.id = "cbdlg" + Math.ceil(Math.random() * 1000000).toString();
-    this.css = "width:450px";
-    this.title = "标题";
+    this.css = css? css:"width:450px";
+    this.title = title ? title:"标题";
     this.subs = new Array();
+    if (subs)
+        this.subs.push(subs);
     this.btndel = false;
 }
 cbDlg.prototype.Add = function (sub) {

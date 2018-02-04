@@ -80,12 +80,14 @@ function RenderTable2(it, style, fun ) {
     if (style)
         r = "<table id=\"" +it.type+ "\" class=\""+style+"\"><thead><tr>";
     for (var c in it.fields) {
-        if (it.fields[c].twidth) {
-            if (parseInt(it.fields[c].twidth) > 0)
-                r += "<th width=\"" + it.fields[c].twidth + "\">" + it.fields[c].title + "</th>";
-        }
+        if (it.fields[c].hasOwnProperty("twidth"))
+            it.fields[c].twidth = parseInt(it.fields[c].twidth);
         else
+            it.fields[c].twidth = -1;
+        if (it.fields[c].twidth == -1 )
             r += "<th>" + it.fields[c].title + "</th>";
+        else if (it.fields[c].twidth > 0)
+            r += "<th width=\"" + it.fields[c].twidth + "\">" + it.fields[c].title + "</th>";
     }
     r += "</tr></thead>\n";
 
@@ -95,7 +97,7 @@ function RenderTable2(it, style, fun ) {
         for (c in it.fields) {
             var field = it.fields[c];
             var val = it.data[x][field.name];
-            if (!field.twidth || field.twidth && parseInt(field.twidth) > 0) {
+            if (it.fields[c].twidth != 0) {
                 if (field.tstyle)
                     r += "<td style=\"" + field.tstyle + "\">" + (fun ? fun(it.data[x],field) : val) + "</td>";
                 else
@@ -170,9 +172,18 @@ function RenderPane2(entity, fields, fun) {
             attr += 'style="width:490px;"';
         else if (field.ftype == "textarea")
             attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
+        if (fun != undefined)
+        {
+            r += "<div><label>" + field.title + "</label><div " + attr + ">" +
+                fun(entity, field) + "</div></div>";
+            }
+        else {
+            r += "<div><label>" + field.title + "</label><div " + attr + ">" +
+                entity[field.name] + "</div></div>";
 
-        r += "<div><label>" + field.title + "</label><div " + attr + ">" +
-            (fun ? fun(entity, field) : entity[field.name]) + "</div></div>";
+        }
+        //r += "<div><label>" + field.title + "</label><div " + attr + ">" +
+        //    (fun ? fun(entity, field) : entity[field.name]) + "</div></div>";
     }
     return r;
 }
@@ -243,9 +254,9 @@ function Request(url, fun) {
     alert("Request=>Reqdata");
     return Reqdata(url, fun)
 }
-function Reqdata(url, fun) {
+function Reqdata(url, ctx, fun) {
     if (cache[url]) { // 优先使用缓冲数据
-        fun(cache[url]);
+        fun(cache[url], ctx);
         return;
     }
 
@@ -254,7 +265,7 @@ function Reqdata(url, fun) {
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             jdata = $.parseJSON(xmlhttp.responseText);
-            fun(jdata);
+            fun(jdata, ctx);
             cache[url] = jdata;
         }
     };
@@ -385,10 +396,10 @@ function x3Tree(id, ls, param, leaf, ItemClick ) {
     this.leaf = leaf;
     this.ItemClick = ItemClick;
     this.Req(id, ls, param);
+    this.root = true;
 
     this.branch = {
-        "root_dev": { "sub": "devwh", "image": "", },
-        "devwh": { "sub": "", "image": "", },
+        "devwh": { "sub": "", "image": "img/devwh.png", },
 
         "root": { "sub": "winderco", "image": "", },
         "winderco": {"sub": "winderprov", "image": "img/diy/1_open.png" },
@@ -400,30 +411,39 @@ function x3Tree(id, ls, param, leaf, ItemClick ) {
     }
 }
 x3Tree.prototype.Req = function (id, ls, param) {
-    Reqdata("/rd?ls=" + ls + (param ? "&" + param:""), function (res) {
+    Reqdata("/rd?ls=" + ls + (param ? "&" + param:""), this, function (res, ctx) {
         var html = "";
+        var data = res.data;
         for (var i in res.data) {
-            if (ls == this.leaf) { // 叶节点，少了左边的加号，为缩进对齐加了一层div
-                html += "<div><div id=\"" + ls + "_" + data[i].id + "\"><span><img src=\""
-                    + branch[ls].image + "\">" + data[i].name + "</span></div></div>\n"
+            if (ls == ctx.leaf) { // 叶节点，少了左边的加号，为缩进对齐加了一层div
+                if (this.root){
+                    html += "<div><div id=\"" + ls + "_" + data[i].id + "\"><span><img src=\""
+                        + ctx.branch[ls].image + "\">" + data[i].name + "</span></div></div>\n"
+                }
+                else {
+                    html += "<div id=\"" + ls + "_" + data[i].id + "\"><span><img src=\""
+                        + ctx.branch[ls].image + "\">" + data[i].name + "</span></div>\n"
+                }
             }
             else { // 
                 html += "<div id=\"" + ls + "_" + data[i].id + "\">"
                     + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
-                    + branch[ls].image + "\">" + data[i].name + "</span></div>\n"
+                    + ctx.branch[ls].image + "\">" + data[i].name + "</span></div>\n"
             }
+            this.root = false;
         }
 
         $("#" + id).append(html);
         $("#" + id).children("img").attr("src", "img/nolines_minus.gif"); // 把加号改成减号
-        $(".xTree div>img").off("click", "", ItemExpand);
-        $(".xTree div>span").off("click", "", ItemClick);
-        $(".xTree div>img").on("click", "", {}, ItemExpand);
-        $(".xTree div>span").on("click", "", {}, ItemClick);
+        $(".xTree div>img").off("click", "", ctx.ItemExpand);
+        $(".xTree div>span").off("click", "", ctx.ItemClick);
+        $(".xTree div>img").on("click", "", {}, ctx.ItemExpand);
+        $(".xTree div>span").on("click", "", {}, ctx.ItemClick);
     });
 }
 //点击树节点的加号
-function ItemExpand() {
+x3Tree.prototype.ItemExpand = function () {
+    alert("hahah!");
     var siblings = $(ev.target).siblings("div");
     if (siblings.length == 0) {
         var id = $(ev.target).parent().attr("id");

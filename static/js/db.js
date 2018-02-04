@@ -98,6 +98,48 @@ var db_sex = [
     { "id": "1", "name": "男" },
 ]
 
+var db_devstatus = [
+    { "id": "0", "name": "空闲" },
+    { "id": "1", "name": "任务中" },
+    { "id": "-1", "name": "报废" },
+]
+
+var db_devclss = [
+    { "id": "1", "name": "航空母舰" },
+    { "id": "2", "name": "战列舰" },
+    { "id": "3", "name": "巡洋舰" },
+    { "id": "4", "name": "驱逐舰" },
+    { "id": "5", "name": "护卫舰" },
+    { "id": "6", "name": "鱼雷艇" },
+    { "id": "7", "name": "导弹艇" },
+    { "id": "8", "name": "猎潜艇" },
+    { "id": "9", "name": "布雷舰" },
+    ]
+
+var db_tbl = [
+    { "id": "1", "name": "base", "title": "定义" },
+    { "id": "2", "name": "link", "title": "一对多引用" },
+    { "id": "3", "name": "addit", "title": "附件" },
+    { "id": "4", "name": "config", "title": "配置信息" },
+    { "id": "5", "name": "admarea", "title": "行政区划" },
+    { "id": "6", "name": "user", "title": "供应商" },
+    { "id": "7", "name": "certif", "title": "人员" },
+    { "id": "8", "name": "edu", "title": "证件信息" },
+    { "id": "9", "name": "employ", "title": "受教育经历" },
+    { "id": "10", "name": "opus", "title": "就业经历" },
+    { "id": "11", "name": "vender", "title": "发表作品" },
+    { "id": "12", },
+    { "id": "13", "name": "winderco", "title": "风电企业" },
+    { "id": "14", "name": "winderprov", "title": "省区" },
+    { "id": "15", "name": "winder", "title": "风场" },
+    { "id": "16", "name": "winderarea", "title": "风区" },
+    { "id": "17", "name": "efan", "title": "风机" },
+    { "id": "18", "name": "leaf", "title": "叶片" },
+    { "id": "19", "name": "fltrep", "title": "报修" },
+    { "id": "20", "name": "devwh", "title": "设备驻地" },
+    { "id": "21", "name": "dev", "title": "设备" },
+]
+
 // 自此以下将被废弃
 
 function tmfmt(tm, fmt) {

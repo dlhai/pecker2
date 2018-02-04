@@ -211,7 +211,7 @@ conn.execute(tbl_admarea.insert(),[dict_admarea(x) for x in data("_全国行政�
 def dict_vender(x,type):
     p1=rnditem("_person")
     p2=rnditem("_station")
-    return dict(type=type,name=x.name,fname=x.fname,atten=p1.name,tel=str(int(p1.phone)),leader=p2.name,fax=p2.phone,addr=p1.origin)
+    return dict(type=type,name=x.name,fname=x.fname,atten=p1.name,tel=str(int(p1.phone)),leader=p1.name,fax=p2.phone,addr=p1.origin)
 
 def dict_user(depart_id,depart_table,job,skill):
     person=rnditem("_person")

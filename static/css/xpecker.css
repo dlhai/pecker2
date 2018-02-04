@@ -89,9 +89,11 @@ body {
 .xTree div>img {
 	border: 0px;
 	vertical-align: middle;
+    width: 18px;
 }
-.xTree div>span > img {
-	margin-right: 5px;
+.xTree div > span > img {
+    margin-right: 5px;
+    width: 18px;
 }
 
 /*表格，需要js配合，xTable-hover是附助*/

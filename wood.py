@@ -26,18 +26,19 @@ conn = engine.connect()
 
 tables = {
     'base':Table('base', metadata,autoload=True),
+    'config':Table('config', metadata,autoload=True),
+    'link':Table('link', metadata,autoload=True),
     'user':Table('user', metadata,autoload=True),
-    'leafvender':Table('leafvender', metadata,autoload=True),
-    'efanvender':Table('efanvender', metadata,autoload=True),
+    'addit':Table('addit', metadata,autoload=True),
+    'vender':Table('vender', metadata,autoload=True),
     'winderco':Table('winderco', metadata,autoload=True),
     'winderprov':Table('winderprov', metadata,autoload=True),
     'winder':Table('winder', metadata,autoload=True),
     'winderarea':Table('winderarea', metadata,autoload=True),
     'efan':Table('efan', metadata,autoload=True),
     'leaf':Table('leaf', metadata,autoload=True),
-    'addit':Table('addit', metadata,autoload=True),
-    'config':Table('config', metadata,autoload=True),
-    'link':Table('link', metadata,autoload=True)
+    'devwh':Table('devwh', metadata,autoload=True),
+    'dev':Table('dev', metadata,autoload=True),
     }
 base=tables["base"]
 base.sl = [base.c.title, base.c.name, base.c.forder, base.c.ftype, base.c.twidth, base.c.tstyle]
