@@ -9,10 +9,12 @@
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
     <script src="laydate/laydate.js"></script>
-    <link rel="stylesheet" href="css/xpecker.css" />
+
     <script src="js/utils.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/Cube.js"></script>
+    <script src="js/db.js"></script>
     <script src="js/xpecker.js"></script>
-    <script src="js/db.js"></script> <!--用到branch-->
 </head>
 <body class="xFCsrow">
     <section class="xPanel2 xFIfixed xScroll" style="width: 300px;padding:5px;">
@@ -110,7 +112,7 @@
     </script>
     <script id="tpl_efan_import" type="text/template">
         <div style="margin: 10px 15px;">
-            <div>为{%=it.data[0].name%}批量导入{%=branch.sub(cur.type).name%}</div>
+            <div>为{%=it.data[0].name%}批量导入{%=branch.sub(cur.ls).name%}</div>
             <div style="margin:5px 0px;">表格请按照模板填写，点此下载模板</div>
             <input type="file" id="upload_efan" name="upload_efan" /><input type="button" value="上传" onclick="uploadFile()" />
             <div style="border:1px solid #dddddd;width:100%;height:15px;"><div id="progress" style="background-color:#0094ff;width:50%;height:100%;"></div></div>
@@ -128,7 +130,7 @@
         function request2(id) {
             var at = id.split("_");
             var type = branch.sub(at[0]).type;
-            Request("/query?type=" + type + (at[1] ? "&"+at[0]+"_id=" + at[1] : ""), function (res) {
+            Reqdata("/rd?ls=" + type + (at[1] ? "&"+at[0]+"_id=" + at[1] : ""), "", function (res) {
                 var html = "";
                 var data = res.data;
                 for (var i in data) {
@@ -174,31 +176,31 @@
             var at = $(this).parent().attr("id").split("_");
 
             // 显示节点详细，这步的查询有优化掉的可能
-            Request("/query?type=" + at[0] + "&id=" + at[1], function (d) {
+            Reqdata("/rd?ls=" + at[0] + "&id=" + at[1], "", function (d) {
                 cur = d;
-                $("#item_detail").html(RenderPane(d, 0));
+                $("#item_detail").html(RenderPane2(d.data[0], d.fields));
                 ID2Name(d, 0);
             });
 
             // 显示节点下级列表
             var type = branch.sub(at[0]).type;
-            Request("/query?type=" + type + "&" + at[0] + "_id=" + at[1], function (d2) {
+            Reqdata("/rd?ls=" + type + "&" + at[0] + "_id=" + at[1], "", function (d2) {
                 sublist = d2;
                 if (at[0] != "winderarea") // 普通列表
                     $("#subitem_list").html(RenderTable2(d2, 0));   
                 else {                     // 风机列表
-                    Request("/query?type=leaf&" + at[0] + "_id=" + at[1], function (d3) {
+                    Reqdata("/rd?ls=leaf&" + at[0] + "_id=" + at[1], "", function (d3) {
                         additlist = d3;
                         var tpl_efan_list = doT.template(document.getElementById('tpl_efan_list').innerHTML);
                         $("#subitem_list").html(tpl_efan_list(d2));
 
-                        Request("/query?type=efanvender", function (d4) {
+                        Reqdata("/rd?ls=vender&type=" + GetTbl("efan"), "", function (d4) {
                             var nodes = $(".efanvender_id");
                             for (var i = 0; i < nodes.length; i++)
                                 nodes[i].innerHTML = GetSub(d4.data, "id", nodes[i].innerHTML).name;
                             nodes.removeClass("efanvender_id");
                         });
-                        Request("/query?type=leafvender", function (d5) {
+                        Reqdata("/rd?ls=vender&type="+GetTbl("leaf"), "", function (d5) {
                             var nodes = $(".leafvender_id");
                             for (var i = 0; i < nodes.length; i++)
                                 nodes[i].innerHTML = GetSub(d5.data, "id", nodes[i].innerHTML).name;
@@ -212,19 +214,19 @@
         function ImportData() {
             var tpl_efan_list = doT.template(document.getElementById('tpl_efan_import').innerHTML);
             $("#ModalDlgContent").html(tpl_efan_list(cur, 0));
-            $("#ModalDlgTitle").html("导入 " + branch.sub(cur.type).name);
+            $("#ModalDlgTitle").html("导入 " + branch.sub(cur.ls).name);
             $('#ModalDlg').modal('show');
         }
 
         function EditShow() {
-            $("#ModalDlgContent").html(RenderForm3(cur,0));
+            $("#ModalDlgContent").html(RenderForm4(cur.data[0], cur.fields));
             fillselect(cur, 0);
             ID2Name(cur, 0);
-            $("#ModalDlgTitle").html("编辑 "+branch[cur.type].name);
+            $("#ModalDlgTitle").html("编辑 "+branch[cur.ls].name);
             $('#ModalDlg').modal('show');
         }
         function AddChild() {
-            sub = branch.sub(cur.type);
+            sub = branch.sub(cur.ls);
             if (sub.type != "efan") {
                 var child = { type: sub.type, fields: sublist.fields, data: [Create(sublist.fields)] };
                 // 根据对象类型不同，需要设置部分外键
@@ -241,7 +243,7 @@
                 else {
                     alert("leaf_su:不能识别的类型");
                 }
-                $("#ModalDlgContent").html(RenderForm3(child, 0));
+                $("#ModalDlgContent").html(RenderForm4(child.data[0], child.fields));
                 fillselect(child, 0);
                 ID2Name(child, 0);
                 $("#ModalDlgTitle").html("添加 " + sub.name);
@@ -271,14 +273,14 @@
             }
             if (efan.leafs.length != 3)
                 alert("叶片数量错");
-            $("#ModalDlgTitle").html("编辑 " + branch[sublist.type].name);
+            $("#ModalDlgTitle").html("编辑 " + branch[sublist.ls].name);
             RenderEfanForm(efan);
         }
 
         function RenderEfanForm(efan) {
             var tpl_efan_edit = doT.template(document.getElementById('tpl_efan_edit2').innerHTML);
             $("#ModalDlgContent").html(tpl_efan_edit(efan));
-            Request("/query?type=efanvender", function (d4) {
+            Reqdata("/rd?ls=vender&type=" + GetTbl("efan"), "", function (d4) {
                 var nodes = $(".efanvender_id");
                 for (var i = 0; i < nodes.length; i++) {
                     var selid = nodes[i].getAttribute("data-id");
@@ -288,7 +290,7 @@
                 }
                 nodes.removeClass("efanvender_id");
             });
-            Request("/query?type=leafvender", function (d5) {
+            Reqdata("/rd?ls=vender&type=" + GetTbl("leaf"), "", function (d5) {
                 var nodes = $(".leafvender_id");
                 for (var i = 0; i < nodes.length; i++) {
                     var selid = nodes[i].getAttribute("data-id");

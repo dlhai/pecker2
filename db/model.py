@@ -173,7 +173,7 @@ tbl_dev=Table('dev', metadata,
 	Column('status',Integer),
 	Column('phone',String(16)),
 	Column('remark',String(2048)),
-	Column('producer',Integer),
+	Column('vender',Integer),
 	Column('producedate',Date),
 	Column('buydate',Date),
 	Column('checkdate',Date))
@@ -216,12 +216,12 @@ def dict_vender(x,type):
 def dict_user(depart_id,depart_table,job,skill):
     person=rnditem("_person")
     mail=rndmail(person)
-    return dict(account=person.pinyin,pwd=person.pinyin,face=rnditem("_faceimage"),depart_id=depart_id,depart_table=depart_table,job=job,skill=skill,name=person.name,code=person.id,sex=id2sex(person.id),ethnic=rnditem("_ethnic"),birth=id2birth(person.id),origin=person.origin,idimg=rndaddition("身份证"),phone=str(int(person.phone)),qq=str(int(person.qq)),mail=mail,wechat=rndwechat(person,mail),addr=rnditem("_麦当劳门店").门店地址)
+    return dict(account=person.pinyin,pwd=person.pinyin,face=rnditem("_faceimage"),depart_id=depart_id,depart_table=str(int(getitembyname("_tbl",depart_table).id)),job=job,skill=skill,name=person.name,code=person.id,sex=id2sex(person.id),ethnic=rnditem("_ethnic"),birth=id2birth(person.id),origin=person.origin,idimg=rndaddition("身份证"),phone=str(int(person.phone)),qq=str(int(person.qq)),mail=mail,wechat=rndwechat(person,mail),addr=rnditem("_麦当劳门店").门店地址)
 
-conn.execute(tbl_vender.insert(),[dict_vender(x,0) for x in data("_efan_vender")])
-conn.execute(tbl_vender.insert(),[dict_vender(x,1) for x in data("_leaf_vender")])
-QueryData("efanvender",tbl_vender,"type",0)
-QueryData("leafvender",tbl_vender,"type",1)
+conn.execute(tbl_vender.insert(),[dict_vender(x,17) for x in data("_efan_vender")])
+conn.execute(tbl_vender.insert(),[dict_vender(x,18) for x in data("_leaf_vender")])
+QueryData("efanvender",tbl_vender,"type",17)
+QueryData("leafvender",tbl_vender,"type",18)
 def dict_winderco(x):
     return dict(name=x.name,remark=rnditem("_songci"))
 conn.execute(tbl_winderco.insert(),[dict_winderco(x) for x in data("_winderco")])
@@ -239,7 +239,7 @@ QueryAll(tbl_winder)
 
 def dict_winderarea(x,y):
     return dict(winder_id=y.id,name=x.name+"风区",remark=rnditem("_songci"),position=rndgpsarea(y.position,0.3,0.27))
-conn.execute(tbl_winderarea.insert(),[dict_winderarea(x,y) for y in data("winder") for x in rndarea(prov[getitem("winderprov",id=y.winderprov_id).name][y.name[:-2]],2,5)])
+conn.execute(tbl_winderarea.insert(),[dict_winderarea(x,y) for y in data("winder") for x in rndarea(prov[getitem("winderprov",y.winderprov_id).name][y.name[:-2]],2,5)])
 QueryAll(tbl_winderarea)
 
 def dict_efan(x,y):
@@ -261,8 +261,8 @@ conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","1","")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"winder","2","") for x in data("winder")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"winder","3","") for x in data("winder") for y in range(rndnum(2,3))])
 conn.execute(tbl_config.insert(),[dict_config("ethnic",x[0]) for x in data("_ethnic").data])
-conn.execute(tbl_vender.insert(),[dict_vender(x,2) for x in data("_dev_vender")])
-QueryData("devvender",tbl_vender,"type",2)
+conn.execute(tbl_vender.insert(),[dict_vender(x,21) for x in data("_dev_vender")])
+QueryData("devvender",tbl_vender,"type",21)
 def dict_devwh(x):
     return dict(name=x.name,fname=x.fname,gps=x.gps,addr=x.addr,remark=x.remark)
 conn.execute(tbl_devwh.insert(),[dict_devwh(x) for x in data("_devwh")])
@@ -271,7 +271,7 @@ QueryAll(tbl_devwh)
 def dict_dev(x,y,z):
     dt=rnddate(4*365,5*365)
     person=rnditem("_person")
-    return dict(code=rndtype("car"),clss=y.id,type=rnditem("_devtype"),img=rnditem("_devimg"),devwh_id=x.id,gps=rndgps(x.gps),status="0",phone=str(int(person.phone)),remark=rnditem("_songci"),producer=rnditem("devvender").id,producedate=dt,buydate=rnddatespan(dt,30,365),checkdate=rnddatespan(dt,30,365))
+    return dict(code=rndtype("car"),clss=y.id,type=rnditem("_devtype"),img=rnditem("_devimg"),devwh_id=x.id,gps=rndgps(x.gps),status="0",phone=str(int(person.phone)),remark=rnditem("_songci"),vender=rnditem("devvender").id,producedate=dt,buydate=rnddatespan(dt,30,365),checkdate=rnddatespan(dt,30,365))
 conn.execute(tbl_dev.insert(),[dict_dev(x,y,z) for x in data("devwh") for y in data("_devclss") for z in range(rndnum(1,3))])
 QueryAll(tbl_dev)
 

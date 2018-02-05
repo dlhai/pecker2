@@ -139,7 +139,7 @@
         var g_user = new Object(); // 当前用户
         document.getElementById("roleselect").innerHTML = RenderSelect(db_job);
 
-        Reqdata("/roleuser?account=" + GetParam("account"), function (res) {
+        Reqdata("/roleuser?account=" + GetParam("account"), "",function (res) {
             for (var i = 0; i < db_roles.length; i++)
                 db_roles[i].user = GetSub(res.data, "job", db_roles[i].id);
             if (GetParam("account") != "") {

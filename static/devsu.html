@@ -8,6 +8,7 @@
     <script src="js/jquery.js"></script>
     <link rel="stylesheet" href="css/bootstrap.css"/>
     <script src="js/bootstrap.js"></script>
+    <script src="laydate/laydate.js"></script>
     <script src="js/utils.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/Cube.js"></script>
@@ -16,47 +17,54 @@
 </head>
 <body class="xFCsrow">
     <section class="xPanel2 xFIfixed" style="width: 300px;">
-        <header>驻地列表<div style="float: right;"><a href="javascript:onNew()">新建</a></div></header>
+        <header>驻地列表<div style="float: right;"><a href="javascript:onNewWh()">新建</a></div></header>
         <div id="xTree" class="xTree xScroll" style="padding: 5px;height:100px;flex-grow: 1;"></div>
     </section>
     <div id="curitem" class="xFCscol">
         <section class="xPanel2 xFIfixed">
-            <header>节点信息<div style="float: right;"><a href="javascript:onEdit()">编辑</a></div></header>
+            <header>节点信息<div style="float: right;"><a href="javascript:onEditWh()">编辑</a></div></header>
             <div id="item_detail" class="x2Form" style="padding:5px;"></div>
         </section>
         <section class="xPanel2">
-            <header>设备列表<div style="float: right;"></header>
+            <header>设备列表<div style="float: right;"><a href="javascript:onNewDev()">新建</a> <a href="javascript:onEditDev()">编辑</a></div></header>
             <div class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"><div id="subitem_list"></div></div>
         </section>
     </div>
     <script type="text/javascript">
+        var g_devwhs, g_curwh, g_devs, g_curdev, g_devvenders;
         Reqdata("/rd?ls=devwh", "", function (res) { g_devwhs = res; });
         Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res) { g_devvenders = res; });
         var g_tree = new x3Tree("xTree", "devwh", "", "devwh", function (ev) {
             var id = $(ev.target).parent().attr("id").split("_")[1];
-            $("#item_detail").html(RenderPane2(GetSub(g_devwhs.data, "id", id), g_devwhs.fields));
-            Reqdata("/rd?ls=dev&devwh_id="+id, "", function (res) {
-                $("#subitem_list").html(RenderTable2(res, "", function (data, field) {
-                    if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
-                    else if (field.name == "devwh_id") return GetSub(g_devwhs.data, "id", data[field.name]).name;
-                    else if (field.name == "status") return GetSub(db_devstatus, "id", data[field.name]).name;
-                    else if (field.name == "vender") return GetSub(g_devvenders.data, "id", data[field.name]).name;
-                    else return data[field.name];
-                }));
+            g_curwh = GetSub(g_devwhs.data, "id", id);
+            $("#item_detail").html(RenderPane2(g_curwh, g_devwhs.fields));
+            Reqdata("/rd?ls=dev&devwh_id=" + id, "", function (res) {
+                g_devs = res;
+                $("#subitem_list").html(RenderTable2(res, "", FieldToShow));
+                TableBindClick3(res.type, function (devid) {g_curdev = GetSub(g_devs.data, "id", devid)});
             });
         });
 
-        function onNew() {
-            (new cbDlg("新建 驻地", "width:610px", RenderPane2(Create(g_devwhs.fields), g_devwhs.fields))).Show();
-        }
+        function onNewWh() { (new cbDlg("新建 驻地", "width:610px", RenderForm4(Create(g_devwhs.fields), g_devwhs.fields, FieldToEdit))).Show();}
+        function onEditWh() { (new cbDlg("编辑 驻地", "width:610px", RenderForm4(g_curwh, g_devwhs.fields))).Show();}
 
-        function onQueryLog() {
-            alert("asdfs");
-        }
-        function onImport() {
-            alert("asdfs");
-        }
+        function onNewDev() { (new cbDlg("新建 设备", "width:610px", RenderForm4(Create(g_devs.fields), g_devs.fields, FieldToEdit))).Show(); }
+        function onEditDev() { (new cbDlg("编辑 设备", "width:610px", RenderForm4(g_curdev, g_devs.fields, FieldToEdit))).Show(); }
 
+        function FieldToShow(data, field){
+            if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
+            else if (field.name == "devwh_id") return GetSub(g_devwhs.data, "id", data[field.name]).name;
+            else if (field.name == "status") return GetSub(db_devstatus, "id", data[field.name]).name;
+            else if (field.name == "vender") return GetSub(g_devvenders.data, "id", data[field.name]).name;
+            else return data[field.name];
+        }
+        function FieldToEdit(data, field) {
+            if (field.name == "clss") return RenderSelect(db_devclss, data[field.name] );
+            else if (field.name == "devwh_id") return RenderSelect(g_devwhs.data, data[field.name]);
+            else if (field.name == "status") return RenderSelect(db_devstatus, data[field.name]);
+            else if (field.name == "vender") return RenderSelect(g_devvenders.data, data[field.name]);
+            else return data[field.name];
+        }
     </script>
 </body>
 </html>

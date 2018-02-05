@@ -24,6 +24,47 @@ engine = create_engine('sqlite:///./db/pecker.db')
 metadata = MetaData(engine)
 conn = engine.connect()
 
+db_tbl = [
+    { "id": "1", "name": "base", "title": "定义" },
+    { "id": "2", "name": "link", "title": "一对多引用" },
+    { "id": "3", "name": "addit", "title": "附件" },
+    { "id": "4", "name": "config", "title": "配置信息" },
+    { "id": "5", "name": "admarea", "title": "行政区划" },
+    { "id": "6", "name": "user", "title": "供应商" },
+    { "id": "7", "name": "certif", "title": "人员" },
+    { "id": "8", "name": "edu", "title": "证件信息" },
+    { "id": "9", "name": "employ", "title": "受教育经历" },
+    { "id": "10", "name": "opus", "title": "就业经历" },
+    { "id": "11", "name": "vender", "title": "发表作品" },
+    { "id": "12", "name": "wait", "title": "" },
+    { "id": "13", "name": "winderco", "title": "风电企业" },
+    { "id": "14", "name": "winderprov", "title": "省区" },
+    { "id": "15", "name": "winder", "title": "风场" },
+    { "id": "16", "name": "winderarea", "title": "风区" },
+    { "id": "17", "name": "efan", "title": "风机" },
+    { "id": "18", "name": "leaf", "title": "叶片" },
+    { "id": "19", "name": "fltrep", "title": "报修" },
+    { "id": "20", "name": "devwh", "title": "设备驻地" },
+    { "id": "21", "name": "dev", "title": "设备" },
+]
+branch = {
+    "devwh": { "sub": "", "image": "img/devwh.png", },
+
+    "root": { "sub": "winderco", "image": "", },
+    "winderco": {"sub": "winderprov", "image": "img/diy/1_open.png" },
+    "winderprov": { "sub": "winder", "image": "img/folder.gif" },
+    "winder": { "sub": "winderarea", "image": "img/diy/3.png" },
+    "winderarea": { "sub": "efan", "image": "img/page.gif" },
+    "efan": { "sub": "leaf", "image": "" },
+    "leaf": { "sub": "", "image": "" },
+}
+
+def gettbl( nameorid ):
+    for x in db_tbl:
+        if x["name"] == nameorid or x['id'] == nameorid:
+            return x
+    raise KeyError
+
 tables = {
     'base':Table('base', metadata,autoload=True),
     'config':Table('config', metadata,autoload=True),
@@ -100,19 +141,19 @@ def login():
     else:
         return '{"login":"'+param['account']+'","result":404}\n'
 
-@app.route("/roleuser")
+@app.route("/roleuser") #frame用来填角色组合框，发布版将必须携带account参数且仅显示account帐号，且去掉密码
 def roleuser():
     param = request.args.to_dict()
     
     #若有当前帐号，则先把它查出来
     if "account" in param and param["account"] != "":
-        ret = QueryObj( "select * from user where account='%s'"%(param["account"]))
+        ret = QueryObj( "select id,account,face,depart_id,depart_table,job from user where account='%s'"%(param["account"]))
         if len(ret) <= 0:
             return '{"roleuser":"'+param['account']+'","result":404}\n'
         user = ret[0]
 
     #找出各角色的代表用户，当前帐号作为其角色的代表
-    rolusr = QueryObj( "select *, min(depart_id) as c0 from user group by job")
+    rolusr = QueryObj( "select id,account,face,depart_id,depart_table,job, min(depart_id) as c0 from user group by job")
     if 'user' in dir():
         for i in range(len(rolusr)):
             if rolusr[i].depart_id == user.depart_id:
@@ -121,9 +162,11 @@ def roleuser():
 
     #为每个代表用户的所在单位找到所在单位的名称、下级单位列表，例如风场的下级风区
     for x in rolusr:
-        if x.depart_table == "winder":
-            x.depart_name = QueryObj( "select id, name from "+x.depart_table+" where id="+str(x.depart_id))
-            x.sub = QueryObj( "select id, name from winderarea where winder_id="+str(x.depart_id))
+        if x.depart_table != 0: 
+            tbl = gettbl(x.depart_table)
+            x.depart = QueryObj( "select id, name from "+tbl.name+" where id="+str(x.depart_id))
+            if tbl.name == "winder":
+                x.sub = QueryObj( "select id, name from winderarea where winder_id="+str(x.depart_id))
 
     ret=obj()
     ret.fun="roleuser"
@@ -160,7 +203,7 @@ def rd():
 
     # 限制对部分表的查询
     if ls== "base" or ls == "user":
-        return 404
+        return '{result:404,msg:"'+ls+''' isn't callable!"}'''
 
     if ls== "scale" or ls == "mainmat" or ls== "job" or ls== "skill" or ls=="ethnic":
         d["type"]=ls
@@ -172,7 +215,6 @@ def rd():
         sql += " where "+" and ".join([ To(k,v) for k,v in d.items()])
     return query4(ls,fields=select(base.sl).where(base.c.table==ls),data = sql)
 
-#-----------------------以下接口将被废弃-------------------------------
 #查询用户
 #测试链接 http://127.0.0.1:5000/queryUser?type=winder&key1=val1&key2=val2....
 @app.route("/queryuser")
@@ -185,14 +227,17 @@ def queryuser():
     if type== "":
         return 404
 
-    tbl = tables[type]
+    tbl = gettbl(type)
     sql = "select "+type+".name as depart_name, user.id,user.account,user.face,user.depart_id,"\
         +"user.job,user.skill,user.name,user.code,user.sex,user.ethnic,user.birth,user.origin,"\
         +"user.idimg,user.phone,user.qq,user.mail,user.wechat,user.addr from user,"+type\
-        +" where user.depart_id = "+type+".id and user.depart_table='"+type+"'"
+        +" where user.depart_id = "+type+".id and user.depart_table='"+tbl["id"]+"'"
     if len(param) > 0:
         sql += " and "+" and ".join([ To(k,v) for k,v in param.items()])
     return query3("queryuser_"+type,fields=select(base.sl).where(base.c.table=="user"),data = sql)
+
+
+#-----------------------以下接口将被废弃-------------------------------
 
 #查询(由于部分表有type字段与type参数作为表名冲突被废弃)
 #测试链接 http://127.0.0.1:5000/query?type=[表名]&key1=val1&key2=val2....
@@ -291,7 +336,6 @@ def efanlist():
 #---------------------以上接口将被废弃---------------------------------------
 if __name__ == "__main__":
     app.config['JSON_AS_ASCII'] = False
-    
     app.run()
 
 #查询代表用户的sql

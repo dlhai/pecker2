@@ -1,4 +1,9 @@
-﻿//表格点击反色
+﻿//update:
+// 0205 改进和移动 xpecker:function RenderForm3(ar, idx) => cube: function RenderForm4(entity, fields, cb )
+// 0205 移动位置 xpecker:function RenderTable2(it, style, fun) => cube: function RenderTable2(it, style, fun)
+// 0205 移动位置 xpecker:function TableBindClick3(tableid, callback) => cube: function TableBindClick3(tableid, callback)
+
+//表格点击反色
 function TableBindClick() {
     var tbc_currow = -1;
     $("tr").click(function () {
@@ -37,29 +42,6 @@ function TableBindClick2(tableid) {
     });
 }
 
-function TableBindClick3(tableid, callback) {
-    var currow = -1;
-    $("#" + tableid + " tr").click(function () {
-        var tag = $(this).parent()[0].localName;
-        if (tag.toLowerCase() == "thead")
-            return;
-        if (currow != -1) {
-            currow++;
-            if (currow % 2 == 0)
-                $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#f5f5f5");
-            else
-                $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#ffffff");
-        }
-        $(this).children().css("background-color", "#00f0f5");
-
-        currow = $(this).index();
-        g_TableCurRow[tableid] = $(this).attr("data_id");
-
-        if (callback)
-            callback($(this).attr("data_id"));
-    });
-}
-
 //文档控件
 $(function () {
     $(".x3Doc>.x3Doc-handle").on("click", function ()
@@ -75,42 +57,8 @@ $(function () {
     }
 });
 
-function RenderTable2(it, style, fun ) {
-    var r = "<table id=\"" +it.type+ "\" class=\"xTable\"><thead><tr>";
-    if (style)
-        r = "<table id=\"" +it.type+ "\" class=\""+style+"\"><thead><tr>";
-    for (var c in it.fields) {
-        if (it.fields[c].hasOwnProperty("twidth"))
-            it.fields[c].twidth = parseInt(it.fields[c].twidth);
-        else
-            it.fields[c].twidth = -1;
-        if (it.fields[c].twidth == -1 )
-            r += "<th>" + it.fields[c].title + "</th>";
-        else if (it.fields[c].twidth > 0)
-            r += "<th width=\"" + it.fields[c].twidth + "\">" + it.fields[c].title + "</th>";
-    }
-    r += "</tr></thead>\n";
-
-    r += "<tbody>";
-    for (var x in it.data) {
-        r += "<tr data_id=\""+it.data[x].id+"\">";
-        for (c in it.fields) {
-            var field = it.fields[c];
-            var val = it.data[x][field.name];
-            if (it.fields[c].twidth != 0) {
-                if (field.tstyle)
-                    r += "<td style=\"" + field.tstyle + "\">" + (fun ? fun(it.data[x],field) : val) + "</td>";
-                else
-                    r += "<td>" + (fun ? fun(it.data[x], field) : val) + "</td>";
-            }
-        }
-        r += "</tr>";
-    }
-    r += "</tbody></table>";
-    return r;
-}
-
 function RenderForm3(ar, idx) {
+    alert("已改更改为cube::RenderForm4，注意参数有变");
     var r = '<div class="x2Form">';
     for (var i = 0; i < ar.fields.length; i++) {
         var field = ar.fields[i];
@@ -172,18 +120,8 @@ function RenderPane2(entity, fields, fun) {
             attr += 'style="width:490px;"';
         else if (field.ftype == "textarea")
             attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
-        if (fun != undefined)
-        {
-            r += "<div><label>" + field.title + "</label><div " + attr + ">" +
-                fun(entity, field) + "</div></div>";
-            }
-        else {
-            r += "<div><label>" + field.title + "</label><div " + attr + ">" +
-                entity[field.name] + "</div></div>";
-
-        }
-        //r += "<div><label>" + field.title + "</label><div " + attr + ">" +
-        //    (fun ? fun(entity, field) : entity[field.name]) + "</div></div>";
+        r += "<div><label>" + field.title + "</label><div " + attr + ">" +
+            (fun != undefined ? fun(entity, field) : entity[field.name]) + "</div></div>";
     }
     return r;
 }
@@ -227,7 +165,7 @@ function ID2Name(ar, idx) {
     if (param.length == 0)
         return;
 
-    Request("/id2name?" + param.join("&"), function (d) {
+    Reqdata("/id2name?" + param.join("&"), "", function (d) {
         for (var j in d) {
             $("#"+j).html(d[j]);
             $("#"+j).removeAttr("id"); // 清除ID属性是因为弹出表单时，有可能导致ID重复
@@ -240,62 +178,13 @@ function fillselect(ar, idx) {
         var fields = ar.fields[i];
         if (fields.ftype == "select") {
             var at = fields.name.split("_");
-            Request("/query?type=" + at[0], function (d) {
+            Reqdata("/rd?ls=" + at[0], function (d) {
                 var selid = ar.data[idx][fields.name];
                 $("#" + fields.name + "_" + selid).html(RenderSelect(d, selid));
             });
         }
     }
 }
-
-cache = new Object()
-// 已改名为Reqdata
-function Request(url, fun) {
-    alert("Request=>Reqdata");
-    return Reqdata(url, fun)
-}
-function Reqdata(url, ctx, fun) {
-    if (cache[url]) { // 优先使用缓冲数据
-        fun(cache[url], ctx);
-        return;
-    }
-
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("GET", url, true);
-    xmlhttp.onreadystatechange = function () {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            jdata = $.parseJSON(xmlhttp.responseText);
-            fun(jdata, ctx);
-            cache[url] = jdata;
-        }
-    };
-    xmlhttp.send();
-}
-
-// 已改名为ReqRender
-function Request2(url, id, val, render_fun) {
-    alert("Request2=>ReqRender");
-    ReqRender(url, id, val, render_fun);
-}
-// 回调函数格式：render_fun(ar, id)
-function ReqRender(url, id, val, render_fun) {
-    if (cache[url]) { // 优先使用缓冲数据
-        return $("#" + id).html(render_fun(cache[url],val));
-    }
-
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("GET", url, true);
-    xmlhttp.onreadystatechange = function () {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            jdata = $.parseJSON(xmlhttp.responseText);
-            $("#" + id).html(render_fun(jdata, val));
-            cache[url] = jdata;
-        }
-    };
-    xmlhttp.send();
-    return "";
-}
-
 
 function RenderForm2(ar, i) {
     alert("使用了旧接口：RenderForm2已被RenderPane替代");

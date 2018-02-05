@@ -6,6 +6,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <script src="static/js/jquery.js"></script>
         <script src="static/js/bootstrap.js"></script>
+        <script src="static/js/db.js"></script>
         <link rel="stylesheet" href="static/css/xpecker.css" />
         <script src="static/js/xpecker.js"></script>
 
@@ -18,7 +19,7 @@
         function Login() {
             var form = document.getElementById("plogin");
             var formdata = new FormData(form);
-            Request('/login?account=' + formdata.get("username") + "&pwd=" + formdata.get("password"), function (res) {
+            Reqdata('/login?account=' + formdata.get("username") + "&pwd=" + formdata.get("password"), "", function (res) {
                 if (res.result == 200){
                     window.location.href = 'static/frame.html?account='+formdata.get("username")
                 }

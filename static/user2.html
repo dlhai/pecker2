@@ -292,7 +292,7 @@
         var g_users = new Object();
         var g_curid = -1;
 
-        Request("/queryuser?type=" + GetParam("type"), function(users) {
+        Reqdata("/queryuser?type=" + GetParam("type"), "", function(users) {
             g_users = users;
             $("#d_table_item").html(RenderUserTable(users));
             TableBindClick3(users.type, function (data_id) {
@@ -450,7 +450,7 @@
                 else if (fieldname == "skill")
                     r += RenderSelect(db_skill, val);
                 else if (fieldname == "ethnic")
-                    Request2("/rd?ls=ethnic", "editer_" + name, val, RenderSelect2);
+                    ReqRender("/rd?ls=ethnic", "editer_" + name, val, RenderSelect2);
                 r += '</select>';
             }
             else if (type == "choice") {

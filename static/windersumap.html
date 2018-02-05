@@ -94,7 +94,7 @@
     }
 
     // 在地图上显示风场
-    Request("/query?type=winder", function (d1) {
+    Reqdata("/rd?ls=winder", "", function (d1) {
         winders = d1;
         for (var x in d1.data) {
             var marker = new BMap.Marker(CreatePoint(d1.data[x].position), { icon: flower });
@@ -103,7 +103,7 @@
             marker.setLabel(label);
             map.addOverlay(marker);
             d1.data[x].mk = marker;
-            BindWinderEvent(marker, label, d1.data, x);
+            BindWinderEvent(marker, label, d1, x);
         }
     });
     function BindWinderEvent(mk,lbl,ar,idx) {
@@ -115,7 +115,7 @@
     }
 
     // 在地图上显示风区
-    Request("/query?type=winderarea", function (d2) {
+    Reqdata("/rd?ls=winderarea", "", function (d2) {
         winderareas = d2;
         for (var x in winderareas.data) {
             var plg = CreatePolygon(winderareas.data[x].position);
@@ -133,7 +133,7 @@
         area.plg.addEventListener("click", function (type, target, point, pixel) {
             if (curdata.data != area) {
                 // 显示本风区的风电机
-                Request("/query?type=efan&winderarea_id=" + area.id, function (darea) {
+                Reqdata("/rd?ls=efan&winderarea_id=" + area.id, "", function (darea) {
                     if (efans.data) {
                         for (var i in efans.data)
                             map.removeOverlay(efans.data[i].mk);
@@ -170,7 +170,7 @@
         lbl.addEventListener("click", function (e) { ShowEfanWindow(ar, idx, e); });
     }
     function ShowEfanWindow(ar, i, e) {
-        Reqdata("/rd?ls=leaf&efan_id=" + ar[i].id, function (res) {
+        Reqdata("/rd?ls=leaf&efan_id=" + ar[i].id, "", function (res) {
             ar[i].leafs = res.data;
 
             var tpl_efan_edit = doT.template(document.getElementById('tpl_efan_edit2').innerHTML);
@@ -186,7 +186,7 @@
             map.openInfoWindow(infoWindow, point); //开启信息窗口
 
             // 填充两个供应商组合框
-            Request("/query?type=efanvender", function (d4) {
+            Reqdata("/rd?ls=vender&type=" + GetTbl("efan"), "", function (d4) {
                 var nodes = $(".efanvender_id");
                 for (var i = 0; i < nodes.length; i++) {
                     var selid = nodes[i].getAttribute("data-id");
@@ -196,7 +196,7 @@
                 }
                 nodes.removeClass("efanvender_id");
             });
-            Request("/query?type=leafvender", function (d5) {
+            Reqdata("/rd?ls=vender&type=" + GetTbl("leaf"), "", function (d5) {
                 var nodes = $(".leafvender_id");
                 for (var i = 0; i < nodes.length; i++) {
                     var selid = nodes[i].getAttribute("data-id");
@@ -336,13 +336,13 @@
 
     function addClickHandler(id, marker) {
         marker.addEventListener("click", function (e) {
-            Request("/itemdetail?type=winder&id=" + id, function (d1) { openInfo(d1, e); });
+            Reqdata("/rd?ls=winder&id=" + id, "", function (d1) { openInfo(d1, e); });
         });
     }
     function ShowInfoWindow(ar,i,e) {
         var p = e.target;
         var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
-        var content = '<div class="xRndAngle x2Form" style="overflow-y: scroll;height:290px;padding:5px 0px">' + RenderPane(ar, i) + '</div>';
+        var content = '<div class="xRndAngle x2Form" style="overflow-y: scroll;height:290px;padding:5px 0px">' + RenderPane2(ar.data[0], ar.fields) + '</div>';
         var infoWindow = new BMap.InfoWindow(content, {
             width: 619,     // 信息窗口宽度
             height: 320,     // 信息窗口高度
@@ -358,7 +358,7 @@
         var at = id.split("_");
         var type = branch.sub(at[0]).type;
         if (type == "winderco" || type == "winderprov") {
-            Request("/query?type=" + type + (at[1] ? "&" + at[0] + "_id=" + at[1] : ""),
+            Reqdata("/rd?ls=" + type + (at[1] ? "&" + at[0] + "_id=" + at[1] : ""),"",
                 function (res) {TreeAddChildren(id, res.data);});
         }
         else if (type == "winder") { TreeAddChildren(id, winders.data); }

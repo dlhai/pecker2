@@ -53,23 +53,23 @@ var branch = {
 
 var db_job = [
     { "id": "1", "type": "winder", "name": "叶片超级帐号" },
-    { "id": "2", "type": "winder", "name": "风场主管" },
-    { "id": "3", "type": "winder", "name": "驻场" },
-    { "id": "4", "type": "dev", "name": "设备超级帐号" },
-    { "id": "5", "type": "dev", "name": "驻地主管" },
-    { "id": "6", "type": "dev", "name": "设备司机" },
-    { "id": "7", "type": "wh", "name": "仓库超级帐号" },
-    { "id": "8", "type": "wh", "name": "仓库主管" },
-    { "id": "9", "type": "wh", "name": "仓库管理员" },
-    { "id": "10", "type": "coord", "name": "调度超级帐号" },
-    { "id": "11", "type": "coord", "name": "调度主管" },
-    { "id": "12", "type": "coord", "name": "调度" },
-    { "id": "13", "type": "expert", "name": "专家超级帐号" },
-    { "id": "14", "type": "expert", "name": "专家" },
-    { "id": "15", "type": "repair", "name": "技工超级帐号" },
-    { "id": "16", "type": "repair", "name": "维修队长" },
-    { "id": "17", "type": "repair", "name": "技工" },
-    { "id": "18", "type": "public", "name": "公众" },
+    { "id": "2", "type": "", "name": "风场主管" },
+    { "id": "3", "type": "", "name": "驻场" },
+    { "id": "4", "type": "devwh", "name": "设备超级帐号" },
+    { "id": "5", "type": "", "name": "驻地主管" },
+    { "id": "6", "type": "", "name": "设备司机" },
+    { "id": "7", "type": "su", "name": "仓库超级帐号" },
+    { "id": "8", "type": "", "name": "仓库主管" },
+    { "id": "9", "type": "", "name": "仓库管理员" },
+    { "id": "10", "type": "su", "name": "调度超级帐号" },
+    { "id": "11", "type": "", "name": "调度主管" },
+    { "id": "12", "type": "", "name": "调度" },
+    { "id": "13", "type": "su", "name": "专家超级帐号" },
+    { "id": "14", "type": "", "name": "专家" },
+    { "id": "15", "type": "su", "name": "技工超级帐号" },
+    { "id": "16", "type": "", "name": "维修队长" },
+    { "id": "17", "type": "", "name": "技工" },
+    { "id": "18", "type": "", "name": "公众" },
 ]
 function GetSubJob(pjob) {
     var jobbranch = [{ "1": ["2", "3"] }, { "2": ["2", "3"] }, { "3": ["3"] },
@@ -84,6 +84,25 @@ function GetSubJob(pjob) {
         r.push(GetArItem(db_job, "id", visable[i]));
     return r;
 }
+function GetJob(type, param) {
+    var jobbranch = {"1": ["2", "3"], "2": ["2", "3"] ,  "3": ["3"] ,
+         "4": ["5", "6"] ,  "5": ["5", "6"] ,  "6": ["6"] ,
+         "7": ["8", "9"] ,  "8": ["8", "9"] ,  "9": ["9"] ,
+         "10": ["11", "12"] ,  "11": ["11", "12"] ,  "11": ["12"] ,
+         "13": ["14"] ,  "14": ["14"] ,
+         "15": ["16", "17"] ,  "16": ["16", "17"] ,  "16": ["17"] }
+    if (type == "array") {
+        var r = new Array();
+        var visable = jobbranch[param];
+        for (var i in visable)
+            r.push(GetArItem(db_job, "id", visable[i]));
+        return r;
+    }
+    else if (type == "sub") {
+        return jobbranch[param];
+    }
+}
+
 
 var db_skill = [
     { "id": "1", "name": "避雷" },
@@ -128,7 +147,7 @@ var db_tbl = [
     { "id": "9", "name": "employ", "title": "受教育经历" },
     { "id": "10", "name": "opus", "title": "就业经历" },
     { "id": "11", "name": "vender", "title": "发表作品" },
-    { "id": "12", },
+    { "id": "12", "name": "wait", "title": "" },
     { "id": "13", "name": "winderco", "title": "风电企业" },
     { "id": "14", "name": "winderprov", "title": "省区" },
     { "id": "15", "name": "winder", "title": "风场" },
@@ -139,6 +158,46 @@ var db_tbl = [
     { "id": "20", "name": "devwh", "title": "设备驻地" },
     { "id": "21", "name": "dev", "title": "设备" },
 ]
+function GetTbl(name) { return GetSub(db_tbl, "name", name).id; }
+
+cache = new Object()
+
+function Reqdata(url, ctx, fun) {
+    if (cache[url]) { // 优先使用缓冲数据
+        fun(cache[url], ctx);
+        return;
+    }
+
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("GET", url, true);
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            jdata = $.parseJSON(xmlhttp.responseText);
+            fun(jdata, ctx);
+            cache[url] = jdata;
+        }
+    };
+    xmlhttp.send();
+}
+
+// 回调函数格式：render_fun(ar, id)
+function ReqRender(url, id, val, render_fun) {
+    if (cache[url]) { // 优先使用缓冲数据
+        return $("#" + id).html(render_fun(cache[url], val));
+    }
+
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("GET", url, true);
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            jdata = $.parseJSON(xmlhttp.responseText);
+            $("#" + id).html(render_fun(jdata, val));
+            cache[url] = jdata;
+        }
+    };
+    xmlhttp.send();
+    return "";
+}
 
 // 自此以下将被废弃
 

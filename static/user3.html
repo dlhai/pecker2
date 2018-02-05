@@ -329,10 +329,11 @@
         var g_user = parent.g_user;
         g_user = { "id": "2", "account": "yanlechen", "pwd": "yanlechen", "face": "img/face/face8.jpg", "depart_id": "1", "depart_table": "winder", "job": "2", "skill": "", "name": "阎乐晨", "code": "542338197908020410", "sex": "1", "ethnic": "达斡尔族", "birth": "1979-08-02", "origin": "西藏自治区日喀则地区岗巴县", "idimg": "img/person/sfz15.jpg", "phone": "13700006203", "qq": "70913564", "mail": "70913564@21cn.com", "wechat": "70913564@21cn.com", "addr": "北京市顺义站前街路北", "c0": "1", "sub": [{ "id": "1", "name": "绿园区风区" }, { "id": "2", "name": "宽城区风区" }] }
 
-        Request("/rd?ls=config&type=ethnic", function (res) { g_ethnic = res.data; });
+        Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
 
         var filter = g_user.job == "1" ? "&job=(2,3)" : "&job=3&depart_id=" + g_user.depart_id;
-        Request("/queryuser?type=winder"+filter, function(res) {
+        var filter = g_user.job == "1" ? "&job=(2,3)" : "&job=3&depart_id=" + g_user.depart_id;
+        Reqdata("/queryuser?type=winder"+filter, "", function(res) {
             g_users = res;
             for (var i in g_users.fields) {
                 if (g_users.fields[i].name == "account" || g_users.fields[i].name == "pwd"
@@ -486,7 +487,7 @@
         function TreeAddChildren(id) {  // id格式: 表名_{id}
             var at = id.split("_");
             var type = branch.sub(at[0]).type;
-            Request("/rd?ls=" + type + (at[1] ? "&" + at[0] + "_id=" + at[1] : ""), function (res) {
+            Reqdata("/rd?ls=" + type + (at[1] ? "&" + at[0] + "_id=" + at[1] : ""), "", function (res) {
                 var html = "";
                 for (var i in res.data) {
                     if (type == "winder") { // 叶节点，少了左边的加号，为缩进对齐加了一层div

@@ -87,6 +87,12 @@ def getitem( tblname, id ):
         if x.id == id:
             return x
 
+def getitembyname( tblname, name ):
+    for x in dat_all[tblname]:
+        if x.name == name:
+            return x
+    return ""
+
 def rndnum(min,max):
     return random.randint(min,max)
 
@@ -186,6 +192,8 @@ def CreateRelationData():
 
 if __name__=="__main__": 
     setdata(loadpkl('rawdata.pkl'))
+    aa = getitembyname("_tbl","__sys__").id
+
     #s = '东莞市风场'
     #b=s[:-2]
     #a = dobj()
