@@ -158,7 +158,7 @@ tbl_devwh=Table('devwh', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('name',String(32)),
 	Column('fname',String(32)),
-	Column('gps',String(32)),
+	Column('position',String(32)),
 	Column('addr',String(128)),
 	Column('remark',String(128)))
 
@@ -169,7 +169,7 @@ tbl_dev=Table('dev', metadata,
 	Column('type',String(32)),
 	Column('img',String(32)),
 	Column('devwh_id',Integer),
-	Column('gps',String(32)),
+	Column('position',String(32)),
 	Column('status',Integer),
 	Column('phone',String(16)),
 	Column('remark',String(2048)),
@@ -264,20 +264,20 @@ conn.execute(tbl_config.insert(),[dict_config("ethnic",x[0]) for x in data("_eth
 conn.execute(tbl_vender.insert(),[dict_vender(x,21) for x in data("_dev_vender")])
 QueryData("devvender",tbl_vender,"type",21)
 def dict_devwh(x):
-    return dict(name=x.name,fname=x.fname,gps=x.gps,addr=x.addr,remark=x.remark)
+    return dict(name=x.name,fname=x.fname,position=x.position,addr=x.addr,remark=x.remark)
 conn.execute(tbl_devwh.insert(),[dict_devwh(x) for x in data("_devwh")])
 QueryAll(tbl_devwh)
 
 def dict_dev(x,y,z):
     dt=rnddate(4*365,5*365)
     person=rnditem("_person")
-    return dict(code=rndtype("car"),clss=y.id,type=rnditem("_devtype"),img=rnditem("_devimg"),devwh_id=x.id,gps=rndgps(x.gps),status="0",phone=str(int(person.phone)),remark=rnditem("_songci"),vender=rnditem("devvender").id,producedate=dt,buydate=rnddatespan(dt,30,365),checkdate=rnddatespan(dt,30,365))
+    return dict(code=rndtype("car"),clss=y.id,type=rnditem("_devtype"),img=rnditem("_devimg"),devwh_id=x.id,position=rndgps(x.position),status="0",phone=str(int(person.phone)),remark=rnditem("_songci"),vender=rnditem("devvender").id,producedate=dt,buydate=rnddatespan(dt,30,365),checkdate=rnddatespan(dt,30,365))
 conn.execute(tbl_dev.insert(),[dict_dev(x,y,z) for x in data("devwh") for y in data("_devclss") for z in range(rndnum(1,3))])
 QueryAll(tbl_dev)
 
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","4","")])
-conn.execute(tbl_user.insert(),[dict_user(x.id,"winder","5","") for x in data("devwh")])
-conn.execute(tbl_user.insert(),[dict_user(x.devwh_id,"winder","6","") for x in data("dev")])
+conn.execute(tbl_user.insert(),[dict_user(x.id,"devwh","5","") for x in data("devwh")])
+conn.execute(tbl_user.insert(),[dict_user(x.devwh_id,"devwh","6","") for x in data("dev")])
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","10","")])
-conn.execute(tbl_user.insert(),[dict_user(0,"guide","11","")])
-conn.execute(tbl_user.insert(),[dict_user(0,"guide","12","") for x in range(rndnum(5,10))])
+conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","11","")])
+conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","12","") for x in range(rndnum(5,10))])

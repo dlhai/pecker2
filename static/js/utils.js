@@ -1,4 +1,13 @@
-﻿// 取url中的参数
+﻿function isInArray(arr, value) {
+    for (var i = 0; i < arr.length; i++) {
+        if (value === arr[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// 取url中的参数
 function GetParam(name) {
     var url = decodeURI(window.location.search);
     var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
@@ -14,10 +23,10 @@ function GetSub(ar, attr, val) {
     return null;
 }
 
-function GetIdx2(ar, attr, val) {
+function GetIdx(ar, attr, val) {
     for (var i in ar) {
         if (ar[i][attr] == val)
-            return ar[i];
+            return i;
     }
     return null;
 }
@@ -51,31 +60,4 @@ function Create2(ar) {
         t[ar.fields[k].name] = "";
     r.data.push(t);
     return r;
-}
-
-// 本接口已被GetSub代替
-function FindSub(ar, attr, val) {
-    alert("调用了旧接口FindSub");
-    return GetSub(ar, attr, val);
-}
-
-// 本接口已被GetIdx代替
-function FindSub2(ar, id) {
-    alert("调用了旧接口FindSub2");
-    return GetIdx(ar, id);
-}
-
-// 本接口已被GetIdxbyId代替
-function GetIdx(ar, id) {
-    alert("调用了旧接口GetIdx");
-    return GetIdxbyId(ar, id);
-    return -1;
-}
-function GetIdxbyId(res, id) {
-    alert("调用了旧接口GetIdxbyId");
-    for (var i in res.data) {
-        if (res.data[i].id == id)
-            return i;
-    }
-    return -1;
 }

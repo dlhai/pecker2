@@ -1,4 +1,16 @@
-﻿var db_roles = [
+﻿var db_rolusers = [
+    { "id": "1", "account": "hongliangwan", "name": "洪良万", " face": "img/face/face0.jpg", "depart_id": "0", " depart_table": "0", "job": "1" },
+    { "id": "2", "account": "zouwendong", "name": "邹文栋", " face": "img/face/face3.jpg", "depart_id": "1", " depart_table": "15", "job": "2" },
+    { "id": "84", "account": "hanjianian", "name": "韩嘉年", " face": "img/face/face3.jpg", "depart_id": "1", " depart_table": "15", "job": "3" },
+    { "id": "291", "account": "mojinxin", "name": "莫金鑫", " face": "img/face/face13.jpg", "depart_id": "0", " depart_table": "0", "job": "4" },
+    { "id": "292", "account": "wujing", "name": "吴靖", " face": "img/face/face7.jpg", "depart_id": "1", " depart_table": "20", "job": "5" },
+    { "id": "300", "account": "jindanxue", "name": "金丹雪", " face": "img/face/face18.jpg", "depart_id": "1", " depart_table": "20", "job": "6" },
+    { "id": "441", "account": "yinhanqiao", "name": "尹含巧", " face": "img/face/face14.jpg", "depart_id": "0", " depart_table": "0", "job": "10" },
+    { "id": "442", "account": "caigaoang", "name": "蔡高昂", " face": "img/face/face19.jpg", "depart_id": "0", " depart_table": "0", "job": "11" },
+    { "id": "443", "account": "miaoxiaole", "name": "苗小乐", " face": "img/face/face20.jpg", "depart_id": "0", " depart_table": "0", "job": "12" },
+]
+
+var db_roles = [
     {
         "id": "1", "type": "winder", "name": "叶片超级帐号", modules: [
             { name: "地图", url: "windersumap.html" },
@@ -55,9 +67,9 @@ var db_job = [
     { "id": "1", "type": "winder", "name": "叶片超级帐号" },
     { "id": "2", "type": "", "name": "风场主管" },
     { "id": "3", "type": "", "name": "驻场" },
-    { "id": "4", "type": "devwh", "name": "设备超级帐号" },
-    { "id": "5", "type": "", "name": "驻地主管" },
-    { "id": "6", "type": "", "name": "设备司机" },
+    { "id": "4", "type": "", "name": "设备超级帐号" },
+    { "id": "5", "type": "devwh", "name": "驻地主管" },
+    { "id": "6", "type": "devwh", "name": "设备司机" },
     { "id": "7", "type": "su", "name": "仓库超级帐号" },
     { "id": "8", "type": "", "name": "仓库主管" },
     { "id": "9", "type": "", "name": "仓库管理员" },
@@ -71,36 +83,45 @@ var db_job = [
     { "id": "17", "type": "", "name": "技工" },
     { "id": "18", "type": "", "name": "公众" },
 ]
-function GetSubJob(pjob) {
-    var jobbranch = [{ "1": ["2", "3"] }, { "2": ["2", "3"] }, { "3": ["3"] },
-    { "4": ["5", "6"] }, { "5": ["5", "6"] }, { "6": ["6"] },
-    { "7": ["8", "9"] }, { "8": ["8", "9"] }, { "9": ["9"] },
-    { "10": ["11", "12"] }, { "11": ["11", "12"] }, { "11": ["12"] },
-    { "13": ["14"] }, { "14": ["14"] },
-    { "15": ["16", "17"] }, { "16": ["16", "17"] }, { "16": ["17"] }]
-    var r = new Array();
-    var visable = jobbranch[pjob];
-    for (var i in visable)
-        r.push(GetArItem(db_job, "id", visable[i]));
-    return r;
-}
-function GetJob(type, param) {
-    var jobbranch = {"1": ["2", "3"], "2": ["2", "3"] ,  "3": ["3"] ,
-         "4": ["5", "6"] ,  "5": ["5", "6"] ,  "6": ["6"] ,
-         "7": ["8", "9"] ,  "8": ["8", "9"] ,  "9": ["9"] ,
-         "10": ["11", "12"] ,  "11": ["11", "12"] ,  "11": ["12"] ,
-         "13": ["14"] ,  "14": ["14"] ,
-         "15": ["16", "17"] ,  "16": ["16", "17"] ,  "16": ["17"] }
+
+function GetJob(type, parentjobid) {
+    var jobbranch = {
+        "1": ["2", "3"], "2": ["2", "3"], "3": ["3"],//风场
+        "4": ["5", "6"], "5": ["5", "6"], "6": ["6"],//驻地
+        "7": ["8", "9"], "8": ["8", "9"], "9": ["9"],//仓库
+        "10": ["11", "12"], "11": ["11", "12"], "11": ["12"], // 调度
+        "13": ["14"], "14": ["14"], // 专家
+        "15": ["16", "17"], "16": ["16", "17"], "17": ["17"] //技工
+    }
     if (type == "array") {
         var r = new Array();
-        var visable = jobbranch[param];
+        var visable = jobbranch[parentjobid];
         for (var i in visable)
             r.push(GetArItem(db_job, "id", visable[i]));
         return r;
     }
-    else if (type == "sub") {
-        return jobbranch[param];
+    else if (type == "string") {
+        if (jobbranch[parentjobid].length>1)
+            return "(" + (jobbranch[parentjobid]).join(",") + ")";
+        else if (jobbranch[parentjobid].length > 1)
+            return jobbranch[parentjobid];
     }
+}
+function GetSubJobParam(user) {
+    var r = "job=" + GetJob("string", user.job);
+    if (parseInt(user.job) < 10) {
+        if (!isInArray(["1", "4", "7"], user.job)) // 不是超级用户
+            r += "&depart_id=" + user.depart_id;
+    }
+
+    if (user.job in ["1", "2", "3"])
+        r += "&depart_table=15" //风场
+    else if (user.job in ["4", "5", "6"])
+        r += "&depart_table=20" //驻地
+    else if (user.job in ["7", "8", "9"])
+        r += "&depart_table=" //仓库，等待定义
+
+    return r;
 }
 
 

@@ -95,6 +95,9 @@
 <body class="xFCscol" style="padding:0px;">
     <header class="xFIfixed xNavbar" >
         <a class="xNavbar-Brand" href="javascript:navto('system.html')">啄木鸟</a>
+        <ul class="nav navbar-nav" style="margin-left: 10px; font-size: 16px; ">
+            <li><div style="width:100px"><div id="depart_name">aaa</div><div id="job">bbb</div></div></li>
+        </ul>
         <ul id="modulelist" class="nav navbar-nav" style="margin-left: 10px; font-size: 16px; ">
             <li class="active"><a>功能1</a></li><li><a>功能2</a></li><li><a>功能3</a></li>
         </ul>
@@ -135,26 +138,28 @@
 
     <script type="text/javascript">
         var tpl_module = doT.template(document.getElementById('tpl_module').innerHTML);
-        var g_role = new Object(); // 当前角色
-        var g_user = new Object(); // 当前用户
+        var g_user, g_role; // 当前用户、当前角色
+
+        // {{发布版要删掉它！
         document.getElementById("roleselect").innerHTML = RenderSelect(db_job);
-
-        Reqdata("/roleuser?account=" + GetParam("account"), "",function (res) {
-            for (var i = 0; i < db_roles.length; i++)
-                db_roles[i].user = GetSub(res.data, "job", db_roles[i].id);
-            if (GetParam("account") != "") {
-                g_user = GetSub(res.data, "account", GetParam("account"));
-                g_role = GetSub(db_roles, "id", g_user.job);
-                $("#roleselect").val(g_user.job);
-                OnRoleChange();
-            }
-        });
-
         function OnRoleChange() {
-            g_role = GetSub(db_roles, "id", $("#roleselect").val());
-            g_user = g_role.user;
-            $('#modulelist').html(tpl_module(g_role.modules));
-            UpdateSubmode(0);
+            var role = GetSub(db_roles, "id", $("#roleselect").val());
+            ChangCurUser(GetSub(db_rolusers, "job", role.id).account);
+        }//}}
+
+        ChangCurUser(GetParam("account"));
+
+        function ChangCurUser(account) {
+            Reqdata("/roleuser?account=" + account, "", function (res) {
+                g_user = res.data;
+                g_role = GetSub(db_roles, "id", g_user.job);
+                $('#usr_name').html(g_user.name);
+                $('#usr_face').attr("src", g_user.face);
+                $('#depart_name').html(g_user.depart_name);
+                $('#job').html(g_role.name);
+                $('#modulelist').html(tpl_module(g_role.modules));
+                UpdateSubmode(0);
+            });
         }
 
         function ClickModule(This, url) {

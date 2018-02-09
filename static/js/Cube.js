@@ -97,13 +97,16 @@ function RenderForm4(entity, fields, cb ) {
 }
 
 // 渲染表格
+// twidth:0不显示，无此属性或为-1表示默认宽度
 function RenderTable2(res, style, fun) {
     var r = "<table id=\"" + res.ls + "\" class=\"xTable\"><thead><tr>";
     if (style)
         r = "<table id=\"" + res.ls+ "\" class=\"" + style + "\"><thead><tr>";
     for (var c in res.fields) {
-        if (res.fields[c].hasOwnProperty("twidth") && res.fields[c].twidth !="" )
-            res.fields[c].twidth = parseInt(res.fields[c].twidth);
+        if (res.fields[c].hasOwnProperty("twidth")) {
+            if (typeof res.fields[c].twidth == "string")
+                res.fields[c].twidth = parseInt(res.fields[c].twidth);
+        }
         else
             res.fields[c].twidth = -1;
         if (res.fields[c].twidth == -1)

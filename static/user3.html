@@ -330,21 +330,24 @@
         g_user = { "id": "2", "account": "yanlechen", "pwd": "yanlechen", "face": "img/face/face8.jpg", "depart_id": "1", "depart_table": "winder", "job": "2", "skill": "", "name": "阎乐晨", "code": "542338197908020410", "sex": "1", "ethnic": "达斡尔族", "birth": "1979-08-02", "origin": "西藏自治区日喀则地区岗巴县", "idimg": "img/person/sfz15.jpg", "phone": "13700006203", "qq": "70913564", "mail": "70913564@21cn.com", "wechat": "70913564@21cn.com", "addr": "北京市顺义站前街路北", "c0": "1", "sub": [{ "id": "1", "name": "绿园区风区" }, { "id": "2", "name": "宽城区风区" }] }
 
         Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
-
-        var filter = g_user.job == "1" ? "&job=(2,3)" : "&job=3&depart_id=" + g_user.depart_id;
-        var filter = g_user.job == "1" ? "&job=(2,3)" : "&job=3&depart_id=" + g_user.depart_id;
-        Reqdata("/queryuser?type=winder"+filter, "", function(res) {
+        var qp = GetSubJobParam(g_user);
+        Reqdata("/queryuser?" + qp, "", function (res) {
             g_users = res;
+            if (qp.indexOf("depart") != -1) { // 删除所在单位
+                var idx = GetIdx(g_users.fields, "name", "depart_id");
+                g_users.fields.splice(idx,1); 
+            }
+            $("#d_table_item").html(RenderTable2(g_users, undefined, ValToView));
+
             for (var i in g_users.fields) {
                 if (g_users.fields[i].name == "account" || g_users.fields[i].name == "pwd"
                     || g_users.fields[i].name == "face" || g_users.fields[i].name == "idimg")
                     continue;
-                if (g_users.fields[i].name == "skill" && g_user.job != "13" ) // 专家su
+                if (g_users.fields[i].name == "skill" && g_user.job != "13") // 专家su
                     continue;
                 g_fields.push(g_users.fields[i]);
             }
-            $("#d_table_item").html(RenderTable2(g_users, undefined, ValToView));
-            TableBindClick3(g_users.type, function (data_id) {
+            TableBindClick3(g_users.ls, function (data_id) {
                 g_cur = GetSub(g_users.data, "id", data_id);
                 var pane = tpl_user_pane(g_cur);
                 pane += RenderPane2(g_cur, g_fields, ValToView);
@@ -460,7 +463,7 @@
                     if (field.name == "sex")
                         render = RenderSelect(db_sex, val);
                     else if (field.name == "job")
-                        render = RenderSelect(GetSubJob(g_user.job), val);
+                        render = RenderSelect(GetJob("array",g_user.job), val);
                     else if (field.name == "ethnic")
                         render = RenderSelect(g_ethnic, val);
                     r += '<select ' + attr + ' name="' + field.name + '">' + render + '</select>';

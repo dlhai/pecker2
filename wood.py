@@ -25,6 +25,7 @@ metadata = MetaData(engine)
 conn = engine.connect()
 
 db_tbl = [
+    { "id": "0", "name": "none", "title": "占位" },
     { "id": "1", "name": "base", "title": "定义" },
     { "id": "2", "name": "link", "title": "一对多引用" },
     { "id": "3", "name": "addit", "title": "附件" },
@@ -60,8 +61,9 @@ branch = {
 }
 
 def gettbl( nameorid ):
+    s = str(nameorid)
     for x in db_tbl:
-        if x["name"] == nameorid or x['id'] == nameorid:
+        if x["name"] == s or x['id'] == s:
             return x
     raise KeyError
 
@@ -102,7 +104,7 @@ def QueryObj( sql ):
 
 def To(k,v):
     if v[0] == "(":
-        return k +"in ("+",".join( ["'"+i+"'" for i in v.trim("()").split(",")]) + ")"
+        return k +" in ("+",".join( ["'"+i+"'" for i in v.strip("()").split(",")]) + ")"
     else:
         return k+"='"+v+"'"
 
@@ -141,40 +143,31 @@ def login():
     else:
         return '{"login":"'+param['account']+'","result":404}\n'
 
-@app.route("/roleuser") #frame用来填角色组合框，发布版将必须携带account参数且仅显示account帐号，且去掉密码
+#frame用来读取当前用户信息，需要所在单位名称、下级单位列表
+@app.route("/roleuser") 
 def roleuser():
     param = request.args.to_dict()
     
-    #若有当前帐号，则先把它查出来
-    if "account" in param and param["account"] != "":
-        ret = QueryObj( "select id,account,face,depart_id,depart_table,job from user where account='%s'"%(param["account"]))
-        if len(ret) <= 0:
-            return '{"roleuser":"'+param['account']+'","result":404}\n'
-        user = ret[0]
+    ret = QueryObj( "select id,account,name,face,depart_id,depart_table,job from user where account='%s'"%(param["account"]))
+    if len(ret) <= 0:
+        return '{"roleuser":"'+param['account']+'","result":404}\n'
+    user = ret[0]
 
-    #找出各角色的代表用户，当前帐号作为其角色的代表
-    rolusr = QueryObj( "select id,account,face,depart_id,depart_table,job, min(depart_id) as c0 from user group by job")
-    if 'user' in dir():
-        for i in range(len(rolusr)):
-            if rolusr[i].depart_id == user.depart_id:
-                rolusr[i] = user
-                break
-
-    #为每个代表用户的所在单位找到所在单位的名称、下级单位列表，例如风场的下级风区
-    for x in rolusr:
-        if x.depart_table != 0: 
-            tbl = gettbl(x.depart_table)
-            x.depart = QueryObj( "select id, name from "+tbl.name+" where id="+str(x.depart_id))
-            if tbl.name == "winder":
-                x.sub = QueryObj( "select id, name from winderarea where winder_id="+str(x.depart_id))
+    #找到用户的所在单位，若所在单位是风场，则需要读取风区列表
+    if user.depart_table != 0: 
+        tbl = gettbl(user.depart_table)
+        user.depart_name = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0].name
+        if tbl["name"] == "winder":
+            user.sub = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
+    else:
+        user.depart_name = ""
 
     ret=obj()
     ret.fun="roleuser"
     ret.param=param
     ret.result = "200"
-    ret.data = rolusr
-    ss = tojson(ret)
-    return Response(ss, mimetype='application/json')
+    ret.data = user
+    return Response(tojson(ret), mimetype='application/json')
 
 #id到名字的转换
 @app.route("/id2name")
@@ -220,22 +213,19 @@ def rd():
 @app.route("/queryuser")
 def queryuser():
     param = request.args.to_dict()
-    type = param["type"]
-    del param["type"]
-
-    # 限制对部分表的查询
-    if type== "":
-        return 404
-
-    tbl = gettbl(type)
-    sql = "select "+type+".name as depart_name, user.id,user.account,user.face,user.depart_id,"\
-        +"user.job,user.skill,user.name,user.code,user.sex,user.ethnic,user.birth,user.origin,"\
-        +"user.idimg,user.phone,user.qq,user.mail,user.wechat,user.addr from user,"+type\
-        +" where user.depart_id = "+type+".id and user.depart_table='"+tbl["id"]+"'"
-    if len(param) > 0:
-        sql += " and "+" and ".join([ To(k,v) for k,v in param.items()])
-    return query3("queryuser_"+type,fields=select(base.sl).where(base.c.table=="user"),data = sql)
-
+    if ("depart_name" in param ):
+        type = db_tbl[param["depart_name"]]
+        sql = "select "+type+".name as depart_name, user.id,user.account,user.face,user.depart_id,"\
+            +"user.job,user.skill,user.name,user.code,user.sex,user.ethnic,user.birth,user.origin,"\
+            +"user.idimg,user.phone,user.qq,user.mail,user.wechat,user.addr from user,"+type\
+            +" where user.depart_id = "+type+".id and user.depart_table='"+tbl["id"]+"' and "
+    else:
+        sql = "select user.id,user.account,user.face,user.depart_id,"\
+            +"user.job,user.skill,user.name,user.code,user.sex,user.ethnic,user.birth,user.origin,"\
+            +"user.idimg,user.phone,user.qq,user.mail,user.wechat,user.addr from user"\
+            +" where "
+    sql +=" and ".join([ To(k,v) for k,v in param.items()])
+    return query4("queryuser",fields=select(base.sl).where(base.c.table=="user"),data = sql)
 
 #-----------------------以下接口将被废弃-------------------------------
 
