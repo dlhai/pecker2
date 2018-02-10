@@ -1,41 +1,44 @@
-﻿var db_rolusers = [
-    { "id": "1", "account": "hongliangwan", "name": "洪良万", " face": "img/face/face0.jpg", "depart_id": "0", " depart_table": "0", "job": "1" },
-    { "id": "2", "account": "zouwendong", "name": "邹文栋", " face": "img/face/face3.jpg", "depart_id": "1", " depart_table": "15", "job": "2" },
-    { "id": "84", "account": "hanjianian", "name": "韩嘉年", " face": "img/face/face3.jpg", "depart_id": "1", " depart_table": "15", "job": "3" },
-    { "id": "291", "account": "mojinxin", "name": "莫金鑫", " face": "img/face/face13.jpg", "depart_id": "0", " depart_table": "0", "job": "4" },
-    { "id": "292", "account": "wujing", "name": "吴靖", " face": "img/face/face7.jpg", "depart_id": "1", " depart_table": "20", "job": "5" },
-    { "id": "300", "account": "jindanxue", "name": "金丹雪", " face": "img/face/face18.jpg", "depart_id": "1", " depart_table": "20", "job": "6" },
-    { "id": "441", "account": "yinhanqiao", "name": "尹含巧", " face": "img/face/face14.jpg", "depart_id": "0", " depart_table": "0", "job": "10" },
-    { "id": "442", "account": "caigaoang", "name": "蔡高昂", " face": "img/face/face19.jpg", "depart_id": "0", " depart_table": "0", "job": "11" },
-    { "id": "443", "account": "miaoxiaole", "name": "苗小乐", " face": "img/face/face20.jpg", "depart_id": "0", " depart_table": "0", "job": "12" },
-]
-
-var db_roles = [
+﻿var db_roles = [
     {
         "id": "1", "type": "winder", "name": "叶片超级帐号", modules: [
             { name: "地图", url: "windersumap.html" },
             { name: "风场", url: "windersu.html" },
             { name: "人员", url: "user3.html" },
-            { name: "厂家", url: "windersuvender.html" }]
+            { name: "厂家", url: "vender.html" }]
     },
     {
         "id": "2", "type": "winder", "name": "风场主管", modules: [
             { name: "地图", url: "windermap.html" },
-            { name: "设备", usesub: true, url: "winder.html" },
+            { name: "设备", usesub: true, url: "winder2.html" },
             { name: "案件", usesub: true, url: "coord.html" },
             { name: "记录", usesub: true, url: "repairlog.html" },
-            { name: "人员", url: "user2.html?type=winder" }]
+            { name: "人员", url: "user3.html" }]
     },
     {
         "id": "3", "type": "winder", "name": "驻场", modules: [
             { name: "地图", url: "bdmap.html?type=风场&range=all" },
-            { name: "设备", usesub: true, url: "winder.html" },
+            { name: "设备", usesub: true, url: "winder2.html" },
             { name: "案件", usesub: true, url: "coord.html" },
             { name: "记录", usesub: true, url: "repairlog.html" }]
     },
-    { "id": "4", "type": "dev", "name": "设备超级帐号", modules: [{ name: "地图", url: "bdmap.html?type=司机|总备&range=all" }, { name: "驻地", url: "devwh_su.html" }, { name: "人员", url: "person.html?type=司机|总备&depart=db_devwh_list" }] },
-    { "id": "5", "type": "dev", "name": "驻地主管", modules: [{ name: "地图", url: "bdmap.html?type=司机" }, { name: "驻地", url: "devwh.html" }, { name: "人员", url: "person.html?type=司机&depart=塔里木驻" }] },
-    { "id": "6", "type": "dev", "name": "设备司机", modules: [{ name: "设备", url: "driver.html" }] },
+    {
+        "id": "4", "type": "dev", "name": "设备超级帐号", modules: [
+            { name: "地图", url: "devmap.html" },
+            { name: "驻地", url: "devsu.html" },
+            { name: "人员", url: "user3.html" },
+            { name: "厂家", url: "vender.html" }]
+    },
+    {
+        "id": "5", "type": "dev", "name": "驻地主管", modules: [
+            { name: "地图", url: "devmap.html" },
+            { name: "驻地", url: "devwh.html" },
+            { name: "人员", url: "user3.html" }]
+    },
+    {
+        "id": "6", "type": "dev", "name": "设备司机", modules: [
+            { name: "地图", url: "devmap.html" },
+            { name: "设备", url: "driver.html" }]
+    },
     { "id": "7", "type": "wh", "name": "仓库超级帐号", modules: [{ name: "仓库", url: "matwh_su.html" }, { name: "人员", url: "person.html?type=仓管|仓主" }, { name: "材料", url: "material.html" }] },
     { "id": "8", "type": "wh", "name": "仓库主管", modules: [{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }] },
     { "id": "9", "type": "wh", "name": "仓库管理员", modules: [{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }] },
@@ -45,7 +48,12 @@ var db_roles = [
     { "id": "13", "type": "expert", "name": "专家超级帐号", modules: [{ name: "专家", url: "person.html?type=专家" }, { name: "记录", url: "repairlog.html" }] },
     { "id": "14", "type": "expert", "name": "专家", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
     { "id": "15", "type": "repair", "name": "技工超级帐号", modules: [{ name: "技工", url: "person.html?type=技工|队长" }] },
-    { "id": "16", "type": "repair", "name": "维修队长", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
+    {
+        "id": "16", "type": "repair", "name": "维修队长", modules: [
+            { name: "案件", url: "coord.html" },
+            { name: "记录", url: "repairlog.html" },
+            { name: "人员", url: "user3.html" }]
+    },
     { "id": "17", "type": "repair", "name": "技工", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
 ];
 
@@ -83,6 +91,22 @@ var db_job = [
     { "id": "17", "type": "", "name": "技工" },
     { "id": "18", "type": "", "name": "公众" },
 ]
+
+function GetRoleUser(name) {
+    alert( "启用GetRoleUser调试" );
+    db_rolusers = [
+        { "id": "1", "account": "hongliangwan", "name": "洪良万", " face": "img/face/face0.jpg", "depart_id": "0", " depart_table": "0", "job": "1" },
+        { "id": "2", "account": "zouwendong", "name": "邹文栋", " face": "img/face/face3.jpg", "depart_id": "1", " depart_table": "15", "job": "2" },
+        { "id": "84", "account": "hanjianian", "name": "韩嘉年", " face": "img/face/face3.jpg", "depart_id": "1", " depart_table": "15", "job": "3" },
+        { "id": "291", "account": "mojinxin", "name": "莫金鑫", " face": "img/face/face13.jpg", "depart_id": "0", " depart_table": "0", "job": "4" },
+        { "id": "292", "account": "wujing", "name": "吴靖", " face": "img/face/face7.jpg", "depart_id": "1", " depart_table": "20", "job": "5" },
+        { "id": "300", "account": "jindanxue", "name": "金丹雪", " face": "img/face/face18.jpg", "depart_id": "1", " depart_table": "20", "job": "6" },
+        { "id": "441", "account": "yinhanqiao", "name": "尹含巧", " face": "img/face/face14.jpg", "depart_id": "0", " depart_table": "0", "job": "10" },
+        { "id": "442", "account": "caigaoang", "name": "蔡高昂", " face": "img/face/face19.jpg", "depart_id": "0", " depart_table": "0", "job": "11" },
+        { "id": "443", "account": "miaoxiaole", "name": "苗小乐", " face": "img/face/face20.jpg", "depart_id": "0", " depart_table": "0", "job": "12" },
+    ]
+    return GetSub(db_rolusers, "job", GetSub(db_job, "name", name).id);
+}
 
 function GetJob(type, parentjobid) {
     var jobbranch = {
@@ -160,7 +184,7 @@ var db_tbl = [
     { "id": "1", "name": "base", "title": "定义" },
     { "id": "2", "name": "link", "title": "一对多引用" },
     { "id": "3", "name": "addit", "title": "附件" },
-    { "id": "4", "name": "config", "title": "配置信息" },
+    { "id": "4", "name": "config", "title": "配置" },
     { "id": "5", "name": "admarea", "title": "行政区划" },
     { "id": "6", "name": "user", "title": "供应商" },
     { "id": "7", "name": "certif", "title": "人员" },
@@ -176,7 +200,7 @@ var db_tbl = [
     { "id": "17", "name": "efan", "title": "风机" },
     { "id": "18", "name": "leaf", "title": "叶片" },
     { "id": "19", "name": "fltrep", "title": "报修" },
-    { "id": "20", "name": "devwh", "title": "设备驻地" },
+    { "id": "20", "name": "devwh", "title": "驻地" },
     { "id": "21", "name": "dev", "title": "设备" },
 ]
 function GetTbl(name) { return GetSub(db_tbl, "name", name).id; }
