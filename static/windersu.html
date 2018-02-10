@@ -194,13 +194,13 @@
                         var tpl_efan_list = doT.template(document.getElementById('tpl_efan_list').innerHTML);
                         $("#subitem_list").html(tpl_efan_list(d2));
 
-                        Reqdata("/rd?ls=vender&type=" + GetTbl("efan"), "", function (d4) {
+                        Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (d4) {
                             var nodes = $(".efanvender_id");
                             for (var i = 0; i < nodes.length; i++)
                                 nodes[i].innerHTML = GetSub(d4.data, "id", nodes[i].innerHTML).name;
                             nodes.removeClass("efanvender_id");
                         });
-                        Reqdata("/rd?ls=vender&type="+GetTbl("leaf"), "", function (d5) {
+                        Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (d5) {
                             var nodes = $(".leafvender_id");
                             for (var i = 0; i < nodes.length; i++)
                                 nodes[i].innerHTML = GetSub(d5.data, "id", nodes[i].innerHTML).name;
@@ -280,7 +280,7 @@
         function RenderEfanForm(efan) {
             var tpl_efan_edit = doT.template(document.getElementById('tpl_efan_edit2').innerHTML);
             $("#ModalDlgContent").html(tpl_efan_edit(efan));
-            Reqdata("/rd?ls=vender&type=" + GetTbl("efan"), "", function (d4) {
+            Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (d4) {
                 var nodes = $(".efanvender_id");
                 for (var i = 0; i < nodes.length; i++) {
                     var selid = nodes[i].getAttribute("data-id");
@@ -290,7 +290,7 @@
                 }
                 nodes.removeClass("efanvender_id");
             });
-            Reqdata("/rd?ls=vender&type=" + GetTbl("leaf"), "", function (d5) {
+            Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (d5) {
                 var nodes = $(".leafvender_id");
                 for (var i = 0; i < nodes.length; i++) {
                     var selid = nodes[i].getAttribute("data-id");

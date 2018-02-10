@@ -1,5 +1,5 @@
 ﻿// CreateMark中的 UpdateCurData 需要先定义
-// ShowWindow中的 ID2Name 需要先定义
+// ShowWindow中的 FieldToShow 需要先定义
 
 function CreateMap( id ) {
     var map = new BMap.Map(id);
@@ -10,7 +10,6 @@ function CreateMap( id ) {
     return map;
 }
 
-//以下为统用代码
 function CreateMark(iconname, data, type, fields) {
     var marker = new BMap.Marker(CreatePoint(data.position), { icon: GetIcon(iconname) });
     var label = new BMap.Label("name" in data ? data.name : data.code, { offset: new BMap.Size(-10, 32) });
@@ -33,7 +32,6 @@ function GetIcon(iconname) {
     return icons[iconname];
 }
 
-
 function CreatePoint(pos) {
     var ar = pos.split(" ");
     return new BMap.Point(parseFloat(ar[0]), parseFloat(ar[1]));
@@ -50,14 +48,13 @@ function CreatePolygon(pos) {
 function ShowWindow(type, data, fields, e) {
     var p = e.target;
     var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
-    var content = '<div class="xRndAngle x2Form" style="overflow-y: scroll;height:290px;padding:5px 0px">' + RenderPane2(data, fields) + '</div>';
+    var content = '<div class="xRndAngle x2Form" style="overflow-y: scroll;height:290px;padding:5px 0px">' + RenderPane2(data, fields, FieldToShow) + '</div>';
     var infoWindow = new BMap.InfoWindow(content, {
         width: 619,     // 信息窗口宽度
         title: GetTbl(type).title + " 信息", // 信息窗口标题
         enableMessage: true//设置允许信息窗发送短息
     });  // 创建信息窗口对象 
     g_map.openInfoWindow(infoWindow, point); //开启信息窗口
-//    ID2Name(ar, i);
 }
 
 //-----------------ModeControl begin------------------------------------------------
@@ -82,10 +79,10 @@ ModeControl.prototype.initialize = function (map) {
     div.style.boxShadow = "1px 1px 1px rgba(0,0,0,.1)";
     div.style.padding = "5px 10px";
     $(div).addClass("xRndAngle");
-    $(div).on("click", "", { editmode: this.editmode, onmodechange: this.onmodechange}, function (ev) {
-        ev.data.editmode = !ev.data.editmode;
-        div.innerHTML = this.editmode ? '编辑' : '浏览';
-        ev.data.onmodechange(ev.data.editmode);
+    $(div).on("click", "", { This: this}, function (ev) {
+        ev.data.This.editmode = !ev.data.This.editmode;
+        div.innerHTML = ev.data.This.editmode ? '编辑' : '浏览';
+        ev.data.This.onmodechange(ev.data.This.editmode);
     });
 
     // 添加DOM元素到地图中

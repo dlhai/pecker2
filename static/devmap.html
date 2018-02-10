@@ -22,14 +22,15 @@
 </body>
 </html>
 <script type="text/javascript">
-    var g_map = CreateMap("allmap"), g_devwhs, g_devs, g_user = parent.g_user, g_editmode = false;;
+    var g_map = CreateMap("allmap"), g_devwhs, g_devs, g_devvenders, g_user = parent.g_user, g_editmode = false;;
     if (g_user == undefined)
         g_user = GetRoleUser("设备超级帐号");
 
+    Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res) { g_devvenders = res; });
     // 在地图上显示驻地
     var param_devwh = g_user.job == "4" ? "" : "&id=" + g_user.depart_id;
     Reqdata("/rd?ls=devwh" + param_devwh, "", function (res1) {
-        g_devwh = res1;
+        g_devwhs = res1;
         for (var x in res1.data)
             CreateMark("devwh", res1.data[x], res1.ls, res1.fields);
         if (res1.data.length > 0 )
@@ -47,12 +48,33 @@
     // 编辑浏览模式控件
     g_map.addControl(new ModeControl(function (mode) {
         if (mode) {
-            for (var i in g_devwh.data) g_devwh.data[i].mk.enableDragging();
+            for (var i in g_devwh.data) g_devwhs.data[i].mk.enableDragging();
             for (var i in g_devs.data) g_devs.data[i].mk.enableDragging();
         }
         else {
-            for (var i in g_devwh.data) g_devwh.data[i].mk.disableDragging();
+            for (var i in g_devwh.data) g_devwhs.data[i].mk.disableDragging();
             for (var i in g_devs.data) g_devs.data[i].mk.disableDragging();
         }
     }));
+
+    function FieldToShow(data, field) {
+        if (field.name == "clss")
+            return GetSub(db_devclss, "id", data[field.name]).name;
+        else if (field.name == "devwh_id")
+            return GetSub(g_devwhs.data, "id", data[field.name]).name;
+        else if (field.name == "status")
+            return GetSub(db_devstatus, "id", data[field.name]).name;
+        else if (field.name == "vender")
+            return GetSub(g_devvenders.data, "id", data[field.name]).name;
+        else
+            return data[field.name];
+    }
+    //function FieldToEdit(data, field) {
+    //    if (field.name == "clss") return RenderSelect(db_devclss, data[field.name]);
+    //    else if (field.name == "devwh_id") return RenderSelect(g_devwhs.data, data[field.name]);
+    //    else if (field.name == "status") return RenderSelect(db_devstatus, data[field.name]);
+    //    else if (field.name == "vender") return RenderSelect(g_devvenders.data, data[field.name]);
+    //    else return data[field.name];
+    //}
+
 </script>

@@ -16,7 +16,7 @@
     },
     {
         "id": "3", "type": "winder", "name": "驻场", modules: [
-            { name: "地图", url: "bdmap.html?type=风场&range=all" },
+            { name: "地图", url: "winder2.html" },
             { name: "设备", usesub: true, url: "winder2.html" },
             { name: "案件", usesub: true, url: "coord.html" },
             { name: "记录", usesub: true, url: "repairlog.html" }]
@@ -203,7 +203,7 @@ var db_tbl = [
     { "id": "20", "name": "devwh", "title": "驻地" },
     { "id": "21", "name": "dev", "title": "设备" },
 ]
-function GetTbl(name) { return GetSub(db_tbl, "name", name).id; }
+function GetTbl(name) { return GetSub(db_tbl, "name", name); }
 
 cache = new Object()
 

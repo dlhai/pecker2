@@ -25,15 +25,35 @@
         </header>
         <div id="item_list" class="xScroll" style="padding: 5px; flex-grow: 1;"></div>
     </section>
+    <script id="tpl_efan_import" type="text/template">
+        <div style="margin: 10px 15px;">
+            <div>为 当前风场 批量导入 风电机</div>
+            <div style="margin:5px 0px;">表格请按照模板填写，点此下载模板</div>
+            <input type="file" id="upload_efan" name="upload_efan" /><input type="button" value="上传" onclick="uploadFile()" />
+            <div style="border:1px solid #dddddd;width:100%;height:15px;"><div id="progress" style="background-color:#0094ff;width:50%;height:100%;"></div></div>
+        </div>
+    </script>
     <script type="text/javascript">
-        g_user = { "id": "2", "account": "yanlechen", "pwd": "yanlechen", "face": "img/face/face8.jpg", "depart_id": "1", "depart_table": "winder", "job": "2", "skill": "", "name": "阎乐晨", "code": "542338197908020410", "sex": "1", "ethnic": "达斡尔族", "birth": "1979-08-02", "origin": "西藏自治区日喀则地区岗巴县", "idimg": "img/person/sfz15.jpg", "phone": "13700006203", "qq": "70913564", "mail": "70913564@21cn.com", "wechat": "70913564@21cn.com", "addr": "北京市顺义站前街路北", "c0": "1", "sub": [{ "id": "1", "name": "绿园区风区" }, { "id": "2", "name": "宽城区风区" }] }
-        g_winderarea_id = GetParam("id");
+        var g_user = parent.g_user, g_winderarea_id = GetParam("id"), g_efanvenders, g_leafvenders, g_efans, g_leafs;
+        if (g_user == undefined) {
+            g_user = GetRoleUser("风场主管");
+            Reqdata("/rd?ls=winderarea&winder_id=" + g_user.depart_id, "", function (sub) {
+                g_user.sub = sub.data;
+                g_winderarea_id = sub.data[0].id;
+                init();
+            });
+        }
+        else{
+            init();
+        }
 
-        var count = 0;
-        Reqdata("/rd?ls=efanvender", function (efanv) { g_efanvenders = efanv; count += 1; if (count == 4) Render(); });
-        Reqdata("/rd?ls=leafvender", function (leafv) { g_leafvenders = leafv; count += 1; if (count == 4) Render();});
-        Reqdata("/rd?ls=efan&winderarea_id=" + g_winderarea_id, function (efan) { g_efans = efan; count += 1; if (count == 4) Render();});
-        Reqdata("/rd?ls=leaf&winderarea_id=" + g_winderarea_id, function (leaf) { g_leafs = leaf; count += 1; if (count == 4) Render();});
+        function init(){
+            var count = 0;
+            Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (efanv) { g_efanvenders = efanv; count += 1; if (count == 4) Render(); });
+            Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (leafv) { g_leafvenders = leafv; count += 1; if (count == 4) Render();});
+            Reqdata("/rd?ls=efan&winderarea_id=" + g_winderarea_id, "", function (efan) { g_efans = efan; count += 1; if (count == 4) Render();});
+            Reqdata("/rd?ls=leaf&winderarea_id=" + g_winderarea_id, "", function (leaf) { g_leafs = leaf; count += 1; if (count == 4) Render(); });
+        }
         function Render(){
             for (var i in g_efans.data) {
                 g_efans.data[i].leafs = new Array();
@@ -71,9 +91,7 @@
         function onQueryLog() {
             alert("asdfs");
         }
-        function onImport() {
-            alert("asdfs");
-        }
+
         function onNew() {
             var efan = EFanCreate(g_efans.fields, g_leafs.fields, g_user.depart_id, g_winderarea_id);
             var form = new EfanForm();
@@ -82,7 +100,64 @@
             dlg.css="width:610px";
             dlg.Add(form.Render(efan));
             dlg.Show();
+            var nodes = $("select");
+            nodes[0].selectedIndex = -1;
+            nodes[1].selectedIndex = -1;
+            nodes[2].selectedIndex = -1;
+            nodes[3].selectedIndex = -1;
         }
+
+        function onImport() {
+            var tpl_efan_list = doT.template(document.getElementById('tpl_efan_import').innerHTML);
+            var dlg = new cbDlg();
+            dlg.title = "导入 风电机";
+            dlg.css = "width:610px";
+            dlg.Add(tpl_efan_list());
+            dlg.Show();
+        }
+
+        function EditEfan(t) {
+            var efan = GetSub(g_efans.data, "id", $(t).attr("id"));
+            var form = new EfanForm();
+            var dlg = new cbDlg();
+            dlg.title = "编辑 风电机";
+            dlg.css = "width:610px";
+            dlg.Add(form.Render(efan));
+            dlg.Show();
+        }
+
+        function uploadFile() {
+            var file = $("#upload_efan").get(0).files[0];
+            var formData = new FormData();
+            formData.append("file", file);
+            var req = new XMLHttpRequest();
+            req.upload.onprogress = function (evt) {
+                var loaded = evt.loaded;     //已经上传大小情况   
+                var tot = evt.total;      //附件总大小   
+                var per = Math.floor(100 * loaded / tot);  //已经上传的百分比   
+                $("#progress").html(per + "%");
+                $("#progress").css("width", per + "%");
+            };
+            req.onreadystatechange = function () {
+                if (req.readyState == 4 && req.status == 200) {
+                    alert(req.responseText);
+                }
+            };
+            req.open("POST", "/upload", true);
+            req.send(formData);
+        }
+
+        function FieldToShow(data, field) {
+            if (field== "efanvender_id") return GetSub(g_efanvenders.data, "id", data[field]).name;
+            else if (field == "leafvender_id") return GetSub(g_leafvenders.data, "id", data[field]).name;
+            else return data[field];
+        }
+        function FieldToEdit(data, field) {
+            if (field == "efanvender_id") return RenderSelect(g_efanvenders.data, data[field]);
+            else if (field == "leafvender_id") return RenderSelect(g_leafvenders.data, data[field]);
+            else return data[field];
+        }
+
     </script>
 </body>
 </html>

@@ -103,12 +103,15 @@ function RenderTable2(res, style, fun) {
     if (style)
         r = "<table id=\"" + res.ls+ "\" class=\"" + style + "\"><thead><tr>";
     for (var c in res.fields) {
-        if (res.fields[c].hasOwnProperty("twidth")) {
-            if (typeof res.fields[c].twidth == "string")
-                res.fields[c].twidth = parseInt(res.fields[c].twidth);
-        }
-        else
+        if (!res.fields[c].hasOwnProperty("twidth"))
             res.fields[c].twidth = -1;
+        if (typeof res.fields[c].twidth == "string") {
+            if (res.fields[c].twidth.length > 0 )
+                res.fields[c].twidth = parseInt(res.fields[c].twidth);
+            else
+                res.fields[c].twidth = -1;
+        }
+            
         if (res.fields[c].twidth == -1)
             r += "<th>" + res.fields[c].title + "</th>";
         else if (res.fields[c].twidth > 0)

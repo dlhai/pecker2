@@ -143,8 +143,8 @@
         // {{发布版要删掉它！
         document.getElementById("roleselect").innerHTML = RenderSelect(db_job);
         function OnRoleChange() {
-            var role = GetSub(db_roles, "id", $("#roleselect").val());
-            ChangCurUser(GetSub(db_rolusers, "job", role.id).account);
+            var role = GetSub(db_job, "id", $("#roleselect").val());
+            ChangCurUser(GetRoleUser(role.name).account);
         }//}}
 
         ChangCurUser(GetParam("account"));

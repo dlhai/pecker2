@@ -27,12 +27,12 @@
     <script type="text/javascript">
         var g_efanVs = new Object();
         var g_leafVs = new Object();
-        Reqdata("/rd?ls=vender&type=" + GetTbl("efan"), "", function (efanVs) {
+        Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (efanVs) {
             g_efanVs = efanVs;
             $("#efan_vender_list").html(RenderTable2(efanVs));
             TableBindClick3(efanVs.ls);
         });
-        Reqdata("/rd?ls=vender&type=" + GetTbl("leaf"), "", function (leafVs) {
+        Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (leafVs) {
             g_leafVs = leafVs;
             $("#leaf_vender_list").html(RenderTable2(leafVs));
             TableBindClick3(leafVs.ls);

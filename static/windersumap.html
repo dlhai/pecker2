@@ -186,7 +186,7 @@
             map.openInfoWindow(infoWindow, point); //开启信息窗口
 
             // 填充两个供应商组合框
-            Reqdata("/rd?ls=vender&type=" + GetTbl("efan"), "", function (d4) {
+            Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (d4) {
                 var nodes = $(".efanvender_id");
                 for (var i = 0; i < nodes.length; i++) {
                     var selid = nodes[i].getAttribute("data-id");
@@ -196,7 +196,7 @@
                 }
                 nodes.removeClass("efanvender_id");
             });
-            Reqdata("/rd?ls=vender&type=" + GetTbl("leaf"), "", function (d5) {
+            Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (d5) {
                 var nodes = $(".leafvender_id");
                 for (var i = 0; i < nodes.length; i++) {
                     var selid = nodes[i].getAttribute("data-id");
