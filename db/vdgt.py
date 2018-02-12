@@ -180,6 +180,8 @@ def rnddate(min,max):
     return (datetime.datetime.now() - datetime.timedelta(days = rndnum(min,max)))
 
 def rnddatespan(dt,min,max):
+    if type(dt) == type(""):
+        dt =  datetime.datetime.strptime(dt,'%Y-%m-%d')
     return (dt + datetime.timedelta(days = rndnum(min,max)))
 
 def CreateRelationData():
@@ -193,42 +195,6 @@ def CreateRelationData():
 if __name__=="__main__": 
     setdata(loadpkl('rawdata.pkl'))
     aa = getitembyname("_tbl","__sys__").id
-
-    #s = '东莞市风场'
-    #b=s[:-2]
-    #a = dobj()
-    #a.a1="A1"
-    #a.a2="A2"
-    #bb = dobj()
-    #bb.a3="A3"
-    #bb.a4="A4"
-    #cc = dobj()
-    #cc.a5="A5"
-    #cc.a6="A6"
-    #ddd = dobj()
-    #ddd.a7="A7"
-    #ddd.a8="A8"
-    #eee = dobj()
-    #eee.a9="A9"
-    #eee.a10="A10"
-    #fff = dobj()
-    #fff.a11="A11"
-    #fff.a12="A12"
-    #ggg = dobj()
-    #ggg.a13="A13"
-    #ggg.a14="A14"
-
-    #a["bb"]=bb
-    #a["cc"]=cc
-    #bb["ddd"]=ddd
-    #bb["eee"]=eee
-    #cc["fff"]=fff
-    #cc["ggg"]=ggg
-
-    #a7=a["bb"]["ddd"].a7
-
-    #s = rndtype("efan")
-
-    #dt = rnddate(4*365,5*365)
-    s = rndaddition("身份证")
-    x=0
+    
+    clss=rnditem("_devclss")
+    aa = clss.id

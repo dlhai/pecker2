@@ -141,11 +141,11 @@ tbl_leaf=Table('leaf', metadata,
 	Column('producedate',Date),
 	Column('putondate',Date))
 
-tbl_fltrep=Table('fltrep', metadata,
+tbl_fault=Table('fault', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('code',String(32)),
 	Column('fault',String(32)),
-	Column('report',String(32)),
+	Column('report',Integer),
 	Column('reporttime',Date),
 	Column('phone',String(16)),
 	Column('winder_id',Integer),
@@ -159,7 +159,7 @@ tbl_devwh=Table('devwh', metadata,
 	Column('name',String(32)),
 	Column('fname',String(32)),
 	Column('position',String(32)),
-	Column('addr',String(128)),
+	Column('addr',String(2048)),
 	Column('remark',String(128)))
 
 tbl_dev=Table('dev', metadata,
@@ -171,12 +171,29 @@ tbl_dev=Table('dev', metadata,
 	Column('devwh_id',Integer),
 	Column('position',String(32)),
 	Column('status',Integer),
-	Column('phone',String(16)),
+	Column('driver',Integer),
 	Column('remark',String(2048)),
 	Column('vender',Integer),
 	Column('producedate',Date),
 	Column('buydate',Date),
 	Column('checkdate',Date))
+
+tbl_devwork=Table('devwork', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('status',Integer),
+	Column('fault_id',Integer),
+	Column('guide',Integer),
+	Column('guidedt',Date),
+	Column('clss',Integer),
+	Column('devwh_id',Integer),
+	Column('timelen',Integer),
+	Column('winder_id',Integer),
+	Column('addr',String(128)),
+	Column('remark',String(2048)),
+	Column('devwhsu',Integer),
+	Column('devwhsudt',Date),
+	Column('dev_id',Integer),
+	Column('driver',Integer))
 
 
 metadata.create_all(engine)
@@ -254,8 +271,8 @@ def dict_leaf(x,y):
 conn.execute(tbl_leaf.insert(),[dict_leaf(x,y) for x in data("efan") for y in range(3)])
 QueryAll(tbl_leaf)
 
-def dict_fltrep(x):
-    return dict(code="",fault="",report="",reporttime="",phone="",winder_id="",remark="",status="",guide="",guidetime="")
+def dict_fault(report):
+    return dict(code=rndqq(),fault=random.choice( ["风化脱漆","叶片断裂", "电机起火", "电路故障"]),report=report.id,reporttime=rnddate(30,60),phone=report.phone,winder_id=report.depart_id,remark=rnditem("_songci"),status="0",guide="0",guidetime=rnddate(1,1))
 
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","1","")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"winder","2","") for x in data("winder")])
@@ -271,9 +288,12 @@ QueryAll(tbl_devwh)
 def dict_dev(x,y,z):
     dt=rnddate(4*365,5*365)
     person=rnditem("_person")
-    return dict(code=rndtype("car"),clss=y.id,type=rnditem("_devtype"),img=rnditem("_devimg"),devwh_id=x.id,position=rndgps(x.position),status="0",phone=str(int(person.phone)),remark=rnditem("_songci"),vender=rnditem("devvender").id,producedate=dt,buydate=rnddatespan(dt,30,365),checkdate=rnddatespan(dt,30,365))
+    return dict(code=rndtype("car"),clss=y.id,type=rnditem("_devtype"),img=rnditem("_devimg"),devwh_id=x.id,position=rndgps(x.position),status="0",driver="0",remark=rnditem("_songci"),vender=rnditem("devvender").id,producedate=dt,buydate=rnddatespan(dt,30,365),checkdate=rnddatespan(dt,30,365))
 conn.execute(tbl_dev.insert(),[dict_dev(x,y,z) for x in data("devwh") for y in data("_devclss") for z in range(rndnum(1,3))])
 QueryAll(tbl_dev)
+
+def dict_devwork():
+    return dict(status="0",fault_id="0",guide="0",guidedt="0",clss="0",devwh_id="0",timelen="0",winder_id="0",addr="0",remark="0",devwhsu="0",devwhsudt="0",dev_id="0",driver="0")
 
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","4","")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"devwh","5","") for x in data("devwh")])
@@ -281,3 +301,14 @@ conn.execute(tbl_user.insert(),[dict_user(x.devwh_id,"devwh","6","") for x in da
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","10","")])
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","11","")])
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","12","") for x in range(rndnum(5,10))])
+
+#为每个设备设置司机
+data1=conn.execute("select id,devwh_id from dev").fetchall()
+data2=conn.execute("select id,name,depart_id from user where job=6").fetchall()
+if len(data1) == len(data2):
+    ll = len(data1)
+    for i in range(len(data1)):
+        if data1[i].devwh_id != data2[i].depart_id:
+            break;
+        sql = "update dev set driver=" +str(data2[i].id)+ " where id="+ str(data1[i].id)
+        conn.execute(sql)

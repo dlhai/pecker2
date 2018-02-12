@@ -93,18 +93,9 @@ var db_job = [
 ]
 
 function GetRoleUser(name) {
-    alert( "启用GetRoleUser调试" );
-    db_rolusers = [
-        { "id": "1", "account": "hongliangwan", "name": "洪良万", " face": "img/face/face0.jpg", "depart_id": "0", " depart_table": "0", "job": "1" },
-        { "id": "2", "account": "zouwendong", "name": "邹文栋", " face": "img/face/face3.jpg", "depart_id": "1", " depart_table": "15", "job": "2" },
-        { "id": "84", "account": "hanjianian", "name": "韩嘉年", " face": "img/face/face3.jpg", "depart_id": "1", " depart_table": "15", "job": "3" },
-        { "id": "291", "account": "mojinxin", "name": "莫金鑫", " face": "img/face/face13.jpg", "depart_id": "0", " depart_table": "0", "job": "4" },
-        { "id": "292", "account": "wujing", "name": "吴靖", " face": "img/face/face7.jpg", "depart_id": "1", " depart_table": "20", "job": "5" },
-        { "id": "300", "account": "jindanxue", "name": "金丹雪", " face": "img/face/face18.jpg", "depart_id": "1", " depart_table": "20", "job": "6" },
-        { "id": "441", "account": "yinhanqiao", "name": "尹含巧", " face": "img/face/face14.jpg", "depart_id": "0", " depart_table": "0", "job": "10" },
-        { "id": "442", "account": "caigaoang", "name": "蔡高昂", " face": "img/face/face19.jpg", "depart_id": "0", " depart_table": "0", "job": "11" },
-        { "id": "443", "account": "miaoxiaole", "name": "苗小乐", " face": "img/face/face20.jpg", "depart_id": "0", " depart_table": "0", "job": "12" },
-    ]
+    alert("启用" + name + "帐号调试");
+
+    ReqdataS("/roleuserall", "", function (res) { db_rolusers = res.data; });
     return GetSub(db_rolusers, "job", GetSub(db_job, "name", name).id);
 }
 
@@ -167,6 +158,12 @@ var db_devstatus = [
     { "id": "1", "name": "任务中" },
     { "id": "-1", "name": "报废" },
 ]
+var db_devwork_status = [
+    { "id": "0", "name": "编辑" },
+    { "id": "1", "name": "提交" },
+    { "id": "2", "name": "受理" },
+    { "id": "-1", "name": "拒绝" },
+]
 
 var db_devclss = [
     { "id": "1", "name": "航空母舰" },
@@ -199,9 +196,10 @@ var db_tbl = [
     { "id": "16", "name": "winderarea", "title": "风区" },
     { "id": "17", "name": "efan", "title": "风机" },
     { "id": "18", "name": "leaf", "title": "叶片" },
-    { "id": "19", "name": "fltrep", "title": "报修" },
+    { "id": "19", "name": "fault", "title": "报修" },
     { "id": "20", "name": "devwh", "title": "驻地" },
     { "id": "21", "name": "dev", "title": "设备" },
+    { "id": "22", "name": "devwork", "title": "设备任务" },
 ]
 function GetTbl(name) { return GetSub(db_tbl, "name", name); }
 
@@ -224,6 +222,20 @@ function Reqdata(url, ctx, fun) {
     };
     xmlhttp.send();
 }
+
+// 同步方式
+function ReqdataS(url, ctx, fun) {
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("GET", url, false);
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            jdata = $.parseJSON(xmlhttp.responseText);
+            fun(jdata, ctx);
+        }
+    };
+    xmlhttp.send();
+}
+
 
 // 回调函数格式：render_fun(ar, id)
 function ReqRender(url, id, val, render_fun) {

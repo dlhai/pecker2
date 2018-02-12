@@ -9,9 +9,9 @@ class obj:
 
 def tojson(o):
     if type(o) == type([]):
-        return "["+",".join([tojson(t) for t in o ])+"]";
+        return "["+",".join([tojson(t) for t in o ])+"]\n";
     elif type(o) == type({}):
-        return "{"+",".join(['"'+k+'":'+tojson(v) for k,v in o.items() ])+"}";
+        return "{"+",".join(['"'+k+'":'+tojson(v) for k,v in o.items() ])+"}\n";
     elif type(o) == type(obj()):
         return tojson(o.__dict__)
     else:
@@ -44,9 +44,10 @@ db_tbl = [
     { "id": "16", "name": "winderarea", "title": "风区" },
     { "id": "17", "name": "efan", "title": "风机" },
     { "id": "18", "name": "leaf", "title": "叶片" },
-    { "id": "19", "name": "fltrep", "title": "报修" },
+    { "id": "19", "name": "fault", "title": "报修" },
     { "id": "20", "name": "devwh", "title": "设备驻地" },
     { "id": "21", "name": "dev", "title": "设备" },
+    { "id": "22", "name": "devwork", "title": "设备任务" },
 ]
 branch = {
     "devwh": { "sub": "", "image": "img/devwh.png", },
@@ -80,8 +81,10 @@ tables = {
     'winderarea':Table('winderarea', metadata,autoload=True),
     'efan':Table('efan', metadata,autoload=True),
     'leaf':Table('leaf', metadata,autoload=True),
+    'fault':Table('fault', metadata,autoload=True),
     'devwh':Table('devwh', metadata,autoload=True),
     'dev':Table('dev', metadata,autoload=True),
+    'devwork':Table('devwork', metadata,autoload=True),
     }
 base=tables["base"]
 base.sl = [base.c.title, base.c.name, base.c.forder, base.c.ftype, base.c.twidth, base.c.tstyle]
@@ -165,6 +168,21 @@ def roleuser():
     ret=obj()
     ret.fun="roleuser"
     ret.param=param
+    ret.result = "200"
+    ret.data = user
+    return Response(tojson(ret), mimetype='application/json')
+
+#frame用来填用户角色组合框
+@app.route("/roleuserall") 
+def roleuserall():
+    user = QueryObj( "select min(id) as id, account, name, job, depart_id, depart_table, face from user group by job")
+    for u in [x for x in user if x.depart_table != 0]:
+        tbl = gettbl(u.depart_table)
+        u.depart = QueryObj( "select * from "+tbl["name"]+" where id="+str(u.depart_id))[0]
+        if tbl["name"] == "winder":
+            u.sub = QueryObj( "select id, name from winderarea where winder_id="+str(u.depart_id))
+    ret=obj()
+    ret.fun="roleuserall"
     ret.result = "200"
     ret.data = user
     return Response(tojson(ret), mimetype='application/json')

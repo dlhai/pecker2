@@ -88,6 +88,20 @@ def QueryData(name,tbl,field,value):
             model += "conn.execute(tbl_"+t.name+".insert(),[dict_"+t.name+t.cycle+"])\n"
         elif t.type == "py":
             model += t.name+"\n"
+
+    model += '''
+#为每个设备设置司机
+data1=conn.execute("select id,devwh_id from dev").fetchall()
+data2=conn.execute("select id,name,depart_id from user where job=6").fetchall()
+if len(data1) == len(data2):
+    ll = len(data1)
+    for i in range(len(data1)):
+        if data1[i].devwh_id != data2[i].depart_id:
+            break;
+        sql = "update dev set driver=" +str(data2[i].id)+ " where id="+ str(data1[i].id)
+        conn.execute(sql)
+'''
+
     return model
 
 def gatherfields(tbls):

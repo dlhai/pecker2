@@ -4,54 +4,73 @@
     <meta charset="utf-8">
     <title>啄木鸟风电维保系统</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <script src="js/jquery.js"></script>
     <link rel="stylesheet" href="css/bootstrap.css"/>
+    <script src="js/bootstrap.js"></script>
     <script type="text/javascript" src="js/doTe.js"></script>
-    <script src="js/jquery.min.js"></script>
+    <script src="js/utils.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
-    <script src="js/xpecker.js"></script>
+    <script src="js/Cube.js"></script>
     <script src="js/db.js"></script>
-    <link rel="StyleSheet" href="css/dtree.css" type="text/css" />
-    <script type="text/javascript" src="js/dtree.js"></script>
+    <script src="js/xpecker.js"></script>
+
 </head>
-<body class="xFCsrow" style="padding:10px 0px 0px 10px;">
-    <div class="xFIgrow xFCscol" style="width:100px">
-        <section class="xPanel" style="margin: 0px 10px 10px 0px; ">
-            <header>驻地信息<div style="float: right;"><a href="#">编辑</a></div></header>
-            <div id="item_detail" style="padding: 5px; "></div>
-        </section>
-        <section class="xPanel xFCscol xFIgrow" style="height:100px; margin: 0px 10px 10px 0px;">
-            <header class="xFIfixed">设备列表<div style="float: right;"><a href="#">编辑</a></div></header>
-            <div id="item_list" class="xFIgrow xScroll" style="padding: 5px; "></div>
-        </section>
-    </div>
-    <section class="xFIgrow xPanel xFCscol" style="width:100px;margin: 0px 10px 10px 0px;">
+<body class="xFCsrow">
+    <section class="xPanel2"  style="width:100px"><!--两个子项都固定宽度100，使它们获得相同的增量-->
+        <header class="xFIfixed">设备列表<div style="float: right;"><a href="javascript:onNewDev()">新建</a> <a href="javascript:onEditDev()">编辑</a></div></header>
+        <div id="item_list" class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"></div>
+    </section>
+    <section class="xPanel2" style="width:100px;">
         <header class="xFIfixed">任务列表</header>
-        <div id="tasklist" class="xScroll xFIgrow" style="padding: 5px;"></div>
+        <div id="tasklist" class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"></div>
     </section>
     <script type="text/javascript">
-        for (var i in db_dev_list.data) {
-            var t = rnditem(db_userlist.data, "prof", "司机");
-            db_dev_list.data[i].driver = t.name;
-            db_dev_list.data[i].phone = t.phone;
-            db_dev_list.data[i].gps = "";
+        var g_devwhs, g_devs, g_devvenders, g_user = parent.g_user, g_driver, g_editmode = false;;
+        if (g_user == undefined)
+            g_user = GetRoleUser("驻地主管");
+
+        Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res1) { g_devvenders = res1; });
+        Reqdata("/queryuser?depart_table=" + GetSub(db_tbl, "name", "devwh").id + "&depart_id=" + g_user.depart.id, "", function (res2) { g_driver = res2; });
+        Reqdata("/rd?ls=dev&devwh_id="+g_user.depart.id, "", function (res3) {
+            g_devs = res3;
+            GetSub(g_devs.fields, "name", "devwh_id").twidth = 0;
+            GetSub(g_devs.fields, "name", "producedate").twidth = 0;
+            GetSub(g_devs.fields, "name", "buydate").twidth = 0;
+            $("#item_list").html(RenderTable2(g_devs, undefined, FieldToShow));
+            TableBindClick3(g_devs.ls, function (id) {
+                g_curdev = GetSub(g_devs.data, "id", id);
+                Reqdata("/rd?ls=devwork&dev_id=" + id, "", function (works) {
+                    $("#tasklist").html(RenderTable2(works, undefined, function (data, field) {
+                        if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
+                        else if (field.name == "devwh_id") return g_user.depart.name;
+                        else if (field.name == "status") return GetSub(db_devwork_status, "id", data[field.name]).name;
+                        else if (field.name == "vender") return GetSub(g_devvenders.data, "id", data[field.name]).name;
+                        else if (field.name == "driver") return GetSub(g_driver.data, "id", data[field.name]).name;
+                        else return data[field.name];
+                    }
+        ));
+                });
+            });
+        });
+        function FieldToShow(data, field) {
+            if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
+            else if (field.name == "devwh_id") return g_user.depart_name;
+            else if (field.name == "status") return GetSub(db_devstatus, "id", data[field.name]).name;
+            else if (field.name == "vender") return GetSub(g_devvenders.data, "id", data[field.name]).name;
+            else if (field.name == "driver") return GetSub(g_driver.data, "id", data[field.name]).name;
+            else return data[field.name];
+        }
+        function FieldToEdit(data, field) {
+            if (field.name == "clss") return RenderSelect(db_devclss, data[field.name]);
+            else if (field.name == "devwh_id") return RenderSelect([g_user.depart], data[field.name]);
+            else if (field.name == "status") return RenderSelect(db_devstatus, data[field.name]);
+            else if (field.name == "vender") return RenderSelect(g_devvenders.data, data[field.name]);
+            else return data[field.name];
         }
 
-        var i = 3;
-        $("#item_detail").html(RenderForm2(db_devwh_list,i));
-        $("#item_list").html(RenderTable2(db_dev_list, "xTable xTable-hover"));
-        TableBindClick();
+        function onNewDev() { (new cbDlg("新建 设备", "width:610px", RenderForm4(Create(g_devs.fields), g_devs.fields, FieldToEdit))).Show(); }
+        function onEditDev() { (new cbDlg("编辑 设备", "width:610px", RenderForm4(g_curdev, g_devs.fields, FieldToEdit))).Show(); }
 
-        $("tr").click(function () {
-            var tag = $(this).parent()[0].localName;
-            if (tag.toLowerCase() == "thead")
-                return;
-            var devtasklist = {
-                fields: db_devtasklist.fields,
-                data: rndsubarray(db_devtasklist.data, 10,50),
-            };
-
-            $("#tasklist").html(RenderTable2(devtasklist));
-        });
 
     </script>
 </body>
