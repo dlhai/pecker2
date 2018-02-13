@@ -98,7 +98,7 @@ if len(data1) == len(data2):
     for i in range(len(data1)):
         if data1[i].devwh_id != data2[i].depart_id:
             break;
-        sql = "update dev set driver=" +str(data2[i].id)+ " where id="+ str(data1[i].id)
+        sql = "update dev set driver_id=" +str(data2[i].id)+ " where id="+ str(data1[i].id)
         conn.execute(sql)
 '''
 

@@ -38,7 +38,7 @@
     });
 
     // 在地图上显示设备
-    var param_dev = g_user.job == "4" ? "" : "&devwh_id=" + g_user.depart_id;
+    var param_dev = g_user.job == "4" ? "" : g_user.job == "5" ? "&devwh_id=" + g_user.depart_id : g_user.job == "6" ? "&driver=" + g_user.id : "-1";
     Reqdata("/rd?ls=dev" + param_dev, "", function (res2) {
         g_devs = res2;
         for (var x in res2.data)

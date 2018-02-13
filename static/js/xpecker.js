@@ -57,35 +57,6 @@ $(function () {
     }
 });
 
-function RenderForm3(ar, idx) {
-    alert("已改更改为cube::RenderForm4，注意参数有变");
-    var r = '<div class="x2Form">';
-    for (var i = 0; i < ar.fields.length; i++) {
-        var field = ar.fields[i];
-        var val = ar.data[idx][field.name];
-        if (field.name == "id")
-            continue;
-
-        var attr = "";
-        if (field.name.indexOf("_") != -1)
-            attr = 'id="' + field.name + "_" + val + '"';
-
-        r += "<div><label>" + field.title + "</label>";
-        if (field.ftype == "div")
-            r += "<div "+attr+">"+val + "</div>";
-        else if (field.ftype == "input")
-            r += '<input '+attr+' name="' + field.name+'" value="'+ val + '"/>';
-        else if (field.ftype == "input_long")
-            r += '<input ' + attr +' style="width:490px;" name="' + field.name + '" value="' + val + '" />';
-        else if (field.ftype == "textarea")
-            r += '<textarea ' + attr +' style="resize:none;width:490px;max-height:45px;" name="' + field.name + '">' + val + '</textarea>';
-        else if (field.ftype == "select")
-            r += '<select '+attr+' name="'+field.name+'"></select>';
-        r += "</div>";
-    }
-    r += "</div>";
-    return r;
-}
 
 function RenderPane(ar, idx, fun){
     var r = "";
@@ -186,22 +157,6 @@ function fillselect(ar, idx) {
     }
 }
 
-function RenderForm2(ar, i) {
-    alert("使用了旧接口：RenderForm2已被RenderPane替代");
-    return "";
-    //var r = "";
-    //for (var x = 0; x < ar.fields.length; x++) {
-    //    if (ar.fields[x].ftype == "bigtext")
-    //        r += "<div class=\"xFormItem\"><label>" + ar.fields[x].title + "</label><div style=\"overflow-y: scroll;width:500px;max-height:45px;\">"
-    //            + ar.data[i][ar.fields[x].name] + "</div></div>"
-    //    else if (ar.fields[x].ftype == "image")
-    //        r += "<div class=\"xImgSFZ\"><img src=\"" + ar.data[i][ar.fields[x].name] + "\"/></div>";
-    //    else
-    //        r += "<div class=\"xFormItem\"><label>" + ar.fields[x].title + "</label><div>" + ar.data[i][ar.fields[x].name] + "</div></div>"
-    //}
-    //return r;
-}
-
 function EFanCreate(fields1, fields2, winder_id, area_id) {
     var efan = Create(fields1);
     efan.winder_id = g_user.depart_id;
@@ -279,16 +234,18 @@ EfanForm.prototype.Render = function (efan) {
 }
 
 // 树控件
-
 // ID 根节点类型, 叶节点类型, 点击回调函数
-function x3Tree(id, ls, param, leaf, ItemClick ) {
+function x3Tree(id, ls, param, leaf, useritemclick ) {
     this.leaf = leaf;
-    this.ItemClick = ItemClick;
+    this.useritemclick = useritemclick;
     this.Req(id, ls, param);
     this.root = true;
 
     this.branch = {
         "devwh": { "sub": "", "image": "img/devwh.png", },
+
+        "matprov": { "sub": "matwh", "image": "img/folder.gif", },
+        "matwh": { "sub": "", "image": "img/devwh.png", },
 
         "root": { "sub": "winderco", "image": "", },
         "winderco": {"sub": "winderprov", "image": "img/diy/1_open.png" },
@@ -305,7 +262,7 @@ x3Tree.prototype.Req = function (id, ls, param) {
         var data = res.data;
         for (var i in res.data) {
             if (ls == ctx.leaf) { // 叶节点，少了左边的加号，为缩进对齐加了一层div
-                if (this.root){
+                if (ctx.root){
                     html += "<div><div id=\"" + ls + "_" + data[i].id + "\"><span><img src=\""
                         + ctx.branch[ls].image + "\">" + data[i].name + "</span></div></div>\n"
                 }
@@ -319,25 +276,26 @@ x3Tree.prototype.Req = function (id, ls, param) {
                     + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
                     + ctx.branch[ls].image + "\">" + data[i].name + "</span></div>\n"
             }
-            this.root = false;
+            ctx.root = false;
         }
 
         $("#" + id).append(html);
         $("#" + id).children("img").attr("src", "img/nolines_minus.gif"); // 把加号改成减号
-        $(".xTree div>img").off("click", "", ctx.ItemExpand);
-        $(".xTree div>span").off("click", "", ctx.ItemClick);
-        $(".xTree div>img").on("click", "", {}, ctx.ItemExpand);
-        $(".xTree div>span").on("click", "", {}, ctx.ItemClick);
+        $(".xTree div>img").off("click", "", treeItemExpand);
+        $(".xTree div>span").off("click", "", treeItemClick);
+        $(".xTree div>img").on("click", "", { ctx: ctx }, treeItemExpand);
+        $(".xTree div>span").on("click", "", { ctx: ctx }, treeItemClick);
     });
 }
+
 //点击树节点的加号
-x3Tree.prototype.ItemExpand = function () {
-    alert("hahah!");
+function treeItemExpand(ev) {
+    ctx = ev.data.ctx;
     var siblings = $(ev.target).siblings("div");
     if (siblings.length == 0) {
         var id = $(ev.target).parent().attr("id");
         var at = id.split("_");
-        Req(id, branch[ls].sub, at[0] + "_id=" + at[1])
+        ctx.Req(id, ctx.branch[at[0]].sub, at[0] + "_id=" + at[1])
     }
     else if (siblings.css("display") == "none") {
         $(event.srcElement).attr("src", "img/nolines_minus.gif");
@@ -347,4 +305,8 @@ x3Tree.prototype.ItemExpand = function () {
         $(event.srcElement).attr("src", "img/nolines_plus.gif");
         siblings.css("display", "none");
     }
+}
+//点击树节点的加号
+function treeItemClick(ev) {
+    alert("hehe!");
 }

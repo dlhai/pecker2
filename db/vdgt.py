@@ -84,7 +84,7 @@ def rndaddition(type):
 
 def getitem( tblname, id ):
     for x in dat_all[tblname]:
-        if x.id == id:
+        if str(int(x.id)) == str(id):
             return x
 
 def getitembyname( tblname, name ):
@@ -184,17 +184,9 @@ def rnddatespan(dt,min,max):
         dt =  datetime.datetime.strptime(dt,'%Y-%m-%d')
     return (dt + datetime.timedelta(days = rndnum(min,max)))
 
-def CreateRelationData():
-    #1.风场主管、驻场
-    #for x in dat["winder"]:
-    #    CreateUser( job="风场主管", skill="", x.id, depart_table="winder" )
-    #    for y in range(rndnum(2,5)):
-    #        CreateUser( job="驻场", skill="", x.id, depart_table="winder" )
-    pass
-
 if __name__=="__main__": 
     setdata(loadpkl('rawdata.pkl'))
     aa = getitembyname("_tbl","__sys__").id
     
-    clss=rnditem("_devclss")
-    aa = clss.id
+    for i in range(500):
+        print(rndqq())

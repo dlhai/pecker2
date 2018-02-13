@@ -63,15 +63,15 @@ function showDlg() {
 }
 
 // 渲染表单
-function RenderForm4(entity, fields, cb ) {
-    var r = '<div class="x2Form">';
-    for (var i in fields ) {
+function RenderFormIn(entity, fields, cb) {
+    var r = "";
+    for (var i in fields) {
         var field = fields[i];
         if (field.ftype == "none")
             continue;
 
         var val = entity[field.name];
-        var val = cb != undefined ? cb(entity, field):val;
+        var val = cb != undefined ? cb(entity, field) : val;
         var attr = "";
         if (field.name.indexOf("_") != -1)
             attr = 'id="' + field.name + "_" + val + '"';
@@ -91,9 +91,13 @@ function RenderForm4(entity, fields, cb ) {
             r += '<input ' + attr + ' name="' + field.name + '" value="' + val + '" onClick="laydate()" />';
         r += "</div>";
     }
+    return r;
+}
+function RenderForm4(entity, fields, cb) {
+    var r = '<div class="x2Form">';
+    RenderFormIn(entity, fields, cb);
     r += "</div>";
     return r;
-
 }
 
 // 渲染表格

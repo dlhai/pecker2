@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.css"/>
+    <script type="text/javascript" src="js/doTe.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/xpecker.js"></script>
+    <script src="js/Cube.js"></script>
+</head>
+<body class="xFCsrow" >
+    <section class="xPanel2" style="width:100px;">
+        <header class="heading">设备供应商<div style="float: right;"><a href="#" onClick="onDevVNew(this)">新建</a> <a href="#" onClick="onDevVEdit(this)">修改</a></div></header>
+        <div id="dev_vender_list" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
+    </section>
+    <section class="xPanel2" style="width:100px;">
+        <header class="heading"><div style="float: right;"><a href="#" onClick="xxxVNew(this)">新建</a> <a href="#" onClick="xxxVEdit(this)">修改</a></div></header>
+        <div id="xxx_vender_list" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
+    </section>
+
+    <script type="text/javascript">
+        var g_devVs = new Object();
+        Reqdata("/rd?ls=vender&type=" + GetTbl("dev").id, "", function (devVs) {
+            g_devVs = devVs;
+            $("#dev_vender_list").html(RenderTable2(devVs));
+            TableBindClick3(devVs.ls);
+        });
+
+        function onDevVNew(This) {
+            var title = "新建 设备供应商";
+            var cnt = RenderForm4(Create(g_devVs.fields), g_devVs.fields);
+            (new cbDlg(title, "width:610px", cnt)).Show();
+        }
+        function onDevVEdit(This) {
+            var efanv = GetSub(g_devVs.data, "id", g_TableCurRow[g_devVs.ls]);
+            var title = "编辑 设备供应商";
+            var cnt = RenderForm4(efanv, g_devVs.fields);
+            (new cbDlg(title, "width:610px", cnt)).Show();
+        }
+
+    </script>
+</body>
+</html>
+

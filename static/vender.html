@@ -29,11 +29,13 @@
         var g_leafVs = new Object();
         Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (efanVs) {
             g_efanVs = efanVs;
+            g_efanVs.ls = "efan"+g_efanVs.ls;
             $("#efan_vender_list").html(RenderTable2(efanVs));
             TableBindClick3(efanVs.ls);
         });
         Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (leafVs) {
             g_leafVs = leafVs;
+            g_leafVs.ls = "leaf" + g_leafVs.ls;
             $("#leaf_vender_list").html(RenderTable2(leafVs));
             TableBindClick3(leafVs.ls);
         });

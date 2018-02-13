@@ -16,7 +16,7 @@
     },
     {
         "id": "3", "type": "winder", "name": "驻场", modules: [
-            { name: "地图", url: "winder2.html" },
+            { name: "地图", url: "windermap.html" },
             { name: "设备", usesub: true, url: "winder2.html" },
             { name: "案件", usesub: true, url: "coord.html" },
             { name: "记录", usesub: true, url: "repairlog.html" }]
@@ -26,7 +26,7 @@
             { name: "地图", url: "devmap.html" },
             { name: "驻地", url: "devsu.html" },
             { name: "人员", url: "user3.html" },
-            { name: "厂家", url: "vender.html" }]
+            { name: "厂家", url: "devvender.html" }]
     },
     {
         "id": "5", "type": "dev", "name": "驻地主管", modules: [
@@ -37,7 +37,7 @@
     {
         "id": "6", "type": "dev", "name": "设备司机", modules: [
             { name: "地图", url: "devmap.html" },
-            { name: "设备", url: "driver.html" }]
+            { name: "设备", url: "devdriver.html" }]
     },
     { "id": "7", "type": "wh", "name": "仓库超级帐号", modules: [{ name: "仓库", url: "matwh_su.html" }, { name: "人员", url: "person.html?type=仓管|仓主" }, { name: "材料", url: "material.html" }] },
     { "id": "8", "type": "wh", "name": "仓库主管", modules: [{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }] },
@@ -95,8 +95,8 @@ var db_job = [
 function GetRoleUser(name) {
     alert("启用" + name + "帐号调试");
 
-    ReqdataS("/roleuserall", "", function (res) { db_rolusers = res.data; });
-    return GetSub(db_rolusers, "job", GetSub(db_job, "name", name).id);
+    ReqdataS("/roleuserall", "", function (res) { db_roleusers = res.data; });
+    return GetSub(db_roleusers, "job", GetSub(db_job, "name", name).id);
 }
 
 function GetJob(type, parentjobid) {
@@ -200,6 +200,9 @@ var db_tbl = [
     { "id": "20", "name": "devwh", "title": "驻地" },
     { "id": "21", "name": "dev", "title": "设备" },
     { "id": "22", "name": "devwork", "title": "设备任务" },
+    { "id": "23", "name": "matprov", "title": "仓库省区" },
+    { "id": "24", "name": "matwh", "title": "仓库" },
+    { "id": "25", "name": "mat", "title": "材料" },
 ]
 function GetTbl(name) { return GetSub(db_tbl, "name", name); }
 
@@ -396,19 +399,6 @@ function RenderTable(it)
         r +=  "</tr>";
     }
     r += "</tbody></table>";
-    return r;
-}
-
-function  RenderForm(ar, i) {
-    var r = "";
-    for (x = 0; x < ar.fields.length; x++) {
-        if (ar.fields[x].ftype == "bigtext")
-            r += "<div class=\"d_data_item\"><label>" + ar.fields[x].title + "</label><div style=\"width:490px;\">" + ar.data[i][ar.fields[x].name] + "</div></div>"
-        else if (ar.fields[x].ftype == "image")
-            r += "<div class=\"xImgSFZ\"><img src=\"" + ar.data[i][ar.fields[x].name] + "\"/></div>";
-        else
-            r += "<div class=\"d_data_item\"><label>" + ar.fields[x].title + "</label><div>" + ar.data[i][ar.fields[x].name] + "</div></div>"
-    }
     return r;
 }
 

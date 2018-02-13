@@ -3,62 +3,14 @@ from buildarea import dobj,rndarea
 from vdgt import *
 from model import *
 
-db_tbl = [
-    { "id": "0", "name": "none", "title": "占位" },
-    { "id": "1", "name": "base", "title": "定义" },
-    { "id": "2", "name": "link", "title": "一对多引用" },
-    { "id": "3", "name": "addit", "title": "附件" },
-    { "id": "4", "name": "config", "title": "配置信息" },
-    { "id": "5", "name": "admarea", "title": "行政区划" },
-    { "id": "6", "name": "user", "title": "供应商" },
-    { "id": "7", "name": "certif", "title": "人员" },
-    { "id": "8", "name": "edu", "title": "证件信息" },
-    { "id": "9", "name": "employ", "title": "受教育经历" },
-    { "id": "10", "name": "opus", "title": "就业经历" },
-    { "id": "11", "name": "vender", "title": "发表作品" },
-    { "id": "12", "name": "wait", "title": "" },
-    { "id": "13", "name": "winderco", "title": "风电企业" },
-    { "id": "14", "name": "winderprov", "title": "省区" },
-    { "id": "15", "name": "winder", "title": "风场" },
-    { "id": "16", "name": "winderarea", "title": "风区" },
-    { "id": "17", "name": "efan", "title": "风机" },
-    { "id": "18", "name": "leaf", "title": "叶片" },
-    { "id": "19", "name": "fltrep", "title": "报修" },
-    { "id": "20", "name": "devwh", "title": "设备驻地" },
-    { "id": "21", "name": "dev", "title": "设备" },
-]
 def gettbl( nameorid ):
-    s = str(nameorid)
-    for x in db_tbl:
-        if x["name"] == s or x['id'] == s:
-            return x
-    raise KeyError
+    r = getitem("_tbl",nameorid)
+    if r == None:
+        r = getitembyname( "_tbl", nameorid )
+    return r
 
-db_job = [
-    { "id": "1", "type": "winder", "name": "叶片超级帐号" },
-    { "id": "2", "type": "", "name": "风场主管" },
-    { "id": "3", "type": "", "name": "驻场" },
-    { "id": "4", "type": "", "name": "设备超级帐号" },
-    { "id": "5", "type": "devwh", "name": "驻地主管" },
-    { "id": "6", "type": "devwh", "name": "设备司机" },
-    { "id": "7", "type": "su", "name": "仓库超级帐号" },
-    { "id": "8", "type": "", "name": "仓库主管" },
-    { "id": "9", "type": "", "name": "仓库管理员" },
-    { "id": "10", "type": "su", "name": "调度超级帐号" },
-    { "id": "11", "type": "", "name": "调度主管" },
-    { "id": "12", "type": "", "name": "调度" },
-    { "id": "13", "type": "su", "name": "专家超级帐号" },
-    { "id": "14", "type": "", "name": "专家" },
-    { "id": "15", "type": "su", "name": "技工超级帐号" },
-    { "id": "16", "type": "", "name": "维修队长" },
-    { "id": "17", "type": "", "name": "技工" },
-    { "id": "18", "type": "", "name": "公众" },
-]
 def getjob( name ):
-    for x in db_job:
-        if x["name"] == name:
-            return x["id"]
-    raise KeyError
+    return getitembyname( "_job", name )
 
 def QueryObj( sql ):
     result = conn.execute(sql).fetchall()
@@ -75,11 +27,11 @@ def QueryObj( sql ):
 roleusers = QueryObj( "select min(id) as id, account, name, job, depart_id, depart_table, face from user group by job")
 for u in [x for x in roleusers if x.depart_table != 0]:
     tbl = gettbl(u.depart_table)
-    u.depart = QueryObj( "select * from "+tbl["name"]+" where id="+str(u.depart_id))[0]
-    if tbl["name"] == "winder":
+    u.depart = QueryObj( "select * from "+tbl.name+" where id="+str(u.depart_id))[0]
+    if tbl.name == "winder":
         u.sub = QueryObj( "select id, name from winderarea where winder_id="+str(u.depart_id))
 def GetUser( job ):
-    jobid = int(getjob(job))
+    jobid = int(getjob(job).id)
     for u in roleusers:
         if u.job == jobid:
             return u
@@ -88,13 +40,13 @@ def GetUser( job ):
 #各种需要的数据
 winder = QueryObj( "select * from winder where id="+str(GetUser("风场主管").depart_id) )[0]
 winder.leader = GetUser("风场主管")
-winder.clerks = QueryObj( "select * from user where depart_table="+str(gettbl("winder")["id"]) + " and depart_id="+str(winder.id) )
+winder.clerks = QueryObj( "select * from user where depart_table="+str(gettbl("winder").id) + " and depart_id="+str(winder.id) )
 winder.efans = QueryObj( "select * from efan where winder_id="+str(winder.id) )
 winder.leafs = QueryObj( "select * from leaf where winder_id="+str(winder.id) )
-guides = QueryObj( "select * from user where job="+str(getjob("调度")) )
+guides = QueryObj( "select * from user where job="+str(getjob("调度").id) )
 devwh = QueryObj( "select * from devwh where id="+str(GetUser("驻地主管").depart_id) )[0]
 devwh.leader = GetUser("驻地主管")
-devwh.clerks = QueryObj( "select * from user where depart_table="+str(gettbl("devwh")["id"]) + " and depart_id="+str(devwh.id) )
+devwh.clerks = QueryObj( "select * from user where depart_table="+str(gettbl("devwh").id) + " and depart_id="+str(devwh.id) )
 devwh.devs = QueryObj( "select * from dev where devwh_id="+str(devwh.id ))
 
 #生成30个故障报告，并把它们找出来
@@ -107,7 +59,7 @@ def create_devwork(fault):
         dev = random.choice(devwh.devs)
         devworks.append( dict(status=2,	#状态 0:编辑、1:提交、2受理 -1拒绝
             fault_id=fault.id,	#故障单号
-            guide= fault.guide,	#发单人
+            guide_id=fault.guide_id,	#发单人
             guidedt=rnddatespan(fault.guidetime,0,1),	#发单时间
             clss=int(random.choice(data("_devclss").data)[0]),	#设备分类
             devwh_id=devwh.id,	#所属驻地
@@ -115,10 +67,10 @@ def create_devwork(fault):
             winder_id=winder.id,	#任务风场
             addr=winder.addr,	#任务地址
             remark=rnditem("_songci"),	#备注
-            devwhsu=devwh.leader.id,	#接单人
-            devwhsudt=rnddatespan(fault.guidetime,1,2),	#接单时间
+            deal_id=devwh.leader.id,	#接单人
+            dealdt=rnddatespan(fault.guidetime,1,2),	#接单时间
             dev_id=dev.id,	#调用设备
-            driver=dev.driver,	#司机
+            driver_id=dev.driver_id,	#司机
         ))
     conn.execute(tbl_devwork.insert(),devworks)
 
@@ -133,7 +85,7 @@ for i, fault in enumerate(faults):
     if 7<=i<=13:
         cols["status"]=2  #2已受理(正在评估)
     if i>=7:#受理人
-        cols[ "guide"]=random.choice(guides).id
+        cols[ "guide_id"]=random.choice(guides).id
         cols["guidetime"]=rnddatespan(fault.reporttime,0,1)
     if i>=8:#专家组
         pass

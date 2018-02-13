@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <script type="text/javascript" src="js/doTe.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="laydate/laydate.js"></script>
+
+    <script src="js/utils.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/Cube.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/xpecker.js"></script>
+</head>
+<body class="xFCsrow">
+    <section class="xPanel2 xFIfixed xScroll" style="width: 300px;padding:5px;">
+        <div id="xTree" class="xTree"></div>
+    </section>
+    <div id="curitem" class="xFCscol">
+        <section class="xPanel2 xFIfixed">
+            <header>节点信息<div style="float: right;"><a href="javascript:EditShow()">编辑</a></div></header>
+            <div id="item_detail" class="x2Form" style="padding:5px;"></div>
+        </section>
+        <section class="xPanel2">
+            <header>下级列表<div style="float: right;"> <a href="javascript:ImportData()">导入</a> <a href="javascript:AddChild()">添加</a></div></header>
+            <div class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"><div id="subitem_list"></div></div>
+        </section>
+    </div>
+
+    <script id="tpl_mat_import" type="text/template">
+        <div style="margin: 10px 15px;">
+            <div>为{%=it.data[0].name%}批量导入{%=branch.sub(cur.ls).name%}</div>
+            <div style="margin:5px 0px;">表格请按照模板填写，点此下载模板</div>
+            <input type="file" id="upload_efan" name="upload_efan" /><input type="button" value="上传" onclick="uploadFile()" />
+            <div style="border:1px solid #dddddd;width:100%;height:15px;"><div id="progress" style="background-color:#0094ff;width:50%;height:100%;"></div></div>
+        </div>
+    </script>
+
+    <script type="text/javascript">
+        var cur = null; // 面板当前显示的元素
+        var sublist = null;// 表格当前显示的列表
+        var additlist = null; // 表格元素中的子元素列表（叶片列表）
+
+        var g_tree = new x3Tree("xTree", "matprov", "", "matwh", function (ev) {
+            //var id = $(ev.target).parent().attr("id").split("_")[1];
+            //g_curwh = GetSub(g_devwhs.data, "id", id);
+            //$("#item_detail").html(RenderPane2(g_curwh, g_devwhs.fields));
+            //Reqdata("/rd?ls=dev&devwh_id=" + id, "", function (res) {
+            //    g_devs = res;
+            //    $("#subitem_list").html(RenderTable2(res, "", FieldToShow));
+            //    TableBindClick3(res.type, function (devid) { g_curdev = GetSub(g_devs.data, "id", devid) });
+            //});
+        });
+
+        //function ImportData() {
+        //    var tpl_efan_list = doT.template(document.getElementById('tpl_efan_import').innerHTML);
+        //    $("#ModalDlgContent").html(tpl_efan_list(cur, 0));
+        //    $("#ModalDlgTitle").html("导入 " + branch.sub(cur.ls).name);
+        //    $('#ModalDlg').modal('show');
+        //}
+
+        //function EditShow() {
+        //    $("#ModalDlgContent").html(RenderForm4(cur.data[0], cur.fields));
+        //    fillselect(cur, 0);
+        //    ID2Name(cur, 0);
+        //    $("#ModalDlgTitle").html("编辑 " + branch[cur.ls].name);
+        //    $('#ModalDlg').modal('show');
+        //}
+        //function AddChild() {
+        //    sub = branch.sub(cur.ls);
+        //    if (sub.type != "efan") {
+        //        var child = { type: sub.type, fields: sublist.fields, data: [Create(sublist.fields)] };
+        //        // 根据对象类型不同，需要设置部分外键
+        //        if (child.type == "winderprov") {
+        //            child.data[0].winderco_id = cur.data[0].id;
+        //        }
+        //        else if (child.type == "winder") {
+        //            child.data[0].winderprov_id = cur.data[0].id;
+        //            child.data[0].winderco_id = cur.data[0].winderco_id;
+        //        }
+        //        else if (child.type == "winderarea") {
+        //            child.data[0].winder_id = cur.data[0].id;
+        //        }
+        //        else {
+        //            alert("leaf_su:不能识别的类型");
+        //        }
+        //        $("#ModalDlgContent").html(RenderForm4(child.data[0], child.fields));
+        //        fillselect(child, 0);
+        //        ID2Name(child, 0);
+        //        $("#ModalDlgTitle").html("添加 " + sub.name);
+        //        $('#ModalDlg').modal('show');
+        //    }
+        //    else {
+        //        var efan = Create(sublist.fields);
+        //        efan.winderarea_id = cur.data[0].id;
+        //        efan.winder_id = cur.data[0].winder_id;
+        //        efan.leafs = [Create(additlist.fields), Create(additlist.fields), Create(additlist.fields)];
+        //        $("#ModalDlgTitle").html("添加 " + sub.name);
+        //        RenderEfanForm(efan);
+        //        //fillselect(efan, 0);
+        //        //var nodes = $("#ModalDlgContent select");
+        //        //for (var i = 0; i < nodes.length; i++)
+        //        //    nodes[i].selectedIndex = -1;
+        //        //ID2Name(efan, 0);
+        //    }
+        //}
+
+        //function uploadFile() {
+        //    var file = $("#upload_efan").get(0).files[0];
+        //    var formData = new FormData();
+        //    formData.append("file", file);
+        //    var req = new XMLHttpRequest();
+        //    req.upload.onprogress = onprogress;
+        //    req.onreadystatechange = function () {
+        //        if (req.readyState == 4 && req.status == 200) {
+        //            alert(req.responseText);
+        //        }
+        //    };
+        //    req.open("POST", "/upload", true);
+        //    req.send(formData);
+        //}
+        //function onprogress(evt) {
+        //    var loaded = evt.loaded;     //已经上传大小情况
+        //    var tot = evt.total;      //附件总大小
+        //    var per = Math.floor(100 * loaded / tot);  //已经上传的百分比
+        //    $("#progress").html(per + "%");
+        //    $("#progress").css("width", per + "%");
+        //}
+
+        // 表单验证的几种方法： http://www.jb51.net/article/92741.htm
+    </script>
+</body>
+</html>
+

@@ -4,36 +4,40 @@
     <meta charset="utf-8">
     <title>啄木鸟风电维保系统</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=nSxiPohfziUaCuONe4ViUP2N"></script>
     <script src="js/jquery.js"></script>
     <link rel="stylesheet" href="css/bootstrap.css"/>
     <script src="js/bootstrap.js"></script>
     <script type="text/javascript" src="js/doTe.js"></script>
     <script src="js/utils.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/Cube.js"></script>
     <script src="js/db.js"></script>
-    <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
+    <script src="js/xmap.js"></script>
     <style>
-        .pane_image>div {
+        .pane_image > div {
             margin: 5px 0px 5px 5px;
             display: inline-flex;
             flex-direction: row;
             align-items: flex-start;
             border: 0px;
         }
-        .pane_image>div>label {
-            width: 40px;
-            text-align: right;
-            margin: 5px;
-        }
-        .pane_image>div>div:first-of-type {
-            border-radius: 4px;
-            border: 1px solid #dddddd;
-            display: inline-block;
-            padding: 5px 10px;
-            margin: 0px 5px;
-            width: 137px;
-        }
+
+            .pane_image > div > label {
+                width: 40px;
+                text-align: right;
+                margin: 5px;
+            }
+
+            .pane_image > div > div:first-of-type {
+                border-radius: 4px;
+                border: 1px solid #dddddd;
+                display: inline-block;
+                padding: 5px 10px;
+                margin: 0px 5px;
+                width: 137px;
+            }
 
         /*图片框无图时的背景十字架图片*/
         .ImgBlank {
@@ -44,13 +48,11 @@
     </style>
 
 </head>
-<body class="xFCsrow">
-    <section class="xPanel2"  style="width:100px"><!--两个子项都固定宽度100，使它们获得相同的增量-->
-        <header class="xFIfixed">设备列表<div style="float: right;"><a href="javascript:onNewDev()">新建</a> <a href="javascript:onEditDev()">编辑</a></div></header>
-        <div id="item_list" class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"></div>
+<body class="xFCsrow" style="padding:10px 0px 0px 10px;">
+    <section id="item_map" class="xPanel2" style="width:100px">
     </section>
 
-    <div id="curitem" class="xFCscol"  style="width:100px;">
+    <div id="curitem" class="xFCscol" style="width:100px;">
         <section class="xPanel2 xFIfixed">
             <header>设备信息<div style="float: right;"><a href="javascript:onEditDev()">编辑</a></div></header>
             <div id="item_detail" class="x2Form" style="padding:5px;"></div>
@@ -66,7 +68,7 @@
             <div class="pane_image" style="width: 100%; height: 80px; margin: 0px; padding:0px; display:block;border:0px;">
                 <div style="float: left; margin:0px;"><img style="width: 78px; height: 78px;" src="{%=it.face%}" /></div>
                 <div style="margin-top:0px;"><label>编号</label><div style="display:inline-block;">{%=it.code%}</div></div>
-                <div><label>分类</label><div>{%=it.clss%}</div></div>
+                <div><label>分类</label><div>{%=GetSub(db_devclss, "id", it.clss).name%}</div></div>
             </div>
             <img style="width: 280px; height: 160px;" src="{%=it.img%}" />
         </div>
@@ -89,48 +91,90 @@
         </div>
     </script>
 
-    <script type="text/javascript">
-        var tpl_dev_pane = doT.template(document.getElementById('tpl_dev_pane').innerHTML);
-        var tpl_dev_form = doT.template(document.getElementById('tpl_dev_form').innerHTML);
-        var g_devwhs, g_devs, g_devvenders, g_user = parent.g_user, g_driver, g_editmode = false;;
+    <script type="text/javascript"> //共享数据
+        var g_user = parent.g_user, g_devwhs, g_devs, g_dev, g_devvenders;
         if (g_user == undefined)
-            g_user = GetRoleUser("驻地主管");
+            g_user = GetRoleUser("设备司机");
 
-        Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res1) { g_devvenders = res1; });
-        Reqdata("/queryuser?depart_table=" + GetSub(db_tbl, "name", "devwh").id + "&depart_id=" + g_user.depart.id, "", function (res2) { g_driver = res2; });
-        Reqdata("/rd?ls=dev&devwh_id="+g_user.depart.id, "", function (res3) {
-            g_devs = res3;
+        ReqdataS("/rd?ls=devwh&id=" + g_user.depart_id, "", function (res1) { g_devwhs = res1; });// 驻地
+        var param_dev = "&driver_id=" + g_user.id;
+        ReqdataS("/rd?ls=dev" + param_dev, "", function (res2) {
+            g_devs = res2;
             GetSub(g_devs.fields, "name", "code").forder = -1;
             GetSub(g_devs.fields, "name", "clss").forder = -1;
-            GetSub(g_devs.fields, "name", "devwh_id").twidth = 0;
-            GetSub(g_devs.fields, "name", "producedate").twidth = 0;
-            GetSub(g_devs.fields, "name", "buydate").twidth = 0;
-            $("#item_list").html(RenderTable2(g_devs, undefined, FieldToShow));
-            TableBindClick3(g_devs.ls, function (id) {
-                g_curdev = GetSub(g_devs.data, "id", id);
-                var pane = tpl_dev_pane(g_curdev);
-                pane += RenderPane2(g_curdev, g_devs.fields, FieldToShow);
-                $("#item_detail").html(pane);
+        });// 设备
+        if (g_devs.data.length > 0) {
+            g_dev = g_devs.data[0];
+            ReqdataS("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id + "&id="+g_dev.vender_id, "", function (res) { g_devvenders = res; });
+        }
 
-                // 任务记录
-                Reqdata("/rd?ls=devwork&dev_id=" + id, "", function (works) {
-                    $("#tasklist").html(RenderTable2(works, undefined, function (data, field) {
-                        if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
-                        else if (field.name == "devwh_id") return g_user.depart.name;
-                        else if (field.name == "status") return GetSub(db_devwork_status, "id", data[field.name]).name;
-                        else if (field.name == "dev_id") return GetSub(g_devs.data, "id", data[field.name]).name;
-                        else if (field.name == "driver_id") return GetSub(g_driver.data, "id", data[field.name]).name;
-                        else return data[field.name];
-                    }));
-                });
-            });
+    </script>
+
+    <script type="text/javascript"> // 地图部分
+        var g_map = CreateMap("item_map");
+
+        // 在地图上显示驻地
+        for (var x in g_devwhs.data)
+            CreateMark("devwh", g_devwhs.data[x], g_devwhs.ls, g_devwhs.fields);
+        if (g_devwhs.data.length > 0)
+            g_map.centerAndZoom(CreatePoint(g_devwhs.data[0].position), 11);
+
+        // 在地图上显示设备
+        for (var x in g_devs.data)
+            CreateMark(GetSub(db_devclss, "id", g_devs.data[x].clss).name, g_devs.data[x], g_devs.ls, g_devs.fields);
+
+        // 编辑浏览模式控件
+        g_map.addControl(new ModeControl(function (mode) {
+            if (mode) {
+                for (var i in g_devs.data) g_devs.data[i].mk.enableDragging();
+            }
+            else {
+                for (var i in g_devs.data) g_devs.data[i].mk.disableDragging();
+            }
+        }));
+
+        function FieldToShow(data, field) {
+            if (field.name == "clss")
+                return GetSub(db_devclss, "id", data[field.name]).name;
+            else if (field.name == "devwh_id")
+                return GetSub(g_devwhs.data, "id", data[field.name]).name;
+            else if (field.name == "status")
+                return GetSub(db_devstatus, "id", data[field.name]).name;
+            else if (field.name == "vender")
+                return GetSub(g_devvenders.data, "id", data[field.name]).name;
+            else
+                return data[field.name];
+        }
+
+    </script>
+
+    <script type="text/javascript"> // 右面表单和表格
+        var tpl_dev_pane = doT.template(document.getElementById('tpl_dev_pane').innerHTML);
+        var tpl_dev_form = doT.template(document.getElementById('tpl_dev_form').innerHTML);
+
+        var pane = tpl_dev_pane(g_dev);
+        pane += RenderPane2(g_dev, g_devs.fields, FieldToShow);
+        $("#item_detail").html(pane);
+
+        // 任务记录
+        Reqdata("/rd?ls=devwork&dev_id=" + g_dev.id, "", function (works) {
+            $("#tasklist").html(RenderTable2(works, undefined, function (data, field) {
+                if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
+                else if (field.name == "devwh_id") return g_user.depart.name;
+                else if (field.name == "status") return GetSub(db_devwork_status, "id", data[field.name]).name;
+                else if (field.name == "dev_id") return GetSub(g_devs.data, "id", data[field.name]).code;
+                else if (field.name == "vender_id") return GetSub(g_devvenders.data, "id", data[field.name]).name;
+                else if (field.name == "driver_id") return g_user.name;
+                else return data[field.name];
+            }));
         });
+
         function FieldToShow(data, field) {
             if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
             else if (field.name == "devwh_id") return g_user.depart.name;
             else if (field.name == "status") return GetSub(db_devstatus, "id", data[field.name]).name;
             else if (field.name == "vender_id") return GetSub(g_devvenders.data, "id", data[field.name]).name;
-            else if (field.name == "driver_id") return GetSub(g_driver.data, "id", data[field.name]).name;
+            else if (field.name == "driver_id") return g_user.name;
             else return data[field.name];
         }
         function FieldToEdit(data, field) {
@@ -141,16 +185,8 @@
             else return data[field.name];
         }
 
-        function onNewDev() {
-            var dev = Create(g_devs.fields);
-            var form = '<div class="x2Form">';
-            form += tpl_dev_form(dev);
-            form += RenderFormIn(dev, g_devs.fields, FieldToEdit);
-            form += "</div>";
-            (new cbDlg("新建 设备", "width:900px", form)).Show();
-        }
         function onEditDev() {
-            var dev = g_curdev;
+            var dev = g_dev;
             var form = '<div class="x2Form">';
             form += tpl_dev_form(dev);
             form += RenderFormIn(dev, g_devs.fields, FieldToEdit);
@@ -166,5 +202,9 @@
         }
 
     </script>
+
 </body>
 </html>
+
+
+

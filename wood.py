@@ -48,6 +48,9 @@ db_tbl = [
     { "id": "20", "name": "devwh", "title": "设备驻地" },
     { "id": "21", "name": "dev", "title": "设备" },
     { "id": "22", "name": "devwork", "title": "设备任务" },
+    { "id": "23", "name": "matprov", "title": "仓库省区" },
+    { "id": "24", "name": "matwh", "title": "仓库" },
+    { "id": "25", "name": "mat", "title": "材料" },
 ]
 branch = {
     "devwh": { "sub": "", "image": "img/devwh.png", },
@@ -85,6 +88,9 @@ tables = {
     'devwh':Table('devwh', metadata,autoload=True),
     'dev':Table('dev', metadata,autoload=True),
     'devwork':Table('devwork', metadata,autoload=True),
+    'matprov':Table('matprov', metadata,autoload=True),
+    'matwh':Table('matwh', metadata,autoload=True),
+    'mat':Table('mat', metadata,autoload=True),
     }
 base=tables["base"]
 base.sl = [base.c.title, base.c.name, base.c.forder, base.c.ftype, base.c.twidth, base.c.tstyle]
@@ -159,7 +165,7 @@ def roleuser():
     #找到用户的所在单位，若所在单位是风场，则需要读取风区列表
     if user.depart_table != 0: 
         tbl = gettbl(user.depart_table)
-        user.depart_name = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0].name
+        user.depart = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0]
         if tbl["name"] == "winder":
             user.sub = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
     else:
@@ -220,7 +226,6 @@ def rd():
         d["type"]=ls
         ls = "config"
 
-    tbl = tables[ls]
     sql = "select * from "+ls
     if len(d) > 0:
         sql += " where "+" and ".join([ To(k,v) for k,v in d.items()])

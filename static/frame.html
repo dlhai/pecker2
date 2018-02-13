@@ -155,7 +155,10 @@
                 g_role = GetSub(db_roles, "id", g_user.job);
                 $('#usr_name').html(g_user.name);
                 $('#usr_face').attr("src", g_user.face);
-                $('#depart_name').html(g_user.depart_name);
+                if (g_user.depart != undefined)
+                    $('#depart_name').html(g_user.depart.name);
+                else
+                    $('#depart_name').html("");
                 $('#job').html(g_role.name);
                 $('#modulelist').html(tpl_module(g_role.modules));
                 UpdateSubmode(0);
