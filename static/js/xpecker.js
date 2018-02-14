@@ -262,13 +262,13 @@ x3Tree.prototype.Req = function (id, ls, param) {
         var data = res.data;
         for (var i in res.data) {
             if (ls == ctx.leaf) { // 叶节点，少了左边的加号，为缩进对齐加了一层div
-                if (ctx.root){
-                    html += "<div><div id=\"" + ls + "_" + data[i].id + "\"><span><img src=\""
-                        + ctx.branch[ls].image + "\">" + data[i].name + "</span></div></div>\n"
-                }
-                else {
+                if (ctx.root){ // 根节点是叶节点时，不要加外层div
                     html += "<div id=\"" + ls + "_" + data[i].id + "\"><span><img src=\""
                         + ctx.branch[ls].image + "\">" + data[i].name + "</span></div>\n"
+                }
+                else {
+                    html += "<div><div id=\"" + ls + "_" + data[i].id + "\"><span><img src=\""
+                        + ctx.branch[ls].image + "\">" + data[i].name + "</span></div></div>\n"
                 }
             }
             else { // 
@@ -276,8 +276,8 @@ x3Tree.prototype.Req = function (id, ls, param) {
                     + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
                     + ctx.branch[ls].image + "\">" + data[i].name + "</span></div>\n"
             }
-            ctx.root = false;
         }
+        ctx.root = false;
 
         $("#" + id).append(html);
         $("#" + id).children("img").attr("src", "img/nolines_minus.gif"); // 把加号改成减号
@@ -308,5 +308,7 @@ function treeItemExpand(ev) {
 }
 //点击树节点的加号
 function treeItemClick(ev) {
-    alert("hehe!");
+    ctx = ev.data.ctx;
+    var at = $(ev.target).parent().attr("id").split("_");
+    ctx.useritemclick(at[0], at[1]);
 }

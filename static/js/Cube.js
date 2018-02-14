@@ -95,7 +95,7 @@ function RenderFormIn(entity, fields, cb) {
 }
 function RenderForm4(entity, fields, cb) {
     var r = '<div class="x2Form">';
-    RenderFormIn(entity, fields, cb);
+    r +=RenderFormIn(entity, fields, cb);
     r += "</div>";
     return r;
 }

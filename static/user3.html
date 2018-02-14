@@ -322,19 +322,17 @@
         var tpl_employlist = doT.template(document.getElementById('tpl_employlist').innerHTML);
         var tpl_opuslist = doT.template(document.getElementById('tpl_opuslist').innerHTML);
         var tpl_user_pane = doT.template(document.getElementById('tpl_user_pane').innerHTML);
-       
-        var g_cur = new Object();
-        var g_fields = new Array();
-        var g_ethnic = new Object();
-        var g_user = parent.g_user;
-        if (g_user == undefined)
-            g_user = GetRoleUser("驻地主管");
 
+        var g_cur, g_fields = new Array(), g_ethnic, g_departs, g_user = parent.g_user;
+        if (g_user == undefined)
+            g_user = GetRoleUser("仓库超级帐号");
+
+        if( isInArray(["1", "4", "7"], g_user.job ))
+            Reqdata("/rd?ls=" + { "1": "winder", "4": "devwh", "7": "matwh" }[g_user.job], "", function (res) { g_departs = res; });
         Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
-        var qp = GetSubJobParam(g_user);
-        Reqdata("/queryuser?" + qp, "", function (res) {
+        Reqdata("/queryuser?job=" + GetsubJob(g_user.job, "string"), "", function (res) {
             g_users = res;
-            if (qp.indexOf("depart") != -1) { // 删除所在单位
+            if (!isInArray(["1", "4", "7"], g_user.job)) { // 除此三类超级用户外不显示所在单位
                 var idx = GetIdx(g_users.fields, "name", "depart_id");
                 g_users.fields.splice(idx,1); 
             }
@@ -364,14 +362,10 @@
         });
         function ValToView(user, field) {
             var name = field.name ? field.name :field;
-            if (name == "sex")
-                return GetSub(db_sex, "id", user.sex).name;
-            else if (name == "job")
-                return GetSub(db_job, "id", user.job).name;
-            else if (name == "depart_id")
-                return user.depart_name;
-            else
-                return user[name];
+            if (name == "sex") return GetSub(db_sex, "id", user.sex).name;
+            else if (name == "job") return GetSub(db_job, "id", user.job).name;
+            else if (name == "depart_id") return GetSub(g_departs.data, "id", user.depart_id).name;
+            else return user[name];
         }
 
         function onAddUser() {
@@ -464,7 +458,7 @@
                     if (field.name == "sex")
                         render = RenderSelect(db_sex, val);
                     else if (field.name == "job")
-                        render = RenderSelect(GetJob("array",g_user.job), val);
+                        render = RenderSelect(GetsubJob(g_user.job, "array"), val);
                     else if (field.name == "ethnic")
                         render = RenderSelect(g_ethnic, val);
                     r += '<select ' + attr + ' name="' + field.name + '">' + render + '</select>';

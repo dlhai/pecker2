@@ -205,12 +205,10 @@ tbl_matwh=Table('matwh', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('matprov_id',Integer,ForeignKey('winderprov.id')),
 	Column('name',String(16)),
-	Column('position',String(64)),
+	Column('scale',Integer),
+	Column('base',Integer),
 	Column('addr',String(64)),
-	Column('scale',String(16)),
-	Column('base',String(64)),
-	Column('manager',String(16)),
-	Column('clerks',String(64)),
+	Column('position',String(64)),
 	Column('remark',String(2048)))
 
 tbl_mat=Table('mat', metadata,
@@ -333,7 +331,7 @@ conn.execute(tbl_matprov.insert(),[dict_matprov(x) for x in rndarea(prov,3,6)])
 QueryAll(tbl_matprov)
 
 def dict_matwh(x,y):
-    return dict(matprov_id=x.id,name=y.name+"仓库",position=str(y.lng)+" "+str(y.lat),addr=rnditem("_person").origin,scale=rnditem("_matwhscale").id,base=rndnum(1,10),manager=rnditem("_station").phone,clerks=rnditem("_person").origin,remark=rnditem("_songci"))
+    return dict(matprov_id=x.id,name=y.name+"仓库",scale=rnditem("_matwhscale").id,base=rndnum(1,10),addr=rnditem("_person").origin,position=str(y.lng)+" "+str(y.lat),remark=rnditem("_songci"))
 conn.execute(tbl_matwh.insert(),[dict_matwh(x,y) for x in data("matprov") for y in rndarea(prov[x.name],3,6)])
 QueryAll(tbl_matwh)
 

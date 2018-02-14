@@ -47,17 +47,3 @@ function Create(fields) {
     return r;
 }
 
-//自此以下接口将被废弃
-
-function Create2(ar) {
-    alert("调用了旧接口Create2");
-    var r = new Object();
-    r.type = ar.type;
-    r.fields = ar.fields;
-    r.data = new Array();
-    t = new Object();
-    for (var k in ar.fields)
-        t[ar.fields[k].name] = "";
-    r.data.push(t);
-    return r;
-}

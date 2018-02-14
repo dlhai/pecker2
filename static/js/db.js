@@ -39,7 +39,12 @@
             { name: "地图", url: "devmap.html" },
             { name: "设备", url: "devdriver.html" }]
     },
-    { "id": "7", "type": "wh", "name": "仓库超级帐号", modules: [{ name: "仓库", url: "matwh_su.html" }, { name: "人员", url: "person.html?type=仓管|仓主" }, { name: "材料", url: "material.html" }] },
+    {
+        "id": "7", "type": "wh", "name": "仓库超级帐号", modules: [
+            { name: "仓库", url: "matwhsu.html" },
+            { name: "人员", url: "user3.html" },
+            { name: "材料", url: "material.html" }]
+    },
     { "id": "8", "type": "wh", "name": "仓库主管", modules: [{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }] },
     { "id": "9", "type": "wh", "name": "仓库管理员", modules: [{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }] },
     { "id": "10", "type": "coord", "name": "调度超级帐号", modules: [{ name: "调度", url: "person.html?type=总调|调度" }] },
@@ -99,7 +104,7 @@ function GetRoleUser(name) {
     return GetSub(db_roleusers, "job", GetSub(db_job, "name", name).id);
 }
 
-function GetJob(type, parentjobid) {
+function GetsubJob(parentjobid, type) {
     var jobbranch = {
         "1": ["2", "3"], "2": ["2", "3"], "3": ["3"],//风场
         "4": ["5", "6"], "5": ["5", "6"], "6": ["6"],//驻地
@@ -122,23 +127,6 @@ function GetJob(type, parentjobid) {
             return jobbranch[parentjobid];
     }
 }
-function GetSubJobParam(user) {
-    var r = "job=" + GetJob("string", user.job);
-    if (parseInt(user.job) < 10) {
-        if (!isInArray(["1", "4", "7"], user.job)) // 不是超级用户
-            r += "&depart_id=" + user.depart_id;
-    }
-
-    if (user.job in ["1", "2", "3"])
-        r += "&depart_table=15" //风场
-    else if (user.job in ["4", "5", "6"])
-        r += "&depart_table=20" //驻地
-    else if (user.job in ["7", "8", "9"])
-        r += "&depart_table=" //仓库，等待定义
-
-    return r;
-}
-
 
 var db_skill = [
     { "id": "1", "name": "避雷" },
@@ -176,6 +164,15 @@ var db_devclss = [
     { "id": "8", "name": "猎潜艇" },
     { "id": "9", "name": "布雷舰" },
     ]
+
+var db_matwhscale = [
+    { "id": "1", "name": "小型" },
+    { "id": "2", "name": "中型" },
+    { "id": "3", "name": "大型" },
+    { "id": "4", "name": "超大型" },
+    { "id": "5", "name": "巨型" },
+    { "id": "6", "name": "超巨型" },
+]
 
 var db_tbl = [
     { "id": "1", "name": "base", "title": "定义" },
