@@ -25,6 +25,8 @@ tbl_base=Table('base', metadata,
 	Column('dtype',String(64)),
 	Column('drule',String(64)),
 	Column('remark',String(2048)))
+def dict_base(x):
+    return dict(table=x.table,title=x.title,name=x.name,forder=x.forder,ftype=x.ftype,twidth=x.twidth,tstyle=x.tstyle,dtype=x.dtype,drule=x.drule,remark=x.remark)
 
 tbl_link=Table('link', metadata,
 	Column('id',Integer,primary_key=True),
@@ -33,6 +35,8 @@ tbl_link=Table('link', metadata,
 	Column('b_field',String(32)),
 	Column('b_id',Integer),
 	Column('name',String(32)))
+def dict_link(x,y):
+    return dict(a_field="",a_id="",b_field="",b_id="",name="")
 
 tbl_addit=Table('addit', metadata,
 	Column('id',Integer,primary_key=True),
@@ -42,11 +46,15 @@ tbl_addit=Table('addit', metadata,
 	Column('remark',String(32)),
 	Column('user',Integer),
 	Column('date',Date))
+def dict_addit(x,y):
+    return dict(name="",table="",field="",remark="",user="",date="")
 
 tbl_config=Table('config', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('type',String(32)),
 	Column('name',String(32)))
+def dict_config(type,name):
+    return dict(type=type,name=name)
 
 tbl_admarea=Table('admarea', metadata,
 	Column('id',Integer,primary_key=True),
@@ -57,6 +65,8 @@ tbl_admarea=Table('admarea', metadata,
 	Column('lng',Float),
 	Column('lat',Float),
 	Column('grade',Integer))
+def dict_admarea(x):
+    return dict(code=x.编号,name=x.名称,parent=x.父级,sname=x.简称,lng=x.经度,lat=x.纬度,grade=x.等级)
 
 tbl_vender=Table('vender', metadata,
 	Column('id',Integer,primary_key=True),
@@ -68,6 +78,21 @@ tbl_vender=Table('vender', metadata,
 	Column('leader',String(32)),
 	Column('fax',String(32)),
 	Column('addr',String(128)))
+def dict_vender(x,type):
+    p1=rnditem("_person")
+    p2=rnditem("_station")
+    return dict(type=type,name=x.name,fname=x.fname,atten=p1.name,tel=str(int(p1.phone)),leader=p1.name,fax=p2.phone,addr=p1.origin)
+
+tbl_flow=Table('flow', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('table',Integer),
+	Column('table_id',Integer),
+	Column('status',Integer),
+	Column('user_id',Integer),
+	Column('date',Date),
+	Column('remark',String(128)))
+def dict_flow(table,table_id,status,user_id):
+    return dict(table=table,table_id=table_id,status=status,user_id=user_id,date=rnddate(30,60),remark=rnditem2("_songci"))
 
 tbl_user=Table('user', metadata,
 	Column('id',Integer,primary_key=True),
@@ -90,17 +115,25 @@ tbl_user=Table('user', metadata,
 	Column('mail',String(32)),
 	Column('wechat',String(32)),
 	Column('addr',String(64)))
+def dict_user(depart_id,depart_table,job,skill):
+    person=rnditem("_person")
+    mail=rndmail(person)
+    return dict(account=person.pinyin,pwd=person.pinyin,face=rnditem("_faceimage"),depart_id=depart_id,depart_table=str(int(getitembyname("_tbl",depart_table).id)),job=job,skill=skill,name=person.name,code=person.id,sex=id2sex(person.id),ethnic=rnditem("_ethnic"),birth=id2birth(person.id),origin=person.origin,idimg=rndaddition("身份证"),phone=str(int(person.phone)),qq=str(int(person.qq)),mail=mail,wechat=rndwechat(person,mail),addr=rnditem("_麦当劳门店").门店地址)
 
 tbl_winderco=Table('winderco', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('name',String(64),unique=True),
 	Column('remark',String(2048)))
+def dict_winderco(x):
+    return dict(name=x.name,remark=rnditem("_songci"))
 
 tbl_winderprov=Table('winderprov', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('winderco_id',Integer,ForeignKey('winderco.id')),
 	Column('name',String(64)),
 	Column('remark',String(2048)))
+def dict_winderprov(x,y):
+    return dict(winderco_id=x.id,name=y.name,remark=rnditem("_songci"))
 
 tbl_winder=Table('winder', metadata,
 	Column('id',Integer,primary_key=True),
@@ -113,6 +146,8 @@ tbl_winder=Table('winder', metadata,
 	Column('addr',String(64)),
 	Column('natural',String(2048)),
 	Column('remark',String(2048)))
+def dict_winder(x,y):
+    return dict(winderprov_id=y.id,winderco_id=y.winderco_id,name=x.name+"风场",scale=rnditem("_scale"),position=str(x.lng)+" "+str(x.lat),fax=rnditem("_station").phone,addr=rnditem("_person").origin,natural=rnditem("_songci"),remark=rnditem("_songci"))
 
 tbl_winderarea=Table('winderarea', metadata,
 	Column('id',Integer,primary_key=True),
@@ -120,6 +155,8 @@ tbl_winderarea=Table('winderarea', metadata,
 	Column('name',String(64)),
 	Column('remark',String(2048)),
 	Column('position',String(64)))
+def dict_winderarea(x,y):
+    return dict(winder_id=y.id,name=x.name+"风区",remark=rnditem("_songci"),position=rndgpsarea(y.position,0.3,0.27))
 
 tbl_efan=Table('efan', metadata,
 	Column('id',Integer,primary_key=True),
@@ -129,6 +166,8 @@ tbl_efan=Table('efan', metadata,
 	Column('type',String(32)),
 	Column('efanvender_id',Integer),
 	Column('position',String(64)))
+def dict_efan(x,y):
+    return dict(winderarea_id=x.id,winder_id=x.winder_id,code=rndqq(),type=rndtype("efan"),efanvender_id=rnditem("efanvender").id,position=rndgps(x.position))
 
 tbl_leaf=Table('leaf', metadata,
 	Column('id',Integer,primary_key=True),
@@ -140,6 +179,10 @@ tbl_leaf=Table('leaf', metadata,
 	Column('mat',String(32)),
 	Column('producedate',Date),
 	Column('putondate',Date))
+def dict_leaf(x,y):
+    pdt=rnddate(4*365,5*365)
+    a="abc"
+    return dict(code=x.code+a[y],winderarea_id=x.winderarea_id,winder_id=x.winder_id,efan_id=x.id,leafvender_id=rnditem("leafvender").id,mat=rnditem("_mainmat"),producedate=pdt,putondate=rnddatespan(pdt,30,365))
 
 tbl_fault=Table('fault', metadata,
 	Column('id',Integer,primary_key=True),
@@ -153,6 +196,8 @@ tbl_fault=Table('fault', metadata,
 	Column('status',Integer),
 	Column('guide_id',Integer),
 	Column('guidetime',Date))
+def dict_fault(report):
+    return dict(code=rndqq(),fault_id=random.choice( ["风化脱漆","叶片断裂", "电机起火", "电路故障"]),report_id=report.id,reporttime=rnddate(30,60),phone=report.phone,winder_id=report.depart_id,remark=rnditem("_songci"),status="0",guide_id="0",guidetime=rnddate(1,1))
 
 tbl_devwh=Table('devwh', metadata,
 	Column('id',Integer,primary_key=True),
@@ -161,6 +206,8 @@ tbl_devwh=Table('devwh', metadata,
 	Column('position',String(32)),
 	Column('addr',String(2048)),
 	Column('remark',String(128)))
+def dict_devwh(x):
+    return dict(name=x.name,fname=x.fname,position=x.position,addr=x.addr,remark=x.remark)
 
 tbl_dev=Table('dev', metadata,
 	Column('id',Integer,primary_key=True),
@@ -178,6 +225,10 @@ tbl_dev=Table('dev', metadata,
 	Column('producedate',Date),
 	Column('buydate',Date),
 	Column('checkdate',Date))
+def dict_dev(x,y,z):
+    dt=rnddate(4*365,5*365)
+    person=rnditem("_person")
+    return dict(code=rndtype("car"),clss=y.id,type=rnditem("_devtype"),face="img/"+y.name+".png",img=rnditem("_devimg"),devwh_id=x.id,position=rndgps(x.position),status="0",driver_id="0",remark=rnditem("_songci"),vender_id=rnditem("devvender").id,producedate=dt,buydate=rnddatespan(dt,30,365),checkdate=rnddatespan(dt,30,365))
 
 tbl_devwork=Table('devwork', metadata,
 	Column('id',Integer,primary_key=True),
@@ -195,11 +246,15 @@ tbl_devwork=Table('devwork', metadata,
 	Column('dealdt',Date),
 	Column('dev_id',Integer),
 	Column('driver_id',Integer))
+def dict_devwork():
+    return dict(status="0",fault_id="0",guide_id="0",guidedt="0",clss="0",devwh_id="0",timelen="0",winder_id="0",addr="0",remark="0",deal_id="0",dealdt="0",dev_id="0",driver_id="0")
 
 tbl_matprov=Table('matprov', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('name',String(64)),
 	Column('remark',String(2048)))
+def dict_matprov(x):
+    return dict(name=x.name,remark=rnditem("_songci"))
 
 tbl_matwh=Table('matwh', metadata,
 	Column('id',Integer,primary_key=True),
@@ -210,6 +265,8 @@ tbl_matwh=Table('matwh', metadata,
 	Column('addr',String(64)),
 	Column('position',String(64)),
 	Column('remark',String(2048)))
+def dict_matwh(x,y):
+    return dict(matprov_id=x.id,name=y.name+"仓库",scale=rnditem("_matwhscale").id,base=rndnum(1,10),addr=rnditem("_person").origin,position=str(y.lng)+" "+str(y.lat),remark=rnditem("_songci"))
 
 tbl_mat=Table('mat', metadata,
 	Column('id',Integer,primary_key=True),
@@ -217,10 +274,40 @@ tbl_mat=Table('mat', metadata,
 	Column('name',String(32)),
 	Column('type',String(16)),
 	Column('unit',String(16)),
+	Column('usage',String(32)),
 	Column('alarm',Integer),
 	Column('essential',Integer),
 	Column('matbase',Integer),
 	Column('remark',String(2048)))
+def dict_mat(x):
+    return dict(code=x.code,name=x.name,type=x.type,unit=x.unit,usage=rnditem("_songci"),alarm=x.alarm,essential=rnditem("_essential").id,matbase=x.matbase,remark=x.remark)
+
+tbl_matin=Table('matin', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('matwh_id',Integer),
+	Column('status',Integer),
+	Column('code',String(16)),
+	Column('source',Integer),
+	Column('courier',String(32)),
+	Column('ourierdate',String(16)),
+	Column('remark',String(2048)))
+def dict_matin(x):
+    return dict(matwh_id=x.matwh_id,status=x.status,code=rndqq(),source=rnditem2("_matsouce").id,courier=rnditem2("_person").name,ourierdate=rnddate(30,60),remark=rnditem2("_songci"))
+
+tbl_matinrec=Table('matinrec', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('matwh_id',Integer),
+	Column('matin_id',Integer),
+	Column('mat_id',Integer),
+	Column('num',Integer),
+	Column('specs',String(16)),
+	Column('vender_id',Integer),
+	Column('producedt',Date),
+	Column('expiredt',Date),
+	Column('remark',String(2048)))
+def dict_matinrec(matwh_id,matin_id):
+    dt=rnddate(30,60)
+    return dict(matwh_id=matwh_id,matin_id=matin_id,mat_id=rnditem2("mat").id,num=rndnum(1000,50000),specs=random.choice( ["100kg/包","100kg/袋", "100m/卷", "100个/盒"]),vender_id=rnditem2("matvender").id,producedt=dt,expiredt=rnddatespan(dt,60,90),remark=rnditem2("_songci"))
 
 
 metadata.create_all(engine)
@@ -235,71 +322,38 @@ def QueryData(name,tbl,field,value):
     data=conn.execute(q).fetchall()
     adddata(name,data)
 
-def dict_base(x):
-    return dict(table=x.table,title=x.title,name=x.name,forder=x.forder,ftype=x.ftype,twidth=x.twidth,tstyle=x.tstyle,dtype=x.dtype,drule=x.drule,remark=x.remark)
 conn.execute(tbl_base.insert(),[dict_base(x) for x in data("_fields")])
 
-def dict_link(x,y):
-    return dict(a_field="",a_id="",b_field="",b_id="",name="")
 
-def dict_addit(x,y):
-    return dict(name="",table="",field="",remark="",user="",date="")
 
-def dict_config(type,name):
-    return dict(type=type,name=name)
 
-def dict_admarea(x):
-    return dict(code=x.编号,name=x.名称,parent=x.父级,sname=x.简称,lng=x.经度,lat=x.纬度,grade=x.等级)
 conn.execute(tbl_admarea.insert(),[dict_admarea(x) for x in data("_全国行政区编号")])
 
-def dict_vender(x,type):
-    p1=rnditem("_person")
-    p2=rnditem("_station")
-    return dict(type=type,name=x.name,fname=x.fname,atten=p1.name,tel=str(int(p1.phone)),leader=p1.name,fax=p2.phone,addr=p1.origin)
 
-def dict_user(depart_id,depart_table,job,skill):
-    person=rnditem("_person")
-    mail=rndmail(person)
-    return dict(account=person.pinyin,pwd=person.pinyin,face=rnditem("_faceimage"),depart_id=depart_id,depart_table=str(int(getitembyname("_tbl",depart_table).id)),job=job,skill=skill,name=person.name,code=person.id,sex=id2sex(person.id),ethnic=rnditem("_ethnic"),birth=id2birth(person.id),origin=person.origin,idimg=rndaddition("身份证"),phone=str(int(person.phone)),qq=str(int(person.qq)),mail=mail,wechat=rndwechat(person,mail),addr=rnditem("_麦当劳门店").门店地址)
+
 
 conn.execute(tbl_vender.insert(),[dict_vender(x,17) for x in data("_efan_vender")])
 conn.execute(tbl_vender.insert(),[dict_vender(x,18) for x in data("_leaf_vender")])
 QueryData("efanvender",tbl_vender,"type",17)
 QueryData("leafvender",tbl_vender,"type",18)
-def dict_winderco(x):
-    return dict(name=x.name,remark=rnditem("_songci"))
 conn.execute(tbl_winderco.insert(),[dict_winderco(x) for x in data("_winderco")])
 QueryAll(tbl_winderco)
 
-def dict_winderprov(x,y):
-    return dict(winderco_id=x.id,name=y.name,remark=rnditem("_songci"))
 conn.execute(tbl_winderprov.insert(),[dict_winderprov(x,y) for x in data("winderco") for y in rndarea(prov,3,6)])
 QueryAll(tbl_winderprov)
 
-def dict_winder(x,y):
-    return dict(winderprov_id=y.id,winderco_id=y.winderco_id,name=x.name+"风场",scale=rnditem("_scale"),position=str(x.lng)+" "+str(x.lat),fax=rnditem("_station").phone,addr=rnditem("_person").origin,natural=rnditem("_songci"),remark=rnditem("_songci"))
 conn.execute(tbl_winder.insert(),[dict_winder(x,y) for y in data("winderprov") for x in rndarea(prov[y.name],3,6)])
 QueryAll(tbl_winder)
 
-def dict_winderarea(x,y):
-    return dict(winder_id=y.id,name=x.name+"风区",remark=rnditem("_songci"),position=rndgpsarea(y.position,0.3,0.27))
 conn.execute(tbl_winderarea.insert(),[dict_winderarea(x,y) for y in data("winder") for x in rndarea(prov[getitem("winderprov",y.winderprov_id).name][y.name[:-2]],2,5)])
 QueryAll(tbl_winderarea)
 
-def dict_efan(x,y):
-    return dict(winderarea_id=x.id,winder_id=x.winder_id,code=rndqq(),type=rndtype("efan"),efanvender_id=rnditem("efanvender").id,position=rndgps(x.position))
 conn.execute(tbl_efan.insert(),[dict_efan(x,y) for x in data("winderarea") for y in range(rndnum(30,50))])
 QueryAll(tbl_efan)
 
-def dict_leaf(x,y):
-    pdt=rnddate(4*365,5*365)
-    a="abc"
-    return dict(code=x.code+a[y],winderarea_id=x.winderarea_id,winder_id=x.winder_id,efan_id=x.id,leafvender_id=rnditem("leafvender").id,mat=rnditem("_mainmat"),producedate=pdt,putondate=rnddatespan(pdt,30,365))
 conn.execute(tbl_leaf.insert(),[dict_leaf(x,y) for x in data("efan") for y in range(3)])
 QueryAll(tbl_leaf)
 
-def dict_fault(report):
-    return dict(code=rndqq(),fault_id=random.choice( ["风化脱漆","叶片断裂", "电机起火", "电路故障"]),report_id=report.id,reporttime=rnddate(30,60),phone=report.phone,winder_id=report.depart_id,remark=rnditem("_songci"),status="0",guide_id="0",guidetime=rnddate(1,1))
 
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","1","")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"winder","2","") for x in data("winder")])
@@ -307,42 +361,34 @@ conn.execute(tbl_user.insert(),[dict_user(x.id,"winder","3","") for x in data("w
 conn.execute(tbl_config.insert(),[dict_config("ethnic",x[0]) for x in data("_ethnic").data])
 conn.execute(tbl_vender.insert(),[dict_vender(x,21) for x in data("_dev_vender")])
 QueryData("devvender",tbl_vender,"type",21)
-def dict_devwh(x):
-    return dict(name=x.name,fname=x.fname,position=x.position,addr=x.addr,remark=x.remark)
 conn.execute(tbl_devwh.insert(),[dict_devwh(x) for x in data("_devwh")])
 QueryAll(tbl_devwh)
 
-def dict_dev(x,y,z):
-    dt=rnddate(4*365,5*365)
-    person=rnditem("_person")
-    return dict(code=rndtype("car"),clss=y.id,type=rnditem("_devtype"),face="img/"+y.name+".png",img=rnditem("_devimg"),devwh_id=x.id,position=rndgps(x.position),status="0",driver_id="0",remark=rnditem("_songci"),vender_id=rnditem("devvender").id,producedate=dt,buydate=rnddatespan(dt,30,365),checkdate=rnddatespan(dt,30,365))
 conn.execute(tbl_dev.insert(),[dict_dev(x,y,z) for x in data("devwh") for y in data("_devclss") for z in range(rndnum(1,3))])
 QueryAll(tbl_dev)
 
-def dict_devwork():
-    return dict(status="0",fault_id="0",guide_id="0",guidedt="0",clss="0",devwh_id="0",timelen="0",winder_id="0",addr="0",remark="0",deal_id="0",dealdt="0",dev_id="0",driver_id="0")
 
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","4","")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"devwh","5","") for x in data("devwh")])
 conn.execute(tbl_user.insert(),[dict_user(x.devwh_id,"devwh","6","") for x in data("dev")])
-def dict_matprov(x):
-    return dict(name=x.name,remark=rnditem("_songci"))
+conn.execute(tbl_vender.insert(),[dict_vender(x,25) for x in data("_matvender")])
+QueryData("matvender",tbl_vender,"type",25)
 conn.execute(tbl_matprov.insert(),[dict_matprov(x) for x in rndarea(prov,3,6)])
 QueryAll(tbl_matprov)
 
-def dict_matwh(x,y):
-    return dict(matprov_id=x.id,name=y.name+"仓库",scale=rnditem("_matwhscale").id,base=rndnum(1,10),addr=rnditem("_person").origin,position=str(y.lng)+" "+str(y.lat),remark=rnditem("_songci"))
 conn.execute(tbl_matwh.insert(),[dict_matwh(x,y) for x in data("matprov") for y in rndarea(prov[x.name],3,6)])
 QueryAll(tbl_matwh)
 
-def dict_mat(x):
-    return dict(code=x.code,name=x.name,type=x.type,unit=x.unit,alarm=x.alarm,essential=rnditem("_essential").id,matbase=x.matbase,remark=x.remark)
 conn.execute(tbl_mat.insert(),[dict_mat(x) for x in data("_mat")])
 QueryAll(tbl_mat)
 
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","7","")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"matwh","8","") for x in data("matwh")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"matwh","9","") for x in data("matwh") for y in range(rndnum(2,5))])
+QueryAll(tbl_matin)
+
+QueryAll(tbl_matinrec)
+
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","10","")])
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","11","")])
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","12","") for x in range(rndnum(5,10))])

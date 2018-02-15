@@ -63,13 +63,30 @@ def name2id(ar, name ):
             return x.id
     return -1
 
-
+#拆分成rnduser和rnditem2 本接口不再用
 def rnditem(name):
     tbl=dat_all[name]
     if name == "_person":
         idx = random.choice(userunique)
         userunique.remove(idx)
         return tbl.__getitem__(idx)
+    if type(tbl) == type([]):
+        idx = random.randint(0,len(tbl)-1)
+        return tbl[idx]
+    idx = random.randint(0,len(tbl.data)-1)
+    if hasattr(tbl,"field"):
+        return tbl.__getitem__(idx)
+    else:
+        return tbl.data[idx][0]
+
+def rnduser():
+    tbl=dat_all["_person"]
+    idx = random.choice(userunique)
+    userunique.remove(idx)
+    return tbl.__getitem__(idx)
+
+def rnditem2(tblname):
+    tbl=dat_all[tblname]
     if type(tbl) == type([]):
         idx = random.randint(0,len(tbl)-1)
         return tbl[idx]
@@ -188,5 +205,3 @@ if __name__=="__main__":
     setdata(loadpkl('rawdata.pkl'))
     aa = getitembyname("_tbl","__sys__").id
     
-    for i in range(500):
-        print(rndqq())

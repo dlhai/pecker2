@@ -14,20 +14,20 @@ def GetIndex(ar, v ):
     return -1
 
 def T(s):
-    if ( s.count(":") == 0):
+    if s.count(":") == 0:
         return s
     ar =s.split(":")
-    if ( len(ar)==2):
-        if ( ar[0] == "rnditem" ):
+    if len(ar)==2:
+        if ar[0] == "rnditem" or ar[0] == "rnditem2":
             return ar[0] + "(\"" + ar[1]+"\")"
         else:
             return ar[0] + "[\"" + ar[1]+"\"]"
-    else:
-        if ( ar[0] == "rnditem" ):
+    elif len(ar)>2:
+        if ar[0] == "rnditem" or ar[0] == "rnditem2":
             return ar[0] + "(\"" + ar[1]+"\")."+ar[2]
         else:
             return ar[0] + "[\"" + ",".join(ar[1:])+"\"]"
-    return r;
+    raise Exception;
 
 def xBuildModel(tbls):
     model = '''#encoding:utf8
@@ -51,7 +51,16 @@ metadata = MetaData(engine)
         irule = GetIndex(t.field,"dtype")
         model += "tbl_"+t.name+"=Table('"+t.name+"', metadata,\n\tColumn('"
         model += "),\n\tColumn('".join(map( lambda f : f[iname]+"',"+f[irule],t.data))
-        model += "))\n\n"
+        model += "))\n"
+        model += "def dict_"+t.name+t.param+":\n    "
+        if t.define !="":
+            model += t.define.replace("\n", "\n    ")+"\n    "
+        iname = GetIndex(t.field, "name")
+        irule = GetIndex(t.field,"drule")
+        cols = [c for c in t.data if c[iname] != "id" ];
+        model += "return dict("
+        model += ",".join(map( lambda c : c[iname] + "=" + T(c[irule]), cols))
+        model += ")\n\n"
 
     model += '''
 metadata.create_all(engine)
@@ -69,15 +78,6 @@ def QueryData(name,tbl,field,value):
 '''
     for t in tbls:
         if t.type == "table":
-            model += "def dict_"+t.name+t.param+":\n    "
-            if t.define !="":
-                model += t.define.replace("\n", "\n    ")+"\n    "
-            iname = GetIndex(t.field, "name")
-            irule = GetIndex(t.field,"drule")
-            cols = [c for c in t.data if c[iname] != "id" ];
-            model += "return dict("
-            model += ",".join(map( lambda c : c[iname] + "=" + T(c[irule]), cols))
-            model += ")\n"
             if t.cycle != "":
                 model +="conn.execute(tbl_"+t.name+".insert(),[dict_"+t.name+t.param+" "+t.cycle+"])\n"
             if t.query == "QueryAll":
