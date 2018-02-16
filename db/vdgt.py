@@ -201,7 +201,21 @@ def rnddatespan(dt,min,max):
         dt =  datetime.datetime.strptime(dt,'%Y-%m-%d')
     return (dt + datetime.timedelta(days = rndnum(min,max)))
 
+#把一个数随机切分成几块
+def rndsplit(num, min, max):
+    slices=[rndnum(0,num) for y in range(rndnum(min-1,max-1))]
+    slices.extend([0,num])
+    t=set(slices)
+    slices=list(t) #滤掉相同的数
+    slices.sort()
+    for i in range(len(slices)-1):
+        slices[i]=slices[i+1]-slices[i]
+    slices.pop()
+    return slices
+
 if __name__=="__main__": 
     setdata(loadpkl('rawdata.pkl'))
     aa = getitembyname("_tbl","__sys__").id
     
+    a = rndsplit(20, 1, 2)
+    print(a)
