@@ -223,8 +223,4 @@ if __name__=="__main__":
     setdata(loadpkl('rawdata.pkl'))
     aa = getitembyname("_tbl","__sys__").id
 
-    ar = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
-    aridx=[x for x in range(len(ar))]
-    a = rndpick(ar, aridx, 5)
-    b=random.choice(a)
-    print(b)
+    print("%s3" %("python"))

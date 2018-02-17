@@ -51,7 +51,12 @@ db_tbl = [
     { "id": "23", "name": "matprov", "title": "仓库省区" },
     { "id": "24", "name": "matwh", "title": "仓库" },
     { "id": "25", "name": "mat", "title": "材料" },
+    { "id": "26", "name": "matin", "title": "入库单" },
+    { "id": "27", "name": "matinrec", "title": "入库记录" },
+    { "id": "28", "name": "matout", "title": "出库单" },
+    { "id": "29", "name": "matoutrec", "title": "出库记录" },
 ]
+
 branch = {
     "devwh": { "sub": "", "image": "img/devwh.png", },
 
@@ -255,26 +260,25 @@ def rdmatins():
     if len(users) !=1:
         return '{result:404,msg:"用户不存在"}'
     user=users[0]
-    if user.job==8: #仓库主管
-        sqlmatin='select matin.* from matin,flow where matin.id=flow.table_id and matin.status in (-1,0,1,2) and flow.status=0 and matwh_id='+str(user.depart_id)
-        sqlmatinrec='select matinrec.* from matinrec,matin where matinrec.matin_id=matin.id and matin.status in (-1,0,1,2) and matinrec.matwh_id='+str(user.depart_id)
-    elif user.job==9: #仓库管理员
-        sqlmatin='select matin.* from matin,flow where matin.id=flow.record_id and matin.status in (-1,0,1,2) and flow.table_id=26 and flow.status=0 and flow.user_id='+str(user.id)
-        sqlmatinrec='select matinrec.* from matinrec,matin,flow where matinrec.matin_id=matin.id and matin.id=flow.record_id and matin.status in (-1,0,1,2) and flow.table_id=26 and flow.status=0 and flow.user_id='+str(user.id)
+
+    #0编辑(正在签收) 1等待审批 2等待入库 3完成 -1退回
+    if user.job==8: #仓库主管(查询所在仓库所有完成的入库单)
+        sqlbase = "select %s from matin where status in (-1,0,1,2) and matwh_id=%d"
+        sqlmatin=sqlbase%("*",user.depart_id)
+        sqlmatinrec="select * from matinrec where matin_id in (%s)"%(sqlbase%("id",user.depart_id))
+    elif user.job==9: #仓库管理员(查询创建者为自己，且未完成的入库单)
+        sqlbase = "select %s from matin,flow where matin.id=flow.record_id and flow.table_id=%d and matin.status in (-1,0,1,2) and flow.status=0 and flow.user_id=%d"
+        sqlmatin=sqlbase%("*",gettbl("matin").id,user.id)
+        sqlmatinrec="select * from matinrec where matin_id in (%s)"%(sqlbase%("id",gettbl("matin").id,user.id))
     else:
         return '{result:404,msg:"用户职业不对！"}'
 
     return query4("rdmatins",mfields=select(base.sl).where(base.c.table=="matin"),mdata = sqlmatin,
                  rfields=select(base.sl).where(base.c.table=="matinrec"),rdata = sqlmatinrec,)
 
-
-#-----------------------以下接口将被废弃-------------------------------
-
-
-#---------------------以上接口将被废弃---------------------------------------
 if __name__ == "__main__":
     app.config['JSON_AS_ASCII'] = False
-    app.run()
+    app.run( host="0.0.0.0")
 
 #查询代表用户的sql
 #select depart_id as c1, "" as c2, * from user where depart_table== "__sys__" union

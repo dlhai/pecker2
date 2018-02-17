@@ -85,14 +85,14 @@ def dict_vender(x,type):
 
 tbl_flow=Table('flow', metadata,
 	Column('id',Integer,primary_key=True),
-	Column('table',Integer),
 	Column('table_id',Integer),
+	Column('record_id',Integer),
 	Column('status',Integer),
 	Column('user_id',Integer),
 	Column('date',Date),
 	Column('remark',String(128)))
 def dict_flow(x):
-    return dict(table=x.table,table_id=x.table_id,status=x.status,user_id=x.user_id,date=rnddate(30,60),remark=x.remark)
+    return dict(table_id=x.table_id,record_id=x.record_id,status=x.status,user_id=x.user_id,date=rnddate(30,60),remark=x.remark)
 
 tbl_user=Table('user', metadata,
 	Column('id',Integer,primary_key=True),
@@ -329,11 +329,12 @@ tbl_matoutrec=Table('matoutrec', metadata,
 	Column('matwh_id',Integer),
 	Column('matout_id',Integer),
 	Column('matinrec_id',Integer),
+	Column('mat_id',Integer),
 	Column('num',Integer),
 	Column('remark',String(2048)))
 def dict_matoutrec(x):
     dt=rnddate(30,60)
-    return dict(matwh_id=x.matwh_id,matout_id=x.matout_id,matinrec_id=x.matinrec_id,num=x.num,remark=rnditem2("_songci"))
+    return dict(matwh_id=x.matwh_id,matout_id=x.matout_id,matinrec_id=x.matinrec_id,mat_id=x.mat_id,num=x.num,remark=rnditem2("_songci"))
 
 
 metadata.create_all(engine)

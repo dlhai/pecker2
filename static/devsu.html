@@ -54,14 +54,14 @@
         function FieldToShow(data, field){
             if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
             else if (field.name == "devwh_id") return GetSub(g_devwhs.data, "id", data[field.name]).name;
-            else if (field.name == "status") return GetSub(db_devstatus, "id", data[field.name]).name;
+            else if (field.name == "status") return GetSub(status_dev, "id", data[field.name]).name;
             else if (field.name == "vender") return GetSub(g_devvenders.data, "id", data[field.name]).name;
             else return data[field.name];
         }
         function FieldToEdit(data, field) {
             if (field.name == "clss") return RenderSelect(db_devclss, data[field.name] );
             else if (field.name == "devwh_id") return RenderSelect(g_devwhs.data, data[field.name]);
-            else if (field.name == "status") return RenderSelect(db_devstatus, data[field.name]);
+            else if (field.name == "status") return RenderSelect(status_dev, data[field.name]);
             else if (field.name == "vender") return RenderSelect(g_devvenders.data, data[field.name]);
             else return data[field.name];
         }

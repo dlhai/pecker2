@@ -152,12 +152,12 @@ var db_sex = [
     { "id": "1", "name": "男" },
 ]
 
-var db_devstatus = [
+var status_dev = [
     { "id": "0", "name": "空闲" },
     { "id": "1", "name": "任务中" },
     { "id": "-1", "name": "报废" },
 ]
-var db_devwork_status = [
+var status_devwork = [
     { "id": "0", "name": "编辑" },
     { "id": "1", "name": "提交" },
     { "id": "2", "name": "受理" },
@@ -183,6 +183,28 @@ var db_matwhscale = [
     { "id": "4", "name": "超大型" },
     { "id": "5", "name": "巨型" },
     { "id": "6", "name": "超巨型" },
+]
+
+var db_matsouce = [
+    { "id": "1", "name": "厂家直送" },
+    { "id": "2", "name": "调货" },
+]
+
+var status_matin = [
+    { "id": "0", "name": "新建" },
+    { "id": "1", "name": "等待审批" },
+    { "id": "2", "name": "等待入库" },
+    { "id": "3", "name": "完成" },
+    { "id": "-1", "name": "退回" },
+]
+var status_matout = [
+    { "id": "0", "name": "新建" },
+    { "id": "1", "name": "调度提交" },
+    { "id": "2", "name": "库管备货或库管创建" },
+    { "id": "3", "name": "等待审批" },
+    { "id": "4", "name": "审批通过" },
+    { "id": "5", "name": "入库完成" },
+    { "id": "-1", "name": "退回" },
 ]
 
 var db_tbl = [
@@ -211,6 +233,10 @@ var db_tbl = [
     { "id": "23", "name": "matprov", "title": "仓库省区" },
     { "id": "24", "name": "matwh", "title": "仓库" },
     { "id": "25", "name": "mat", "title": "材料" },
+    { "id": "26", "name": "matin", "title": "入库单" },
+    { "id": "27", "name": "matinrec", "title": "入库记录" },
+    { "id": "28", "name": "matout", "title": "出库单" },
+    { "id": "29", "name": "matoutrec", "title": "出库记录" },
 ]
 function GetTbl(name) { return GetSub(db_tbl, "name", name); }
 
@@ -380,35 +406,6 @@ function GetArItem( ar, att, val )
     return "";
 }
 
-function RenderTable(it)
-{
-    var r = "<table class=\"d_table\"><thead><tr>";
-    for ( var c in it.fields) {
-        if (it.fields[c].twidth) {
-            if (parseInt( it.fields[c].twidth) > 0)
-                r += "<th width=\"" + it.fields[c].twidth + "\">" + it.fields[c].title + "</th>";
-        }
-        else
-            r += "<th>" + it.fields[c].title + "</th>";
-    }
-    r += "</tr></thead>\n";
-
-    r += "<tbody>";
-    for (var x in it.data) {
-        r += "<tr>";
-        for (c in it.fields) {
-            if (!it.fields[c].twidth || it.fields[c].twidth && parseInt( it.fields[c].twidth ) > 0) {
-                if (it.fields[c].tstyle)
-                    r += "<td style=\""+it.fields[c].tstyle+"\">" + it.data[x][it.fields[c].name] + "</td>";
-                else
-                    r += "<td>" + it.data[x][it.fields[c].name] + "</td>";
-            }
-        }
-        r +=  "</tr>";
-    }
-    r += "</tbody></table>";
-    return r;
-}
 
 //初始化关联数据
 $(function () {
