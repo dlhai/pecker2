@@ -155,107 +155,102 @@ def gen_matin(): #0编辑(正在签收) 1等待审批 2等待入库 3完成 -1�
         matin = obj2()
         matin.main = obj2(matwh_id=matwh.id, status = 0)
         matin.recs = [obj2(matwh_id=matwh.id,matin_id=-1) for x in range(rndnum(3,6))]
-        matin.flows = [obj2(table=gettbl("matin").id,table_id=-1,status=0,user_id=clerk.id)]
+        matin.flows = [obj2(table_id=gettbl("matin").id,record_id=-1,status=0,user_id=clerk.id, remark="创建")]
         matins.append(matin)
     for i in range(rndnum(3,6)): # 为clerk创建3-6个等待审批的入库单
         matin = obj2()
         matin.main = obj2(matwh_id=matwh.id,status = 1)
         matin.recs = [obj2(matwh_id=matwh.id,matin_id=-1) for x in range(rndnum(3,6))]
-        matin.flows = [obj2(table=gettbl("matin").id,table_id=-1,status=0,user_id=clerk.id),
-                        obj2(table=gettbl("matin").id,table_id=-1,status=1,user_id=clerk.id)]
+        matin.flows = [obj2(table_id=gettbl("matin").id,record_id=-1,status=0,user_id=clerk.id,remark="创建"),
+                        obj2(table_id=gettbl("matin").id,record_id=-1,status=1,user_id=clerk.id,remark="提交")]
         matins.append(matin)
     for i in range(rndnum(3,6)): # 为clerk创建3-6个等待入库的入库单
         matin = obj2()
         matin.main = obj2(matwh_id=matwh.id,status = 2)
         matin.recs = [obj2(matwh_id=matwh.id,matin_id=-1) for x in range(rndnum(3,6))]
-        matin.flows = [obj2(table=gettbl("matin").id,table_id=-1,status=0,user_id=clerk.id),
-                        obj2(table=gettbl("matin").id,table_id=-1,status=1,user_id=clerk.id),
-                        obj2(table=gettbl("matin").id,table_id=-1,status=2,user_id=leader.id)]
+        matin.flows = [obj2(table_id=gettbl("matin").id,record_id=-1,status=0,user_id=clerk.id,remark="创建"),
+                        obj2(table_id=gettbl("matin").id,record_id=-1,status=1,user_id=clerk.id,remark="提交"),
+                        obj2(table_id=gettbl("matin").id,record_id=-1,status=2,user_id=leader.id,remark="审批通过")]
         matins.append(matin)
     for i in range(rndnum(3,6)): # 为clerk创建3-6个审批退回的入库单
         matin = obj2()
         matin.main = obj2(matwh_id=matwh.id,status = -1)
         matin.recs = [obj2(matwh_id=matwh.id,matin_id=-1) for x in range(rndnum(3,6))]
-        matin.flows = [obj2(table=gettbl("matin").id,table_id=-1,status=0,user_id=clerk.id), #编辑
-                        obj2(table=gettbl("matin").id,table_id=-1,status=1,user_id=clerk.id), #提交
-                        obj2(table=gettbl("matin").id,table_id=-1,status=-1,user_id=leader.id)]#审批退回
+        matin.flows = [obj2(table_id=gettbl("matin").id,record_id=-1,status=0,user_id=clerk.id,remark="创建"), #编辑
+                        obj2(table_id=gettbl("matin").id,record_id=-1,status=1,user_id=clerk.id,remark="提交"), #提交
+                        obj2(table_id=gettbl("matin").id,record_id=-1,status=-1,user_id=leader.id,remark="审批退回")]#审批退回
         matins.append(matin)
-    for i in range(rndnum(20,40)): # 为clerk创建20-40个完成的入库单
+    for i in range(rndnum(40,60)): # 为clerk创建40-60个完成的入库单
         matin = obj2()
         matin.main = obj2(matwh_id=matwh.id,status = 3)
         matin.recs = [obj2(matwh_id=matwh.id,matin_id=-1) for x in range(rndnum(3,6))]
-        matin.flows = [obj2(table=gettbl("matin").id,table_id=-1,status=0,user_id=clerk.id), #编辑
-                        obj2(table=gettbl("matin").id,table_id=-1,status=1,user_id=clerk.id), #提交
-                        obj2(table=gettbl("matin").id,table_id=-1,status=2,user_id=leader.id),#审批
-                        obj2(table=gettbl("matin").id,table_id=-1,status=3,user_id=clerk.id)] #入库
+        matin.flows = [obj2(table_id=gettbl("matin").id,record_id=-1,status=0,user_id=clerk.id,remark="创建"), #编辑
+                        obj2(table_id=gettbl("matin").id,record_id=-1,status=1,user_id=clerk.id,remark="提交"), #提交
+                        obj2(table_id=gettbl("matin").id,record_id=-1,status=2,user_id=leader.id,remark="审批通过"),#审批
+                        obj2(table_id=gettbl("matin").id,record_id=-1,status=3,user_id=clerk.id,remark="入库")] #入库
         matins.append(matin)
 
     for i,x in enumerate(matins):
         for y in x.flows:
-            y.table_id=i+1
+            y.record_id=i+1
         for y in x.recs:
             y.matin_id=i+1
     conn.execute(tbl_matin.insert(),[dict_matin(x.main) for x in matins])
     conn.execute(tbl_matinrec.insert(),[dict_matinrec(y.matwh_id,y.matin_id) for x in matins for y in x.recs ])
-    conn.execute(tbl_flow.insert(),[dict_flow(y.table, y.table_id, y.status, y.user_id) for x in matins for y in x.flows ])
+    conn.execute(tbl_flow.insert(),[dict_flow(y) for x in matins for y in x.flows ])
 gen_matin()
 
 def gen_matout(): #0编辑(正在签收) 1等待审批 2等待入库 3完成 -1退回
     matwh = QueryObj( "select * from matwh where id="+str(GetUser("仓库主管").depart_id) )[0]
     leader = GetUser("仓库主管")
     clerk = GetUser("仓库管理员")
+    guide = GetUser("调度")
+
+    #找到已完成的入库记录，并将每条随机切分
     mats = QueryObj( "select matinrec.id as id,mat_id,num from matinrec,matin where matinrec.matin_id==matin.id and matin.status==3")
-    for x in mats:
-        x.slices=rndsplit(x.num, 1,6)
+    matos=[obj2(matinrec_id=x.id,mat_id=x.mat_id,num=y) for x in mats for y in rndsplit(x.num, 1,6)]
+    index= [x for x in range(len(matos))]
 
-
-
-    matins = []
-    for i in range(rndnum(3,6)): # 为clerk创建3-6个正在编辑的入库单
-        matin = obj2()
-        matin.main = obj2(matwh_id=matwh.id, status = 0)
-        matin.recs = [obj2(matwh_id=matwh.id,matin_id=-1) for x in range(rndnum(3,6))]
-        matin.flows = [obj2(table=gettbl("matin").id,table_id=-1,status=0,user_id=clerk.id)]
-        matins.append(matin)
-    for i in range(rndnum(3,6)): # 为clerk创建3-6个等待审批的入库单
-        matin = obj2()
-        matin.main = obj2(matwh_id=matwh.id,status = 1)
-        matin.recs = [obj2(matwh_id=matwh.id,matin_id=-1) for x in range(rndnum(3,6))]
-        matin.flows = [obj2(table=gettbl("matin").id,table_id=-1,status=0,user_id=clerk.id),
-                        obj2(table=gettbl("matin").id,table_id=-1,status=1,user_id=clerk.id)]
-        matins.append(matin)
-    for i in range(rndnum(3,6)): # 为clerk创建3-6个等待入库的入库单
-        matin = obj2()
-        matin.main = obj2(matwh_id=matwh.id,status = 2)
-        matin.recs = [obj2(matwh_id=matwh.id,matin_id=-1) for x in range(rndnum(3,6))]
-        matin.flows = [obj2(table=gettbl("matin").id,table_id=-1,status=0,user_id=clerk.id),
-                        obj2(table=gettbl("matin").id,table_id=-1,status=1,user_id=clerk.id),
-                        obj2(table=gettbl("matin").id,table_id=-1,status=2,user_id=leader.id)]
-        matins.append(matin)
-    for i in range(rndnum(3,6)): # 为clerk创建3-6个审批退回的入库单
-        matin = obj2()
-        matin.main = obj2(matwh_id=matwh.id,status = -1)
-        matin.recs = [obj2(matwh_id=matwh.id,matin_id=-1) for x in range(rndnum(3,6))]
-        matin.flows = [obj2(table=gettbl("matin").id,table_id=-1,status=0,user_id=clerk.id), #编辑
-                        obj2(table=gettbl("matin").id,table_id=-1,status=1,user_id=clerk.id), #提交
-                        obj2(table=gettbl("matin").id,table_id=-1,status=-1,user_id=leader.id)]#审批退回
-        matins.append(matin)
-    for i in range(rndnum(20,40)): # 为clerk创建20-40个完成的入库单
-        matin = obj2()
-        matin.main = obj2(matwh_id=matwh.id,status = 3)
-        matin.recs = [obj2(matwh_id=matwh.id,matin_id=-1) for x in range(rndnum(3,6))]
-        matin.flows = [obj2(table=gettbl("matin").id,table_id=-1,status=0,user_id=clerk.id), #编辑
-                        obj2(table=gettbl("matin").id,table_id=-1,status=1,user_id=clerk.id), #提交
-                        obj2(table=gettbl("matin").id,table_id=-1,status=2,user_id=leader.id),#审批
-                        obj2(table=gettbl("matin").id,table_id=-1,status=3,user_id=clerk.id)] #入库
-        matins.append(matin)
-
-    for i,x in enumerate(matins):
-        for y in x.flows:
-            y.table_id=i
-        for y in x.recs:
-            y.matin_id=i
-    conn.execute(tbl_matin.insert(),[dict_matin(x.main) for x in matins])
-    conn.execute(tbl_matinrec.insert(),[dict_matinrec(y.matwh_id,y.matin_id) for x in matins for y in x.recs ])
-    conn.execute(tbl_flow.insert(),[dict_flow(y.table, y.table_id, y.status, y.user_id) for x in matins for y in x.flows ])
+    matouts = []
+    for i in range(rndnum(3,6)): # 为guide创建3-6个正在备货的出库单
+        matout = obj2()
+        matout.main = obj2(fault_id=10000, matwh_id=matwh.id, status=1,usage="维修用料")
+        matout.recs = [obj2(matwh_id=matwh.id,matout_id=len(matouts)+1,matinrec_id=x.matinrec_id,num=x.num) for x in rndpick(matos,index, rndnum(3,6))]
+        matout.flows = [obj2(table_id=gettbl("matout").id,record_id=len(matouts)+1,status=0,user_id=guide.id,remark="创建"),
+                        obj2(table_id=gettbl("matout").id,record_id=len(matouts)+1,status=1,user_id=guide.id,remark="提交备货"),
+                        obj2(table_id=gettbl("matout").id,record_id=len(matouts)+1,status=2,user_id=guide.id,remark="备货")]
+        matouts.append(matout)
+    for i in range(rndnum(3,6)): # 为clerk创建3-6个等待备货的出库单
+        matout = obj2()
+        matout.main = obj2(fault_id=10000, matwh_id=matwh.id, status=1,usage="调货")
+        matout.recs = [obj2(matwh_id=matwh.id,matout_id=len(matouts)+1,matinrec_id=x.matinrec_id,num=x.num) for x in rndpick(matos,index, rndnum(3,6))]
+        matout.flows = [obj2(table_id=gettbl("matout").id,record_id=len(matouts)+1,status=2,user_id=guide.id,remark="备货")]
+        matouts.append(matout)
+    for i in range(rndnum(3,6)): # 为clerk创建3-6个等待审批的出库单
+        matout = obj2()
+        matout.main = obj2(fault_id=10000, matwh_id=matwh.id, status=1,usage="调货")
+        matout.recs = [obj2(matwh_id=matwh.id,matout_id=len(matouts)+1,matinrec_id=x.matinrec_id,num=x.num) for x in rndpick(matos,index, rndnum(3,6))]
+        matout.flows = [obj2(table_id=gettbl("matout").id,record_id=len(matouts)+1,status=2,user_id=guide.id,remark="备货"),
+                        obj2(table_id=gettbl("matout").id,record_id=len(matouts)+1,status=3,user_id=guide.id,remark="提交审批")]
+        matouts.append(matout)
+    for i in range(rndnum(3,6)): # 为clerk创建3-6个审批退回的出库单
+        matout = obj2()
+        matout.main = obj2(fault_id=10000, matwh_id=matwh.id, status=1,usage="调货")
+        matout.recs = [obj2(matwh_id=matwh.id,matout_id=len(matouts)+1,matinrec_id=x.matinrec_id,num=x.num) for x in rndpick(matos,index, rndnum(3,6))]
+        matout.flows = [obj2(table_id=gettbl("matout").id,record_id=len(matouts)+1,status=2,user_id=guide.id,remark="备货"),
+                        obj2(table_id=gettbl("matout").id,record_id=len(matouts)+1,status=3,user_id=guide.id,remark="提交审批"),
+                        obj2(table_id=gettbl("matout").id,record_id=len(matouts)+1,status=-1,user_id=leader.id,remark="审批退回"),]
+        matouts.append(matout)
+    for i in range(rndnum(20,30)): # 为clerk创建20-30个审批通过的出库单
+        matout = obj2()
+        matout.main = obj2(fault_id=10000, matwh_id=matwh.id, status=1,usage="调货")
+        matout.recs = [obj2(matwh_id=matwh.id,matout_id=len(matouts)+1,matinrec_id=x.matinrec_id,num=x.num) for x in rndpick(matos,index, rndnum(3,6))]
+        matout.flows = [obj2(table_id=gettbl("matout").id,record_id=len(matouts)+1,status=2,user_id=guide.id,remark="备货"),
+                        obj2(table_id=gettbl("matout").id,record_id=len(matouts)+1,status=3,user_id=guide.id,remark="提交审批"),
+                        obj2(table_id=gettbl("matout").id,record_id=len(matouts)+1,status=-1,user_id=leader.id,remark="审批通过"),]
+        matouts.append(matout)
+    conn.execute(tbl_matout.insert(),[dict_matout(x.main) for x in matouts])
+    conn.execute(tbl_matoutrec.insert(),[dict_matoutrec(y) for x in matouts for y in x.recs ])
+    conn.execute(tbl_flow.insert(),[dict_flow(y) for x in matouts for y in x.flows ])
 gen_matout()
+print("haha!")

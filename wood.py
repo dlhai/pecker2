@@ -126,12 +126,6 @@ def jquery(q):
         seq.append("{"+",".join(row)+"}")
     return "["+",\n".join(seq)+"]"
 
-def query3(type,**kw):
-    r = '{"result":200,"type":"'+type+'","ls":"'+type+'",\n'
-    r += ",\n".join([ '"' + k + '":'+ jquery(v) for k,v in kw.items()] )
-    r += "\n}\n"
-    return Response(r, mimetype='application/json')
-
 def query4(ls,**kw):
     r = '{"result":200,"ls":"'+ls+'",\n'
     r += ",\n".join([ '"' + k + '":'+ jquery(v) for k,v in kw.items()] )
@@ -232,9 +226,9 @@ def rd():
     return query4(ls,fields=select(base.sl).where(base.c.table==ls),data = sql)
 
 #查询用户
-#测试链接 http://127.0.0.1:5000/queryUser?type=winder&key1=val1&key2=val2....
-@app.route("/queryuser")
-def queryuser():
+#测试链接 http://127.0.0.1:5000/rduser?type=winder&key1=val1&key2=val2....
+@app.route("/rduser")
+def rduser():
     param = request.args.to_dict()
     if ("depart_name" in param ):
         type = db_tbl[param["depart_name"]]
@@ -250,101 +244,32 @@ def queryuser():
     sql +=" and ".join([ To(k,v) for k,v in param.items()])
     return query4("queryuser",fields=select(base.sl).where(base.c.table=="user"),data = sql)
 
+#读取用户的未完成入库单列表
+#测试链接 http://127.0.0.1:5000/rdmatins?user_id=?
+@app.route("/rdmatins")
+def rdmatins():
+    param = request.args.to_dict()
+    if "user_id" not in param:
+        return '{result:404,msg:"缺少参数 user_id"}'
+    users=QueryObj("select * from user where id="+str(param["user_id"]))
+    if len(users) !=1:
+        return '{result:404,msg:"用户不存在"}'
+    user=users[0]
+    if user.job==8: #仓库主管
+        sqlmatin='select matin.* from matin,flow where matin.id=flow.table_id and matin.status in (-1,0,1,2) and flow.status=0 and matwh_id='+str(user.depart_id)
+        sqlmatinrec='select matinrec.* from matinrec,matin where matinrec.matin_id=matin.id and matin.status in (-1,0,1,2) and matinrec.matwh_id='+str(user.depart_id)
+    elif user.job==9: #仓库管理员
+        sqlmatin='select matin.* from matin,flow where matin.id=flow.record_id and matin.status in (-1,0,1,2) and flow.table_id=26 and flow.status=0 and flow.user_id='+str(user.id)
+        sqlmatinrec='select matinrec.* from matinrec,matin,flow where matinrec.matin_id=matin.id and matin.id=flow.record_id and matin.status in (-1,0,1,2) and flow.table_id=26 and flow.status=0 and flow.user_id='+str(user.id)
+    else:
+        return '{result:404,msg:"用户职业不对！"}'
+
+    return query4("rdmatins",mfields=select(base.sl).where(base.c.table=="matin"),mdata = sqlmatin,
+                 rfields=select(base.sl).where(base.c.table=="matinrec"),rdata = sqlmatinrec,)
+
+
 #-----------------------以下接口将被废弃-------------------------------
 
-#查询(由于部分表有type字段与type参数作为表名冲突被废弃)
-#测试链接 http://127.0.0.1:5000/query?type=[表名]&key1=val1&key2=val2....
-@app.route("/query")
-def _query():
-    d = request.args.to_dict()
-    type = d["type"]
-    del d["type"]
-
-    # 限制对部分表的查询
-    if type== "base" or type == "user":
-        return 404
-
-    tbl = tables[type]
-    sql = "select * from "+type
-    if len(d) > 0:
-        sql += " where "+" and ".join([ k+"='"+v+"'" for k,v in d.items()])
-    return query3(type,fields=select(base.sl).where(base.c.table==type),data = sql)
-
-#leaf_su8设备sheet用
-#测试链接 http://127.0.0.1:5000/itemdetail?type=winderco&id=1
-@app.route("/itemdetail")
-def itemdetail():
-    type = request.args.get('type')
-    id = request.args.get('id')
-    tbl = tables[type]
-    return query3(type,fields=select(base.sl).where(base.c.table==type),\
-        data=select([tbl]).where(tbl.c.id==id).order_by(tbl.c.id))
-
-#leaf_su8子设备列表tables用，type=root时，仅超级用户可用
-#测试链接 http://127.0.0.1:5000/sublistdetail?type=root&id=1
-#测试链接 http://127.0.0.1:5000/sublistdetail?type=winderco&id=1
-#测试链接 http://127.0.0.1:5000/sublistdetail?type=winderarea&id=1
-@app.route("/sublistdetail")
-def sublistdetail():
-    type = request.args.get('type')
-    id = request.args.get('id')
-    subtype = organ[type]
-    tbl = tables[subtype]
-    s1 = select(base.sl).where(base.c.table==subtype).order_by(base.c.id)
-    s2 = select([tbl]).order_by(tbl.c.id)
-    if type != "root":
-        s2 = select([tbl]).where(tbl.c[type+"_id"]==id).order_by(tbl.c.id)
-    if subtype == "efan":
-        sub = tables["leaf"]
-        s3 = select([sub]).where(sub.c.winderarea_id==id).order_by(sub.c.id)
-        return query3(type,fields=s1,data=s2,addit=s3)
-    else:
-        return query3(type,fields=s1,data=s2)
-
-#leaf_su8设备树用，【暂废：winder补充了position，用来在】
-#测试链接 http://127.0.0.1:5000/sublist?type=root&id=1
-#测试链接 http://127.0.0.1:5000/sublist?type=winderco&id=1
-@app.route("/sublist")
-def sublist():
-    type = request.args.get('type')
-    id = request.args.get('id')
-    tbl = tables[organ[type]]
-    sel = ""
-    if type =="root":
-        sel = select([tbl.c.id, tbl.c.name]).order_by(tbl.c.id)
-    #elif type == "winder":
-    #    sel = select([tbl.c.id, tbl.c.name,tbl.c.position]).order_by(tbl.c.id).where(tbl.c[type+"_id"]==id)
-    else:
-        sel = select([tbl.c.id, tbl.c.name]).order_by(tbl.c.id).where(tbl.c[type+"_id"]==id)
-    return to_json(conn.execute(sel).fetchall())
-
-#leafmap用来显示地图上的风场地标和风区轮廓，考虑到调度，不限制权限，任何人可用
-#测试链接 http://127.0.0.1:5000/winderlist?winder_id=0
-#测试链接 http://127.0.0.1:5000/winderlist?winder_id=1
-@app.route("/winderlist")
-def winderlist():
-    winder_id = request.args.get('winder_id') #为0仅su可用，表示获得全部风场
-    tbl1 = tables["winder"]
-    tbl2 = tables["winderarea"]
-
-    if winder_id =="0":
-        s1 = select([tbl1.c.id, tbl1.c.name,tbl1.c.position]).order_by(tbl1.c.id)
-        s2 = select([tbl2.c.id, tbl2.c.name,tbl2.c.position]).order_by(tbl2.c.id)
-        return query3("winder",winder=s1,winderarea=s2)
-    else:
-        s1 = select([tbl1.c.id, tbl1.c.name,tbl1.c.position]).order_by(tbl1.c.id).where(tbl1.c.id==winder_id)
-        s2 = select([tbl2.c.id, tbl2.c.name,tbl2.c.position]).order_by(tbl2.c.id).where(tbl2.c.winder_id==winder_id)
-        return query3("winder", winder=s1,winderarea=s2)
-
-#leafmap用来显示地图上风电机分布，除su外，仅本风场人员可访问
-#与sublist之区别是这是无下级叶片列表，仅efan, sublist无gps
-#测试链接 http://127.0.0.1:5000/efanlist?winder_id=1
-@app.route("/efanlist")
-def efanlist():
-    winder_id = request.args.get('winder_id')
-    tbl = tables["efan"]
-    s = select([tbl.c.id, tbl.c.position]).where(tbl.c.winder_id==winder_id).order_by(tbl.c.id)
-    return query3("efan", efanlist=s)
 
 #---------------------以上接口将被废弃---------------------------------------
 if __name__ == "__main__":

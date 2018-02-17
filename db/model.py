@@ -91,8 +91,8 @@ tbl_flow=Table('flow', metadata,
 	Column('user_id',Integer),
 	Column('date',Date),
 	Column('remark',String(128)))
-def dict_flow(table,table_id,status,user_id):
-    return dict(table=table,table_id=table_id,status=status,user_id=user_id,date=rnddate(30,60),remark=rnditem2("_songci"))
+def dict_flow(x):
+    return dict(table=x.table,table_id=x.table_id,status=x.status,user_id=x.user_id,date=rnddate(30,60),remark=x.remark)
 
 tbl_user=Table('user', metadata,
 	Column('id',Integer,primary_key=True),
@@ -290,9 +290,10 @@ tbl_matin=Table('matin', metadata,
 	Column('source',Integer),
 	Column('courier',String(32)),
 	Column('ourierdate',String(16)),
-	Column('remark',String(2048)))
+	Column('remark',String(2048)),
+	Column('img',String(32)))
 def dict_matin(x):
-    return dict(matwh_id=x.matwh_id,status=x.status,code=rndqq(),source=rnditem2("_matsouce").id,courier=rnditem2("_person").name,ourierdate=rnddate(30,60),remark=rnditem2("_songci"))
+    return dict(matwh_id=x.matwh_id,status=x.status,code=rndqq(),source=rnditem2("_matsouce").id,courier=rnditem2("_person").name,ourierdate=rnddate(30,60),remark=rnditem2("_songci"),img="")
 
 tbl_matinrec=Table('matinrec', metadata,
 	Column('id',Integer,primary_key=True),
@@ -308,6 +309,31 @@ tbl_matinrec=Table('matinrec', metadata,
 def dict_matinrec(matwh_id,matin_id):
     dt=rnddate(30,60)
     return dict(matwh_id=matwh_id,matin_id=matin_id,mat_id=rnditem2("mat").id,num=rndnum(1000,50000),specs=random.choice( ["100kg/包","100kg/袋", "100m/卷", "100个/盒"]),vender_id=rnditem2("matvender").id,producedt=dt,expiredt=rnddatespan(dt,60,90),remark=rnditem2("_songci"))
+
+tbl_matout=Table('matout', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('fault_id',Integer),
+	Column('matwh_id',Integer),
+	Column('status',Integer),
+	Column('code',String(16)),
+	Column('usage',String(32)),
+	Column('receiver',String(32)),
+	Column('receiverdate',String(16)),
+	Column('remark',String(2048)),
+	Column('img',String(32)))
+def dict_matout(x):
+    return dict(fault_id=x.fault_id,matwh_id=x.matwh_id,status=x.status,code=rndqq(),usage=x.usage,receiver=rnditem2("_person").name,receiverdate=rnddate(30,60),remark=rnditem2("_songci"),img="")
+
+tbl_matoutrec=Table('matoutrec', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('matwh_id',Integer),
+	Column('matout_id',Integer),
+	Column('matinrec_id',Integer),
+	Column('num',Integer),
+	Column('remark',String(2048)))
+def dict_matoutrec(x):
+    dt=rnddate(30,60)
+    return dict(matwh_id=x.matwh_id,matout_id=x.matout_id,matinrec_id=x.matinrec_id,num=x.num,remark=rnditem2("_songci"))
 
 
 metadata.create_all(engine)
@@ -388,6 +414,10 @@ conn.execute(tbl_user.insert(),[dict_user(x.id,"matwh","9","") for x in data("ma
 QueryAll(tbl_matin)
 
 QueryAll(tbl_matinrec)
+
+QueryAll(tbl_matout)
+
+QueryAll(tbl_matoutrec)
 
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","10","")])
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","11","")])

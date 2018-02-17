@@ -330,7 +330,7 @@
         if( isInArray(["1", "4", "7"], g_user.job ))
             Reqdata("/rd?ls=" + { "1": "winder", "4": "devwh", "7": "matwh" }[g_user.job], "", function (res) { g_departs = res; });
         Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
-        Reqdata("/queryuser?job=" + GetsubJob(g_user.job, "string"), "", function (res) {
+        Reqdata("/rduser?job=" + GetsubJob(g_user.job, "string"), "", function (res) {
             g_users = res;
             if (!isInArray(["1", "4", "7"], g_user.job)) { // 除此三类超级用户外不显示所在单位
                 var idx = GetIdx(g_users.fields, "name", "depart_id");

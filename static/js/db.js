@@ -41,12 +41,23 @@
     },
     {
         "id": "7", "type": "wh", "name": "仓库超级帐号", modules: [
-            { name: "仓库", url: "matwhsu.html" },
+            { name: "仓库", url: "matsu.html" },
             { name: "人员", url: "user3.html" },
             { name: "材料", url: "material.html" }]
     },
-    { "id": "8", "type": "wh", "name": "仓库主管", modules: [{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }] },
-    { "id": "9", "type": "wh", "name": "仓库管理员", modules: [{ name: "入库", url: "matwh_in4.html" }, { name: "出库", url: "matwh_out3.html" }, { name: "查询", url: "matwh_query2.html" }] },
+    {
+        "id": "8", "type": "wh", "name": "仓库主管", modules: [
+            { name: "入库", url: "matin.html" },
+            { name: "出库", url: "matout.html" },
+            { name: "查询", url: "matquery.html" },
+            { name: "人员", url: "user3.html" }]
+    },
+    {
+        "id": "9", "type": "wh", "name": "仓库管理员", modules: [
+            { name: "入库", url: "matin.html" },
+            { name: "出库", url: "matout.html" },
+            { name: "查询", url: "matquery.html" }]
+    },
     { "id": "10", "type": "coord", "name": "调度超级帐号", modules: [{ name: "调度", url: "person.html?type=总调|调度" }] },
     { "id": "11", "type": "coord", "name": "调度主管", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
     { "id": "12", "type": "coord", "name": "调度", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },

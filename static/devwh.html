@@ -97,7 +97,7 @@
             g_user = GetRoleUser("驻地主管");
 
         Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res1) { g_devvenders = res1; });
-        Reqdata("/queryuser?depart_table=" + GetSub(db_tbl, "name", "devwh").id + "&depart_id=" + g_user.depart.id, "", function (res2) { g_driver = res2; });
+        Reqdata("/rduser?depart_table=" + GetSub(db_tbl, "name", "devwh").id + "&depart_id=" + g_user.depart.id, "", function (res2) { g_driver = res2; });
         Reqdata("/rd?ls=dev&devwh_id="+g_user.depart.id, "", function (res3) {
             g_devs = res3;
             GetSub(g_devs.fields, "name", "code").forder = -1;
