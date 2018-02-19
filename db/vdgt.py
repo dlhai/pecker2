@@ -76,6 +76,8 @@ def rnditem(name):
     idx = random.randint(0,len(tbl.data)-1)
     if hasattr(tbl,"field"):
         return tbl.__getitem__(idx)
+    elif name == "_songci":
+        return tbl.data[idx][0][0:rndnum(8,32)]
     else:
         return tbl.data[idx][0]
 
@@ -93,6 +95,8 @@ def rnditem2(tblname):
     idx = random.randint(0,len(tbl.data)-1)
     if hasattr(tbl,"field"):
         return tbl.__getitem__(idx)
+    elif tblname == "_songci":
+        return tbl.data[idx][0][0:rndnum(8,32)]
     else:
         return tbl.data[idx][0]
 
@@ -223,4 +227,14 @@ if __name__=="__main__":
     setdata(loadpkl('rawdata.pkl'))
     aa = getitembyname("_tbl","__sys__").id
 
-    print("%s3" %("python"))
+    print(rnditem("_songci"))
+    print(rnditem("_songci"))
+    print(rnditem("_songci"))
+    print(rnditem("_songci"))
+    print(rnditem("_songci"))
+    print(rnditem("_songci"))
+    print(rnditem("_songci"))
+    print(rnditem("_songci"))
+    print(rnditem("_songci"))
+    print(rnditem("_songci"))
+    aa =1

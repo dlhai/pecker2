@@ -289,11 +289,11 @@ tbl_matin=Table('matin', metadata,
 	Column('code',String(16)),
 	Column('source',Integer),
 	Column('courier',String(32)),
-	Column('ourierdate',String(16)),
+	Column('courierdate',String(16)),
 	Column('remark',String(2048)),
 	Column('img',String(32)))
 def dict_matin(x):
-    return dict(matwh_id=x.matwh_id,status=x.status,code=rndqq(),source=rnditem2("_matsouce").id,courier=rnditem2("_person").name,ourierdate=rnddate(30,60),remark=rnditem2("_songci"),img="")
+    return dict(matwh_id=x.matwh_id,status=x.status,code=rndqq(),source=rnditem2("_matsouce").id,courier=rnditem2("_person").name,courierdate=rnddate(30,60),remark=rnditem2("_songci"),img="")
 
 tbl_matinrec=Table('matinrec', metadata,
 	Column('id',Integer,primary_key=True),

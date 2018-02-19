@@ -1,6 +1,29 @@
-.matin{
+/*面板、表单上的带文字的标签*/
+/*基本框架为：
+    <div class="x2Tag">
+        <label>标签文字</label>
+        <div>可以是div、input、select、textarea等各种输入控件，默认设置宽为200px</div>
+    </div>*/
+.x2Tag {
+    display: inline-flex;
+    margin: 5px;
+    flex-direction: row;
+    align-items: flex-start;
 
-    &>header>div{
-
+    & > label {
+        width: 60px;
+        text-align: right;
+        margin: 5px;
+    }
+    & > div:first-of-type,
+    & > input,
+    & > select,
+    & > textarea {
+        border-radius: 4px;
+        border: 1px solid #95b7ff;
+        display: inline-block;
+        padding: 5px 10px;
+        margin: 0px 5px;
+        width: 200px;
     }
 }

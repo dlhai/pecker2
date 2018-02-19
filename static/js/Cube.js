@@ -62,7 +62,26 @@ function showDlg() {
     dlg.Show();
 }
 
-// 渲染表单
+// 渲染表单,三步
+//1.仅渲染控件，（在表格中，不需要前面的标签）
+function RenderFormItem(type, attr, val )
+{
+    var r = "";
+    if (type == "div")
+        r += "<div " + attr + ">" + val + "</div>";
+    else if (type == "input")
+        r += '<input ' + attr + ' name="' + name + '" value="' + val + '"/>';
+    else if (type == "input_long")
+        r += '<input ' + attr + ' style="width:490px;" name="' + name + '" value="' + val + '" />';
+    else if (type == "textarea")
+        r += '<textarea ' + attr + ' style="resize:none;width:490px;max-height:45px;" name="' + name + '">' + val + '</textarea>';
+    else if (type == "select")
+        r += '<select ' + attr + ' name="' + name + '">' + val + '</select>';
+    else if (type == "date")
+        r += '<input ' + attr + ' name="' + name + '" value="' + val + '" onClick="laydate()" />';
+    return r;
+}
+//2.控件加标签
 function RenderFormIn(entity, fields, cb) {
     var r = "";
     for (var i in fields) {
@@ -71,10 +90,11 @@ function RenderFormIn(entity, fields, cb) {
             continue;
 
         var val = entity[field.name];
-        var val = cb != undefined ? cb(entity, field) : val;
         var attr = "";
         if (field.name.indexOf("_") != -1)
             attr = 'id="' + field.name + "_" + val + '"';
+
+        var val = cb != undefined ? cb(entity, field) : val;
 
         r += "<div><label>" + field.title + "</label>";
         if (field.ftype == "div")
@@ -93,6 +113,7 @@ function RenderFormIn(entity, fields, cb) {
     }
     return r;
 }
+//3.控件加标签加表单
 function RenderForm4(entity, fields, cb) {
     var r = '<div class="x2Form">';
     r +=RenderFormIn(entity, fields, cb);

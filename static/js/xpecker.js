@@ -97,7 +97,7 @@ function RenderPane2(entity, fields, fun) {
     return r;
 }
 
-
+// 直接为数组用这一版
 function RenderSelect(ar, selid, type) {
     var r = "";
     for (var i in ar) {
@@ -113,6 +113,7 @@ function RenderSelect(ar, selid, type) {
     return r;
 }
 
+// 使用data采用这一版
 function RenderSelect2(res, selid) {
     var r = "";
     for (var i in res.data) {

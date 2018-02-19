@@ -262,7 +262,7 @@ def rdmatins():
     user=users[0]
 
     #0编辑(正在签收) 1等待审批 2等待入库 3完成 -1退回
-    if user.job==8: #仓库主管(查询所在仓库所有完成的入库单)
+    if user.job==8: #仓库主管(查询所在仓库所有未完成的入库单)
         sqlbase = "select %s from matin where status in (-1,0,1,2) and matwh_id=%d"
         sqlmatin=sqlbase%("*",user.depart_id)
         sqlmatinrec="select * from matinrec where matin_id in (%s)"%(sqlbase%("id",user.depart_id))

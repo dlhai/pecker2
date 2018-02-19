@@ -144,7 +144,7 @@ body {
     flex-direction: row;
     align-items: flex-start;
 }
-.x2Form>div>label {
+.x2Form>div>label{
     width: 60px;
     text-align: right;
     margin: 5px;
