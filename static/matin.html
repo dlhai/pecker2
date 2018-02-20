@@ -159,15 +159,18 @@
                 </div>
             </footer>
             <div class="buttonarray" style="margin-top:20px;margin-right:20px;border-top:2px dashed #6a923d;padding-top:30px;">
+                <button id="btn_remove" type="button" class="btn btn-primary">删除</button>
+                <button id="btn_recall" type="button" class="btn btn-primary">撤回</button>
                 <div style="float: right;">
                     <div id="sect_flow" class="x2Form" style="display:inline-block;">
                         <div><label>意见</label><input id="log" style="width:400px;"/></div>
                     </div>
                     <button id="btn_save" type="button" class="btn btn-primary">保存</button>
                     <button id="btn_submit" type="button" class="btn btn-primary">提交</button>
-                    <button id="btn_checkok" type="button" class="btn btn-primary">审核通过</button>
-                    <button id="btn_checkreject" type="button" class="btn btn-primary">审核不通过</button>
-                    <button id="btn_inwh" type="button" class="btn btn-primary">入库</button>
+                    <button id="btn_checkT" type="button" class="btn btn-primary">审核通过</button>
+                    <button id="btn_checkF" type="button" class="btn btn-primary">审核不通过</button>
+                    <button id="btn_inwhT" type="button" class="btn btn-primary">入库</button>
+                    <button id="btn_inwhF" type="button" class="btn btn-primary">入库不成功</button>
                 </div>
             </div>
             <div id="sect_flowlist" style="margin-top:50px;"></div>
@@ -191,7 +194,7 @@
             </div>
             <div class="body">
                 <table cellpadding="2px">
-                    {% for (var j=0,y=x.subs[0];j<x.subs.length;j++,y=x.subs[j]) { %}
+                    {% for (var j=0,y=x.subs[0];j<x.subs.length && y.mat_id>0;j++,y=x.subs[j]) { %}
                     <tr><td style="width: 140px; text-align: left;">{%=f2s(y,"mat_id")%}</td><td>{%=y.num%}</td><td>{%=f2s(y,"unit")%}</td></tr>
                     {% } %}
                 </table>
@@ -205,6 +208,13 @@
             g_matins_editing = new Array(), g_matins_checking = new Array(), g_matins_whin = new Array();
         if (g_user == undefined)
             g_user = GetRoleUser("仓库主管");
+
+        var g_recfields = [{ name: "code", title: "编号", ftype: "div", width: "90px" }, { name: "name", title: "材料名称", ftype: "select", width: "120px" },
+        { name: "type", title: "类型", ftype: "div", width: "80px" }, { name: "unit", title: "计量单位", ftype: "div", width: "40px" },
+        { name: "num", title: "数量", ftype: "input", width: "40px" }, { name: "specs", title: "规格", ftype: "input", width: "60px" },
+        { name: "vender_id", title: "生产厂家", ftype: "select", width: "80px" }, { name: "producedt", title: "生产日期", ftype: "date", width: "80px" },
+        { name: "expiredt", title: "失效日期", ftype: "date", width: "80px" }, { name: "remark", title: "备注", ftype: "input", width: "300px" }];
+
 
         ReqdataS("/rd?ls=mat", "", function (mats) {g_mats = mats;});
         Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_matvenders = res; });
@@ -234,6 +244,9 @@
                 else if (mdata.status == 1) g_matins_checking.push(mdata);
                 else if (mdata.status == 2) g_matins_whin.push(mdata);
             }
+            // 将子项不够10个的创建够
+            g_matins_editing.map(x => x.subs = x.subs.concat(Array(10 - x.subs.length).fill(0).map(v => Create(g_matins.rfields))));
+
             var tpl_matin_card = doT.template(document.getElementById('tpl_matin_card').innerHTML);
             $("#g_matins_editing").html(tpl_matin_card(g_matins_editing));
             $("#g_matins_checking").html(tpl_matin_card(g_matins_checking));
@@ -242,11 +255,18 @@
 
         function onclickcard(This) {
             g_matin = GetSub(g_matins.mdata, "id", $(This).attr("id"));
-            RenderMatinDetail(g_matin, editable);
+            RenderMatinDetail(g_matin);
+        }
+        function onNewMatin(This) {
+            g_matin = Create(g_matins.mfields);
+            g_matin.id = 0;
+            g_matin.status = 0;
+            g_matin.subs = Array(10).fill(0).map(v => Create(g_matins.rfields));
+            RenderMatinDetail(g_matin);
         }
 
         function RenderMatinDetail(matin) {
-            if (matin.status == 0 || matin.status == -1) {
+            if (matin.status == 0 || matin.status == -1) { // 编辑状态
                 var source='<select style="font-size:36px;margin-top:20px;height:58px; min-width:170px;margin-left:50px;">{0}</select>'
                 $("#source").html(source.format(RenderSelect(db_matsouce, matin.source)));
 
@@ -256,10 +276,25 @@
 
                 var remark = '<label>备注</label><input id="remark" style="width:490px;" value="{0}"/>'
                 $("#remark").parent().html(remark.format(matin.remark));
+
+                // 清除空白行的组合框自动选中
+                $('select[name="name"],select[name="vender_id"]').each((idx, node, node2) => {
+                    var row = $(node).parent().parent().attr('id').split("_")[1];
+                    if (matin.subs[row].mat_id == "")
+                        node.selectedIndex = -1;
+                });
+                $("select").on("change", function () {
+                    var id = $(this).val();
+                    var mat = GetSub(g_mats.data, "id", $(this).val());
+                    var prt = $(this).parent();
+                    prt.prev().children().html(mat.code);
+                    prt.next().children().html(mat.type);
+                    prt.next().next().children().html(mat.unit);
+                });
             }
-            else {
+            else { //只读状态
                 var source = '<div style="font-size:36px;margin-top:20px;height:58px; min-width:170px;margin-left:50px;">{0}</div>'
-                $("#source").html(source.format(f2s(matin.source, "source")));
+                $("#source").html(source.format(f2s(matin, "source")));
 
                 $("#sect_code").html(RenderPaneIn(matin, [GetSub(g_matins.mfields, "name", "code")]));
                 $("#sect_courier").html(RenderPaneIn(matin, [GetSub(g_matins.mfields, "name", "courier"), GetSub(g_matins.mfields, "name", "courierdate")]));
@@ -268,8 +303,10 @@
                 var remark = '<label>备注</label><div id="remark" style="width:490px;" >{0}</div>'
                 $("#remark").parent().html(remark.format(matin.remark ));
             }
+            // 流水
             Reqdata("/rd?ls=flow&table_id=" + GetTbl("matin").id + "&record_id=" + matin.id, "", function (flows) {
                 ["checker", "checkdt", "inwh", "inwhdt"].map(x => $("#" + x).html("　"));
+                if (matin.id == 0) flows.data.push({ status: 0, user_id: g_user.id, date: (new Date()).format("yyyy-M-d"), remark: "新建入库单" });
                 var loglist = "";
                 for (var x = flows.data[0], k = 0; k < flows.data.length; k++ , x = flows.data[k]) {
                     if (x.status == 0) { $("#creater").html(f2s(x, "user_id")); $("#createrdt").html(f2s(x, "date")); }
@@ -279,33 +316,29 @@
                 }
                 $("#sect_flowlist").html(loglist);
             });
-        }
+                // 按钮控制 
+                // 单据状态	删除   撤回    保存	提交   审核T   审核F  入库T	入库F
+                //          remove recall save	submit checkT checkF inwhT	inwhF
+                // 退回 -1	s	   h      s     s      h      h      h      h
+                // 编辑 0	s	   h      s     s      h      h      h      h
+                // 提交 1	h	   s      h     h      h      h      h      h
+                // 审核T 2	h	   h      h     h      h      h      s      s
 
-        function onclickcard_old(This) {
-            g_matin = GetSub(g_matins.mdata, "id", $(This).attr("id"));
-
-            var fields = ["source", "code", "courier", "courierdate", "remark", "inwh", "inwhdt"];
-            for (var i in fields) $("#" + fields[i]).html(f2s(g_matin, fields[i]));
-
-            $("#matinrec").html(MatinRenderTable(g_matin));
-            //$("#matinrec").html(RenderTable2({ fields: g_recfields, data: g_matin.subs }, "", f2sRec));
-            Reqdata("/rd?ls=flow&table_id=" + GetTbl("matin").id + "&record_id=" + g_matin.id, "", function (flows) {
-                var loglist = "";
-                //{ $("#checker").html("　"); $("#checkdt").html("　"); $("#inwh").html("　"); $("#inwhdt").html("　"); }
-                ["checker", "checkdt", "inwh", "inwhdt"].map(x => $("#"+x).html("　"));
-                for (var x = flows.data[0], k = 0; k < flows.data.length; k++ , x = flows.data[k]) {
-                    if (x.status == 0) { $("#creater").html(f2s(x,"user_id")); $("#createrdt").html(f2s(x,"date")); }
-                    if (x.status == 1) { $("#checker").html(f2s(x,"user_id")); $("#checkdt").html(f2s(x,"date")); }
-                    if (x.status == 2) { $("#inwh").html(f2s(x,"user_id")); $("#inwhdt").html(f2s(x,"date")); }
-                    loglist += "<div>" + x.date + " " + f2s(x,"user_id") + " " + x.remark + "</div>";
-                }
-                $("#loglist").html(loglist);
-            });
+            var btnarray=[ "remove", "recall", "save", "submit", "checkT", "checkF", "inwhT", "inwhF"];
+            var btnstatus=[{ "remove": "s", "recall": "h", "save": "s", "submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", },
+                { "remove": "s", "recall": "h", "save": "s", "submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", },
+                { "remove": "h", "recall": "s", "save": "h", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", },
+                { "remove": "h", "recall": "h", "save": "h", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "s", "inwhF": "s", }];
+            var status = btnstatus[parseInt(g_matin.status) + 1];
+            btnarray.map(val => status[val] == "s" ? $("#btn_" + val).show() : $("#btn_" + val).hide());
+            if (g_matin.status == 1 && g_user.job == GetSub(db_job, "name", "仓库主管").id) {
+                $("#btn_checkT").show();$("#btn_checkF").show();
+            }
         }
 
         function RenderPaneIn(data, fields ) {
             var r = "";
-            for (var i = 0, field = fields[0]; i < ar.fields.length; i++, field=field[i]) {
+            for (var i = 0, field = fields[0]; i < fields.length; i++, field=fields[i]) {
                 var attr = "";
                 if (field.name.indexOf("_") != -1)
                     attr = 'id="' + field.name + "_" + val + '" ';
@@ -329,39 +362,26 @@
             else return data[field];
         }
 
-        //function f2sRec(data, field) {
-        //    // "code", "name", "type", "unit", "num", "specs", "vender_id", "producedt", "expiredt", "remark"
-        //    if (field.name == "code") return GetSub(g_mats.data, "id", data["mat_id"]).code;
-        //    else if (field.name == "name") return GetSub(g_mats.data, "id", data["mat_id"]).name;
-        //    else if (field.name == "type") return GetSub(g_mats.data, "id", data["mat_id"]).type;
-        //    else if (field.name == "unit") return GetSub(g_mats.data, "id", data["mat_id"]).unit;
-        //    else if (field.name == "vender_id") return GetSub(g_matvenders.data, "id", data["vender_id"]).name;
-        //    else return data[field.name];
-
-        //}
-        //function FieldToEdit(data, field) {
-        //    if (field.name == "scale") return RenderSelect(db_matwhscale, data[field.name]);
-        //    else if (field.name == "matprov_id") return GetSub(g_matprovs.data, "id", data[field.name]).name;
-        //    else return data[field.name];
-        //}
+        function f2sRec(data, field) {
+            if (field.name == "code") return GetSub(g_mats.data, "id", data["mat_id"]).code;
+            else if (field.name == "name") return GetSub(g_mats.data, "id", data["mat_id"]).name;
+            else if (field.name == "type") return GetSub(g_mats.data, "id", data["mat_id"]).type;
+            else if (field.name == "unit") return GetSub(g_mats.data, "id", data["mat_id"]).unit;
+            else if (field.name == "vender_id") return GetSub(g_matvenders.data, "id", data["vender_id"]).name;
+            else return data[field.name];
+        }
 
         function MatinRenderTable(subs) {
-            var fields = [{ name: "code", title: "编号", ftype: "div", width: "90px" }, { name: "name", title: "材料名称", ftype: "select", width: "120px"},
-                { name: "type", title: "类型", ftype: "div", width: "80px" }, { name: "unit", title: "计量单位", ftype: "div", width: "40px" },
-                { name: "num", title: "数量", ftype: "input", width: "40px" }, { name: "specs", title: "规格", ftype: "input", width: "60px" },
-                { name: "vender_id", title: "生产厂家", ftype: "select", width: "80px" }, { name: "producedt", title: "生产日期", ftype: "date", width: "80px"},
-                { name: "expiredt", title: "失效日期", ftype: "date", width: "80px" }, { name: "remark", title: "备注", ftype: "input", width: "300px" }];
-
             var table = `<table class="xTable"><thead><tr><th>`;
-            table += fields.map(val=>val.title).join("</th><th>");
+            table += g_recfields.map(val=>val.title).join("</th><th>");
             table += "</th></tr></thead><tbody>";
             
             for (var i = 0, rec = subs[0]; i < subs.length; i++ , rec = subs[i]){
                 var mat = GetSub(g_mats.data, "id", rec["mat_id"]);
-                table += "<tr>";
-                for (var j = 0, field = fields[0]; j < fields.length; j++ , field = fields[j]){
-                 //   var style = (["input", "select", "date"].indexOf(field.ftype)!=-1) ? 'style="border-bottom:1px solid blue"' : "";
-                    var attr = field.width ?'style="width:' + field.width + '"' : "";
+                if (mat == null) mat = Create(g_mats.fields);// 新建时，还没有指定是哪种材料
+                table += '<tr id="sub_'+i+'">';
+                for (var j = 0, field = g_recfields[0]; j < g_recfields.length; j++ , field = g_recfields[j]){
+                    var attr = 'name="'+field.name +'"'+( field.width ?' style="width:' + field.width + '"' : "");
                     table += "<td " + /*style+*/">" + RenderFormItem(field.ftype, attr, function (field, mat, rec) {
                         if (field.name == "code") return mat.code;
                         else if (field.name == "name") return RenderSelect2(g_mats, mat.id);
@@ -378,33 +398,8 @@
                 }
                 table += "</tr>";
             }
-            for (var i = subs.length; i < 10; i++)
-                table += "<tr><td>　</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
             table += "</tbody></table>";
             return table;
-        }
-
-        String.prototype.format = function (args) {
-            var result = this;
-            if (arguments.length > 0) {
-                if (arguments.length == 1 && typeof (args) == "object") {
-                    for (var key in args) {
-                        if (args[key] != undefined) {
-                            var reg = new RegExp("({" + key + "})", "g");
-                            result = result.replace(reg, args[key]);
-                        }
-                    }
-                }
-                else {
-                    for (var i = 0; i < arguments.length; i++) {
-                        if (arguments[i] != undefined) {
-                            var reg = new RegExp("({)" + i + "(})", "g");
-                            result = result.replace(reg, arguments[i]);
-                        }
-                    }
-                }
-            }
-            return result;
         }
 
         // 表单验证的几种方法： http://www.jb51.net/article/92741.htm

@@ -70,15 +70,15 @@ function RenderFormItem(type, attr, val )
     if (type == "div")
         r += "<div " + attr + ">" + val + "</div>";
     else if (type == "input")
-        r += '<input ' + attr + ' name="' + name + '" value="' + val + '"/>';
+        r += '<input ' + attr + '" value="' + val + '"/>';
     else if (type == "input_long")
-        r += '<input ' + attr + ' style="width:490px;" name="' + name + '" value="' + val + '" />';
+        r += '<input ' + attr + ' style="width:490px;" value="' + val + '" />';
     else if (type == "textarea")
-        r += '<textarea ' + attr + ' style="resize:none;width:490px;max-height:45px;" name="' + name + '">' + val + '</textarea>';
+        r += '<textarea ' + attr + ' style="resize:none;width:490px;max-height:45px;">' + val + '</textarea>';
     else if (type == "select")
-        r += '<select ' + attr + ' name="' + name + '">' + val + '</select>';
+        r += '<select ' + attr + '">' + val + '</select>';
     else if (type == "date")
-        r += '<input ' + attr + ' name="' + name + '" value="' + val + '" onClick="laydate()" />';
+        r += '<input ' + attr + '" value="' + val + '" onClick="laydate()" />';
     return r;
 }
 //2.控件加标签
