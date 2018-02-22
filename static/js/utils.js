@@ -1,4 +1,9 @@
-﻿//var str = '这是一个测试的字符串：{0} {1}'.format('Hello', 'world');
+﻿function int(s) {
+    if (s == "") return 0;
+    else return parseInt(s);
+}
+
+//var str = '这是一个测试的字符串：{0} {1}'.format('Hello', 'world');
 //var str = '这是一个测试的字符串：{str0} {str1}'.format({ str0: 'Hello', str1: 'world' });
 String.prototype.format = function (args) {
     var result = this;
@@ -95,3 +100,4 @@ function Create(fields) {
         r[fields[k].name] = "";
     return r;
 }
+

@@ -1,0 +1,86 @@
+/*出库单入库单的绿色小卡*/
+.card {
+    display: inline-block;
+    margin: 10px;
+    width: 230px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    text-align: center;
+    border-radius: 5px;
+}
+.card .header {
+    border-radius: 5px 5px 0px 0px;
+    background-color: #98bf68;
+    color: white;
+    font-size: 10px;
+    height: 42px;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+}
+.card .header .lefttop {
+    border-radius: 5px 0px 5px 0px;
+    color: white;
+    font-size: 12px;
+    float: left;
+    border: 1px solid #6a923d;
+}
+
+.card .header .left {
+    position: absolute;
+    color: white;
+    font-size: 12px;
+    left: 2px;
+    top:27px;
+}
+
+.card .header .title {
+    color: white;
+    padding-top: 8px;
+    font-size: 20px;
+    text-align: center;
+    width: 100%;
+}
+.card .header .right {
+    padding-top: 15px;
+    padding-right: 4px;
+    text-align: right;
+    font-size: 12px;
+    float: right;
+}
+.card .header .right .time {
+    padding: 0px 2px;
+    top: -4px;
+    left: 5px;
+    text-align: right;
+    position: relative;
+}
+.card .body {
+    background-color: #f5f3ee;
+    color: #5f5135;
+    padding: 4px;
+    font-size: 14px;
+    text-align: center;
+    border-top: 1px solid #6a923d;
+    border-bottom: 1px solid #e0d5c5;
+    border-radius: 0px 0px 5px 5px;
+}
+.card button {
+    background: linear-gradient(#d2e7b9, #6fa743);
+    border: 1px solid #cfc4b6;
+    color: white;
+    padding: 4px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 6px;
+    cursor: pointer;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2), 0 2px 5px 0 rgba(0, 0, 0, 0.19);
+}
+
+.card table {width: 100%;table-layout: fixed;}
+.card table tr:nth-child(2n+1) {background-color: #ffffee;}
+.card table tr:nth-child(2n) {background-color: #eeffee;}
+/* .card table tr:first-child {width: 200px;text-align: left;}*/
+.card table td, .card table th {white-space: nowrap;overflow: hidden;word-break: keep-all;}

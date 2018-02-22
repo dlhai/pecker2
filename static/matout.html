@@ -1,0 +1,355 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/doTe.js"></script>
+    <script src="js/utils.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/Cube.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/xpecker.js"></script>
+
+    <script src="laydate/laydate.js"></script>
+    <style>/*为了解决BootStrap中css和layDate的css样式冲突*/
+        .laydate_box, .laydate_box * {box-sizing: content-box;}
+        .laydate_box th {text-align: center;}
+    </style>
+
+    <link rel="stylesheet" href="css/matio.css" />
+    <style>
+        .formtitle {
+            font-size: 36px;
+            margin-top: 20px;
+            height: 58px;
+            min-width: 170px;
+            margin-left: 50px;
+            text-align: center;
+        }
+
+        .xTable input, .xTable select {border: 0px;}
+    </style>
+</head>
+<body class="xFCsrow">
+    <div id="curitem" class="xFCscol xFIfixed" style="width: 300px;">
+        <section class="xPanel2">
+            <header>正在编辑<div style="float: right;"><a id="btn_new" href="javascript:onNewMatin()">新建</a></div></header>
+            <div id="g_matouts_editing" class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"></div>
+        </section>
+        <section class="xPanel2">
+            <header>等待审批</header>
+            <div id="g_matouts_checking" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
+        </section>
+    </div>
+    <section class="xPanel2">
+        <header>出库单</header>
+        <div class="matin xScroll" style="padding: 5px;height:100px;flex-grow: 1;">
+            <header class="xFCsrow">
+                <div id="sect_creater" class="xFIfixed x2Form" style="width:300px;margin-top:50px;">
+                    <div><label>备货人</label><div id="stocker">　</div></div><div><label>备货时间</label><div id="stockdate">　</div></div>
+                </div>
+                <div style="text-align:center;">
+                    <div id="usage" ><div class="formtitle" value="">出库单</div></div>
+                    <div id="sect_code" class="x2Form" ><div><label>单号</label><input id="code"/></div></div>
+                </div>
+                <div id="sect_request" class="xFIfixed x2Form" style="width:300px;margin-top:10px;">
+                    <div><label>故障单号</label><div>　</div></div><div><label>申请人</label><div id="creater">　</div></div><div><label>申请时间</label><div id="createdate">　</div></div>
+                </div>
+            </header>
+            <div id="recs_table" style="margin:20px;">
+                <table class="xTable">
+                    <thead><tr><th>编号</th><th>材料名称</th><th>类型</th><th>计量单位</th><th>数量</th><th>规格</th><th>生产厂家</th><th>生产日期</th><th>失效日期</th><th>备注</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>2</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>3</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>4</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>5</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>6</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>7</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>8</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>9</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>0</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <footer class="xFCsrow" sstyle="margin-top:20px;">
+                <div id="sect_checker" class="xFIfixed x2Form" style="width:600px;">
+                    <div><label>备注</label><input id="remark" style="width:490px;"/></div>
+                    <div><label>审核人</label><div id="checker">　</div></div><div><label>审核时间</label><div id="checkdate">　</div></div>
+                </div>
+                <div></div>
+                <div id="sect_whout" class="xFIfixed x2Form" style="width:300px;">
+                    <div><label>发货人</label><div id="shipper">　</div></div><div><label>发货时间</label><div id="shipdate">　</div></div>
+                </div>
+            </footer>
+            <div class="buttonarray" style="margin-top:20px;margin-right:20px;border-top:2px dashed #6a923d;padding-top:30px;">
+                <button id="btn_remove" type="button" class="btn btn-primary">删除</button>
+                <button id="btn_goback" type="button" class="btn btn-primary">退回</button>
+                <button id="btn_recall" type="button" class="btn btn-primary">撤回</button>
+                <div style="float: right;">
+                    <div id="sect_flow" class="x2Form" style="display:inline-block;">
+                        <div><label>意见</label><input id="log" style="width:400px;"/></div>
+                    </div>
+                    <button id="btn_save" type="button" class="btn btn-primary">保存</button>
+                    <button id="btn_submit" type="button" class="btn btn-primary">提交</button>
+                    <button id="btn_checkT" type="button" class="btn btn-primary">审核通过</button>
+                    <button id="btn_checkF" type="button" class="btn btn-primary">审核不通过</button>
+                    <button id="btn_inwhT" type="button" class="btn btn-primary">出库</button>
+                    <button id="btn_inwhF" type="button" class="btn btn-primary">出库不成功</button>
+                    <button id="btn_inwhF" type="button" class="btn btn-primary">确认收货</button>
+                </div>
+            </div>
+            <div id="sect_flowlist" style="margin-top:50px;"></div>
+        </div>
+    </section>
+    <div class="xFCscol xFIfixed" style="width: 300px;">
+        <section class="xPanel2">
+            <header>等待出库</header>
+            <div id="g_matouts_outwh" class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"></div>
+        </section>
+        <section class="xPanel2">
+            <header>等待确认</header>
+            <div id="g_matouts_waitrecv" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
+        </section>
+    </div>
+
+    <script id="tpl_matout_card" type="text/template">
+        {% for (var i=0,x=it[0];i<it.length;i++,x=it[i]) { %}
+        <div id={%=x.id%} class="card" onclick="onclickcard(this)">
+            <div class="header">
+                <div class="lefttop">{%=x.type%}</div>
+                <div class="left">{%=f2s(x,"stocker_id")%}</div>
+                <div class="right">
+                    <div>{%=f2s(x,"creater_id")%}</div>
+                    <div class="time">{%=f2s(x,"createdate")%}</div>
+                </div>
+                <div class="title">{%=f2s(x,"usage")%}</div>
+            </div>
+            <div class="body">
+                <table cellpadding="2px">
+                    {% for (var j=0,y=x.subs[0];j<x.subs.length && y.mat_id>0;j++,y=x.subs[j]) { %}
+                    <tr><td style="width: 140px; text-align: left;">{%=f2s(y,"mat_id")%}</td><td>{%=y.num%}</td><td>{%=f2s(y,"unit")%}</td></tr>
+                    {% } %}
+                </table>
+            </div>
+        </div>
+        {% } %}
+    </script>
+
+    <script type="text/javascript">
+        aa = int("123");
+        var g_user = parent.g_user, g_mats, g_users = [], g_clerks, g_guides, g_matout, g_matouts, g_matvenders,
+            g_matouts_editing = new Array(), g_matouts_checking = new Array(), g_matouts_outwh = new Array(), g_matouts_waitrecv = new Array();
+        if (g_user == undefined)
+            g_user = GetRoleUser("仓库主管");
+
+        ReqdataS("/rd?ls=mat", "", function (mats) {g_mats = mats;});
+        Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_matvenders = res; });
+        Reqdata("/rduser?depart_table=" + GetSub(db_tbl, "name", "matwh").id + "&depart_id=" + g_user.depart.id, "", function (res2) {
+            g_clerks = res2;g_users = g_users.concat(res2.data);});
+        Reqdata("/rduser?job=" + GetSub(db_job, "name", "调度").id, "", function (res2) {
+            g_guides = res2;g_users = g_users.concat(res2.data);});
+        // 查询所有的出库单
+        Reqdata("/rdmatouts?user_id=" + g_user.id, "", function (matouts) {
+            g_matouts = matouts;
+
+            for (var i in matouts.mdata) {
+                // 添加到主表的子记录中
+                var mdata = matouts.mdata[i];
+                mdata.subs = new Array();
+                mdata.type = "出库单";
+                for (var j in matouts.rdata) {
+                    if (mdata.id == matouts.rdata[j].matout_id)
+                        mdata.subs.push(matouts.rdata[j]);
+                }
+
+                //分类
+                if (mdata.status == 2) g_matouts_editing.push(mdata);
+                else if (mdata.status == 3) g_matouts_checking.push(mdata);
+                else if (mdata.status == 4) g_matouts_outwh.push(mdata);
+                else if (mdata.status == 5) g_matouts_waitrecv.push(mdata);
+            }
+            // 将子项不够10个补足
+            g_matouts_editing.map(x => x.subs = x.subs.concat(Array(10 - x.subs.length).fill(0).map(v => Create(g_matouts.rfields))));
+
+            var tpl_matout_card = doT.template(document.getElementById('tpl_matout_card').innerHTML);
+            $("#g_matouts_editing").html(tpl_matout_card(g_matouts_editing));
+            $("#g_matouts_checking").html(tpl_matout_card(g_matouts_checking));
+            $("#g_matouts_outwh").html(tpl_matout_card(g_matouts_outwh));
+            $("#g_matouts_waitrecv").html(tpl_matout_card(g_matouts_waitrecv));
+        });
+
+        function onclickcard(This) {
+            g_matout = GetSub(g_matouts.mdata, "id", $(This).attr("id"));
+            RendermatoutDetail(g_matout);
+        }
+        function onNewmatout(This) {
+            g_matout = Create(g_matouts.mfields);
+            g_matout.id = 0;
+            g_matout.status = 0;
+            g_matout.subs = Array(10).fill(0).map(v => Create(g_matouts.rfields));
+            RendermatoutDetail(g_matout);
+        }
+
+        function RendermatoutDetail(matout) {
+            if (matout.status == 2) { // 编辑状态
+                $("#usage").html('<input class="formtitle xRndAngle" style="width:200px;border: 1px solid #95b7ff;" value="{0}"/>'.format(matout.usage));
+                $("#sect_code").html(RenderFormIn(matout, [GetSub(g_matouts.mfields, "name", "code")]));
+                $("#recs_table").html(RenderTable2({ fields: g_matouts.rfields, data: matout.subs }, "", (data, field) => {
+                    if (field.name == "name") return '<select style="width:120px;border-bottom:1px solid blue;">' + RenderSelect2(g_mats, data.mat_id) + '</select>';
+                    else if (field.name == "num") return '<input style="width:80px;border-bottom:1px solid blue;" value= "' + data[field.name] + '" />';
+                    else if (field.name == "remark") return '<input style="width:300px;border-bottom:1px solid blue;" value= "' + data[field.name] + '" />';
+                    else if (field.name == "vender_id")
+                        return int(data.vender_id) == 0 ? "" : GetSub(g_matvenders.data, "id", data.vender_id).name;
+                    else return data[field.name];
+                }));
+
+                var remark = '<label>备注</label><input id="remark" style="width:490px;" value="{0}"/>'
+                $("#remark").parent().html(remark.format(matout.remark));
+
+                // 清除空白行的组合框自动选中
+                $('select').each((idx, node) => {
+                    var id = $(node).parent().parent().attr('data_id');
+                    if (id == "")
+                        node.selectedIndex = -1;
+                });
+                $("select").on("change", function () {
+                    var id = $(this).val();
+                    var mat = GetSub(g_mats.data, "id", $(this).val());
+                    var prt = $(this).parent();
+                    prt.prev().children().html(mat.code);
+                    prt.next().children().html(mat.type);
+                    prt.next().next().children().html(mat.unit);
+                });
+            }
+            else { //只读状态
+                $("#usage").html('<div class="formtitle">{0}</div>'.format(f2s(matout, "usage")));
+                $("#sect_code").html(RenderPaneIn(matout, [GetSub(g_matouts.mfields, "name", "code")]));
+                $("#recs_table").html(RenderTable2({ fields: g_matouts.rfields, data: matout.subs }, "", f2sRec));
+
+                var remark = '<label>备注</label><div id="remark" style="width:490px;" >{0}</div>'
+                $("#remark").parent().html(remark.format(matout.remark));
+            }
+            
+            var request = `<div><label>故障单号</label><div>{fault_id}</div></div><div><label>申请人</label>
+                    <div>{creater}</div></div><div><label>申请时间</label><div>{createdate}</div></div>`
+            if (matout.fault_code == "")
+                $("#sect_request").html(request.format({ fault_id: '　', creater: '　', createdate: '　', }));
+            else{
+                $("#sect_request").html(request.format({fault_id: matout.fault_id,
+                    creater: GetSub(g_users, "id", matout.creater_id).name, createdate: matout.createdate
+                }));
+            }
+
+            // 流水
+            Reqdata("/rd?ls=flow&table_id=" + GetTbl("matout").id + "&record_id=" + matout.id, "", function (flows) {
+                // 填流表单上的四项操作员、操作日期
+                var oper = [{ status: "2", name: "stocker", date: "stockdate" }, 
+                    { status: "4", name: "checker", date: "checkdate" }, { status: "5", name: "shipper", date: "shipdate" }];
+                oper.map(x => { $("#" + x.name).html("　"); $("#" + x.date).html("　"); });
+                if (matout.id == 0) {
+                    flows.data.push({ status: 0, user_id: g_user.id, date: (new Date()).format("yyyy-M-d"), remark: "新建出库单" });
+                    flows.data.push({ status: 2, user_id: g_user.id, date: (new Date()).format("yyyy-M-d"), remark: "开始备货" });
+                }
+                var loglist = "";
+                $.each(flows.data, (i, x) => {
+                    $.each(oper, (j, y) => {
+                        if (x.status == 0 && matout.creater_id == matout.stocker_id)
+                            return;
+                        if (x.status == y.status){$("#" + y.name).html(f2s(x, "user_id")); $("#" + y.date).html(x.date);}
+                    });
+                    loglist += "<div>" + x.date + " " + f2s(x, "user_id") + " " + x.remark + "</div>";
+                });
+                $("#sect_flowlist").html(loglist);
+            });
+                // 按钮控制 
+                // 单据状态	删除   撤回    保存	提交   审核T   审核F  入库T	入库F
+                //          remove recall save	submit checkT checkF inwhT	inwhF
+                // 退回 -1	s	   h      s     s      h      h      h      h
+                // 编辑 0	s	   h      s     s      h      h      h      h
+                // 提交 1	h	   s      h     h      h      h      h      h
+                // 审核T 2	h	   h      h     h      h      h      s      s
+
+            //var btnarray=[ "remove", "recall", "save", "submit", "checkT", "checkF", "inwhT", "inwhF"];
+            //var btnstatus=[{ "remove": "s", "recall": "h", "save": "s", "submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", },
+            //    { "remove": "s", "recall": "h", "save": "s", "submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", },
+            //    { "remove": "h", "recall": "s", "save": "h", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", },
+            //    { "remove": "h", "recall": "h", "save": "h", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "s", "inwhF": "s", }];
+            //var status = btnstatus[parseInt(g_matout.status) + 1];
+            //btnarray.map(val => status[val] == "s" ? $("#btn_" + val).show() : $("#btn_" + val).hide());
+            //if (g_matout.status == 1 && g_user.job == GetSub(db_job, "name", "仓库主管").id) {
+            //    $("#btn_checkT").show();$("#btn_checkF").show();
+            //}
+        }
+
+        function RenderPaneIn(data, fields ) {
+            var r = "";
+            for (var i = 0, field = fields[0]; i < fields.length; i++, field=fields[i]) {
+                var attr = "";
+                if (field.ftype == "input_long")
+                    attr += 'style="width:490px;"';
+                else if (field.ftype == "textarea")
+                    attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
+
+                r += "<div><label>" + field.title + "</label><div " + attr + ">" + data[field.name] + "</div></div>";
+            }
+            return r;
+        }
+
+        function f2s(data, field) {
+            if (typeof field != "string")
+                field = field.name;
+            if (field == "stocker_id") return GetSub(g_users, "id", data[field]).name;
+            else if (field == "creater_id") return GetSub(g_users, "id", data[field]).name;
+            else if (field == "user_id") return GetSub(g_users, "id", data[field]).name;
+            else if (field == "mat_id") return GetSub(g_mats.data, "id", data[field]).name;
+            else if (field == "unit") return GetSub(g_mats.data, "id", data["mat_id"]).unit;
+            else return data[field];
+        }
+
+        function f2sRec(data, field) {
+            if (field.name == "vender_id") return GetSub(g_matvenders.data, "id", data["vender_id"]).name;
+     //       else if (field.name == "matinrec") return data.matin_code;
+     //       else if (field.name == "stocknum") return data.num;
+            //else if (field.name == "type") return GetSub(g_mats.data, "id", data["mat_id"]).type;
+            //else if (field.name == "unit") return GetSub(g_mats.data, "id", data["mat_id"]).unit;
+            else return data[field.name];
+        }
+
+        function rfield2edit(data, field) {
+            if (field.name == "name") return RenderSelect2(g_mats, rec.mat_id);
+            else if (field.name == "vender_id") return GetSub(g_matvenders, rec.vender_id).name;
+            else return rec[field.name];
+        }
+
+        function matoutRenderTable(subs) {
+            var fields = g_matouts.rfields.filter(x => { return x.ftype != "none" });
+            var table = `<table class="xTable"><thead><tr><th>`;
+            table += fields.map(val => val.title).join("</th><th>");
+            table += "</th></tr></thead><tbody>";
+            $.each(subs, (i, rec) => { table += '<tr id="sub_' + i + '">';
+                $.each(fields, (j, field) => {
+                    var attr = 'name="' + field.name + '"' + (field.width > 0 ? ' style="width:' + field.width + '"' : "");
+                    table += "<td>" + RenderFormItem(field.ftype, attr, function () {
+                        if (field.name == "name") return RenderSelect2(g_mats, rec.mat_id);
+                        else if (field.name == "vender_id") return GetSub(g_matvenders, rec.vender_id).name;
+                        else return rec[field.name];
+                    }());
+                    table += "</td>";
+                });
+                table += "</tr>";
+            });
+            table += "</tbody></table>";
+            return table;
+        }
+
+        // 表单验证的几种方法： http://www.jb51.net/article/92741.htm
+    </script>
+</body>
+</html>
+

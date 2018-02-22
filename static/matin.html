@@ -20,90 +20,10 @@
         .laydate_box th {text-align: center;}
     </style>
 
+    <link rel="stylesheet" href="css/matio.css" />
     <style>
-        .card {
-            display: inline-block;
-            margin: 10px;
-            width: 230px;
-            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-            text-align: center;
-            border-radius: 5px;
-        }
-        .card .header {
-            border-radius: 5px 5px 0px 0px;
-            background-color: #98bf68;
-            color: white;
-            font-size: 10px;
-            height: 42px;
-            text-align: center;
-            overflow: hidden;
-        }
-        .card .header .type {
-            border-radius: 5px 0px 5px 0px;
-            color: white;
-            font-size: 12px;
-            float: left;
-            border: 1px solid #6a923d;
-        }
-        .card .header .title {
-            color: white;
-            padding-top: 8px;
-            font-size: 20px;
-            text-align: center;
-            width: 100%;
-        }
-        .card .header .sent {
-            padding-top: 15px;
-            padding-right: 4px;
-            text-align: right;
-            font-size: 12px;
-            float: right;
-        }
-        .card .header .sent .time {
-            padding: 0px 2px;
-            top: -4px;
-            left: 5px;
-            text-align: right;
-            position: relative;
-        }
-        .card .body {
-            background-color: #f5f3ee;
-            color: #5f5135;
-            padding: 4px;
-            font-size: 14px;
-            text-align: center;
-            border-top: 1px solid #6a923d;
-            border-bottom: 1px solid #e0d5c5;
-            border-radius: 0px 0px 5px 5px;
-        }
-        .card button {
-            background: linear-gradient(#d2e7b9, #6fa743);
-            border: 1px solid #cfc4b6;
-            color: white;
-            padding: 4px 16px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            margin: 6px;
-            cursor: pointer;
-            border-radius: 6px;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2), 0 2px 5px 0 rgba(0, 0, 0, 0.19);
-        }
-
-        .card table {width: 100%;table-layout: fixed;}
-        .card table tr:nth-child(2n+1) {background-color: #ffffee;}
-        .card table tr:nth-child(2n) {background-color: #eeffee;}
-       /* .card table tr:first-child {width: 200px;text-align: left;}*/
-        .card table td, .card table th {white-space: nowrap;overflow: hidden;word-break: keep-all;}
-
-        .xTable input, .xTable select {
-            border: 0px;
-        }
+        .xTable input, .xTable select {border: 0px;}
     </style>
-
-    <!--link rel="stylesheet/less" type="text/css" href="css/matin.less" />
-    <script src="js/less.js" type="text/javascript"></script-->
 </head>
 <body class="xFCsrow">
     <div id="curitem" class="xFCscol xFIfixed" style="width: 300px;">
@@ -185,8 +105,8 @@
         {% for (var i=0,x=it[0];i<it.length;i++,x=it[i]) { %}
         <div id={%=x.id%} class="card" onclick="onclickcard(this)">
             <div class="header">
-                <div class="type">{%=x.type%}</div>
-                <div class="sent">
+                <div class="lefttop">{%=x.type%}</div>
+                <div class="right">
                     <div>{%=x.courier%}</div>
                     <div class="time">{%=f2s(x,"courierdate")%}</div>
                 </div>
@@ -244,7 +164,7 @@
                 else if (mdata.status == 1) g_matins_checking.push(mdata);
                 else if (mdata.status == 2) g_matins_whin.push(mdata);
             }
-            // 将子项不够10个的创建够
+            // 将子项不够10个补足
             g_matins_editing.map(x => x.subs = x.subs.concat(Array(10 - x.subs.length).fill(0).map(v => Create(g_matins.rfields))));
 
             var tpl_matin_card = doT.template(document.getElementById('tpl_matin_card').innerHTML);
@@ -340,9 +260,6 @@
             var r = "";
             for (var i = 0, field = fields[0]; i < fields.length; i++, field=fields[i]) {
                 var attr = "";
-                if (field.name.indexOf("_") != -1)
-                    attr = 'id="' + field.name + "_" + val + '" ';
-
                 if (field.ftype == "input_long")
                     attr += 'style="width:490px;"';
                 else if (field.ftype == "textarea")

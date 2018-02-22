@@ -41,16 +41,9 @@ class xlread(object):
     def readtbl(self):
         tbls = []
         for sh in [ x for x in self.xls.sheets() if x.name.startswith("tbl")]:
-            for r in [ x for x in range(sh.nrows) if sh.cell(x,0).value in ["table", "builddata", "py"]]:
-                if sh.cell(r,0).value == "table":
-                    tbl = xlread.xReadTable(sh,r,0)
-                    tbls.append(tbl)
-                elif sh.cell(r,0).value == "builddata":
-                    tbl = xlread.xReadTable(sh,r,0)
-                    tbls.append(tbl)
-                elif sh.cell(r,0).value == "py":
-                    tbl = xlread.xReadTable(sh,r,0)
-                    tbls.append(tbl)
+            for r in [ x for x in range(sh.nrows) if sh.cell(x,0).value in ["table", "view", "builddata", "py"]]:
+                tbl = xlread.xReadTable(sh,r,0)
+                tbls.append(tbl)
         return tbls
 
     def readraw(self):
@@ -101,6 +94,12 @@ class xlread(object):
             tbl.param = sh.cell(r,c+5).value
             tbl.define = sh.cell(r,c+6).value
             tbl.cycle = sh.cell(r,c+7).value
+        elif sh.cell(r,c).value == "view":
+            tbl.type = sh.cell(r,c).value
+            tbl.name = sh.cell(r,c+1).value
+            tbl.title = sh.cell(r,c+2).value
+            #tbl.xxxx = sh.cell(r,c+3).value
+            tbl.fromtables = sh.cell(r,c+4).value
         elif sh.cell(r,c).value == "builddata":
             tbl.type = sh.cell(r,c).value
             tbl.name = sh.cell(r,c+1).value
@@ -111,7 +110,7 @@ class xlread(object):
             tbl.type = sh.cell(r,c).value
 
         if sh.cell(r,c).value in ["builddata","py"]:
-            return tbl
+            return tbl # 没有字段定义，直接返回
 
         if sh.ncols > c+1 and sh.nrows > r+1 and sh.cell(r+1,c+1).value !="":
             tbl.field = xlread.xReadBlock(sh, r+1,c,1,-1)[0]

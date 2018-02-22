@@ -289,7 +289,7 @@ tbl_matin=Table('matin', metadata,
 	Column('code',String(16)),
 	Column('source',Integer),
 	Column('courier',String(32)),
-	Column('courierdate',String(16)),
+	Column('courierdate',Date),
 	Column('remark',String(2048)),
 	Column('img',String(32)))
 def dict_matin(x):
@@ -313,28 +313,27 @@ def dict_matinrec(matwh_id,matin_id):
 tbl_matout=Table('matout', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('fault_id',Integer),
+	Column('fault_code',String(16)),
 	Column('matwh_id',Integer),
 	Column('status',Integer),
 	Column('code',String(16)),
 	Column('usage',String(32)),
-	Column('receiver',String(32)),
-	Column('receiverdate',String(16)),
+	Column('shipper',String(32)),
+	Column('shipperdate',Date),
 	Column('remark',String(2048)),
 	Column('img',String(32)))
 def dict_matout(x):
-    return dict(fault_id=x.fault_id,matwh_id=x.matwh_id,status=x.status,code=rndqq(),usage=x.usage,receiver=rnditem2("_person").name,receiverdate=rnddate(30,60),remark=rnditem2("_songci"),img="")
+    return dict(fault_id=x.fault_id,fault_code=x.fault_code,matwh_id=x.matwh_id,status=x.status,code=rndqq(),usage=x.usage,shipper=rnditem2("_person").name,shipperdate=rnddate(30,60),remark=rnditem2("_songci"),img="")
 
 tbl_matoutrec=Table('matoutrec', metadata,
 	Column('id',Integer,primary_key=True),
-	Column('matwh_id',Integer),
 	Column('matout_id',Integer),
 	Column('matinrec_id',Integer),
-	Column('mat_id',Integer),
 	Column('num',Integer),
 	Column('remark',String(2048)))
 def dict_matoutrec(x):
     dt=rnddate(30,60)
-    return dict(matwh_id=x.matwh_id,matout_id=x.matout_id,matinrec_id=x.matinrec_id,mat_id=x.mat_id,num=x.num,remark=rnditem2("_songci"))
+    return dict(matout_id=x.matout_id,matinrec_id=x.matinrec_id,num=x.num,remark=rnditem2("_songci"))
 
 
 metadata.create_all(engine)
@@ -348,6 +347,10 @@ def QueryData(name,tbl,field,value):
     q = select([tbl]).where(tbl.c[field]==value)
     data=conn.execute(q).fetchall()
     adddata(name,data)
+
+conn.execute("CREATE VIEW matout_view AS select matout.id,fault_id,fault_code,matwh_id,matout.status,code,usage,shipper,shipperdate,matout.remark,img,creater.user_id as creater_id,creater.date as createdate,stocker.user_id as stocker_id,stocker.date as stockdate from matout LEFT JOIN flow AS creater ON (creater.table_id = 28 AND creater.record_id = matout.id AND creater.status = 0) LEFT JOIN flow AS stocker ON (stocker.table_id = 28 AND stocker.record_id = matout.id AND stocker.status = 2)")
+
+conn.execute("CREATE VIEW matoutrec_view AS select matoutrec.id,matout.matwh_id,matoutrec.matout_id,matout.code as matout_code,matout.status as matout_status,mat.id as mat_id,mat.code,mat.name,mat.type,matoutrec.num,mat.unit,matinrec.specs,matinrec.matin_id,matin.code as matin_code,matin.status as matin_status,matinrec.id as matinrec_id,matinrec.vender_id,matinrec.producedt,matinrec.expiredt,matinrec.remark as matinrec_remark,matoutrec.remark from matoutrec,matinrec,mat,matin,matout where matoutrec.matinrec_id = matinrec.id and matinrec.mat_id=mat.id and matoutrec.matout_id=matout.id and matinrec.matin_id=matin.id")
 
 conn.execute(tbl_base.insert(),[dict_base(x) for x in data("_fields")])
 

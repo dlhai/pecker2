@@ -76,6 +76,12 @@ def QueryData(name,tbl,field,value):
     adddata(name,data)
 
 '''
+    for t in [ x for x in tbls if x.type == "view"]:
+        iname = GetIndex(t.field, "name")
+        model += 'conn.execute("CREATE VIEW '+t.name+' AS select '
+        model += ",".join(map( lambda f : f[iname],t.data))
+        model += " from "+ t.fromtables + '")\n\n'
+
     for t in tbls:
         if t.type == "table":
             if t.cycle != "":
@@ -106,12 +112,16 @@ if len(data1) == len(data2):
 
 def gatherfields(tbls):
     ret = []
-    for t in [ x for x in tbls if x.type == "table"]:
+    for t in [ x for x in tbls if x.type == "table" or x.type=="view"]:
         for r in t.data:
             field = obj()
             field.table = str(t.name)
             field.title = str(r[0])
             field.name = str(r[1])
+            if -1 != field.name.find(" as "):
+                field.name = field.name.split(" as ")[1]
+            if -1 != field.name.find("."):
+                field.name = field.name.split(".")[1]
             field.forder = str(r[2])
             field.ftype = str(r[3])
             field.twidth = str(r[4])

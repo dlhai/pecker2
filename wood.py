@@ -276,6 +276,32 @@ def rdmatins():
     return query4("rdmatins",mfields=select(base.sl).where(base.c.table=="matin"),mdata = sqlmatin,
                  rfields=select(base.sl).where(base.c.table=="matinrec"),rdata = sqlmatinrec,)
 
+#读取用户的未完成出库单列表
+#测试链接 http://127.0.0.1:5000/rdmatouts?user_id=?
+@app.route("/rdmatouts")
+def rdmatouts():
+    param = request.args.to_dict()
+    if "user_id" not in param:
+        return '{result:404,msg:"缺少参数 user_id"}'
+    users=QueryObj("select * from user where id="+str(param["user_id"]))
+    if len(users) !=1:
+        return '{result:404,msg:"用户不存在"}'
+    user=users[0]
+
+    #0编辑(调度创建) 1调度提交等待备货 2库管正在备货或库管创建) 3库管提交等待审批 4主管审批通过等待出库 5出库(发货) 6确认收货(完成) -1退回
+    if user.job==8: #仓库主管(查询所在仓库所有未完成的出库单)
+        sqlmatout="select * from matoutview where status in (2,3,4,5) and matwh_id="+str(user.depart_id)
+        sqlmatoutrec="select matoutrecview.* from matoutrecview where matout_status in (2,3,4,5) and matwh_id="+str(user.depart_id)
+    elif user.job==9: #仓库管理员(查询备货者为自己，且未完成的出库单) 这个sql还可以再优化下
+        sqlmatout="select * from matoutview where status in (2,3,4,5) and stocker_id="+str(user.id)
+        sqlmatoutrec='''select matoutrecview.* from matoutrecview,matoutview where matoutrecview.matout_id = matoutview.id 
+            and matoutview.status in (2,3,4,5) and matoutview.stocker_id='''+str(user.id)
+    else:
+        return '{result:404,msg:"用户职业不对！"}'
+
+    return query4("rdmatouts",mfields=select(base.sl).where(base.c.table=="matoutview"),mdata = sqlmatout,
+                 rfields=select(base.sl).where(base.c.table=="matoutrecview"),rdata = sqlmatoutrec,)
+
 if __name__ == "__main__":
     app.config['JSON_AS_ASCII'] = False
     app.run( host="0.0.0.0")
