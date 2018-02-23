@@ -109,10 +109,11 @@ var db_job = [
 ]
 
 function GetRoleUser(name) {
-    alert("启用" + name + "帐号调试");
-
     ReqdataS("/roleuserall", "", function (res) { db_roleusers = res.data; });
-    return GetSub(db_roleusers, "job", GetSub(db_job, "name", name).id);
+    var user = GetSub(db_roleusers, "job", GetSub(db_job, "name", name).id);
+    var tip = "启用" + name + "帐号:{name}({id}) job={job} depart_id={depart_id} 调试"
+    alert(tip.format(user));
+    return user;
 }
 
 function GetsubJob(parentjobid, type) {

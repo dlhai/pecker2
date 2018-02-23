@@ -1,5 +1,6 @@
 ﻿function int(s) {
     if (s == "") return 0;
+    else if (s == "None") return 0;
     else return parseInt(s);
 }
 

@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <script type="text/javascript" src="js/doTe.js"></script>
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/Cube.js"></script>
+    <script src="js/xpecker.js"></script>
+    <style>
+    /*表格，需要js配合，xTable-hover是附助*/
+    .xStoreTable {width: 100%;}
+    .xStoreTable thead > tr > th {
+        text-align: center;
+        background-color: #f0f0f0;
+    }
+    .xStoreTable > tbody > tr.inrow > td {
+        /*background-color: #b6ff00;*/
+    }
+    .xStoreTable > tbody > tr.outrow > td {
+        background-color: Gainsboro;
+    }
+    .xStoreTable thead > tr > th, .d_table tbody > tr > td {
+        padding: 2px 4px;
+        vertical-align: top;
+    }
+    .xTable-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
+        background-color: #f0f0f5 !important;
+    }
+
+    </style>
+</head>
+<body class="xFCsrow">
+    <section class="xPanel2" style="width:100px;">
+        <header class="heading">材料列表</header>
+        <div id="mat_list" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
+    </section>
+    <section class="xPanel2" style="width:100px;">
+        <header class="heading">流水</header>
+        <div id="vender_list" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
+    </section>
+
+    <script type="text/javascript">
+        var g_user = parent.g_user, g_mats, g_store, g_recs, g_venders;
+        if (g_user == undefined)
+            g_user = GetRoleUser("仓库主管");
+
+        ReqdataS("/rd?ls=mat", "", function (mats) { g_mats = mats; });
+        Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_venders = res; });
+        Reqdata("/rdstore?user_id=" + g_user.id, "", function (store) {
+            g_store = store;
+            g_store.fields.push({title:"库存数量",name:"innum",twidth:"80"});
+            $("#mat_list").html(RenderTable2(g_store, "", (data, field) => {
+                if (field.name == "innum")
+                    return int(data.innum) - int(data.outnum);
+                return data[field.name];
+            }));
+            TableBindClick3(g_store.ls, onClickMatTable);
+        });
+        function onClickMatTable( mat_id ){
+            Reqdata("/rdstoredetail?user_id=" + g_user.id + "&mat_id=" + mat_id, "", function (storedetail) {
+                g_storedetail = storedetail;
+                g_storedetail.fields.splice(0,0,{ title: "发生日期", name: "date", twidth: "80" });
+                var recs = new Array();
+                storedetail.inrecs.forEach(x => {
+                    recs.push(x);
+                    storedetail.outrecs.forEach(y=>{if (y.matinrec_id == x.id) recs.push(y);});
+                });
+                $("#vender_list").html(StoreRenderTable("storedetail", storedetail.fields, recs));
+            });
+        }
+        // 渲染表格
+        // twidth:0不显示，无此属性或为-1表示默认宽度
+        function StoreRenderTable(id, fields,recs) {
+            var r = "<table id=\"" + id + "\" class=\"xStoreTable\"><thead><tr>";
+            r += fields.map(x => {if (!x.hasOwnProperty("twidth")) x.twidth = "-1";
+                if (x.twidth == "-1") return "<th>" + x.title + "</th>";
+                else if (int(x.twidth) == 0) return "";
+                else return '<th style="width:' + x.twidth+'">' + x.title + "</th>"
+            }).join("") +"</tr></thead>\n<tbody>";
+            recs.forEach(data => {
+                var isin = !data.hasOwnProperty("matout_id");
+                var row = '<tr class="{0}" data_id="{1}">'.format(isin ? "inrow" :"outrow",data.id);
+                row += fields.map(field => {
+                    if (int(field.twidth) == 0) return "";
+                    if (field.name == "matin_code") return "<td>" + (isin ? data["matin_code"] : data["matout_code"]) + "</td>";
+                    else if (field.name == "source") return "<td>" + (isin ? GetSub(db_matsouce, data["source"]).name : data["usage"]) + "</td>";
+                    else if (field.name == "vender_id") return "<td>" + GetSub(g_venders.data, data["vender_id"]).name + "</td>";
+                    else return "<td>" + data[field.name] + "</td>";
+                }).join("") + "</tr>";
+                r += row;
+            });
+            r += "</tbody></table>";
+            return r;
+        }
+    </script>
+</body>
+</html>

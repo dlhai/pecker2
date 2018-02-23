@@ -281,7 +281,7 @@ def gen_matout(): #0编辑(正在签收) 1等待审批 2等待入库 3完成 -1�
 gen_matout()
 
 #创建库存视图
-creat_store_view='''CREATE VIEW storeview AS
+creat_store_view='''CREATE VIEW store_view AS
     SELECT *
       FROM (
                SELECT matinrec.*
@@ -290,20 +290,20 @@ creat_store_view='''CREATE VIEW storeview AS
                 WHERE matinrec.matin_id = matin.id AND 
                       matin.status = 3
            )
-           AS allin
+           AS inrec
            LEFT JOIN
            (
                SELECT matinrec_id,
-                      sum(num) AS out
+                      sum(num) AS outnum
                  FROM matoutrec,
                       matout
                 WHERE matoutrec.matout_id = matout.id AND 
                       matout.status >= 3
                 GROUP BY matinrec_id
            )
-           AS allout ON allin.id = allout.matinrec_id;
+           AS outrec ON inrec.id = outrec.matinrec_id;
 '''
-conn.execute(createview_stock)
+conn.execute(creat_store_view)
 
 ##创建正在出库视图
 #createview_matouting='''CREATE VIEW matouting AS
