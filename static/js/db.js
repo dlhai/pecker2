@@ -36,7 +36,6 @@
     },
     {
         "id": "6", "type": "dev", "name": "设备司机", modules: [
-            { name: "地图", url: "devmap.html" },
             { name: "设备", url: "devdriver.html" }]
     },
     {
@@ -49,21 +48,25 @@
         "id": "8", "type": "wh", "name": "仓库主管", modules: [
             { name: "入库", url: "matin.html" },
             { name: "出库", url: "matout.html" },
-            { name: "查询", url: "matquery.html" },
+            { name: "查询", usesub: true, subs: [{ name: "库存", url: "matquery.html" }, { name: "入库", url: "matqueryin.html" }, { name: "出库", url: "matqueryout.html" }]},
             { name: "人员", url: "user3.html" }]
     },
     {
         "id": "9", "type": "wh", "name": "仓库管理员", modules: [
             { name: "入库", url: "matin.html" },
             { name: "出库", url: "matout.html" },
-            { name: "查询", url: "matquery.html" }]
+            { name: "查询", usesub: true, subs: [{ name: "库存", url: "matquery.html" }, { name: "入库", url: "matqueryin.html" }, { name: "出库", url: "matqueryout.html" }] }],
     },
     { "id": "10", "type": "coord", "name": "调度超级帐号", modules: [{ name: "调度", url: "person.html?type=总调|调度" }] },
     { "id": "11", "type": "coord", "name": "调度主管", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
     { "id": "12", "type": "coord", "name": "调度", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
-    { "id": "13", "type": "expert", "name": "专家超级帐号", modules: [{ name: "专家", url: "person.html?type=专家" }, { name: "记录", url: "repairlog.html" }] },
-    { "id": "14", "type": "expert", "name": "专家", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
-    { "id": "15", "type": "repair", "name": "技工超级帐号", modules: [{ name: "技工", url: "person.html?type=技工|队长" }] },
+    {"id": "13", "type": "expert", "name": "专家超级帐号", modules: [{ name: "专家", url: "user3.html" }]},
+    {
+        "id": "14", "type": "expert", "name": "专家", modules: [
+            { name: "案件", url: "coord.html" },
+            { name: "记录", url: "repairlog.html" }]
+    },
+    { "id": "15", "type": "repair", "name": "技工超级帐号", modules: [{ name: "技工", url: "user3.html" }] },
     {
         "id": "16", "type": "repair", "name": "维修队长", modules: [
             { name: "案件", url: "coord.html" },
@@ -135,9 +138,10 @@ function GetsubJob(parentjobid, type) {
     else if (type == "string") {
         if (jobbranch[parentjobid].length>1)
             return "(" + (jobbranch[parentjobid]).join(",") + ")";
-        else if (jobbranch[parentjobid].length > 1)
+        else
             return jobbranch[parentjobid];
     }
+
 }
 
 var db_skill = [

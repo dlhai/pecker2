@@ -34,8 +34,7 @@
         var g_devwhs, g_curwh, g_devs, g_curdev, g_devvenders;
         Reqdata("/rd?ls=devwh", "", function (res) { g_devwhs = res; });
         Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res) { g_devvenders = res; });
-        var g_tree = new x3Tree("xTree", "devwh", "", "devwh", function (ev) {
-            var id = $(ev.target).parent().attr("id").split("_")[1];
+        var g_tree = new x3Tree("xTree", "devwh", "", "devwh", function (type,id) {
             g_curwh = GetSub(g_devwhs.data, "id", id);
             $("#item_detail").html(RenderPane2(g_curwh, g_devwhs.fields));
             Reqdata("/rd?ls=dev&devwh_id=" + id, "", function (res) {

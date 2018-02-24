@@ -305,6 +305,12 @@ creat_store_view='''CREATE VIEW store_view AS
 '''
 conn.execute(creat_store_view)
 
+def create_team():
+    leaders = QueryObj( "select * from user where job="+str(int(getjob( "维修队长" ).id)))
+    skillers = QueryObj( "select * from user where job="+str(int(getjob( "技工" ).id)))
+    conn.execute(tbl_link.insert(),[ dict_link(obj2(type="team",a_id=random.choice(leaders).id,b_id=x.id,remark="")) for x in skillers])
+create_team()
+
 ##创建正在出库视图
 #createview_matouting='''CREATE VIEW matouting AS
 #    SELECT matout.*,

@@ -30,13 +30,12 @@ def dict_base(x):
 
 tbl_link=Table('link', metadata,
 	Column('id',Integer,primary_key=True),
-	Column('a_field',String(32)),
+	Column('type',String(16)),
 	Column('a_id',Integer),
-	Column('b_field',String(32)),
 	Column('b_id',Integer),
-	Column('name',String(32)))
-def dict_link(x,y):
-    return dict(a_field="",a_id="",b_field="",b_id="",name="")
+	Column('remark',String(32)))
+def dict_link(x):
+    return dict(type=x.type,a_id=x.a_id,b_id=x.b_id,remark=x.remark)
 
 tbl_addit=Table('addit', metadata,
 	Column('id',Integer,primary_key=True),
@@ -318,12 +317,12 @@ tbl_matout=Table('matout', metadata,
 	Column('status',Integer),
 	Column('code',String(16)),
 	Column('usage',String(32)),
-	Column('shipper',String(32)),
-	Column('shipperdate',Date),
+	Column('recver',String(32)),
+	Column('recvdate',Date),
 	Column('remark',String(2048)),
 	Column('img',String(32)))
 def dict_matout(x):
-    return dict(fault_id=x.fault_id,fault_code=x.fault_code,matwh_id=x.matwh_id,status=x.status,code=rndqq(),usage=x.usage,shipper=rnditem2("_person").name,shipperdate=rnddate(30,60),remark=rnditem2("_songci"),img="")
+    return dict(fault_id=x.fault_id,fault_code=x.fault_code,matwh_id=x.matwh_id,status=x.status,code=rndqq(),usage=x.usage,recver=rnditem2("_person").name,recvdate=rnddate(30,60),remark=rnditem2("_songci"),img="")
 
 tbl_matoutrec=Table('matoutrec', metadata,
 	Column('id',Integer,primary_key=True),
@@ -348,11 +347,11 @@ def QueryData(name,tbl,field,value):
     data=conn.execute(q).fetchall()
     adddata(name,data)
 
-conn.execute("CREATE VIEW matoutview AS select matout.id,fault_id,fault_code,matwh_id,matout.status,code,usage,shipper,shipperdate,matout.remark,img,creater.user_id as creater_id,creater.date as createdate,stocker.user_id as stocker_id,stocker.date as stockdate from matout LEFT JOIN flow AS creater ON (creater.table_id = 28 AND creater.record_id = matout.id AND creater.status = 0) LEFT JOIN flow AS stocker ON (stocker.table_id = 28 AND stocker.record_id = matout.id AND stocker.status = 2)")
+conn.execute("CREATE VIEW matoutview AS select matout.id,fault_id,fault_code,matwh_id,matout.status,code,usage,matout.remark,img,creater.user_id as creater_id,creater.date as createdate,stocker.user_id as stocker_id,stocker.date as stockdate from matout LEFT JOIN flow AS creater ON (creater.table_id = 28 AND creater.record_id = matout.id AND creater.status = 0) LEFT JOIN flow AS stocker ON (stocker.table_id = 28 AND stocker.record_id = matout.id AND stocker.status = 2)")
 
 conn.execute("CREATE VIEW matoutrecview AS select matoutrec.id,matout.matwh_id,matoutrec.matout_id,matout.code as matout_code,matout.status as matout_status,mat.id as mat_id,mat.code,mat.name,mat.type,matoutrec.num,mat.unit,matinrec.specs,matinrec.matin_id,matin.code as matin_code,matin.status as matin_status,matinrec.id as matinrec_id,matinrec.vender_id,matinrec.producedt,matinrec.expiredt,matinrec.remark as matinrec_remark,matoutrec.remark from matoutrec,matinrec,mat,matin,matout where matoutrec.matinrec_id = matinrec.id and matinrec.mat_id=mat.id and matoutrec.matout_id=matout.id and matinrec.matin_id=matin.id")
 
-conn.execute("CREATE VIEW inrecview AS select matinrec.id,matin.matwh_id,matinrec.matin_id,matin.code as matin_code,matin.status as matin_status,matin.usage,matinrec.mat_id,matinrec.num,matinrec.specs,matinrec.vender_id,matinrec.producedt,matinrec.expiredt,matinrec.remark from matinrec,matin where matinrec.matin_id = matin.id")
+conn.execute("CREATE VIEW inrecview AS select matinrec.id,matin.matwh_id,matinrec.matin_id,matin.code as matin_code,matin.status as matin_status,matin.source,matinrec.mat_id,matinrec.num,matinrec.specs,matinrec.vender_id,matinrec.producedt,matinrec.expiredt,matinrec.remark from matinrec,matin where matinrec.matin_id = matin.id")
 
 conn.execute("CREATE VIEW outrecview AS select matoutrec.id,matout.matwh_id,matoutrec.matout_id,matout.code as matout_code,matout.status as matout_status,matout.usage,matinrec.mat_id,matoutrec.num,matinrec.specs,matinrec.matin_id,matinrec.id as matinrec_id,matinrec.vender_id,matinrec.producedt,matinrec.expiredt,matinrec.remark as matinrec_remark,matoutrec.remark from matoutrec,matinrec,matout where matoutrec.matinrec_id = matinrec.id and matoutrec.matout_id=matout.id ")
 
@@ -430,6 +429,11 @@ QueryAll(tbl_matoutrec)
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","10","")])
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","11","")])
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","12","") for x in range(rndnum(5,10))])
+conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","13","")])
+conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","14","") for x in range(rndnum(20,30))])
+conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","15","")])
+conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","16","") for x in range(rndnum(20,30))])
+conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","17","") for x in range(rndnum(100,150))])
 
 #为每个设备设置司机
 data1=conn.execute("select id,devwh_id from dev").fetchall()

@@ -101,7 +101,7 @@
         <ul id="modulelist" class="nav navbar-nav" style="margin-left: 10px; font-size: 16px; ">
             <li class="active"><a>功能1</a></li><li><a>功能2</a></li><li><a>功能3</a></li>
         </ul>
-        <ul id="submodulelist" class="nav navbar-nav" style="margin-top: 20px; margin-left: 200px; font-size: 16px; ">
+        <ul id="submodulelist" class="nav navbar-nav" style="margin-top: 20px; margin-left: 20px; font-size: 16px; ">
             <li class="active"><a>区域1</a></li><li><a>区域2</a></li><li><a>区域3</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-avatar pull-right">
@@ -180,9 +180,10 @@
         function UpdateSubmode(idx) {
             if (g_role.modules[idx].usesub) {
                 var submodule = new Array();
-                for (var i in g_user.sub) {
-                    submodule.push({ "name": g_user.sub[i].name, "url": g_role.modules[idx].url + "?id=" + g_user.sub[i].id});
-                }
+                if (g_role.modules[idx].subs != undefined)
+                    submodule = submodule.concat(g_role.modules[idx].subs);
+                if (g_user.sub != undefined)
+                    g_user.sub.forEach(x => { submodule.push({ "name": x.name, "url": g_role.modules[idx].url + "?id=" + x.id }); });
                 $('#submodulelist').html(tpl_module(submodule));
                 $('#mainframe').attr("src", submodule[0].url);
             }

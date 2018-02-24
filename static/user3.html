@@ -325,12 +325,15 @@
 
         var g_cur, g_fields = new Array(), g_ethnic, g_departs, g_user = parent.g_user;
         if (g_user == undefined)
-            g_user = GetRoleUser("仓库超级帐号");
+            g_user = GetRoleUser("专家超级帐号");
 
         if( isInArray(["1", "4", "7"], g_user.job ))
             Reqdata("/rd?ls=" + { "1": "winder", "4": "devwh", "7": "matwh" }[g_user.job], "", function (res) { g_departs = res; });
+
         Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
-        Reqdata("/rduser?job=" + GetsubJob(g_user.job, "string"), "", function (res) {
+
+        param = (g_user.depart_id == "0") ? "" : ("&depart_id=" + g_user.depart_id);
+        Reqdata("/rduser?job=" + GetsubJob(g_user.job, "string") + param, "", function (res) {
             g_users = res;
             if (!isInArray(["1", "4", "7"], g_user.job)) { // 除此三类超级用户外不显示所在单位
                 var idx = GetIdx(g_users.fields, "name", "depart_id");

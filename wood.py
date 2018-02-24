@@ -267,9 +267,10 @@ def rdmatins():
         sqlmatin=sqlbase%("*",user.depart_id)
         sqlmatinrec="select * from matinrec where matin_id in (%s)"%(sqlbase%("id",user.depart_id))
     elif user.job==9: #仓库管理员(查询创建者为自己，且未完成的入库单)
-        sqlbase = "select %s from matin,flow where matin.id=flow.record_id and flow.table_id=%d and matin.status in (-1,0,1,2) and flow.status=0 and flow.user_id=%d"
-        sqlmatin=sqlbase%("*",gettbl("matin").id,user.id)
-        sqlmatinrec="select * from matinrec where matin_id in (%s)"%(sqlbase%("id",gettbl("matin").id,user.id))
+        sqlmatin='''select matin.* from matin,flow where matin.id=flow.record_id and flow.table_id=26 
+            and matin.status in (-1,0,1,2) and flow.status=0 and flow.user_id='''+str(user.id);
+        sqlmatinrec='''select inrecview.* from inrecview,flow where matin_id=flow.record_id and
+            flow.table_id=26 and matin_status in (-1,0,1,2) and flow.status=0 and flow.user_id='''+str(user.id);
     else:
         return '{result:404,msg:"用户职业不对！"}'
 
@@ -335,9 +336,9 @@ def rdstoredetail():
 
     #查询入库记录的、查询出库记录的
     inrecs='''select inrecview.*,flow.date as date from inrecview,flow where inrecview.matin_id=flow.record_id 
-        and flow.table_id=26 and flow.status=3 and matin_status >=3 and matwh_id={0} and mat_id={1} sort by id'''
+        and flow.table_id=26 and flow.status=3 and matin_status >=3 and matwh_id={0} and mat_id={1} order by id'''
     outrecs='''select outrecview.*,flow.date as date from outrecview,flow where outrecview.matout_id=flow.record_id 
-        and flow.table_id = 28 and flow.status=5 and matout_status >=5 and matwh_id={0} and mat_id={1} sort by id'''
+        and flow.table_id = 28 and flow.status=5 and matout_status >=5 and matwh_id={0} and mat_id={1} order by id'''
     return query4("rdstore",fields=select(base.sl).where(base.c.table=="inrecview"),\
         inrecs = inrecs.format(user.depart_id,param["mat_id"]),outrecs = outrecs.format(user.depart_id,param["mat_id"]))
 

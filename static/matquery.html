@@ -30,9 +30,6 @@
         padding: 2px 4px;
         vertical-align: top;
     }
-    .xTable-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
-        background-color: #f0f0f5 !important;
-    }
 
     </style>
 </head>
@@ -55,7 +52,7 @@
         Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_venders = res; });
         Reqdata("/rdstore?user_id=" + g_user.id, "", function (store) {
             g_store = store;
-            g_store.fields.push({title:"库存数量",name:"innum",twidth:"80"});
+            g_store.fields.push({ title: "库存数量", name: "innum", twidth: "80" });
             $("#mat_list").html(RenderTable2(g_store, "", (data, field) => {
                 if (field.name == "innum")
                     return int(data.innum) - int(data.outnum);
@@ -66,7 +63,8 @@
         function onClickMatTable( mat_id ){
             Reqdata("/rdstoredetail?user_id=" + g_user.id + "&mat_id=" + mat_id, "", function (storedetail) {
                 g_storedetail = storedetail;
-                g_storedetail.fields.splice(0,0,{ title: "发生日期", name: "date", twidth: "80" });
+                if (g_storedetail.fields[0].name != "date")
+                    g_storedetail.fields.splice(0, 0, { title: "发生日期", name: "date", twidth: "80" });
                 var recs = new Array();
                 storedetail.inrecs.forEach(x => {
                     recs.push(x);
@@ -82,7 +80,7 @@
             r += fields.map(x => {if (!x.hasOwnProperty("twidth")) x.twidth = "-1";
                 if (x.twidth == "-1") return "<th>" + x.title + "</th>";
                 else if (int(x.twidth) == 0) return "";
-                else return '<th style="width:' + x.twidth+'">' + x.title + "</th>"
+                else return '<th style="width:' + x.twidth+'px">' + x.title + "</th>"
             }).join("") +"</tr></thead>\n<tbody>";
             recs.forEach(data => {
                 var isin = !data.hasOwnProperty("matout_id");
