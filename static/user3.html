@@ -228,7 +228,7 @@
     <script id="tpl_user_new" type="text/template">
         <div class="x2Form" style="padding: 0px 0px 0px 30px;">
             <div style="float: left; margin:0px;"><img style="width: 100px;height: 180px;" src="img/bird.jpg" /></div>
-            <div><label>帐号</label><input /></div>
+            <div><label>帐号</label><input id="username"/></div>
             <div><label>密码</label><input /></div>
             <div><label>密码</label><input /></div>
         </div>
@@ -325,7 +325,7 @@
 
         var g_cur, g_fields = new Array(), g_ethnic, g_departs, g_user = parent.g_user;
         if (g_user == undefined)
-            g_user = GetRoleUser("专家超级帐号");
+            g_user = GetRoleUser("维修队长");
 
         if( isInArray(["1", "4", "7"], g_user.job ))
             Reqdata("/rd?ls=" + { "1": "winder", "4": "devwh", "7": "matwh" }[g_user.job], "", function (res) { g_departs = res; });
@@ -333,7 +333,10 @@
         Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
 
         param = (g_user.depart_id == "0") ? "" : ("&depart_id=" + g_user.depart_id);
-        Reqdata("/rduser?job=" + GetsubJob(g_user.job, "string") + param, "", function (res) {
+        var url = "/rduser?job=" + GetsubJob(g_user.job, "string") + param
+        if (g_user.job == "16") // 维修队长
+            url = "/rdteam?user_id=" + g_user.id;
+        Reqdata(url, "", function (res) {
             g_users = res;
             if (!isInArray(["1", "4", "7"], g_user.job)) { // 除此三类超级用户外不显示所在单位
                 var idx = GetIdx(g_users.fields, "name", "depart_id");
@@ -378,6 +381,7 @@
             var newuser = Create(g_users.fields);
             dlg.Add(tpl_user_new(newuser));
             dlg.submit = function () {
+                newuser.account = $("#username").val();
                 newuser.depart_name = g_user.depart_name;
                 var form = new Userform();
                 var dlg2 = new cbDlg();
@@ -390,6 +394,7 @@
                 $(".xTree div>span").unbind("click", TreeItemClick);
                 $(".xTree div>img").bind("click", TreeItemExpand);
                 $(".xTree div>span").bind("click", TreeItemClick);
+                rebindevent();
             }
             dlg.Show();
         }
@@ -407,6 +412,7 @@
 
             $("#ModalDlgTitle").html("编辑 用户");
             $('#ModalDlg').modal('show');
+            rebindevent();
         }
 
         function Userform() {
@@ -440,14 +446,16 @@
 
                 r += '<div style="position:relative;" ><label>' + field.title + "</label>";
                 if (field.ftype == "div") {
-                    if (field.name == "depart_id"){
+                    if (field.name == "depart_id") {
                         attr += ' class="drop" + style="border: 1px solid #95b7ff;"';
                         r += "<div " + attr + ">" + user.depart_name + "</div>" + RenderDepart();
                     }
-                    else{
+                    else {
                         r += "<div " + attr + ">" + val + "</div>";
                     }
                 }
+                else if (field.ftype == "multiselect")
+                    r += RenderMultiSelect( field, user);
                 else if (field.ftype == "input")
                     r += '<input ' + attr + ' name="' + field.name + '" value="' + val + '"/>';
                 else if (field.ftype == "date")
@@ -470,6 +478,38 @@
             }
             r += "</div>";
             return r;
+        }
+
+        function RenderMultiSelect( field, data )
+        {
+            var val = data[field.name];
+            if (val == "") val = "　";
+            var skills = ["避雷", "工艺设计", "工艺生产", "材料", "安全"];
+            var cnt = skills.map(x => { return val.indexOf(x) == -1 ? ("<div>" + x + "</div>") : ('<div class="selected">' + x + "</div>") });
+            return `<div class="xCombox"><span>` + val + `</span><div class="xMenu">` + cnt.join("") + `</div></div>`;
+        }
+
+        function rebindevent()
+        {
+            $(".xCombox").on("click", function () {
+                $(this).children(".xMenu").toggle();
+                event.cancelBubble = true;
+            });
+            $(".xMenu div").on("click", function () {
+                $(this).toggleClass("selected");
+                var sels = $(this).parent().children(".selected");
+                if (sels.length == 0){ // 至少要选一个
+                    $(this).toggleClass("selected");
+                    return;
+                }
+                $(this).parent().prev().html(sels.map((i, x) => { return $(x).html(); }).toArray().join(","));
+            });
+
+            // 点击外部隐藏
+            if (typeof __dropwindowglobalvar__ == "undefined") {
+                __dropwindowglobalvar__ = 1;
+                $("html").on("click", function () { $("xMenu").hide(); });
+            }
         }
 
         function RenderDepart() {

@@ -8,57 +8,127 @@
     <link rel="stylesheet" href="static/css/bootstrap.css">
     <script src="static/js/jquery.js"></script>
     <script src="static/js/bootstrap.js"></script>
-    
-    
-    <script type="text/javascript">
-        function cbDlg() {
-            this.id = "cbdlg" + Math.ceil(Math.random() * 1000000).toString();
-            this.css = "width:450px";
-            this.title = "标题";
-            this.subs = new Array();
-            this.btndel = false;
-        }
-        cbDlg.prototype.Add = function (sub) {
-            this.subs.push(sub);
-        }
-        cbDlg.prototype.Show = function () {
-            var html = '<div class="modal fade" id="' + this.id + '" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">'
-                + '<div class="modal-dialog" style="' + this.css + '">'
-                + '<div class="modal-content">'
-                + '    <div class="modal-header">'
-                + '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>'
-                + '        <h4 class="modal-title" id="ModalDlgTitle">' + this.title + '</h4>'
-                + '   </div>'
-                + '    <div id="ModalDlgContent" class="modal-body" style="padding:5px 0px">';
-            for (var i in this.sub) html += this.sub[i].toString();
-            html += '    </div>'
-                + '    <div class="modal-footer">';
-            if (this.btndel) html += '        <div style="float:left;"><button type="button" class="btn btn-default" style="color:#aaaaaa">删除</button></div>';
-            html += '        <button type="button" class="btn btn-primary">提交</button>'
-                + '        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>'
-                + '        <button type="button" class="btn">关2闭</button>'
-                + '    </div>'
-                + '</div><!-- /.modal-content -->'
-                + '</div><!-- /.modal -->';
-            $("body").append(html);
-            var btn = $('#' + this.id).find("button");
-            btn.on("click", '', { id: this.id, close: this.closedlg, submit: this.submit }, function (ev) {
-                if (ev.target.innerText == "提交") submit();
-                else if (ev.target.innerText == "提交") submit();
-                $('#' + ev.data.id).remove();
-            });
-            $('#' + this.id).modal('show');
-        } 
 
-        function showDlg() {
-            var dlg = new cbDlg();
-            dlg.Show();
+    <style>
+        /*组合框*/
+        .xCombox {
+            border-radius: 4px;
+            position: relative;
+            padding: 5px 30px 5px 10px;
         }
-    </script>
+        .xCombox::after { /*组合框右侧的小三角*/
+            content: '';
+            width: 0px;
+            height: 0px;
+            position: absolute;
+            top: 14px;
+            right: 8px;
+            border-top: 6px solid #404040;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+        }
 
+        /*菜单项，菜单窗体直接借用bootstrap的dropdown-menu*/
+        .xMenu {
+            position: absolute;
+            display: none;
+            top: 100%;
+            left: 0;
+            z-index: 1000;
+            width: 100%;
+            padding: 5px 5px;
+            background-color: #ffffff;
+            background-clip: padding-box;
+            border: 1px solid #ccc;
+            border: 1px solid rgba(0,0,0,.15);
+            border-radius: 4px;
+            box-shadow: 0 6px 12px rgba(0,0,0,.175);
+            color: #333333;
+        }
+
+        .xMenu>div{
+            color: #333333;
+        }
+        .xMenu>div:hover, .xMenu>div.selected{
+            background-color: #357ebd;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+    </style>
+    
 </head>
 <body>
-    <div onclick="showDlg()">
-        asldflsdlf;lasdf
+
+    <div style="margin:100px;">
+        <label>密码</label>
+        <div style="border: 1px solid #95b7ff;">
+            <div class="xCombox">
+                <span>msg to show</span>
+                <div class="xMenu">
+                    <div>a</div>
+                    <div>b</div>
+                    <div class="selected">c</div>
+                    <div>d</div>
+                </div>
+            </div>
+        </div>
+        <label style="margin-right:5px;">asdfasdf</label><input style="width:140px;height:20px;">
+        <div><label>帐号</label><input id="username" /></div>
     </div>
+
+    <script type="text/javascript">
+
+
+
+        $(".xCombox").on("click", function () {
+            var aa = $("#username");
+            account = $("#username").val();
+
+            $(this).children(".xMenu").toggle(); event.cancelBubble = true;
+        });
+        $(".xMenu div").on("click", function () {
+            $(this).toggleClass("selected");
+            var sels = $(this).parent().children(".selected").map((i, x) => { return $(x).html(); });
+            $(this).parent().prev().html(sels.toArray().join(","));
+        });
+        $("html").on("click", function () { $("xMenu").hide();});
+
+
+        function drop(This) {
+            DropWindow($(This),"",
+                `<div class="x3MenuItem">a</div>
+                <div class="x3MenuItem">b</div>
+                <div class="x3MenuItem x3MenuItemSelected">c</div>
+                <div class="x3MenuItem">d</div>`
+            );
+        };
+
+        function DropWindow(parentElement, attr, content) {
+            parentElement.css("position", "relative");
+            var height = parentElement.outerHeight() + 2;
+            var wnd = `<div class="dropdown-menu" style="top:` + height + `px;width:190px;height:100px;padding:5px;">`
+                + content + `</div>`
+            parentElement.append(wnd);
+            event.cancelBubble = true;
+
+            $(".dropdown-menu div").on("click", function (ev) {
+                $(ev.target).toggleClass("x3MenuItemSelected");
+            });
+
+            // 点击自己隐藏
+            $(".dropdown-menu").on("click", function (ev) {
+                event.cancelBubble = true;
+                parentElement.children(":last-child").hide();
+            });
+            // 点击外部隐藏
+            if (typeof __dropwindowglobalvar__ == "undefined") {
+                __dropwindowglobalvar__ = 1;
+                $("html").on("click", function () {
+                    $(".dropdown-menu").hide();
+                });
+            }
+        }
+    </script>
 </body>
+</html>

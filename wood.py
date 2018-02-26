@@ -342,6 +342,22 @@ def rdstoredetail():
     return query4("rdstore",fields=select(base.sl).where(base.c.table=="inrecview"),\
         inrecs = inrecs.format(user.depart_id,param["mat_id"]),outrecs = outrecs.format(user.depart_id,param["mat_id"]))
 
+#读取队长所带的技工列表
+#测试链接 http://127.0.0.1:5000/rdteam?user_id=
+@app.route("/rdteam")
+def rdteam():
+    param = request.args.to_dict()
+    if "user_id" not in param:
+        return '{result:404,msg:"缺少参数 user_id"}'
+    users=QueryObj("select * from user where id="+str(param["user_id"]))
+    if len(users) !=1:
+        return '{result:404,msg:"用户不存在"}'
+    user=users[0]
+
+    #查询入库记录的、查询出库记录的
+    sql='''select * from user where id in ( select b_id from link where type ='team' and a_id = {0})'''
+    return query4("rdteam",fields=select(base.sl).where(base.c.table=="user"),data = sql.format(user.id))
+
 if __name__ == "__main__":
     app.config['JSON_AS_ASCII'] = False
     app.run( host="0.0.0.0")

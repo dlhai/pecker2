@@ -277,3 +277,71 @@ body {
     margin: 0px;
     box-sizing：border-box;
 }
+
+
+/*组合框
+<div class="xCombox">
+    <span>msg to show</span>
+    <div class="xMenu">
+        <div>a</div>
+        <div>b</div>
+        <div class="selected">c</div>
+        <div>d</div>
+    </div>
+</div>
+$(".xCombox").on("click", function () { $(this).children(".xMenu").toggle(); event.cancelBubble = true;});
+$(".xMenu div").on("click", function (ev) { $(ev.target).toggleClass("selected"); });
+$("html").on("click", function () { $("xMenu").hide();});
+*/
+.xCombox {
+    border-radius: 4px;
+    position: relative;
+    padding: 5px 30px 5px 10px;
+}
+.xCombox::after { /*组合框右侧的小三角*/
+    content: '';
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    top: 14px;
+    right: 8px;
+    border-top: 6px solid #404040;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+}
+
+/*菜单，这个菜单既可以与组合框结合使，也可以单独使用
+<div class="xMenu">
+    <div>a</div>
+    <div>b</div>
+    <div class="selected">c</div>
+    <div>d</div>
+</div>
+$(".xCombox").on("click", function () { $(this).children(".xMenu").toggle(); event.cancelBubble = true;});
+$(".xMenu div").on("click", function (ev) { $(ev.target).toggleClass("selected"); });
+$("html").on("click", function () { $("xMenu").hide();});
+*/
+.xMenu {
+    position: absolute;
+    display: none;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    width: 100%;
+    padding: 5px 5px;
+    background-color: #ffffff;
+    background-clip: padding-box;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    color: #333333;
+}
+.xMenu>div{
+    color: #333333;
+}
+.xMenu>div:hover, .xMenu>div.selected{
+    background-color: #357ebd;
+    color: #ffffff;
+    text-decoration: none;
+}

@@ -217,6 +217,9 @@ def rndsplit(num, min, max):
     slices.pop()
     return slices
 
+def rndskill():
+    return ",".join(list(set([ random.choice(["避雷","工艺设计","工艺生产","材料","安全"]) for x in range(4)])))
+
 def rndpick( ar, aridx, count):
     sel = random.sample(aridx, count)
     [aridx.remove(x) for x in sel]
@@ -227,14 +230,4 @@ if __name__=="__main__":
     setdata(loadpkl('rawdata.pkl'))
     aa = getitembyname("_tbl","__sys__").id
 
-    print(rnditem("_songci"))
-    print(rnditem("_songci"))
-    print(rnditem("_songci"))
-    print(rnditem("_songci"))
-    print(rnditem("_songci"))
-    print(rnditem("_songci"))
-    print(rnditem("_songci"))
-    print(rnditem("_songci"))
-    print(rnditem("_songci"))
-    print(rnditem("_songci"))
-    aa =1
+    print(rndskill())
