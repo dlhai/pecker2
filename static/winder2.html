@@ -13,6 +13,7 @@
     <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
+    <link rel="stylesheet" href="css/Cube.css" />
     <script src="js/Cube.js"></script>
 </head>
 <body class="xFCscol">
@@ -83,10 +84,21 @@
                 inputs.each(function () {$(this).prop('checked', !$(this).prop("checked"));});
         }
         function onRepair() {
-            var dlg = new cbDlg();
-            dlg.title = "报修";
-            dlg.css = "width:610px";
-            dlg.Show();
+            Reqdata("/rd?ls=fault&id=0", "", res => {
+                var dlg = new cbDlg();
+                dlg.title = "报修";
+                dlg.css = "width:610px";
+
+                res.fields.push({ "title": "报修设备", "name": "devices", "forder": "2", "ftype": "div_long" } );
+                xfieldsort(res.fields);
+                var data = Create(res.fields);
+                data.devices = "qweqwe,asdasd,zxzxc,ewrwer,werwer,sdfsdf,erwert";
+                data.winder_id = "xxx风场";
+                data.report_id = "xxx驻场人";
+                dlg.Add(RenderForm4(data, res.fields));
+                dlg.Add(xrimagelistlive([""]));
+                dlg.Show();
+            });
         }
         function onQueryLog() {
             alert("asdfs");

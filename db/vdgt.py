@@ -221,13 +221,9 @@ def rndskill():
     return ",".join(list(set([ random.choice(["避雷","工艺设计","工艺生产","材料","安全"]) for x in range(4)])))
 
 def rndpick( ar, aridx, count):
-    sel = random.sample(aridx, count)
+    sel = random.sample(aridx, count) #从数组aridx中随机选count个，作为一个数组返回
     [aridx.remove(x) for x in sel]
     return [ar[x] for x in sel]
 
-
 if __name__=="__main__": 
     setdata(loadpkl('rawdata.pkl'))
-    aa = getitembyname("_tbl","__sys__").id
-
-    print(rndskill())

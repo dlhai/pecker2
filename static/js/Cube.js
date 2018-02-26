@@ -1,4 +1,47 @@
-﻿// div组件 可定制类名和style
+﻿$("html").on("change", function () {
+    var node = event.target;
+    if (node.tagName == "INPUT" && node.type == "file") {
+        var file = node.files[0];
+        var reader = new FileReader();
+        reader.onload = function (e) { $(node).prev().attr("src", e.target.result); };
+        reader.readAsDataURL(file);
+        var parent = $(node).parent().parent();
+        if (parent.next().length == 0) {
+            parent.append(xrimagelive(""));
+        }
+    }
+});
+function xrimagelive(img) {
+    var tpl = `<label class="ImgBlank"for="{id}"><img style="width: 100%; height: 100%;" {img} />
+                        <input type="file" id="{id}" accept="image/*"></label>`;
+    return tpl.format({ id: rndstr(8), img: (img == "" ? "" : 'src="' + img + '"') });
+}
+function xrimagelistlive(imglist) {
+    return `<div class="imagelistlive">` + imglist.map(x => xrimagelive(x)) + `</div>`;
+}
+
+// 字段数组专用的排序函数，数组自带的为毛不好用
+function xfieldsort(ar) {
+    ar.forEach((x, i) => {
+        if (!x.hasOwnProperty("forder"))
+            x.forder = "";
+        if (x.forder == "") {
+            if (i == 0) x.forder = "0";
+            else x.forder = ar[i - 1].forder;
+        }
+    });
+    for (var i = 0; i < ar.length; i++) {
+        for (var j = i + 1; j < ar.length; j++) {
+            if (int(ar[i].forder) > int(ar[j].forder)) {
+                var t = ar[i];
+                ar[i] = ar[j];
+                ar[j] = t;
+            }
+        }
+    }
+}
+
+// div组件 可定制类名和style
 function cbCube(cls, css) {
     this.cls = cls;
     this.css = attr;
@@ -38,7 +81,7 @@ cbDlg.prototype.Show = function () {
         + '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>'
         + '        <h4 class="modal-title" id="ModalDlgTitle">' + this.title + '</h4>'
         + '   </div>'
-        + '    <div id="ModalDlgContent" class="modal-body" style="padding:5px 0px">';
+        + '    <div id="ModalDlgContent" class="modal-body" style="padding:5px">';
     for (var i in this.subs) html += this.subs[i].toString();
     html += '    </div>'
         + '    <div class="modal-footer">';
@@ -99,6 +142,8 @@ function RenderFormIn(entity, fields, cb) {
         r += "<div><label>" + field.title + "</label>";
         if (field.ftype == "div")
             r += "<div " + attr + ">" + val + "</div>";
+        if (field.ftype == "div_long")
+            r += "<div " + attr + ' style="width: 490px;">' + val + "</div>";
         else if (field.ftype == "input")
             r += '<input ' + attr + ' name="' + field.name + '" value="' + val + '"/>';
         else if (field.ftype == "input_long")

@@ -1,0 +1,14 @@
+﻿/*图片框无图时的背景十字架图片*/
+.imagelistlive {}
+.imagelistlive>label {
+    background: url(/static/img/add2.png);
+    background-size: 50% 50%;
+    background-repeat: no-repeat;
+    background-position: center center;
+    display: inline-block;
+    margin: 0px;
+    width: 120px; height: 80px;
+}
+.imagelistlive>label>input {
+    display: none;
+}

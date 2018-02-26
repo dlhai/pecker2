@@ -321,6 +321,16 @@ function tmfmt(tm, fmt) {
     return fmt; 
 }
 
+//生成一个随机字符串
+function rndstr(len) {
+    var chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    var maxPos = chars.length + 1;
+    var pwd = '';
+    for (i = 0; i < len; i++)
+        pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+    return pwd;
+}
+
 //生成[min-max)之间的一个数
 function rndrange(min, max) { return parseInt(Math.random() * (max - min)) + min; }
 //生成长度为len一个数字字符串
@@ -373,17 +383,6 @@ function rndsubarray(ar, min, max, att, val )
         for (var i = 0; i < sel.length; i++)
             r.push(ar[sel[i]]);
         return r;
-
-        //var a = [], r = [];
-        //var c = rndrange(min,max);
-        //while (a.length < c) {
-        //    var x = rndrange(0, ar.length);
-        //    while ($.inArray(x, a) != -1)
-        //        x = rndrange(0, ar.length);
-        //    a.push(x);
-        //    r.push(ar[x]);
-        //}
-        //return r;
     }
 }
 
