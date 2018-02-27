@@ -87,11 +87,16 @@ function GetIdx(ar, attr, val) {
 }
 
 function Clone(obj) {
-    var r = new Object();
+    if (typeof obj == typeof []) 
+        var r = new Array();
+    else
+        var r = new Object();
+
     for (var k in obj) {
         var val = obj[k];
-        r[k] = typeof val === 'object' ? cloneObj(val) : val;
+        r[k] = typeof val === 'object' ? Clone(val) : val;
     }
+
     return r;
 }
 

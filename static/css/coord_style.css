@@ -1,4 +1,16 @@
-﻿.xBoard {
+﻿.xDetail {
+    margin-bottom: 10px;
+}
+.xDetail>summary {
+    padding: 5px 10px;
+    width: 100%;
+    background: #f0f0f0;
+    border-bottom: 1px solid #dddddd;
+    border-top: 1px solid #dddddd;
+}
+
+/*以下至结束，计划废弃*/
+.xBoard {
     margin-bottom:10px;
 }
 .xBoard>summary {
@@ -53,6 +65,7 @@
 .x2Board>div {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: baseline;
 }
 .x2Board>div>label {

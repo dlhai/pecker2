@@ -55,6 +55,7 @@ db_tbl = [
     { "id": "27", "name": "matinrec", "title": "入库记录" },
     { "id": "28", "name": "matout", "title": "出库单" },
     { "id": "29", "name": "matoutrec", "title": "出库记录" },
+    { "id": "30", "name": "chat", "title": "聊天记录" },
 ]
 
 branch = {
@@ -96,6 +97,7 @@ tables = {
     'matprov':Table('matprov', metadata,autoload=True),
     'matwh':Table('matwh', metadata,autoload=True),
     'mat':Table('mat', metadata,autoload=True),
+    'chat':Table('chat', metadata,autoload=True),
     }
 base=tables["base"]
 base.sl = [base.c.title, base.c.name, base.c.forder, base.c.ftype, base.c.twidth, base.c.tstyle]
@@ -341,6 +343,18 @@ def rdstoredetail():
         and flow.table_id = 28 and flow.status=5 and matout_status >=5 and matwh_id={0} and mat_id={1} order by id'''
     return query4("rdstore",fields=select(base.sl).where(base.c.table=="inrecview"),\
         inrecs = inrecs.format(user.depart_id,param["mat_id"]),outrecs = outrecs.format(user.depart_id,param["mat_id"]))
+
+#测试链接 http://127.0.0.1:5000/rdstoredetail?user_id=?
+@app.route("/rdfault")
+def rdfault():
+    param = request.args.to_dict()
+    if "guide_id" not in param:
+        return '{result:404,msg:"缺少参数 guide_id"}'
+
+    #查询入库记录的、查询出库记录的
+    sql='''select fault.*,user.name as report_name, winder.name as winder_name from fault,winder,user 
+        where fault.report_id= user.id and fault.winder_id=winder.id and guide_id='''+param["guide_id"]
+    return query4("rdstore",fields=select(base.sl).where(base.c.table=="fault"), data = sql)
 
 #读取队长所带的技工列表
 #测试链接 http://127.0.0.1:5000/rdteam?user_id=

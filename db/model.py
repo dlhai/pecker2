@@ -33,20 +33,21 @@ tbl_link=Table('link', metadata,
 	Column('type',String(16)),
 	Column('a_id',Integer),
 	Column('b_id',Integer),
-	Column('remark',String(32)))
+	Column('remark',String(32)),
+	Column('date',Date))
 def dict_link(x):
-    return dict(type=x.type,a_id=x.a_id,b_id=x.b_id,remark=x.remark)
+    return dict(type=x.type,a_id=x.a_id,b_id=x.b_id,remark=x.remark,date=x.date)
 
 tbl_addit=Table('addit', metadata,
 	Column('id',Integer,primary_key=True),
-	Column('name',String(64)),
-	Column('table',String(32)),
-	Column('field',Integer),
+	Column('type',String(16)),
+	Column('ref_id',Integer),
+	Column('name',String(32)),
 	Column('remark',String(32)),
-	Column('user',Integer),
+	Column('user_id',Integer),
 	Column('date',Date))
-def dict_addit(x,y):
-    return dict(name="",table="",field="",remark="",user="",date="")
+def dict_addit(x):
+    return dict(type=x.type,ref_id=x.ref_id,name=x.name,remark=x.remark,user_id=x.user_id,date=x.date)
 
 tbl_config=Table('config', metadata,
 	Column('id',Integer,primary_key=True),
@@ -186,7 +187,7 @@ def dict_leaf(x,y):
 tbl_fault=Table('fault', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('code',String(32)),
-	Column('fault_id',String(32)),
+	Column('type',String(32)),
 	Column('report_id',Integer),
 	Column('reporttime',Date),
 	Column('phone',String(16)),
@@ -196,7 +197,7 @@ tbl_fault=Table('fault', metadata,
 	Column('guide_id',Integer),
 	Column('guidetime',Date))
 def dict_fault(report):
-    return dict(code=rndqq(),fault_id=random.choice( ["风化脱漆","叶片断裂", "电机起火", "电路故障"]),report_id=report.id,reporttime=rnddate(30,60),phone=report.phone,winder_id=report.depart_id,remark=rnditem("_songci"),status="0",guide_id="0",guidetime=rnddate(1,1))
+    return dict(code=rndqq(),type=random.choice( ["风化脱漆","叶片断裂", "电机起火", "电路故障"]),report_id=report.id,reporttime=rnddate(30,60),phone=report.phone,winder_id=report.depart_id,remark=rnditem("_songci"),status="0",guide_id="0",guidetime=rnddate(1,1))
 
 tbl_devwh=Table('devwh', metadata,
 	Column('id',Integer,primary_key=True),
@@ -334,6 +335,15 @@ def dict_matoutrec(x):
     dt=rnddate(30,60)
     return dict(matout_id=x.matout_id,matinrec_id=x.matinrec_id,num=x.num,remark=rnditem2("_songci"))
 
+tbl_chat=Table('chat', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('fault_id',Integer),
+	Column('user_id',Integer),
+	Column('say',String(1024)),
+	Column('date',Date))
+def dict_chat(x):
+    return dict(fault_id=x.fault_id,user_id=x.user_id,say=x.say,date=x.date)
+
 
 metadata.create_all(engine)
 conn = engine.connect()
@@ -434,6 +444,7 @@ conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","14",rndskill()) for x in 
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","15","")])
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","16","") for x in range(rndnum(20,30))])
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","17","") for x in range(rndnum(100,150))])
+
 
 #为每个设备设置司机
 data1=conn.execute("select id,devwh_id from dev").fetchall()

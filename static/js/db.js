@@ -242,6 +242,7 @@ var db_tbl = [
     { "id": "27", "name": "matinrec", "title": "入库记录" },
     { "id": "28", "name": "matout", "title": "出库单" },
     { "id": "29", "name": "matoutrec", "title": "出库记录" },
+    { "id": "30", "name": "chat", "title": "聊天记录" },
 ]
 function GetTbl(name) { return GetSub(db_tbl, "name", name); }
 

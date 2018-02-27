@@ -11,11 +11,20 @@
         }
     }
 });
+
+function xrimagelist(img) {
+    var tpl = `<label class="ImgBlank"for="{id}"><img style="width: 100%; height: 100%;" {img} />
+                        <input type="file" id="{id}" accept="image/*"></label>`;
+    return tpl.format({ id: rndstr(8), img: (img == "" ? "" : 'src="' + img + '"') });
+}
+
+//背景带十字，点击可换图
 function xrimagelive(img) {
     var tpl = `<label class="ImgBlank"for="{id}"><img style="width: 100%; height: 100%;" {img} />
                         <input type="file" id="{id}" accept="image/*"></label>`;
     return tpl.format({ id: rndstr(8), img: (img == "" ? "" : 'src="' + img + '"') });
 }
+//背景带十字，点击可换图的列表
 function xrimagelistlive(imglist) {
     return `<div class="imagelistlive">` + imglist.map(x => xrimagelive(x)) + `</div>`;
 }

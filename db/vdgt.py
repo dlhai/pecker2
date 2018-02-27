@@ -5,6 +5,7 @@ import random
 import pickle
 import string
 import datetime
+
 #from testiter import *
 
 dat_all = {}
@@ -227,3 +228,4 @@ def rndpick( ar, aridx, count):
 
 if __name__=="__main__": 
     setdata(loadpkl('rawdata.pkl'))
+
