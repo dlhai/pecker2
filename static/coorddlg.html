@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <script src="js/jquery.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.css"/>
+    <script src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/doTe.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <link rel="stylesheet" href="css/Cube.css" />
+    <script src="js/Cube.js"></script>
+    <script src="js/xpecker.js"></script>
+
+    <link rel="StyleSheet" href="css/coord_card.css" type="text/css" />
+    <link rel="StyleSheet" href="css/coord_style.css" type="text/css" />
+
+    <style type="text/css">
+        .narrow{}
+        .narrow>div>div:first-of-type{width: 165px;}
+    </style> 
+
+    <script type="text/javascript">
+        function crd_card(obj) {
+            var tpl = `<div class="card" code="{code}">
+                    <div class="header">
+                        <div class="type">报修单</div>
+                        <div class="title">{type}</div>
+                    </div>
+                    <div class="body" style="text-align:left;">
+                        <div><strong>单号：</strong>{code}</div>
+                        <div><strong>报修人：</strong>{report_name}</div>
+                        <div><strong>联系电话：</strong>{phone}</div>
+                        <div><strong>单位：</strong>{winder_name}</div>
+                    </div>
+                </div>`
+            return tpl.format(obj);
+        }
+
+        function crd_render_fault(obj, fields) {
+            var r = '<div class="x2Form narrow">' + RenderPane2(obj, fields) +'</div>';
+            var tpl_remark = `<div id="remark" class="xRndAngle" style="margin:10px;margin-top:5px; padding:5px 10px;">{0}</div>`
+            r += tpl_remark.format(obj.remark);
+            return r;
+        }
+    </script>
+</head>
+<body class="xFCsrow">
+    <section class="xPanel2 xFIfixed" style="width:300px;">
+        <header>任务列表<div style="float: right;"><a href="#">添加</a></div></header>
+        <div id="troublelist" class="xScroll" style="height:100px;flex-grow: 1;"></div>
+    </section>
+    <section class="xPanel2" style="width: 700px; max-width:900px;">
+        <header>案件处理</header>
+        <div style="height:100px;flex-grow: 1;padding:0px;">
+            <details id="fault" open class="xDetail"><summary style="border-top:0px;">报修</summary>
+            </details>
+            <details open class="xDetail"><summary>准备</summary><div id="prepare"></div></details>
+            <details open class="xDetail"><summary>维修<div style="float: right;"><a href="#">添加</a></div></summary><div id="repair_log"></div></details>
+            <details open class="xDetail"><summary>完工</summary><div id="complete"></div></details>
+        </div>
+    </section>
+    <section class="xPanel2 xFIfixed" style="width:200px;min-width:160px;">
+        <header>参与人员<div style="float: right;"><a href="#">管理</a></div></header>
+        <div id="userlist" class="xScroll" style="height:100px;flex-grow: 1;"><div>asdfasldkjf;lasdkjfasjdfjasdlfjlk</div><div>asdfasldkjf;lasdkjfasjdfjasdlfjlk</div><div>asdfasldkjf;lasdkjfasjdfjasdlfjlk</div></div>
+    </section>
+    <section class="xPanel2" style="width: 450px; min-width: 300px;">
+        <header>对话</header>
+        <div id="speechlist" class="xScroll" style="height:100px;flex-grow: 1;"></div>
+        <footer class="xFCsrow" style="padding:10px; height: 120px; width: 100%; align-items: flex-end;">
+            <textarea class="xrAngle" style="margin-right:10px; padding:5px 10px; height:100px;width:100px;resize:none;"></textarea>
+            <div class="xFIfixed"><button>发送</button></div>
+        </footer>
+    </section>
+    <style>
+        .roleselect>div{margin: 5px;display:inline-block;}
+        .roleselect {margin: 5px;display:inline-block;}
+        .roleselect>.rolelist > div {background: #00ff00;margin:5px;padding:5px;}
+        .live {background: #ffff00;}
+    </style>
+    <script type="text/javascript">
+        function crd_showuserselectdlg(){
+            var dlg = new cbDlg("人员选择","width:610px");
+            //dlg.Add('<div>'+db_job.map(x=>'<div>'+(x.name.indexOf("超级帐号")==-1?x.name : "")+'</div>').join("")+'</div>')
+            dlg.Add(crd_userselect())
+            dlg.Show();
+        }
+
+        function crd_userselect() {
+            var roles = ['调度人员','风场人员','设备人员','仓库人员','专家','维修人员'];
+            return '<div class="roleselect"><div class="rolelist">'+roles.map(x=>'<div>'+x+'</div>').join("")
+              +'</div><div id="userfilter"></div><div id="userlist"></div></div>';
+        }
+        function crd_userwithface(user){                          
+          var tpl = `<div class="SmallHead"><img src="img/face/face{face}.jpg" />【{prof}】{name}</div>`;
+          return tpl.format(user);
+        }
+
+        $("html").on("click", function () {
+            var node = event.target;
+            if (node.tagName == "DIV" && $(node).parent().hasClass("roleselect")) {
+              $(node).parent().children().removeClass("live");
+              $(node).addClass("live");
+              if ( $(node).html()=="调度人员"){
+                $(".userfilter").html('<div class="roleselect live">所有人员</div>');
+                ReqData( "rduser?job="+GetSubJob("调度超级帐号","string").id,"", function(res) {
+                 $(".userlist").html(res.data.map(x=>crd_userwithface(x)));
+                });
+              }
+              else if ( $(node).html()=="风场人员"){
+                ReqData( "rd?type="+GetSubJob("调度超级帐号","string").id,"", function(res) {
+                 $(".userlist").html(res.data.map(x=>crd_userwithface(x)));
+                });
+              }
+              else if ( $(node).html()=="设备人员"){
+              }
+              else if ( $(node).html()=="仓库人员"){
+              }
+              else if ( $(node).html()=="专家"){
+              }
+              else if ( $(node).html()=="维修人员"){
+              }
+                               
+            }
+        });
+
+
+    </script>
+
+    <script type="text/javascript">
+        var g_cursel = -1;
+        var g_user = parent.g_user, faultlist = [];
+        if (g_user == undefined)
+            g_user = GetRoleUser("调度");
+
+
+        crd_showuserselectdlg();
+
+    </script>
+
+</body>
+</html>
+

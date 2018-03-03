@@ -58,18 +58,6 @@ db_tbl = [
     { "id": "30", "name": "chat", "title": "聊天记录" },
 ]
 
-branch = {
-    "devwh": { "sub": "", "image": "img/devwh.png", },
-
-    "root": { "sub": "winderco", "image": "", },
-    "winderco": {"sub": "winderprov", "image": "img/diy/1_open.png" },
-    "winderprov": { "sub": "winder", "image": "img/folder.gif" },
-    "winder": { "sub": "winderarea", "image": "img/diy/3.png" },
-    "winderarea": { "sub": "efan", "image": "img/page.gif" },
-    "efan": { "sub": "leaf", "image": "" },
-    "leaf": { "sub": "", "image": "" },
-}
-
 def gettbl( nameorid ):
     s = str(nameorid)
     for x in db_tbl:
