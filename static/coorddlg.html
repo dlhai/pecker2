@@ -79,6 +79,15 @@
         .roleselect {margin: 5px;display:inline-block;}
         .roleselect>.rolelist > div {background: #00ff00;margin:5px;padding:5px;}
         .live {background: #ffff00;}
+
+        .SmallHead {
+        }
+        .SmallHead img {
+            border-radius: 10px;
+            width: 20px;
+            height: 20px;
+        }
+
     </style>
     <script type="text/javascript">
         function crd_showuserselectdlg(){
@@ -91,38 +100,39 @@
         function crd_userselect() {
             var roles = ['调度人员','风场人员','设备人员','仓库人员','专家','维修人员'];
             return '<div class="roleselect"><div class="rolelist">'+roles.map(x=>'<div>'+x+'</div>').join("")
-              +'</div><div id="userfilter"></div><div id="userlist"></div></div>';
+              +'</div><div id="userfilter"></div><div id="filteruserlist"></div></div>';
         }
         function crd_userwithface(user){                          
-          var tpl = `<div class="SmallHead"><img src="img/face/face{face}.jpg" />【{prof}】{name}</div>`;
+          var tpl = `<div class="SmallHead"><img src="{face}" />【{job}】{name}</div>`;
           return tpl.format(user);
         }
 
         $("html").on("click", function () {
             var node = event.target;
-            if (node.tagName == "DIV" && $(node).parent().hasClass("roleselect")) {
-              $(node).parent().children().removeClass("live");
-              $(node).addClass("live");
-              if ( $(node).html()=="调度人员"){
-                $(".userfilter").html('<div class="roleselect live">所有人员</div>');
-                ReqData( "rduser?job="+GetSubJob("调度超级帐号","string").id,"", function(res) {
-                 $(".userlist").html(res.data.map(x=>crd_userwithface(x)));
-                });
-              }
-              else if ( $(node).html()=="风场人员"){
-                ReqData( "rd?type="+GetSubJob("调度超级帐号","string").id,"", function(res) {
-                 $(".userlist").html(res.data.map(x=>crd_userwithface(x)));
-                });
-              }
-              else if ( $(node).html()=="设备人员"){
-              }
-              else if ( $(node).html()=="仓库人员"){
-              }
-              else if ( $(node).html()=="专家"){
-              }
-              else if ( $(node).html()=="维修人员"){
-              }
-                               
+            if (node.tagName == "DIV") {
+                if ($(node).parent().hasClass("rolelist")) {
+                    $(node).parent().children().removeClass("live");
+                    $(node).addClass("live");
+                    if ($(node).html() == "调度人员") {
+                        $("#userfilter").html('<div class="roleselect live">所有人员</div>');
+                        Reqdata("/rduser?job=" + GetsubJob(GetSub(db_job, "name", "调度超级帐号").id, "string"), "", function (res) {
+                            $("#filteruserlist").html(res.data.map(x => crd_userwithface(x)));
+                        });
+                    }
+                    else if ($(node).html() == "风场人员") {
+                        Reqdata("/rd?type=" + GetsubJob(GetSub(db_job, "name", "叶片超级帐号").id, "string"), "", function (res) {
+                            $(".filteruserlist").html(res.data.map(x => crd_userwithface(x)));
+                        });
+                    }
+                    else if ($(node).html() == "设备人员") {
+                    }
+                    else if ($(node).html() == "仓库人员") {
+                    }
+                    else if ($(node).html() == "专家") {
+                    }
+                    else if ($(node).html() == "维修人员") {
+                    }
+                }
             }
         });
 
