@@ -321,7 +321,7 @@ $(".xCombox").on("click", function () { $(this).children(".xMenu").toggle(); eve
 $(".xMenu div").on("click", function (ev) { $(ev.target).toggleClass("selected"); });
 $("html").on("click", function () { $("xMenu").hide();});
 */
-.xMenu {
+.xMenu, .xPopWnd {
     position: absolute;
     display: none;
     top: 100%;

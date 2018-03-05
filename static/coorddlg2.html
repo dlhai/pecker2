@@ -1,0 +1,198 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <script src="js/jquery.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.css"/>
+    <script src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/doTe.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <link rel="stylesheet" href="css/Cube.css" />
+    <script src="js/Cube.js"></script>
+    <script src="js/xpecker.js"></script>
+
+    <link rel="StyleSheet" href="css/coord_card.css" type="text/css" />
+    <link rel="StyleSheet" href="css/coord_style.css" type="text/css" />
+
+
+</head>
+<body>
+    <div style="margin:100px;">
+        <div id="rolelist" class="xCombox xRndAngle" style="margin-top:5px; display:inline-block;"><span>调度人员</span><div class="xMenu">
+            <div class="selected">调度人员</div><div>风场人员</div><div>设备人员</div><div>仓库人员</div><div>专家</div><div>维修人员</div>
+        </div></div>
+        <div id="userfilter" class="xCombox xRndAngle" style="margin-top:5px; display:inline-block;">
+            <span>调度人员</span><div id="userfiltertree" class="xPopWnd">
+                <div class="selected">调度人员</div><div>风场人员</div><div>设备人员</div><div>仓库人员</div><div>专家</div><div>维修人员</div>
+            </div>
+        </div>
+        <div id="filteruserlist" class="xRndAngle" style="margin-top:5px; width:500px;height:250px;">
+            <span>调度人员</span><div >
+                <div class="selected">调度人员</div><div>风场人员</div><div>设备人员</div><div>仓库人员</div><div>专家</div><div>维修人员</div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .roleselect>div{margin: 5px;display:inline-block;}
+        .roleselect {margin: 5px;display:inline-block;}
+        .roleselect>.rolelist > div {background: #00ff00;margin:5px;padding:5px;}
+        .live {background: #ffff00;}
+
+        .SmallHead {
+        }
+        .SmallHead img {
+            border-radius: 10px;
+            width: 20px;
+            height: 20px;
+        }
+
+    </style>
+    <script type="text/javascript">
+        //按钮下拉窗口
+        $("html").on("click", function () {
+            var node = $(event.target);
+            if (node.hasClass("xCombox")) { // 先看是否自己
+                var pop = node.children(".xPopWnd");
+                pop.toggle();
+                $(".xPopWnd").each((i, n) => { // 关闭其它菜单
+                    if (pop[0] == n)
+                        return;
+                    else $(n).hide(); 
+                });
+            }
+            else if (node.parents(".xCombox").length > 0) {
+                if (node.hasClass(".xPopWnd")) { //点在菜单背景上  
+                }
+                else if (node.parents(".xPopWnd").length > 0) { //点在菜单子项上
+
+                }
+                else { //点在xCombox的其他子项上
+                    var cbx = node.parents(".xCombox");
+                    var pop = cbx.children(".xPopWnd");
+                    pop.toggle();
+                    $(".xPopWnd").each((i, n) => { // 关闭其它菜单
+                        if (pop[0] == n)
+                            return;
+                        else $(n).hide();
+                    });
+                }
+            }
+            else {
+                $(".xPopWnd").each((i, n) => { $(n).hide(); }); // 关闭所有菜单
+            }
+        });
+
+        //按钮下拉菜单
+        $("html").on("click", function () {
+            var node = $(event.target);
+            if (node.hasClass("xCombox")) { // 先看是否自己
+                var pop = node.children(".xMenu");
+                pop.toggle();
+                $(".xMenu").each((i, n) => { // 关闭其它菜单
+                    if (pop[0] == n)
+                        return;
+                    else $(n).hide();
+                });
+            }
+            else if (node.parents(".xCombox").length > 0) {
+                if (node.hasClass(".xMenu")) { //点在菜单背景上  
+                }
+                else if (node.parents(".xMenu").length > 0) { //点在菜单子项上
+                    node.parents(".xCombox").children("span").html(node.html());
+                    node.parents(".xMenu").hide();
+                }
+                else { //点在xCombox的其他子项上
+                    var cbx = node.parents(".xCombox");
+                    var pop = cbx.children(".xMenu");
+                    pop.toggle();
+                    $(".xMenu").each((i, n) => { // 关闭其它菜单
+                        if (pop[0] == n)
+                            return;
+                        else $(n).hide();
+                    });
+                }
+            }
+            else {
+                $(".xMenu").each((i, n) => { $(n).hide(); }); // 关闭所有菜单
+            }
+        });
+
+        //点在菜单项上
+        $("html").on("click", function () {
+            var node = $(event.target);
+            if (node.parent().hasClass("xMenu")) { //点在菜单背景上
+                var text = $(node).html();
+                if (text == "调度人员") {
+                    $("#userfilter span").html('所有');
+                    $("#userfilter .xPopWnd").html('');
+                    Reqdata("/rduser?job=" + GetsubJob(GetSub(db_job, "name", "调度超级帐号").id, "string"), "", function (res) {
+                        $("#filteruserlist").html(res.data.map(x => crd_userwithface(x)));
+                    });
+                }
+                else if (text == "风场人员") {
+                    var g_tree = new x4Tree("userfiltertree", "winderco", "", "winder", function (type, id) {
+                        g_curwh = GetSub(g_devwhs.data, "id", id);
+                        $("#item_detail").html(RenderPane2(g_curwh, g_devwhs.fields));
+                        Reqdata("/rd?ls=dev&devwh_id=" + id, "", function (res) {
+                            g_devs = res;
+                            $("#subitem_list").html(RenderTable2(res, "", FieldToShow));
+                            TableBindClick3(res.type, function (devid) { g_curdev = GetSub(g_devs.data, "id", devid) });
+                        });
+                    });
+
+
+                    Reqdata("/rd?type=" + GetsubJob(GetSub(db_job, "name", "叶片超级帐号").id, "string"), "", function (res) {
+                        $(".filteruserlist").html(res.data.map(x => crd_userwithface(x)));
+                    });
+                }
+                else if ($(node).html() == "设备人员") {
+                }
+                else if ($(node).html() == "仓库人员") {
+                }
+                else if ($(node).html() == "专家") {
+                }
+                else if ($(node).html() == "维修人员") {
+                }
+            }
+        });
+
+
+        function crd_showuserselectdlg() {
+            var dlg = new cbDlg("人员选择", "width:610px");
+            //dlg.Add('<div>'+db_job.map(x=>'<div>'+(x.name.indexOf("超级帐号")==-1?x.name : "")+'</div>').join("")+'</div>')
+            dlg.Add(crd_userselect())
+            dlg.Show();
+        }
+
+        function crd_userselect() {
+            var roles = ['调度人员', '风场人员', '设备人员', '仓库人员', '专家', '维修人员'];
+            return '<div class="roleselect"><div class="rolelist">' + roles.map(x => '<div>' + x + '</div>').join("")
+                + '</div><div id="userfilter"></div><div id="filteruserlist"></div></div>';
+        }
+        function crd_userwithface(user) {
+            var tpl = `<div class="SmallHead"><img src="{face}" />【{job}】{name}</div>`;
+            return tpl.format(user);
+        }
+
+
+
+
+    </script>
+
+    <script type="text/javascript">
+        //var g_cursel = -1;
+        //var g_user = parent.g_user, faultlist = [];
+        //if (g_user == undefined)
+        //    g_user = GetRoleUser("调度");
+
+
+//        crd_showuserselectdlg();
+
+    </script>
+
+</body>
+</html>
+

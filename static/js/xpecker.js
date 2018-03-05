@@ -289,6 +289,74 @@ x3Tree.prototype.Req = function (id, ls, param) {
     });
 }
 
+// 树控件，与第3版的区别:
+// 1.事件使用了委托，不再要绑定
+// 2.使用expr，不用ID，更加灵活
+// ID 根节点类型, 叶节点类型, 点击回调函数
+function x4Tree(expr, ls, param, leaf, useritemclick) {
+    $(expr).addClass("x4Tree");
+    this.leaf = leaf;
+    this.useritemclick = useritemclick;
+    this.Req(expr, ls, param);
+    this.root = true;
+
+    this.branch = {
+        "devwh": { "sub": "", "image": "img/devwh.png", },
+
+        "matprov": { "sub": "matwh", "image": "img/folder.gif", },
+        "matwh": { "sub": "", "image": "img/devwh.png", },
+
+        "root": { "sub": "winderco", "image": "", },
+        "winderco": { "sub": "winderprov", "image": "img/diy/1_open.png" },
+        "winderprov": { "sub": "winder", "image": "img/folder.gif" },
+        "winder": { "sub": "winderarea", "image": "img/diy/3.png" },
+        "winderarea": { "sub": "efan", "image": "img/page.gif" },
+        "efan": { "sub": "leaf", "image": "" },
+        "leaf": { "sub": "", "image": "" },
+    }
+}
+x4Tree.prototype.Req = function (expr, ls, param) {
+    Reqdata("/rd?ls=" + ls + (param ? "&" + param : ""), this, function (res, ctx) {
+        var html = "";
+        var data = res.data;
+        for (var i in res.data) {
+            if (ls == ctx.leaf) { // 叶节点，少了左边的加号，为缩进对齐加了一层div
+                if (ctx.root) { // 根节点是叶节点时，不要加外层div
+                    html += "<div id=\"" + ls + "_" + data[i].id + "\"><span><img src=\""
+                        + ctx.branch[ls].image + "\">" + data[i].name + "</span></div>\n"
+                }
+                else {
+                    html += "<div><div id=\"" + ls + "_" + data[i].id + "\"><span><img src=\""
+                        + ctx.branch[ls].image + "\">" + data[i].name + "</span></div></div>\n"
+                }
+            }
+            else { // 
+                html += "<div id=\"" + ls + "_" + data[i].id + "\">"
+                    + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
+                    + ctx.branch[ls].image + "\">" + data[i].name + "</span></div>\n"
+            }
+        }
+        ctx.root = false;
+
+        $(expr).append(html);
+        $(expr).children("img").attr("src", "img/nolines_minus.gif"); // 把加号改成减号
+
+        $(".xTree div>img").off("click", "", treeItemExpand);
+        $(".xTree div>span").off("click", "", treeItemClick);
+        $(".xTree div>img").on("click", "", { ctx: ctx }, treeItemExpand);
+        $(".xTree div>span").on("click", "", { ctx: ctx }, treeItemClick);
+    });
+}
+//$(".xTree").on("click", function () {
+//    $(".xMenu").each((i, n) => { $(n).hide(); });
+//    var node = $(event.target);
+//    if (node.hasClass("xCombox"))
+//        node.children(".xMenu").toggle();
+//    else if ((node[0].tagName == "SPAN" && node.parent().hasClass("xCombox")))
+//        node.siblings(".xMenu").toggle();
+//});
+
+
 //点击树节点的加号
 function treeItemExpand(ev) {
     ctx = ev.data.ctx;
@@ -296,7 +364,7 @@ function treeItemExpand(ev) {
     if (siblings.length == 0) {
         var id = $(ev.target).parent().attr("id");
         var at = id.split("_");
-        ctx.Req(id, ctx.branch[at[0]].sub, at[0] + "_id=" + at[1])
+        ctx.Req("#"+id, ctx.branch[at[0]].sub, at[0] + "_id=" + at[1])
     }
     else if (siblings.css("display") == "none") {
         $(event.srcElement).attr("src", "img/nolines_minus.gif");
