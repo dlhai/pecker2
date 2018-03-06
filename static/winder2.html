@@ -93,8 +93,8 @@
                 xfieldsort(res.fields);
                 var data = Create(res.fields);
                 data.devices = "qweqwe,asdasd,zxzxc,ewrwer,werwer,sdfsdf,erwert";
-                data.winder_id = "xxx风场";
-                data.report_id = "xxx驻场人";
+                data.winder_id = g_user.depart_id;
+                data.report_id = g_user.id;
                 dlg.Add(RenderForm4(data, res.fields));
                 dlg.Add(xrimagelistlive([""]));
                 dlg.Show();

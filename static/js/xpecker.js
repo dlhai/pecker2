@@ -300,10 +300,11 @@ x3Tree.prototype.Req = function (id, ls, param) {
 //     ......
 // </div>
 // ID 根节点类型, 叶节点类型, 点击回调函数
-function x4Tree(expr, ls, param, leaf) {
+function x4Tree(expr, ls, param, leaf, useritemclick) {
     $(expr).addClass("x4Tree");
     $(expr).attr("x4Tree");
     this.leaf = leaf;
+    this.onTreeItemClick = useritemclick;
     this.Req(expr, ls, param);
     this.root = true;
 
@@ -358,14 +359,14 @@ $("html").on("click", function () {
     var node = $(event.target);
     if (node.parents(".x4Tree").length == 0)
         return;
-    var id = node.parents(".x4Tree").attr("id");
+    var treeid = node.parents(".x4Tree").attr("id");
     if (event.target.tagName == "IMG" && node.parent()[0].tagName == "DIV") { // 点在加号上
         var siblings = node.siblings("div");
         if (siblings.length == 0) { // 无子项,去请求
             var id = node.parent().attr("id");
             var at = id.split("_");
-            if (id != "" && g[id] != undefined)
-                g[id].Req("#" + id, g_treebranch[at[0]].sub, at[0] + "_id=" + at[1])
+            if (id != "" && g[treeid] != undefined)
+                g[treeid].Req("#" + id, g_treebranch[at[0]].sub, at[0] + "_id=" + at[1])
         }
         else if (siblings.css("display") == "none") { // 有子项,展开
             $(event.srcElement).attr("src", "img/nolines_minus.gif");
@@ -377,9 +378,9 @@ $("html").on("click", function () {
         }
     }
     else { //  点在标签上
-        if (typeof onTreeItemClick != "undefined"){
-            var at = $(ev.target).parent().attr("id").split("_");
-            onTreeItemClick(at[0], at[1]);
+        if (g[treeid].onTreeItemClick != undefined){
+            var at = node.parent().attr("id").split("_");
+            g[treeid].onTreeItemClick(at[0], at[1], node);
         }
     }
 });

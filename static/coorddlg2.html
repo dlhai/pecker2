@@ -25,7 +25,7 @@
             <div class="selected">调度人员</div><div>风场人员</div><div>设备人员</div><div>仓库人员</div><div>专家</div><div>维修人员</div>
         </div></div>
         <div id="userfilter" class="xCombox xRndAngle" style="margin-top:5px; display:inline-block;">
-            <span>调度人员</span><div id="userfiltertree" class="xPopWnd">
+            <span>调度人员</span><div id="userfiltertree" class="xPopWnd" style="width:300px;max-height:600px;">
                 <div class="selected">调度人员</div><div>风场人员</div><div>设备人员</div><div>仓库人员</div><div>专家</div><div>维修人员</div>
             </div>
         </div>
@@ -91,11 +91,7 @@
             if (node.hasClass("xCombox")) { // 先看是否自己
                 var pop = node.children(".xMenu");
                 pop.toggle();
-                $(".xMenu").each((i, n) => { // 关闭其它菜单
-                    if (pop[0] == n)
-                        return;
-                    else $(n).hide();
-                });
+                $(".xMenu").each((i, n) => { if (pop[0] != n) $(n).hide(); });// 关闭其它菜单
             }
             else if (node.parents(".xCombox").length > 0) {
                 if (node.hasClass(".xMenu")) { //点在菜单背景上  
@@ -108,11 +104,7 @@
                     var cbx = node.parents(".xCombox");
                     var pop = cbx.children(".xMenu");
                     pop.toggle();
-                    $(".xMenu").each((i, n) => { // 关闭其它菜单
-                        if (pop[0] == n)
-                            return;
-                        else $(n).hide();
-                    });
+                    $(".xMenu").each((i, n) => { if (pop[0] != n) $(n).hide(); });// 关闭其它菜单
                 }
             }
             else {
@@ -126,8 +118,8 @@
             if (node.parent().hasClass("xMenu")) { //点在菜单背景上
                 var text = $(node).html();
                 if (text == "调度人员") {
-                    $("#userfilter span").html('所有');
-                    $("#userfilter .xPopWnd").html('');
+                    $("#userfilter span").html('所有　　');
+                    $("#userfilter .xPopWnd").html('<div class="selected">所有　　</div>');
                     Reqdata("/rduser?job=" + GetsubJob(GetSub(db_job, "name", "调度超级帐号").id, "string"), "", function (res) {
                         $("#filteruserlist").html(res.data.map(x => crd_userwithface(x)));
                     });
@@ -135,10 +127,15 @@
                 else if (text == "风场人员") {
                     $("#userfilter span").html('　　　　　　');
                     $("#userfiltertree").html('');
-                    g.userfiltertree = new x4Tree("#userfiltertree", "winderco", "", "winder", "");
-                    //Reqdata("/rd?type=" + GetsubJob(GetSub(db_job, "name", "叶片超级帐号").id, "string"), "", function (res) {
-                    //    $(".filteruserlist").html(res.data.map(x => crd_userwithface(x)));
-                    //});
+                    g.userfiltertree = new x4Tree("#userfiltertree", "winderco", "", "winder", function(type, id, node) {
+                        if (type == "winder") {
+                            $("#userfilter>span").html(node.html());
+                            $("#userfilter .xPopWnd").toggle();
+                            Reqdata("/rduser?depart_id=" + id, "", function (res) {
+                                $("#filteruserlist").html(res.data.map(x => crd_userwithface(x)));
+                            });
+                        }
+                    });
                 }
                 else if ($(node).html() == "设备人员") {
                 }

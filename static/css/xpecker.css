@@ -96,6 +96,30 @@ body {
     width: 18px;
 }
 
+/*新版，对CSS来讲，与上版相同，仅js变化*/
+.x4Tree {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	color: #666;
+	white-space: nowrap;
+}
+
+.x4Tree > div div {
+	padding-left: 18px;
+	border: 0px;
+	margin: 0px;
+}
+.x4Tree div>img {
+	border: 0px;
+	vertical-align: middle;
+    width: 18px;
+}
+.x4Tree div > span > img {
+    margin-right: 5px;
+    width: 18px;
+}
+
+
 /*表格，需要js配合，xTable-hover是附助*/
 .xTable {width: 100%;}
 .xTable thead > tr > th {
