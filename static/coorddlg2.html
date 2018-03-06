@@ -133,20 +133,12 @@
                     });
                 }
                 else if (text == "风场人员") {
-                    var g_tree = new x4Tree("userfiltertree", "winderco", "", "winder", function (type, id) {
-                        g_curwh = GetSub(g_devwhs.data, "id", id);
-                        $("#item_detail").html(RenderPane2(g_curwh, g_devwhs.fields));
-                        Reqdata("/rd?ls=dev&devwh_id=" + id, "", function (res) {
-                            g_devs = res;
-                            $("#subitem_list").html(RenderTable2(res, "", FieldToShow));
-                            TableBindClick3(res.type, function (devid) { g_curdev = GetSub(g_devs.data, "id", devid) });
-                        });
-                    });
-
-
-                    Reqdata("/rd?type=" + GetsubJob(GetSub(db_job, "name", "叶片超级帐号").id, "string"), "", function (res) {
-                        $(".filteruserlist").html(res.data.map(x => crd_userwithface(x)));
-                    });
+                    $("#userfilter span").html('　　　　　　');
+                    $("#userfiltertree").html('');
+                    g.userfiltertree = new x4Tree("#userfiltertree", "winderco", "", "winder", "");
+                    //Reqdata("/rd?type=" + GetsubJob(GetSub(db_job, "name", "叶片超级帐号").id, "string"), "", function (res) {
+                    //    $(".filteruserlist").html(res.data.map(x => crd_userwithface(x)));
+                    //});
                 }
                 else if ($(node).html() == "设备人员") {
                 }
@@ -159,6 +151,15 @@
             }
         });
 
+        function onTreeItemClick(type, id) {
+            g_curwh = GetSub(g_devwhs.data, "id", id);
+            $("#item_detail").html(RenderPane2(g_curwh, g_devwhs.fields));
+            Reqdata("/rd?ls=dev&devwh_id=" + id, "", function (res) {
+                g_devs = res;
+                $("#subitem_list").html(RenderTable2(res, "", FieldToShow));
+                TableBindClick3(res.type, function (devid) { g_curdev = GetSub(g_devs.data, "id", devid) });
+            });
+        }
 
         function crd_showuserselectdlg() {
             var dlg = new cbDlg("人员选择", "width:610px");
