@@ -292,12 +292,12 @@
             });
             Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (d5) {
                 var nodes = $(".leafvender_id");
-                for (var i = 0; i < nodes.length; i++) {
-                    var selid = nodes[i].getAttribute("data-id");
-                    nodes[i].innerHTML = RenderSelect(d5.data, selid);
+                nodes.each((i, n) => {
+                    var selid = n.getAttribute("data-id");
+                    n.innerHTML = RenderSelect(d5.data, selid);
                     if (selid == "")
-                        nodes[i].selectedIndex = -1;
-                }
+                        n.selectedIndex = -1;
+                });
                 nodes.removeClass("leafvender_id");
             });
             $('#ModalDlg').modal('show');
