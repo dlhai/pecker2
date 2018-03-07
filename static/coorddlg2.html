@@ -25,14 +25,12 @@
             <div class="selected">调度人员</div><div>风场人员</div><div>设备人员</div><div>仓库人员</div><div>专家</div><div>维修人员</div>
         </div></div>
         <div id="userfilter" class="xCombox xRndAngle" style="margin-top:5px; display:inline-block;">
-            <span>调度人员</span><div id="userfiltertree" class="xPopWnd" style="width:300px;max-height:600px;">
+            <span>调度人员</span><div id="userfiltertree" class="xPopWnd" style="max-height:600px;overflow-y:auto;">
                 <div class="selected">调度人员</div><div>风场人员</div><div>设备人员</div><div>仓库人员</div><div>专家</div><div>维修人员</div>
             </div>
         </div>
-        <div id="filteruserlist" class="xRndAngle" style="margin-top:5px; width:500px;height:250px;">
-            <span>调度人员</span><div >
-                <div class="selected">调度人员</div><div>风场人员</div><div>设备人员</div><div>仓库人员</div><div>专家</div><div>维修人员</div>
-            </div>
+        <div id="filteruserlist" class="xRndAngle" style="margin-top:5px; width:500px;height:250px;padding:5px;">
+            
         </div>
     </div>
     <style>
@@ -49,19 +47,26 @@
             height: 20px;
         }
 
+        #filteruserlist > div {
+            display: inline-block;
+            margin: 5px;
+        }
+
     </style>
     <script type="text/javascript">
+        var fmt = "abc def a{a}a x{y}z";
+        var t = new Object();
+        t.a = 123;
+        t.y = 456;
+        fmt.format(t)
+
         //按钮下拉窗口
         $("html").on("click", function () {
             var node = $(event.target);
             if (node.hasClass("xCombox")) { // 先看是否自己
                 var pop = node.children(".xPopWnd");
                 pop.toggle();
-                $(".xPopWnd").each((i, n) => { // 关闭其它菜单
-                    if (pop[0] == n)
-                        return;
-                    else $(n).hide(); 
-                });
+                $(".xPopWnd").each((i, n) => { if (pop[0] != n) $(n).hide(); });// 关闭其它菜单
             }
             else if (node.parents(".xCombox").length > 0) {
                 if (node.hasClass(".xPopWnd")) { //点在菜单背景上  
@@ -73,11 +78,7 @@
                     var cbx = node.parents(".xCombox");
                     var pop = cbx.children(".xPopWnd");
                     pop.toggle();
-                    $(".xPopWnd").each((i, n) => { // 关闭其它菜单
-                        if (pop[0] == n)
-                            return;
-                        else $(n).hide();
-                    });
+                    $(".xPopWnd").each((i, n) => { if (pop[0] != n) $(n).hide(); }); // 关闭其它菜单
                 }
             }
             else {
@@ -131,7 +132,7 @@
                         if (type == "winder") {
                             $("#userfilter>span").html(node.html());
                             $("#userfilter .xPopWnd").toggle();
-                            Reqdata("/rduser?depart_id=" + id, "", function (res) {
+                            Reqdata("/rduser?depart_id=" + id + "&depart_table=" + GetTbl("winder").id, "", function (res) {
                                 $("#filteruserlist").html(res.data.map(x => crd_userwithface(x)));
                             });
                         }

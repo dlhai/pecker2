@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\static",
+    "\\static\\css",
     "\\static\\js"
   ],
-  "SelectedNode": "\\static\\driver.html",
+  "SelectedNode": "\\static\\coorddlg2.html",
   "PreviewInSolutionExplorer": false
 }
