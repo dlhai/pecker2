@@ -50,7 +50,7 @@
 
         ReqdataS("/rd?ls=mat", "", function (mats) { g_mats = mats; });
         Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_venders = res; });
-        Reqdata("/rdstore?user_id=" + g_user.id, "", function (store) {
+        Reqdata("/rdstore?matwh_id=" + g_user.depart_id, "", function (store) {
             g_store = store;
             g_store.fields.push({ title: "库存数量", name: "innum", twidth: "80" });
             $("#mat_list").html(RenderTable2(g_store, "", (data, field) => {

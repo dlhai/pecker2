@@ -29,7 +29,7 @@
                 <div class="selected">调度人员</div><div>风场人员</div><div>设备人员</div><div>仓库人员</div><div>专家</div><div>维修人员</div>
             </div>
         </div>
-        <div id="filteruserlist" class="xRndAngle" style="margin-top:5px; width:500px;height:250px;padding:5px;">
+        <div id="filteruserlist" class="xRndAngle xScroll" style="margin-top:5px; width:500px;height:250px;padding:5px;">
             
         </div>
     </div>
@@ -47,9 +47,16 @@
             height: 20px;
         }
 
-        #filteruserlist > div {
+        #filteruserlist > label > div {
             display: inline-block;
             margin: 5px;
+            font-weight: normal;
+            margin-right: 20px;
+        }
+
+        #userfilter > span > img {
+            margin-right: 5px;
+            width: 18px;
         }
 
     </style>
@@ -139,6 +146,17 @@
                     });
                 }
                 else if ($(node).html() == "设备人员") {
+                    $("#userfilter span").html('　　　　　　');
+                    $("#userfiltertree").html('');
+                    g.userfiltertree = new x4Tree("#userfiltertree", "devwh", "", "devwh", function (type, id, node) {
+                        if (type == "devwh") {
+                            $("#userfilter>span").html(node.html());
+                            $("#userfilter .xPopWnd").toggle();
+                            Reqdata("/rduser?depart_id=" + id + "&depart_table=" + GetTbl("devwh").id, "", function (res) {
+                                $("#filteruserlist").html(res.data.map(x => crd_userwithface(x)));
+                            });
+                        }
+                    });
                 }
                 else if ($(node).html() == "仓库人员") {
                 }
@@ -172,7 +190,7 @@
                 + '</div><div id="userfilter"></div><div id="filteruserlist"></div></div>';
         }
         function crd_userwithface(user) {
-            var tpl = `<div class="SmallHead"><img src="{face}" />【{job}】{name}</div>`;
+            var tpl = `<label><input type="checkbox"><div class="SmallHead"><img src="{face}" />【{job}】{name}</div></label>`;
             return tpl.format(user);
         }
 

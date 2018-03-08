@@ -48,36 +48,8 @@
             { "title": "受理时间", "name": "guidetime", "ftype": "none" },
         ]
 
-        fields.push({ "title": "报修设备", "name": "devices", "forder": "2", "ftype": "div_long" }, );
-
-        function xfieldsort(ar) {
-            ar.forEach((x, i) => {
-                if (!x.hasOwnProperty("forder"))
-                    x.forder = "";
-                if (x.forder == "") {
-                    if (i == 0) x.forder = "0";
-                    else x.forder = ar[i - 1].forder;
-                }
-            });
-            for (var i = 0; i < ar.length; i++) {
-                for (var j = i + 1; j < ar.length; j++) {
-                    if (int(ar[i].forder) > int(ar[j].forder)) {
-                        var t = ar[i];
-                        ar[i] = ar[j];
-                        ar[j] = t;
-                    }
-                }
-            }
-        }
-        xfieldsort(fields);
-        var data = Create(fields);
-        data.devices = "qweqwe,asdasd,zxzxc,ewrwer,werwer,sdfsdf,erwert";
-        data.winder_id = "xxx风场";
-        data.report_id = "xxx驻场人";
-        var html = RenderForm4(data, fields);
-        html += xrimagelistlive([""]);
-        $("body").append(html);
-
+        var tt = fields.filter(x => { if (x.name == "guidetime") return x; });
+        var aa = 0;
 
     </script>
 </body>

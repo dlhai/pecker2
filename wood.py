@@ -294,21 +294,16 @@ def rdmatouts():
                  rfields=select(base.sl).where(base.c.table=="matoutrecview"),rdata = sqlmatoutrec,)
 
 #读取库存列表
-#测试链接 http://127.0.0.1:5000/rdstore?user_id=?
+#测试链接 http://127.0.0.1:5000/rdstore?matwh_id=?
 @app.route("/rdstore")
 def rdstore():
     param = request.args.to_dict()
-    if "user_id" not in param:
-        return '{result:404,msg:"缺少参数 user_id"}'
-    users=QueryObj("select * from user where id="+str(param["user_id"]))
-    if len(users) !=1:
-        return '{result:404,msg:"用户不存在"}'
-    user=users[0]
-
+    if "matwh_id" not in param:
+        return '{result:404,msg:"缺少参数 matwh_id"}'
     sql='''select mat.*,sum(store_view.num) as innum,sum(store_view.outnum) as outnum 
         from mat left join store_view on (mat.id=store_view.mat_id and store_view.matwh_id={0})
         group by mat_id order by mat_id '''
-    return query4("rdstore",fields=select(base.sl).where(base.c.table=="mat"),data = sql.format(user.depart_id))
+    return query4("rdstore",fields=select(base.sl).where(base.c.table=="mat"),data = sql.format(param["matwh_id"]))
 
 #读取库存明细
 #测试链接 http://127.0.0.1:5000/rdstoredetail?mat_id=?
@@ -329,7 +324,7 @@ def rdstoredetail():
         and flow.table_id=26 and flow.status=3 and matin_status >=3 and matwh_id={0} and mat_id={1} order by id'''
     outrecs='''select outrecview.*,flow.date as date from outrecview,flow where outrecview.matout_id=flow.record_id 
         and flow.table_id = 28 and flow.status=5 and matout_status >=5 and matwh_id={0} and mat_id={1} order by id'''
-    return query4("rdstore",fields=select(base.sl).where(base.c.table=="inrecview"),\
+    return query4("rdstoredetail",fields=select(base.sl).where(base.c.table=="inrecview"),\
         inrecs = inrecs.format(user.depart_id,param["mat_id"]),outrecs = outrecs.format(user.depart_id,param["mat_id"]))
 
 #测试链接 http://127.0.0.1:5000/rdstoredetail?user_id=?
@@ -342,7 +337,7 @@ def rdfault():
     #查询入库记录的、查询出库记录的
     sql='''select fault.*,user.name as report_name, winder.name as winder_name from fault,winder,user 
         where fault.report_id= user.id and fault.winder_id=winder.id and guide_id='''+param["guide_id"]
-    return query4("rdstore",fields=select(base.sl).where(base.c.table=="fault"), data = sql)
+    return query4("rdfault",fields=select(base.sl).where(base.c.table=="fault"), data = sql)
 
 #读取队长所带的技工列表
 #测试链接 http://127.0.0.1:5000/rdteam?user_id=
