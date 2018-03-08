@@ -34,13 +34,13 @@
         var g_devwhs, g_curwh, g_devs, g_curdev, g_devvenders;
         Reqdata("/rd?ls=devwh", "", function (res) { g_devwhs = res; });
         Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res) { g_devvenders = res; });
-        var g_tree = new x3Tree("xTree", "devwh", "", "devwh", function (type,id) {
+        g.xTree = new x4Tree("#xTree", "devwh", "", "devwh", function (type,id) {
             g_curwh = GetSub(g_devwhs.data, "id", id);
             $("#item_detail").html(RenderPane2(g_curwh, g_devwhs.fields));
             Reqdata("/rd?ls=dev&devwh_id=" + id, "", function (res) {
                 g_devs = res;
                 $("#subitem_list").html(RenderTable2(res, "", FieldToShow));
-                TableBindClick3(res.type, function (devid) {g_curdev = GetSub(g_devs.data, "id", devid)});
+                TableBindClick3(res.ls, function (devid) {g_curdev = GetSub(g_devs.data, "id", devid);});
             });
         });
 

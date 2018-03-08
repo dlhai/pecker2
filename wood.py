@@ -294,21 +294,16 @@ def rdmatouts():
                  rfields=select(base.sl).where(base.c.table=="matoutrecview"),rdata = sqlmatoutrec,)
 
 #读取库存列表
-#测试链接 http://127.0.0.1:5000/rdstore?user_id=?
+#测试链接 http://127.0.0.1:5000/rdstore?matwh_id=?
 @app.route("/rdstore")
 def rdstore():
     param = request.args.to_dict()
-    if "user_id" not in param:
-        return '{result:404,msg:"缺少参数 user_id"}'
-    users=QueryObj("select * from user where id="+str(param["user_id"]))
-    if len(users) !=1:
-        return '{result:404,msg:"用户不存在"}'
-    user=users[0]
+    if "matwh_id" not in param:
+        return '{result:404,msg:"缺少参数 matwh_id"}'
 
-    sql='''select mat.*,sum(store_view.num) as innum,sum(store_view.outnum) as outnum 
-        from mat left join store_view on (mat.id=store_view.mat_id and store_view.matwh_id={0})
-        group by mat_id order by mat_id '''
-    return query4("rdstore",fields=select(base.sl).where(base.c.table=="mat"),data = sql.format(user.depart_id))
+    sql='''select * from mat left join ( select mat_id, sum(num) as allin, sum(outnum) as allout from store_view 
+        where matwh_id={0} group by mat_id ) as store on mat.id = store.mat_id order by mat_id '''
+    return query4("rdstore",fields=select(base.sl).where(base.c.table=="mat"),data = sql.format(param["matwh_id"]))
 
 #读取库存明细
 #测试链接 http://127.0.0.1:5000/rdstoredetail?mat_id=?

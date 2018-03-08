@@ -44,11 +44,12 @@
         var g_matprovs, g_matprov, g_matwhs, g_matwh, g_curtri = new Object(), g_curtbi = new Object();
         Reqdata("/rd?ls=matprov", "", function (res1) { g_matprovs = res1; });
         Reqdata("/rd?ls=matwh", "", function (matwhs) { g_matwhs = matwhs; });
-        var g_tree = new x3Tree("xTree", "matprov", "", "matwh", function (type, id) { // 点击树节点
+        g.xTree = new x4Tree("#xTree", "matprov", "", "matwh", function (type, id) { // 点击树节点
             g_curtri.type = type;
             g_curtri.id = id;
 
             if (type == "matprov") { // 点击仓库省区
+                g_curtbi.type = "matwh";
                 g_matprov = GetSub(g_matprovs.data, "id", id);
                 $("#item_detail").html(RenderPane2(g_matprov, g_matprovs.fields));
                 Reqdata("/rd?ls=matwh&matprov_id=" + id, "", function (res3) {
@@ -57,17 +58,15 @@
                 });
             }
             else if (type == "matwh") {
+                g_curtbi.type = "store";
                 g_matwh = GetSub(g_matwhs.data, "id", id);
                 $("#item_detail").html(RenderPane2(g_matwh, g_matwhs.fields, FieldToShow));
-
-                // 库存暂无数据
-                //Reqdata("/rd?ls=matwh&matprov_id=" + id, "", function (res3) {
-                //    g_matwhs = res3;
-                //    $("#subitem_list").html(RenderTable2(g_matwhs, "", FieldToShow));
-                //    TableBindClick3(res3.ls, function (rowid) { g_curtbi.type = g_matwhs.ls; g_curtbi.id = rowid; });
-                //});
+                // 库存
+                Reqdata("/rdstore?matwh_id=" + id, "", function (stores) {
+                    $("#subitem_list").html(RenderTable2(stores, "", FieldToShow));
+                    TableBindClick3(stores.ls, function (rowid) { g_curtbi.type = stores.ls; g_curtbi.id = rowid; });
+                });
             }
-
         });
 
         function ImportData() {
