@@ -40,7 +40,7 @@
             Reqdata("/rd?ls=dev&devwh_id=" + id, "", function (res) {
                 g_devs = res;
                 $("#subitem_list").html(RenderTable2(res, "", FieldToShow));
-                TableBindClick3(res.type, function (devid) {g_curdev = GetSub(g_devs.data, "id", devid)});
+                TableBindClick3(res.ls, function (devid) {g_curdev = GetSub(g_devs.data, "id", devid);});
             });
         });
 

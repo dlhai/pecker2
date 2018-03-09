@@ -300,9 +300,8 @@ def rdstore():
     param = request.args.to_dict()
     if "matwh_id" not in param:
         return '{result:404,msg:"缺少参数 matwh_id"}'
-    sql='''select mat.*,sum(store_view.num) as innum,sum(store_view.outnum) as outnum 
-        from mat left join store_view on (mat.id=store_view.mat_id and store_view.matwh_id={0})
-        group by mat_id order by mat_id '''
+    sql='''select * from mat left join ( select mat_id, sum(num) as allin, sum(outnum) as allout from store_view 
+        where matwh_id={0} group by mat_id ) as store on mat.id = store.mat_id order by mat_id '''
     return query4("rdstore",fields=select(base.sl).where(base.c.table=="mat"),data = sql.format(param["matwh_id"]))
 
 #读取库存明细

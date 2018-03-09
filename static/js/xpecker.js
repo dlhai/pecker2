@@ -3,25 +3,8 @@
 // 0205 移动位置 xpecker:function RenderTable2(it, style, fun) => cube: function RenderTable2(it, style, fun)
 // 0205 移动位置 xpecker:function TableBindClick3(tableid, callback) => cube: function TableBindClick3(tableid, callback)
 g = new Object();
+
 //表格点击反色
-function TableBindClick() {
-    var tbc_currow = -1;
-    $("tr").click(function () {
-        var tag = $(this).parent()[0].localName;
-        if (tag.toLowerCase() == "thead")
-            return;
-        if (tbc_currow != -1) {
-            tbc_currow++;
-            if (tbc_currow % 2 == 0)
-                $(this).parent().children(":nth-child(" + tbc_currow + ")").children().css("background-color", "#f5f5f5");
-            else
-                $(this).parent().children(":nth-child(" + tbc_currow + ")").children().css("background-color", "#ffffff");
-        }
-        tbc_currow = $(this).index();
-        $(this).children().css("background-color", "#00f0f5");
-    });
-}
-//表格点击反色 
 var g_TableCurRow = new Object();
 function TableBindClick2(tableid) {
     var currow = -1;
@@ -382,5 +365,59 @@ $("html").on("click", function () {
             var at = node.parent().attr("id").split("_");
             g[treeid].onTreeItemClick(at[0], at[1], node);
         }
+    }
+});
+
+
+//按钮下拉窗口，css:  .xCombox .xPopWnd
+$("html").on("click", function () {
+    var node = $(event.target);
+    if (node.hasClass("xCombox")) { // 先看是否自己
+        var pop = node.children(".xPopWnd");
+        pop.toggle();
+        $(".xPopWnd").each((i, n) => { if (pop[0] != n) $(n).hide(); });// 关闭其它菜单
+    }
+    else if (node.parents(".xCombox").length > 0) {
+        if (node.hasClass(".xPopWnd")) { //点在菜单背景上  
+        }
+        else if (node.parents(".xPopWnd").length > 0) { //点在菜单子项上
+
+        }
+        else { //点在xCombox的其他子项上
+            var cbx = node.parents(".xCombox");
+            var pop = cbx.children(".xPopWnd");
+            pop.toggle();
+            $(".xPopWnd").each((i, n) => { if (pop[0] != n) $(n).hide(); }); // 关闭其它菜单
+        }
+    }
+    else {
+        $(".xPopWnd").each((i, n) => { $(n).hide(); }); // 关闭所有菜单
+    }
+});
+
+//按钮下拉菜单，css  .xCombox .xMenu
+$("html").on("click", function () {
+    var node = $(event.target);
+    if (node.hasClass("xCombox")) { // 先看是否自己
+        var pop = node.children(".xMenu");
+        pop.toggle();
+        $(".xMenu").each((i, n) => { if (pop[0] != n) $(n).hide(); });// 关闭其它菜单
+    }
+    else if (node.parents(".xCombox").length > 0) {
+        if (node.hasClass(".xMenu")) { //点在菜单背景上  
+        }
+        else if (node.parents(".xMenu").length > 0) { //点在菜单子项上
+            node.parents(".xCombox").children("span").html(node.html());
+            node.parents(".xMenu").hide();
+        }
+        else { //点在xCombox的其他子项上
+            var cbx = node.parents(".xCombox");
+            var pop = cbx.children(".xMenu");
+            pop.toggle();
+            $(".xMenu").each((i, n) => { if (pop[0] != n) $(n).hide(); });// 关闭其它菜单
+        }
+    }
+    else {
+        $(".xMenu").each((i, n) => { $(n).hide(); }); // 关闭所有菜单
     }
 });

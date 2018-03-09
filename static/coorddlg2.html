@@ -25,13 +25,9 @@
             <div class="selected">调度人员</div><div>风场人员</div><div>设备人员</div><div>仓库人员</div><div>专家</div><div>维修人员</div>
         </div></div>
         <div id="userfilter" class="xCombox xRndAngle" style="margin-top:5px; display:inline-block;">
-            <span>调度人员</span><div id="userfiltertree" class="xPopWnd" style="max-height:600px;overflow-y:auto;">
-                <div class="selected">调度人员</div><div>风场人员</div><div>设备人员</div><div>仓库人员</div><div>专家</div><div>维修人员</div>
-            </div>
+            <span>所有</span><div id="userfiltertree" class="xPopWnd" style="max-height:600px;overflow-y:auto;"></div>
         </div>
-        <div id="filteruserlist" class="xRndAngle xScroll" style="margin-top:5px; width:500px;height:250px;padding:5px;">
-            
-        </div>
+        <div id="filteruserlist" class="xRndAngle xScroll" style="margin-top:5px; width:500px;height:250px;padding:5px;"></div>
     </div>
     <style>
         .roleselect>div{margin: 5px;display:inline-block;}
@@ -47,78 +43,19 @@
             height: 20px;
         }
 
-        #filteruserlist > label > div {
+        #filteruserlist >label> div {
             display: inline-block;
             margin: 5px;
-            font-weight: normal;
             margin-right: 20px;
+            font-weight:normal;
         }
-
-        #userfilter > span > img {
+        #userfilter>span > img {
             margin-right: 5px;
-            width: 18px;
+            width: 20px;
         }
 
     </style>
     <script type="text/javascript">
-        var fmt = "abc def a{a}a x{y}z";
-        var t = new Object();
-        t.a = 123;
-        t.y = 456;
-        fmt.format(t)
-
-        //按钮下拉窗口
-        $("html").on("click", function () {
-            var node = $(event.target);
-            if (node.hasClass("xCombox")) { // 先看是否自己
-                var pop = node.children(".xPopWnd");
-                pop.toggle();
-                $(".xPopWnd").each((i, n) => { if (pop[0] != n) $(n).hide(); });// 关闭其它菜单
-            }
-            else if (node.parents(".xCombox").length > 0) {
-                if (node.hasClass(".xPopWnd")) { //点在菜单背景上  
-                }
-                else if (node.parents(".xPopWnd").length > 0) { //点在菜单子项上
-
-                }
-                else { //点在xCombox的其他子项上
-                    var cbx = node.parents(".xCombox");
-                    var pop = cbx.children(".xPopWnd");
-                    pop.toggle();
-                    $(".xPopWnd").each((i, n) => { if (pop[0] != n) $(n).hide(); }); // 关闭其它菜单
-                }
-            }
-            else {
-                $(".xPopWnd").each((i, n) => { $(n).hide(); }); // 关闭所有菜单
-            }
-        });
-
-        //按钮下拉菜单
-        $("html").on("click", function () {
-            var node = $(event.target);
-            if (node.hasClass("xCombox")) { // 先看是否自己
-                var pop = node.children(".xMenu");
-                pop.toggle();
-                $(".xMenu").each((i, n) => { if (pop[0] != n) $(n).hide(); });// 关闭其它菜单
-            }
-            else if (node.parents(".xCombox").length > 0) {
-                if (node.hasClass(".xMenu")) { //点在菜单背景上  
-                }
-                else if (node.parents(".xMenu").length > 0) { //点在菜单子项上
-                    node.parents(".xCombox").children("span").html(node.html());
-                    node.parents(".xMenu").hide();
-                }
-                else { //点在xCombox的其他子项上
-                    var cbx = node.parents(".xCombox");
-                    var pop = cbx.children(".xMenu");
-                    pop.toggle();
-                    $(".xMenu").each((i, n) => { if (pop[0] != n) $(n).hide(); });// 关闭其它菜单
-                }
-            }
-            else {
-                $(".xMenu").each((i, n) => { $(n).hide(); }); // 关闭所有菜单
-            }
-        });
 
         //点在菜单项上
         $("html").on("click", function () {
@@ -148,7 +85,7 @@
                 else if ($(node).html() == "设备人员") {
                     $("#userfilter span").html('　　　　　　');
                     $("#userfiltertree").html('');
-                    g.userfiltertree = new x4Tree("#userfiltertree", "devwh", "", "devwh", function (type, id, node) {
+                    g.userfiltertree = new x4Tree("#userfiltertree", "devwh", "", "devwh", function (type, id, node){
                         if (type == "devwh") {
                             $("#userfilter>span").html(node.html());
                             $("#userfilter .xPopWnd").toggle();
@@ -159,6 +96,17 @@
                     });
                 }
                 else if ($(node).html() == "仓库人员") {
+                    $("#userfilter span").html('　　　　　　');
+                    $("#userfiltertree").html('');
+                    g.userfiltertree = new x4Tree("#userfiltertree", "matprov", "", "matwh", function (type, id, node) {
+                        if (type == "matwh") {
+                            $("#userfilter>span").html(node.html());
+                            $("#userfilter .xPopWnd").toggle();
+                            Reqdata("/rduser?depart_id=" + id + "&depart_table=" + GetTbl("matwh").id, "", function (res) {
+                                $("#filteruserlist").html(res.data.map(x => crd_userwithface(x)));
+                            });
+                        }
+                    });
                 }
                 else if ($(node).html() == "专家") {
                 }

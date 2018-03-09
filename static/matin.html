@@ -258,7 +258,7 @@
 
         function RenderPaneIn(data, fields ) {
             var r = "";
-            for (var i = 0, field = fields[0]; i < fields.length; i++, field=fields[i]) {
+            fields.forEach(field => {
                 var attr = "";
                 if (field.ftype == "input_long")
                     attr += 'style="width:490px;"';
@@ -266,7 +266,7 @@
                     attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
 
                 r += "<div><label>" + field.title + "</label><div " + attr + ">" + data[field.name] + "</div></div>";
-            }
+            });
             return r;
         }
 

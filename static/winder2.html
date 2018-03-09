@@ -55,15 +55,11 @@
             Reqdata("/rd?ls=efan&winderarea_id=" + g_winderarea_id, "", function (efan) { g_efans = efan; count += 1; if (count == 4) Render();});
             Reqdata("/rd?ls=leaf&winderarea_id=" + g_winderarea_id, "", function (leaf) { g_leafs = leaf; count += 1; if (count == 4) Render(); });
         }
-        function Render(){
-            for (var i in g_efans.data) {
-                g_efans.data[i].leafs = new Array();
-                for (var j in g_leafs.data) {
-                    if (g_efans.data[i].id == g_leafs.data[j].efan_id ) {
-                        g_efans.data[i].leafs.push(g_leafs.data[j]);
-                    }
-                }
-            }
+        function Render() {
+            g_efans.data.forEach(x => {
+                x.leafs = new Array();
+                g_leafs.data.forEach(y => {if (x.id == y.efan_id) x.leafs.push(y);});
+            });
             var html = "";
             var pane = new EFanPane(true);
             for (var i in g_efans.data) {
