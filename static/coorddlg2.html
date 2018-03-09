@@ -109,6 +109,10 @@
                     });
                 }
                 else if ($(node).html() == "专家") {
+                    $("#userfilter span").html('　　　　　　');
+                    $("#userfiltertree").removeClass('xPopWnd');
+                    $("#userfiltertree").addClass('xMenu');
+                    $("#filteruserlist").html(res.data.map(x => crd_userwithface(x)));
                 }
                 else if ($(node).html() == "维修人员") {
                 }
