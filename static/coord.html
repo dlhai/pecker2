@@ -12,8 +12,14 @@
     <link rel="StyleSheet" href="css/dtree.css" type="text/css" />
     <link rel="StyleSheet" href="css/coord_card.css" type="text/css" />
     <link rel="StyleSheet" href="css/coord_style.css" type="text/css" />
+
+    <script src="js/utils.js"></script>
+    <link rel="stylesheet" href="css/Cube.css" />
+    <script src="js/Cube.js"></script>
+
     <script type="text/javascript" src="js/db.js"></script>
     <script type="text/javascript" src="js/xpecker.js"></script>
+    <script type="text/javascript" src="js/coord.js"></script>
 
     <style type="text/css">
         .lspeech, .rspeech {
@@ -390,7 +396,7 @@
         </div>
     </section>
     <section class="xPanel2" style="width:250px;min-width:160px;">
-        <header>参与人员<div style="float: right;"><a href="#">管理</a></div></header>
+        <header>参与人员<div style="float: right;"><a onclick="crd_showuserselectdlg()">管理</a></div></header>
         <div class="xFi_grow xScroll"><div id="userlist" style="padding:10px;"></div></div>
     </section>
     <section class="xPanel2" style="width: 500px; min-width: 300px;">

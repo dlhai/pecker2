@@ -1,4 +1,27 @@
-﻿.xDetail {
+﻿.roleselect>div{margin: 5px;display:inline-block;}
+.roleselect {margin: 5px;display:inline-block;}
+.roleselect>.rolelist > div {background: #00ff00;margin:5px;padding:5px;}
+
+.SmallHead {
+}
+.SmallHead img {
+    border-radius: 10px;
+    width: 20px;
+    height: 20px;
+}
+
+#filteruserlist >label> div {
+    display: inline-block;
+    margin: 5px;
+    margin-right: 20px;
+    font-weight:normal;
+}
+#userfilter>span > img {
+    margin-right: 5px;
+    width: 20px;
+}
+
+.xDetail {
     margin-bottom: 10px;
 }
 .xDetail>summary {

@@ -20,13 +20,19 @@ function xrimagelist(img) {
 
 //背景带十字，点击可换图
 function xrimagelive(img) {
-    var tpl = `<label class="ImgBlank"for="{id}"><img style="width: 100%; height: 100%;" {img} />
+    var tpl = `<label class="ImgBlank" for="{id}"><img style="width: 100%; height: 100%;" {img} />
                         <input type="file" id="{id}" accept="image/*"></label>`;
     return tpl.format({ id: rndstr(8), img: (img == "" ? "" : 'src="' + img + '"') });
 }
 //背景带十字，点击可换图的列表
 function xrimagelistlive(imglist) {
     return `<div class="imagelistlive">` + imglist.map(x => xrimagelive(x)) + `</div>`;
+}
+
+//菜单项
+function xrmenuin(ar, pre) {
+    var tpl = `<div id="` + pre + `{id}">{name}</div>`;
+    return ar.map(x => tpl.format(x)).join("");
 }
 
 // 字段数组专用的排序函数，数组自带的为毛不好用
@@ -91,7 +97,7 @@ cbDlg.prototype.Show = function () {
         + '        <h4 class="modal-title" id="ModalDlgTitle">' + this.title + '</h4>'
         + '   </div>'
         + '    <div id="ModalDlgContent" class="modal-body" style="padding:5px">';
-    for (var i in this.subs) html += this.subs[i].toString();
+    this.subs.forEach(x => { html += x.toString() });
     html += '    </div>'
         + '    <div class="modal-footer">';
     if (this.btndel) html += '        <div style="float:left;"><button type="button" class="btn btn-default" style="color:#aaaaaa">删除</button></div>';
@@ -238,3 +244,59 @@ function TableBindClick3(tableid, callback) {
             callback($(this).attr("data_id"));
     });
 }
+
+//按钮下拉窗口，css:  .xCombox .xPopWnd
+$("html").on("click", function () {
+    var node = $(event.target);
+    if (node.hasClass("xCombox")) { // 先看是否自己
+        var pop = node.children(".xPopWnd");
+        pop.toggle();
+        $(".xPopWnd").each((i, n) => { if (pop[0] != n) $(n).hide(); });// 关闭其它菜单
+    }
+    else if (node.parents(".xCombox").length > 0) {
+        if (node.hasClass(".xPopWnd")) { //点在菜单背景上  
+        }
+        else if (node.parents(".xPopWnd").length > 0) { //点在菜单子项上
+
+        }
+        else { //点在xCombox的其他子项上
+            var cbx = node.parents(".xCombox");
+            var pop = cbx.children(".xPopWnd");
+            pop.toggle();
+            $(".xPopWnd").each((i, n) => { if (pop[0] != n) $(n).hide(); }); // 关闭其它菜单
+        }
+    }
+    else {
+        $(".xPopWnd").each((i, n) => { $(n).hide(); }); // 关闭所有菜单
+    }
+});
+
+//按钮下拉菜单，css  .xCombox .xMenu
+$("html").on("click", function () {
+    var node = $(event.target);
+    if (node.hasClass("xCombox")) { // 先看是否自己
+        var pop = node.children(".xMenu");
+        pop.toggle();
+        $(".xMenu").each((i, n) => { if (pop[0] != n) $(n).hide(); });// 关闭其它菜单
+    }
+    else if (node.parents(".xCombox").length > 0) {
+        if (node.hasClass(".xMenu")) { //点在菜单背景上  
+        }
+        else if (node.parents(".xMenu").length > 0) { //点在菜单子项上
+            var span = node.parents(".xCombox").children("span");
+            span.html(node.html());
+            span.attr("id", node.attr("id"));
+            node.parents(".xMenu").hide();
+        }
+        else { //点在xCombox的其他子项上
+            var cbx = node.parents(".xCombox");
+            var pop = cbx.children(".xMenu");
+            pop.toggle();
+            $(".xMenu").each((i, n) => { if (pop[0] != n) $(n).hide(); });// 关闭其它菜单
+        }
+    }
+    else {
+        $(".xMenu").each((i, n) => { $(n).hide(); }); // 关闭所有菜单
+    }
+});
+

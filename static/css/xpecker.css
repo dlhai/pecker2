@@ -137,27 +137,6 @@ body {
     background-color: #f0f0f5 !important;
 }
 
-/*（已废，新版为x2Form）面板上的标签*/
-.xFormItem {
-    margin: 5px 10px;
-    display: inline-flex;
-    flex-direction: row;
-    align-items: flex-start;
-}
-.xFormItem label {
-    width: 60px;
-    text-align: right;
-    margin: 5px 5px;
-}
-.xFormItem div {
-    border-radius: 4px;
-    border: 1px solid #dddddd;
-    display: inline-block;
-    padding: 5px 10px;
-    margin: 0px 5px;
-    width: 200px;
-}
-
 /*面板、表单上的标签*/
 .x2Form{
 
@@ -244,65 +223,6 @@ body {
     text-decoration: none;
 }
 
-/*风电机面板*/
-.xEFanPanel {
-    border-radius: 4px;
-    background-color: #ffffff;
-    border: 1px solid #dddddd;
-    border-color: #e0e4e8;
-    margin: 5px;
-    width: 435px;
-    display: inline-block;
-}
-.xEFanPanel>header {
-    border-bottom: 1px solid #dddddd;
-    padding: 5px;
-}
-.xEFanPanel>header>strong {padding-left: 10px;}
-.xEFanPanel>table {width: 100%;}
-.xEFanPanel>table>thead>tr>th {
-    text-align: center;
-    background-color: #f0f0f0;
-}
-.xEFanPanel>table>tbody>tr:nth-child(2n)>td {
-    background-color: #f5f5f5;
-}
-.xEFanPanel>table>thead>tr>th, .d_table tbody > tr > td{
-    padding: 2px 4px;
-    vertical-align: top;
-}
-
-/*风机编辑表单，需要日期控件配合、dote模板配合*/
-.xEFanForm {margin: 0px 15px;}
-.xEFanForm>*{margin: 5px;}
-.xEFanForm>form>input, .xEFanForm>form>select {
-    border-radius: 4px;
-    border: 1px solid #95b7ff;
-    display: inline-block;
-    padding: 2px 10px;
-    width: 126px;
-    margin: 0px 20px 0px 5px;
-}
-.xEFanForm>table{width:568px;margin-top:10px;}
-.xEFanForm>table>thead {border-right: 1px solid #f0f0f0;}
-.xEFanForm>table>thead>tr>th{background:#f0f0f0;text-align:center;}
-.xEFanForm>table>tbody {
-    border-right: 1px solid #95b7ff;
-    border-bottom: 1px solid #95b7ff;
-}
-.xEFanForm>table>tbody>tr>td>input, .xEFanForm>table>tbody>tr>td>select {
-    border-left: 1px solid #95b7ff;
-    border-top: 1px solid #95b7ff;
-    border-right: 0px;
-    border-bottom: 0px;
-    padding: 2px 5px;
-    width: 100%;
-    height: 22px;
-    margin: 0px;
-    box-sizing：border-box;
-}
-
-
 /*组合框
 <div class="xCombox">
     <span>msg to show</span>
@@ -369,4 +289,63 @@ $("html").on("click", function () { $("xMenu").hide();});
     background-color: #357ebd;
     color: #ffffff;
     text-decoration: none;
+}
+
+
+/*风电机面板*/
+.xEFanPanel {
+    border-radius: 4px;
+    background-color: #ffffff;
+    border: 1px solid #dddddd;
+    border-color: #e0e4e8;
+    margin: 5px;
+    width: 435px;
+    display: inline-block;
+}
+.xEFanPanel>header {
+    border-bottom: 1px solid #dddddd;
+    padding: 5px;
+}
+.xEFanPanel>header>strong {padding-left: 10px;}
+.xEFanPanel>table {width: 100%;}
+.xEFanPanel>table>thead>tr>th {
+    text-align: center;
+    background-color: #f0f0f0;
+}
+.xEFanPanel>table>tbody>tr:nth-child(2n)>td {
+    background-color: #f5f5f5;
+}
+.xEFanPanel>table>thead>tr>th, .d_table tbody > tr > td{
+    padding: 2px 4px;
+    vertical-align: top;
+}
+
+/*风机编辑表单，需要日期控件配合、dote模板配合*/
+.xEFanForm {margin: 0px 15px;}
+.xEFanForm>*{margin: 5px;}
+.xEFanForm>form>input, .xEFanForm>form>select {
+    border-radius: 4px;
+    border: 1px solid #95b7ff;
+    display: inline-block;
+    padding: 2px 10px;
+    width: 126px;
+    margin: 0px 20px 0px 5px;
+}
+.xEFanForm>table{width:568px;margin-top:10px;}
+.xEFanForm>table>thead {border-right: 1px solid #f0f0f0;}
+.xEFanForm>table>thead>tr>th{background:#f0f0f0;text-align:center;}
+.xEFanForm>table>tbody {
+    border-right: 1px solid #95b7ff;
+    border-bottom: 1px solid #95b7ff;
+}
+.xEFanForm>table>tbody>tr>td>input, .xEFanForm>table>tbody>tr>td>select {
+    border-left: 1px solid #95b7ff;
+    border-top: 1px solid #95b7ff;
+    border-right: 0px;
+    border-bottom: 0px;
+    padding: 2px 5px;
+    width: 100%;
+    height: 22px;
+    margin: 0px;
+    box-sizing：border-box;
 }

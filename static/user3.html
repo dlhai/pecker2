@@ -484,8 +484,7 @@
         {
             var val = data[field.name];
             if (val == "") val = "　";
-            var skills = ["避雷", "工艺设计", "工艺生产", "材料", "安全"];
-            var cnt = skills.map(x => { return val.indexOf(x) == -1 ? ("<div>" + x + "</div>") : ('<div class="selected">' + x + "</div>") });
+            var cnt = db_skill.map(x => { return val.indexOf(x.name) == -1 ? ("<div>" + x.name + "</div>") : ('<div class="selected">' + x.name + "</div>") });
             return `<div class="xCombox"><span>` + val + `</span><div class="xMenu">` + cnt.join("") + `</div></div>`;
         }
 

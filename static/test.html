@@ -33,7 +33,6 @@
 </head>
 <body>
     <script type="text/javascript">
-
         var fields = [
             { "title": "标识", "name": "id", "forder": "-1", "ftype": "none" },
             { "title": "报修单号", "name": "code", "forder": "0", "ftype": "input" },
@@ -48,7 +47,7 @@
             { "title": "受理时间", "name": "guidetime", "ftype": "none" },
         ]
 
-        var tt = fields.filter(x => { if (x.name == "guidetime") return x; });
+        var tt = fields.fmap(x => { if (x.name == "guidetime") return x; });
         var aa = 0;
 
     </script>

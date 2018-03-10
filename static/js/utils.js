@@ -53,6 +53,11 @@ Date.prototype.format = function (fmt) { //author: meizz
     return fmt;
 }  
 
+// 对Array的扩展，相当于将Array的filter和map的功能合并
+Array.prototype.fmap = function (cb) {
+    return this.map(cb).filter(x => x != undefined);
+}  
+
 function isInArray(arr, value) {
     for (var i = 0; i < arr.length; i++) {
         if (value === arr[i]) {

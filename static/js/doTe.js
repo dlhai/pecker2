@@ -88,7 +88,6 @@
 	function unescape(code) {
 		return code.replace(/\\('|\\)/g, "$1").replace(/[\r\t\n]/g, " ");
 	}
-
 	doT.template = function(tmpl, c, def) {
 		c = c || doT.templateSettings;
 		var cse = c.append ? startend.append : startend.split, needhtmlencode, sid = 0, indv,
@@ -142,3 +141,7 @@
 		return doT.template(tmpl, null, def);
 	};
 }());
+
+ function dtpl(tmpl, c, def) {
+    return doT.template(tmpl, c, def);
+}

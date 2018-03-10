@@ -217,61 +217,6 @@ EfanForm.prototype.Render = function (efan) {
     return this.tpl(efan);
 }
 
-// 树控件
-// ID 根节点类型, 叶节点类型, 点击回调函数
-function x3Tree(id, ls, param, leaf, useritemclick ) {
-    this.leaf = leaf;
-    this.useritemclick = useritemclick;
-    this.Req(id, ls, param);
-    this.root = true;
-
-    this.branch = {
-        "devwh": { "sub": "", "image": "img/devwh.png", },
-
-        "matprov": { "sub": "matwh", "image": "img/folder.gif", },
-        "matwh": { "sub": "", "image": "img/devwh.png", },
-
-        "root": { "sub": "winderco", "image": "", },
-        "winderco": {"sub": "winderprov", "image": "img/diy/1_open.png" },
-        "winderprov": { "sub": "winder", "image": "img/folder.gif" },
-        "winder": { "sub": "winderarea", "image": "img/diy/3.png" },
-        "winderarea": { "sub": "efan", "image": "img/page.gif" },
-        "efan": { "sub": "leaf", "image": "" },
-        "leaf": { "sub": "", "image": "" },
-    }
-}
-x3Tree.prototype.Req = function (id, ls, param) {
-    Reqdata("/rd?ls=" + ls + (param ? "&" + param:""), this, function (res, ctx) {
-        var html = "";
-        var data = res.data;
-        for (var i in res.data) {
-            if (ls == ctx.leaf) { // 叶节点，少了左边的加号，为缩进对齐加了一层div
-                if (ctx.root){ // 根节点是叶节点时，不要加外层div
-                    html += "<div id=\"" + ls + "_" + data[i].id + "\"><span><img src=\""
-                        + ctx.branch[ls].image + "\">" + data[i].name + "</span></div>\n"
-                }
-                else {
-                    html += "<div><div id=\"" + ls + "_" + data[i].id + "\"><span><img src=\""
-                        + ctx.branch[ls].image + "\">" + data[i].name + "</span></div></div>\n"
-                }
-            }
-            else { // 
-                html += "<div id=\"" + ls + "_" + data[i].id + "\">"
-                    + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
-                    + ctx.branch[ls].image + "\">" + data[i].name + "</span></div>\n"
-            }
-        }
-        ctx.root = false;
-
-        $("#" + id).append(html);
-        $("#" + id).children("img").attr("src", "img/nolines_minus.gif"); // 把加号改成减号
-        $(".xTree div>img").off("click", "", treeItemExpand);
-        $(".xTree div>span").off("click", "", treeItemClick);
-        $(".xTree div>img").on("click", "", { ctx: ctx }, treeItemExpand);
-        $(".xTree div>span").on("click", "", { ctx: ctx }, treeItemClick);
-    });
-}
-
 // 树控件，与第3版的区别:
 // 1.事件使用了委托，不再要绑定
 // 2.使用expr，不用ID，更加灵活
@@ -312,30 +257,47 @@ x4Tree.prototype.Req = function (expr, ls, param) {
     Reqdata("/rd?ls=" + ls + (param ? "&" + param : ""), this, function (res, ctx) {
         var html = "";
         var data = res.data;
-        for (var i in res.data) {
+        res.data.forEach(x => {
             if (ls == ctx.leaf) { // 叶节点，少了左边的加号，为缩进对齐加了一层div
                 if (ctx.root) { // 根节点是叶节点时，不要加外层div
-                    html += "<div id=\"" + ls + "_" + data[i].id + "\"><span><img src=\""
-                        + g_treebranch[ls].image + "\">" + data[i].name + "</span></div>\n"
+                    html += "<div id=\"" + ls + "_" + x.id + "\"><span><img src=\""
+                        + g_treebranch[ls].image + "\">" + x.name + "</span></div>\n"
                 }
                 else {
-                    html += "<div><div id=\"" + ls + "_" + data[i].id + "\"><span><img src=\""
-                        + g_treebranch[ls].image + "\">" + data[i].name + "</span></div></div>\n"
+                    html += "<div><div id=\"" + ls + "_" + x.id + "\"><span><img src=\""
+                        + g_treebranch[ls].image + "\">" + x.name + "</span></div></div>\n"
                 }
             }
             else { // 
-                html += "<div id=\"" + ls + "_" + data[i].id + "\">"
+                html += "<div id=\"" + ls + "_" + x.id + "\">"
                     + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
-                    + g_treebranch[ls].image + "\">" + data[i].name + "</span></div>\n"
+                    + g_treebranch[ls].image + "\">" + x.name + "</span></div>\n"
             }
-        }
+        });
         ctx.root = false;
 
         $(expr).append(html);
         $(expr).children("img").attr("src", "img/nolines_minus.gif"); // 把加号改成减号
     });
 }
+x4Tree.prototype.Extend = function (expr) {
+    var node = $(expr);
+    var children = node.children("div");
+    if (children.length == 0) { // 无子项,去请求
+        var at = expr.slice(1).split("_");
+        this.Req(expr, g_treebranch[at[0]].sub, at[0] + "_id=" + at[1]);
+    }
+    else if (children.css("display") == "none") { // 有子项,展开
+        $(event.srcElement).attr("src", "img/nolines_minus.gif");
+        children.css("display", "block");
+    }
+    else { // 有子项,合并
+        $(event.srcElement).attr("src", "img/nolines_plus.gif");
+        children.css("display", "none");
+    }
+}
 
+// 树控件的事件处理
 $("html").on("click", function () {
     if (event.target.tagName != "IMG" && event.target.tagName != "SPAN")
         return;
@@ -343,81 +305,21 @@ $("html").on("click", function () {
     if (node.parents(".x4Tree").length == 0)
         return;
     var treeid = node.parents(".x4Tree").attr("id");
+    if ( g[treeid] == undefined)
+        return;
     if (event.target.tagName == "IMG" && node.parent()[0].tagName == "DIV") { // 点在加号上
-        var siblings = node.siblings("div");
-        if (siblings.length == 0) { // 无子项,去请求
-            var id = node.parent().attr("id");
-            var at = id.split("_");
-            if (id != "" && g[treeid] != undefined)
-                g[treeid].Req("#" + id, g_treebranch[at[0]].sub, at[0] + "_id=" + at[1])
-        }
-        else if (siblings.css("display") == "none") { // 有子项,展开
-            $(event.srcElement).attr("src", "img/nolines_minus.gif");
-            siblings.css("display", "block");
-        }
-        else { // 有子项,合并
-            $(event.srcElement).attr("src", "img/nolines_plus.gif");
-            siblings.css("display", "none");
-        }
+        var id = node.parent().attr("id");
+        g[treeid].Extend("#" + id);
     }
     else { //  点在标签上
+        if (event.target.tagName == "IMG")
+            var id = node.parent().parent().attr("id");
+        else
+            var id = node.parent().attr("id");
         if (g[treeid].onTreeItemClick != undefined){
-            var at = node.parent().attr("id").split("_");
-            g[treeid].onTreeItemClick(at[0], at[1], node);
+            var at = id.split("_");
+            g[treeid].onTreeItemClick(at[0], at[1], node); // 回调
         }
     }
 });
 
-
-//按钮下拉窗口，css:  .xCombox .xPopWnd
-$("html").on("click", function () {
-    var node = $(event.target);
-    if (node.hasClass("xCombox")) { // 先看是否自己
-        var pop = node.children(".xPopWnd");
-        pop.toggle();
-        $(".xPopWnd").each((i, n) => { if (pop[0] != n) $(n).hide(); });// 关闭其它菜单
-    }
-    else if (node.parents(".xCombox").length > 0) {
-        if (node.hasClass(".xPopWnd")) { //点在菜单背景上  
-        }
-        else if (node.parents(".xPopWnd").length > 0) { //点在菜单子项上
-
-        }
-        else { //点在xCombox的其他子项上
-            var cbx = node.parents(".xCombox");
-            var pop = cbx.children(".xPopWnd");
-            pop.toggle();
-            $(".xPopWnd").each((i, n) => { if (pop[0] != n) $(n).hide(); }); // 关闭其它菜单
-        }
-    }
-    else {
-        $(".xPopWnd").each((i, n) => { $(n).hide(); }); // 关闭所有菜单
-    }
-});
-
-//按钮下拉菜单，css  .xCombox .xMenu
-$("html").on("click", function () {
-    var node = $(event.target);
-    if (node.hasClass("xCombox")) { // 先看是否自己
-        var pop = node.children(".xMenu");
-        pop.toggle();
-        $(".xMenu").each((i, n) => { if (pop[0] != n) $(n).hide(); });// 关闭其它菜单
-    }
-    else if (node.parents(".xCombox").length > 0) {
-        if (node.hasClass(".xMenu")) { //点在菜单背景上  
-        }
-        else if (node.parents(".xMenu").length > 0) { //点在菜单子项上
-            node.parents(".xCombox").children("span").html(node.html());
-            node.parents(".xMenu").hide();
-        }
-        else { //点在xCombox的其他子项上
-            var cbx = node.parents(".xCombox");
-            var pop = cbx.children(".xMenu");
-            pop.toggle();
-            $(".xMenu").each((i, n) => { if (pop[0] != n) $(n).hide(); });// 关闭其它菜单
-        }
-    }
-    else {
-        $(".xMenu").each((i, n) => { $(n).hide(); }); // 关闭所有菜单
-    }
-});
