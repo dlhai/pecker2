@@ -1,15 +1,9 @@
 #encoding:utf8
 from sqlalchemy import *
-from flask import Flask,request, Response, jsonify,redirect, url_for, flash, render_template  
+from flask import Flask,request, Response, jsonify
 from werkzeug.utils import secure_filename
 import pdb
-  
-app = Flask(__name__)  
-app.secret_key = "The quick brown fox jumps over the lazy dog"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./db/pecker.db'  
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True  
-app.debug = True  
-  
+
 class obj:
     pass
 
@@ -22,6 +16,8 @@ def tojson(o):
         return tojson(o.__dict__)
     else:
         return '"'+str(o)+'"'
+
+app = Flask(__name__) 
 
 engine = create_engine('sqlite:///./db/pecker.db')
 #engine.echo = True
@@ -95,6 +91,7 @@ base=tables["base"]
 base.sl = [base.c.title, base.c.name, base.c.forder, base.c.ftype, base.c.twidth, base.c.tstyle]
 organ = { "root": "winderco", "winderco": "winderprov", "winderprov": "winder", "winder":"winderarea","winderarea":"efan" }
 
+
 def QueryObj( sql ):
     result = conn.execute(sql).fetchall()
     ret = []
@@ -144,7 +141,6 @@ def index():
 #        return '{"login":"'+param['account']+'","result":200}\n'
 #    else:
 #        return '{"login":"'+param['account']+'","result":404}\n'
-
 
 #frame用来读取当前用户信息，需要所在单位名称、下级单位列表
 @app.route("/roleuser") 
@@ -359,54 +355,54 @@ def rdteam():
     sql='''select * from user where id in ( select b_id from link where type ='team' and a_id = {0})'''
     return query4("rdteam",fields=select(base.sl).where(base.c.table=="user"),data = sql.format(user.id))
 
-#####################################################################################################
-#from flask_login import (LoginManager, login_required, login_user,
-#                             logout_user, UserMixin)
+#############################################################
+from flask_login import (LoginManager, login_required, login_user,
+                             logout_user, UserMixin)
+# user models
+class User(UserMixin):
+    def is_authenticated(self):
+        return True
+ 
+    def is_actice(self):
+        return True
+ 
+    def is_anonymous(self):
+        return False
+ 
+    def get_id(self):
+        return "1"
+ 
+# flask-login
+app.secret_key = 's3cr3t'
+login_manager = LoginManager()
+login_manager.session_protection = 'strong'
+login_manager.login_view = 'login'
+login_manager.init_app(app)
+ 
+@login_manager.user_loader
+def load_user(user_id):
+    user = User()
+    return user
+ 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    user = User()
+    login_user(user)
+    return "login page"
+ 
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    logout_user()
+    return "logout page"
+ 
+# test method
+@app.route('/test')
+@login_required
+def test():
+    return "you allowed！"
 
-#class User(UserMixin):
-#    def is_authenticated(self):
-#        return True
- 
-#    def is_actice(self):
-#        return True
- 
-#    def is_anonymous(self):
-#        return False
- 
-#    def get_id(self):
-#        return "1"
- 
-## flask-login
-#app.secret_key = 's3cr3t'
-#login_manager = LoginManager()
-#login_manager.session_protection = 'strong'
-#login_manager.login_view = 'login'
-#login_manager.init_app(app)
- 
-#@login_manager.user_loader
-#def load_user(user_id):
-#    user = User()
-#    return user
- 
-#@app.route('/login', methods=['GET', 'POST'])
-#def login():
-#    user = User()
-#    login_user(user)
-#    return "login page"
- 
-#@app.route('/logout', methods=['GET', 'POST'])
-#@login_required
-#def logout():
-#    logout_user()
-#    return "logout page"
- 
-## test method
-#@app.route('/test')
-#@login_required
-#def test():
-#    return "yes , you are allowed"
-
-#######################################################################################################################  
+#############################################################
 
 if __name__ == "__main__":
     app.config['JSON_AS_ASCII'] = False
