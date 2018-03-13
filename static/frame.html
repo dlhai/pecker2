@@ -140,12 +140,12 @@
         var tpl_module = doT.template(document.getElementById('tpl_module').innerHTML);
         var g_user, g_role; // 当前用户、当前角色
 
-        // {{发布版要删掉它！
+        // {{发布版要删掉这部分代码！
         document.getElementById("roleselect").innerHTML = RenderSelect(db_job);
         function OnRoleChange() {
             var role = GetSub(db_job, "id", $("#roleselect").val());
             ChangCurUser(GetRoleUser(role.name).account);
-        }//}}
+        }
 
         ChangCurUser(GetParam("account"));
 
@@ -164,6 +164,7 @@
                 UpdateSubmode(0);
             });
         }
+        //}}
 
         function ClickModule(This, url) {
             $(This).parent().parent().children().removeClass("active");

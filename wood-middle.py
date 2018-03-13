@@ -357,38 +357,35 @@ def rdteam():
 
 #############################################################
 from flask_login import (LoginManager, login_required, login_user,
-                             logout_user, UserMixin)
+                             logout_user, UserMixin,current_user)
 # user models
 class User(UserMixin):
-    def is_authenticated(self):
-        return True
- 
-    def is_actice(self):
-        return True
- 
-    def is_anonymous(self):
-        return False
- 
+    def __init__(self,user ):
+        self.__dict__ = user.__dict__
     def get_id(self):
-        return "1"
+        return self.id
  
 # flask-login
-app.secret_key = 's3cr3t'
+app.secret_key = '1The2quick3brown4fox5jumps6over7the8lazy9dog0'
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
-login_manager.login_view = 'login'
+login_manager.login_view = '/static/index.html'
 login_manager.init_app(app)
  
 @login_manager.user_loader
 def load_user(user_id):
-    user = User()
-    return user
+    user = QueryObj( "select * from user where id='%d'"%user_id)
+    return User(user[0])
  
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login')
 def login():
-    user = User()
-    login_user(user)
-    return "login page"
+    param = request.args.to_dict()
+    user = QueryObj( "select * from user where account='%s'"%param["account"])
+    if len(user)>0 and hasattr( user[0], "account" ) and user[0].pwd == param["pwd"]:
+        login_user(User(user[0]))
+        return '{"login":"'+param['account']+'","result":200}\n'
+    else:
+        return '{"login":"'+param['account']+'","result":404}\n'
  
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
@@ -400,7 +397,7 @@ def logout():
 @app.route('/test')
 @login_required
 def test():
-    return "you allowed！"
+    return current_user.name+" you allowed！"
 
 #############################################################
 

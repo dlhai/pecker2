@@ -101,12 +101,12 @@
         var fault = faultlist.data[g_cursel];
         $("#fault").html(crd_render_fault(fault, faultlist.fieldsshow));
         //Reqdata("/rd?ls=addit&type=faultspot&ref_id=" + fault.id, "", function (res) { renderimagelist() }
-        Reqdata("/rd?ls=link&type=f_experts&ref_id=" + fault.id, "", function (res) { renderimagelist() });
-        Reqdata("/rd?ls=addit&type=eval1rep&ref_id=" + fault.id, "", function (res) { renderimagelist() });
-        Reqdata("/rd?ls=addit&type=eval2rep&ref_id=" + fault.id, "", function (res) { renderimagelist() });
-        Reqdata("/rd?ls=addit&type=repairprog&ref_id=" + fault.id, "", function (res) { renderimagelist() });
-        //Reqdata("/rd?ls=link&type=conform&ref_id=" + fault.id, "", function (res) { renderimagelist() });
-        Reqdata("/rd?ls=link&type=repairteam&ref_id=" + fault.id, "", function (res) { renderimagelist() });
+        Reqdata("/rd?ls=link&type=f_experts&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });
+        Reqdata("/rd?ls=addit&type=eval1rep&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });
+        Reqdata("/rd?ls=addit&type=eval2rep&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });
+        Reqdata("/rd?ls=addit&type=repairprog&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });
+        //Reqdata("/rd?ls=link&type=conform&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });
+        Reqdata("/rd?ls=link&type=repairteam&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });
         
 
 
