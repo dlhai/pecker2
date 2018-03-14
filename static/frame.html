@@ -150,7 +150,7 @@
         ChangCurUser(GetParam("account"));
 
         function ChangCurUser(account) {
-            Reqdata("/roleuser?account=" + account, "", function (res) {
+            Reqdata("/curuser", "", function (res) {
                 g_user = res.data;
                 g_role = GetSub(db_roles, "id", g_user.job);
                 $('#usr_name').html(g_user.name);
