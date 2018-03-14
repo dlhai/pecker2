@@ -2,8 +2,27 @@
 from sqlalchemy import *
 from flask import Flask,request, Response, jsonify
 from werkzeug.utils import secure_filename
+from flask_login import (LoginManager, login_required, login_user,
+                             logout_user, UserMixin,current_user)
 import pdb
 
+app = Flask(__name__)
+app.secret_key = '1The2quick3brown4fox5jumps6over7the8lazy9dog0'
+login_manager = LoginManager()
+login_manager.session_protection = 'strong'
+login_manager.login_view = '/static/index.html'
+login_manager.init_app(app)
+engine = create_engine('sqlite:///./db/pecker.db')
+#engine.echo = True
+metadata = MetaData(engine)
+conn = engine.connect()
+
+# user models
+class User(UserMixin):
+    def __init__(self,user ):
+        self.__dict__ = user.__dict__
+    def get_id(self):
+        return self.id
 class obj:
     pass
 
@@ -16,13 +35,6 @@ def tojson(o):
         return tojson(o.__dict__)
     else:
         return '"'+str(o)+'"'
-
-app = Flask(__name__) 
-
-engine = create_engine('sqlite:///./db/pecker.db')
-#engine.echo = True
-metadata = MetaData(engine)
-conn = engine.connect()
 
 db_tbl = [
     { "id": "0", "name": "none", "title": "占位" },
@@ -91,7 +103,6 @@ base=tables["base"]
 base.sl = [base.c.title, base.c.name, base.c.forder, base.c.ftype, base.c.twidth, base.c.tstyle]
 organ = { "root": "winderco", "winderco": "winderprov", "winderprov": "winder", "winder":"winderarea","winderarea":"efan" }
 
-
 def QueryObj( sql ):
     result = conn.execute(sql).fetchall()
     ret = []
@@ -128,6 +139,52 @@ def query4(ls,**kw):
     r += "\n}\n"
     return Response(r, mimetype='application/json')
 
+def loaduser(where):
+    ret = QueryObj( "select id,account,name,face,depart_id,depart_table,job from user where "+where)
+    if len(ret) <= 0:
+        return
+    #找到用户的所在单位，若所在单位是风场，则需要读取风区列表
+    user = ret[0]
+    if user.depart_table != 0: 
+        tbl = gettbl(user.depart_table)
+        user.depart = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0]
+        if tbl["name"] == "winder":
+            user.sub = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
+    return user
+
+#############################################################
+ 
+@login_manager.user_loader
+def load_user(user_id):
+    user = loaduser("id='%d'"%user_id)
+    return User(user[0])
+ 
+@app.route('/login')
+def login():
+    param = request.args.to_dict()
+    user = loaduser("id='%d'"%user_id)
+    user = QueryObj( "select * from user where account='%s'"%param["account"])
+    if len(user)>0 and hasattr( user[0], "account" ) and user[0].pwd == param["pwd"]:
+        login_user(User(user[0]))
+        return '{"login":"'+param['account']+'","result":200}\n'
+    else:
+        return '{"login":"'+param['account']+'","result":404}\n'
+ 
+@app.route('/logout', methods=['GET', 'POST'])
+
+@login_required
+def logout():
+    logout_user()
+    return "logout page"
+ 
+# test method
+@app.route('/test')
+@login_required
+def test():
+    return current_user.name+" you allowed！"
+
+#############################################################
+
 #登录表单
 @app.route("/")
 def index():
@@ -143,11 +200,10 @@ def index():
 #        return '{"login":"'+param['account']+'","result":404}\n'
 
 #frame用来读取当前用户信息，需要所在单位名称、下级单位列表
-@app.route("/roleuser") 
-def roleuser():
-    param = request.args.to_dict()
-    
-    ret = QueryObj( "select id,account,name,face,depart_id,depart_table,job from user where account='%s'"%(param["account"]))
+@app.route("/curuser")
+@login_required
+def curuser():
+    ret = QueryObj( "select id,account,name,face,depart_id,depart_table,job from user where id="+str(current_user.id))
     if len(ret) <= 0:
         return '{"roleuser":"'+param['account']+'","result":404}\n'
     user = ret[0]
@@ -158,12 +214,8 @@ def roleuser():
         user.depart = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0]
         if tbl["name"] == "winder":
             user.sub = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
-    else:
-        user.depart_name = ""
-
     ret=obj()
-    ret.fun="roleuser"
-    ret.param=param
+    ret.fun="curuser"
     ret.result = "200"
     ret.data = user
     return Response(tojson(ret), mimetype='application/json')
@@ -354,52 +406,6 @@ def rdteam():
     #查询入库记录的、查询出库记录的
     sql='''select * from user where id in ( select b_id from link where type ='team' and a_id = {0})'''
     return query4("rdteam",fields=select(base.sl).where(base.c.table=="user"),data = sql.format(user.id))
-
-#############################################################
-from flask_login import (LoginManager, login_required, login_user,
-                             logout_user, UserMixin,current_user)
-# user models
-class User(UserMixin):
-    def __init__(self,user ):
-        self.__dict__ = user.__dict__
-    def get_id(self):
-        return self.id
- 
-# flask-login
-app.secret_key = '1The2quick3brown4fox5jumps6over7the8lazy9dog0'
-login_manager = LoginManager()
-login_manager.session_protection = 'strong'
-login_manager.login_view = '/static/index.html'
-login_manager.init_app(app)
- 
-@login_manager.user_loader
-def load_user(user_id):
-    user = QueryObj( "select * from user where id='%d'"%user_id)
-    return User(user[0])
- 
-@app.route('/login')
-def login():
-    param = request.args.to_dict()
-    user = QueryObj( "select * from user where account='%s'"%param["account"])
-    if len(user)>0 and hasattr( user[0], "account" ) and user[0].pwd == param["pwd"]:
-        login_user(User(user[0]))
-        return '{"login":"'+param['account']+'","result":200}\n'
-    else:
-        return '{"login":"'+param['account']+'","result":404}\n'
- 
-@app.route('/logout', methods=['GET', 'POST'])
-@login_required
-def logout():
-    logout_user()
-    return "logout page"
- 
-# test method
-@app.route('/test')
-@login_required
-def test():
-    return current_user.name+" you allowed！"
-
-#############################################################
 
 if __name__ == "__main__":
     app.config['JSON_AS_ASCII'] = False
