@@ -8,7 +8,13 @@
     <script type="text/javascript" src="js/doTe.js"></script>
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
+
     <script src="laydate/laydate.js"></script>
+    <style>/*为了解决BootStrap中css和layDate的css样式冲突*/
+        .laydate_box, .laydate_box * {box-sizing: content-box;}
+        .laydate_box th {text-align: center;}
+    </style>
+
     <script src="js/utils.js"></script>
     <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
@@ -62,9 +68,9 @@
             });
             var html = "";
             var pane = new EFanPane(true);
-            for (var i in g_efans.data) {
-                html += pane.Render(g_efans.data[i]);
-            }
+            g_efans.data.forEach(leaf => {
+                html += pane.Render(leaf);
+            });
 
             $("#item_list").html(html);
         }
@@ -84,11 +90,11 @@
                 var dlg = new cbDlg();
                 dlg.title = "报修";
                 dlg.css = "width:610px";
-
-                res.fields.push({ "title": "报修设备", "name": "devices", "forder": "2", "ftype": "div_long" } );
+                if (!res.fields.some(x => x.name =="devices"))
+                    res.fields.push({ "title": "报修设备", "name": "devices", "forder": "2", "ftype": "div_long" } );
                 xfieldsort(res.fields);
                 var data = Create(res.fields);
-                data.devices = "qweqwe,asdasd,zxzxc,ewrwer,werwer,sdfsdf,erwert";
+                data.devices = "02548973,7018263954,6578329041,049385176,6730259481,742630958";
                 data.winder_id = g_user.depart_id;
                 data.report_id = g_user.id;
                 dlg.Add(RenderForm4(data, res.fields));
@@ -105,7 +111,7 @@
             var form = new EfanForm();
             var dlg = new cbDlg();
             dlg.title = "新建 风电机";
-            dlg.css="width:610px";
+            dlg.css="width:620px";
             dlg.Add(form.Render(efan));
             dlg.Show();
             var nodes = $("select");
@@ -119,7 +125,7 @@
             var tpl_efan_list = doT.template(document.getElementById('tpl_efan_import').innerHTML);
             var dlg = new cbDlg();
             dlg.title = "导入 风电机";
-            dlg.css = "width:610px";
+            dlg.css = "width:620px";
             dlg.Add(tpl_efan_list());
             dlg.Show();
         }
@@ -129,7 +135,7 @@
             var form = new EfanForm();
             var dlg = new cbDlg();
             dlg.title = "编辑 风电机";
-            dlg.css = "width:610px";
+            dlg.css = "width:620px";
             dlg.Add(form.Render(efan));
             dlg.Show();
         }

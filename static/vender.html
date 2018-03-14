@@ -42,24 +42,24 @@
 
         function EfanVEdit(This) {
             var efanv = GetSub(g_efanVs.data, "id", g_TableCurRow[g_efanVs.ls]);
-            var title = "编辑 " + branch["efan" + g_efanVs.ls].name;
+            var title = "编辑 " + branch[g_efanVs.ls].name;
             var cnt = RenderForm4(efanv, g_efanVs.fields);
             (new cbDlg(title, "width:610px", cnt)).Show();
         }
         function LeafVEdit(This) {
             var leafv = GetSub(g_leafVs.data, "id", g_TableCurRow[g_leafVs.ls]);
-            var title = "编辑 " + branch["leaf" + g_leafVs.ls].name;
+            var title = "编辑 " + branch[g_leafVs.ls].name;
             var cnt = RenderForm4(leafv, g_leafVs.fields);
             (new cbDlg(title, "width:610px", cnt)).Show();
         }
 
         function EfanVNew(This) {
-            var title = "新建 " + branch["efan" + g_efanVs.ls].name;
+            var title = "新建 " + branch[g_efanVs.ls].name;
             var cnt = RenderForm4(Create(g_efanVs.fields), g_efanVs.fields);
             (new cbDlg(title, "width:610px", cnt)).Show();
         }
         function LeafVNew(This) {
-            var title = "新建 " + branch["leaf" + g_leafVs.ls].name;
+            var title = "新建 " + branch[g_leafVs.ls].name;
             var cnt = RenderForm4(Create(g_leafVs.fields), g_leafVs.fields);
             (new cbDlg(title, "width:610px", cnt)).Show();
         }

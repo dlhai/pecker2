@@ -142,10 +142,9 @@ function RenderFormItem(type, attr, val )
 //2.控件加标签
 function RenderFormIn(entity, fields, cb) {
     var r = "";
-    for (var i in fields) {
-        var field = fields[i];
+    fields.forEach(field => {
         if (field.ftype == "none")
-            continue;
+            return;
 
         var val = entity[field.name];
         var attr = "";
@@ -170,7 +169,7 @@ function RenderFormIn(entity, fields, cb) {
         else if (field.ftype == "date")
             r += '<input ' + attr + ' name="' + field.name + '" value="' + val + '" onClick="laydate()" />';
         r += "</div>";
-    }
+    });
     return r;
 }
 //3.控件加标签加表单
@@ -186,39 +185,38 @@ function RenderForm4(entity, fields, cb) {
 function RenderTable2(res, style, fun) {
     var r = "<table id=\"" + res.ls + "\" class=\"xTable\"><thead><tr>";
     if (style)
-        r = "<table id=\"" + res.ls+ "\" class=\"" + style + "\"><thead><tr>";
-    for (var c in res.fields) {
-        if (!res.fields[c].hasOwnProperty("twidth"))
-            res.fields[c].twidth = -1;
-        if (typeof res.fields[c].twidth == "string") {
-            if (res.fields[c].twidth.length > 0 )
-                res.fields[c].twidth = parseInt(res.fields[c].twidth);
+        r = "<table id=\"" + res.ls + "\" class=\"" + style + "\"><thead><tr>";
+    res.fields.forEach(field => {
+        if (!field.hasOwnProperty("twidth"))
+            field.twidth = -1;
+        if (typeof field.twidth == "string") {
+            if (field.twidth.length > 0)
+                field.twidth = parseInt(field.twidth);
             else
-                res.fields[c].twidth = -1;
+                field.twidth = -1;
         }
-            
-        if (res.fields[c].twidth == -1)
-            r += "<th>" + res.fields[c].title + "</th>";
-        else if (res.fields[c].twidth > 0)
-            r += "<th width=\"" + res.fields[c].twidth + "\">" + res.fields[c].title + "</th>";
-    }
+
+        if (field.twidth == -1)
+            r += "<th>" + field.title + "</th>";
+        else if (field.twidth > 0)
+            r += "<th width=\"" + field.twidth + "\">" + field.title + "</th>";
+    });
     r += "</tr></thead>\n";
 
     r += "<tbody>";
-    for (var x in res.data) {
-        r += "<tr data_id=\"" + res.data[x].id + "\">";
-        for (c in res.fields) {
-            var field = res.fields[c];
-            var val = res.data[x][field.name];
-            if (res.fields[c].twidth != 0) {
+    res.data.forEach(x => {
+        r += "<tr data_id=\"" + x.id + "\">";
+        res.fields.forEach(field => {
+            var val = x[field.name];
+            if (field.twidth != 0) {
                 if (field.tstyle)
-                    r += "<td style=\"" + field.tstyle + "\">" + (fun ? fun(res.data[x], field) : val) + "</td>";
+                    r += "<td style=\"" + field.tstyle + "\">" + (fun ? fun(x, field) : val) + "</td>";
                 else
-                    r += "<td>" + (fun ? fun(res.data[x], field) : val) + "</td>";
+                    r += "<td>" + (fun ? fun(x, field) : val) + "</td>";
             }
-        }
+        });
         r += "</tr>";
-    }
+    });
     r += "</tbody></table>";
     return r;
 }
