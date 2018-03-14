@@ -4,24 +4,24 @@
 	<title>登录表单</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <script src="static/js/jquery.js"></script>
-        <script src="static/js/bootstrap.js"></script>
-        <script src="static/js/db.js"></script>
-        <link rel="stylesheet" href="static/css/xpecker.css" />
-        <script src="static/js/xpecker.js"></script>
+        <script src="/static/js/jquery.js"></script>
+        <script src="/static/js/bootstrap.js"></script>
+        <script src="/static/js/db.js"></script>
+        <link rel="stylesheet" href="/static/css/xpecker.css" />
+        <script src="/static/js/xpecker.js"></script>
 
 		<script type="application/x-javascript"> 
             addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); 
             function hideURLbar(){ window.scrollTo(0,1); } 
         </script>
-        <link rel="stylesheet" href="static/login/style.css" type="text/css" media="all">
+        <link rel="stylesheet" href="/static/login/style.css" type="text/css" media="all">
     <script type="text/javascript">
         function Login() {
             var form = document.getElementById("plogin");
             var formdata = new FormData(form);
             Reqdata('/login?account=' + formdata.get("username") + "&pwd=" + formdata.get("password"), "", function (res) {
                 if (res.result == 200){
-                    window.location.href = 'static/frame.html?account='+formdata.get("username")
+                    window.location.href = '/static/frame.html?account='+formdata.get("username")
                 }
                 else {
                     alert("用户名或密码错");
