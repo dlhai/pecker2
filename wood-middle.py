@@ -200,9 +200,9 @@ def index():
 #        return '{"login":"'+param['account']+'","result":404}\n'
 
 #frame用来读取当前用户信息，需要所在单位名称、下级单位列表
-@app.route("/curuser")
+@app.route("/curuserinf")
 @login_required
-def curuser():
+def curuserinf():
     ret = QueryObj( "select id,account,name,face,depart_id,depart_table,job from user where id="+str(current_user.id))
     if len(ret) <= 0:
         return '{"roleuser":"'+param['account']+'","result":404}\n'
@@ -215,7 +215,7 @@ def curuser():
         if tbl["name"] == "winder":
             user.sub = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
     ret=obj()
-    ret.fun="curuser"
+    ret.fun="curuserinf"
     ret.result = "200"
     ret.data = user
     return Response(tojson(ret), mimetype='application/json')

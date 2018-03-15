@@ -344,14 +344,14 @@
             }
             $("#d_table_item").html(RenderTable2(g_users, undefined, ValToView));
 
-            for (var i in g_users.fields) {
-                if (g_users.fields[i].name == "account" || g_users.fields[i].name == "pwd"
-                    || g_users.fields[i].name == "face" || g_users.fields[i].name == "idimg")
-                    continue;
-                if (g_users.fields[i].name == "skill" && g_user.job != "13") // 专家su
-                    continue;
-                g_fields.push(g_users.fields[i]);
-            }
+            g_users.fields.forEach(field => {
+                if (field.name == "account" || field.name == "pwd"
+                    || field.name == "face" || field.name == "idimg")
+                    return;
+                if (field.name == "skill" && g_user.job != "13") // 专家su
+                    return;
+                g_fields.push(field);
+            });
             TableBindClick3(g_users.ls, function (data_id) {
                 g_cur = GetSub(g_users.data, "id", data_id);
                 var pane = tpl_user_pane(g_cur);
@@ -434,11 +434,10 @@
             var tpl_user_form = doT.template(document.getElementById('tpl_user_form').innerHTML);
             var r = '<div class="x2Form">';
             r += tpl_user_form(user);
-            for (var i in fields) {
-                var field = fields[i];
+            fields.forEach(field => {
                 var val = user[field.name];
                 if (field.forder == -1 || field.ftype == "none")
-                    continue;
+                    return;
 
                 var attr = "";
                 if (field.name.indexOf("_") != -1)
@@ -455,7 +454,7 @@
                     }
                 }
                 else if (field.ftype == "multiselect")
-                    r += RenderMultiSelect( field, user);
+                    r += RenderMultiSelect(field, user);
                 else if (field.ftype == "input")
                     r += '<input ' + attr + ' name="' + field.name + '" value="' + val + '"/>';
                 else if (field.ftype == "date")
@@ -475,7 +474,7 @@
                     r += '<select ' + attr + ' name="' + field.name + '">' + render + '</select>';
                 }
                 r += "</div>";
-            }
+            });
             r += "</div>";
             return r;
         }
