@@ -325,7 +325,7 @@
 
         var g_cur, g_fields = new Array(), g_ethnic, g_departs, g_user = parent.g_user;
         if (g_user == undefined)
-            g_user = GetRoleUser("维修队长");
+            g_user = GetRoleUser("叶片超级帐号");
 
         if( isInArray(["1", "4", "7"], g_user.job ))
             Reqdata("/rd?ls=" + { "1": "winder", "4": "devwh", "7": "matwh" }[g_user.job], "", function (res) { g_departs = res; });
@@ -424,7 +424,9 @@
         function imgPreview(fileDom, idimg) {
             var file = fileDom.files[0];
             var reader = new FileReader();
-            reader.onload = function (e) {$("#"+idimg).attr("src", e.target.result);};
+            reader.onload = function (e) {
+                $("#" + idimg).attr("src", e.target.result);
+            };
             reader.readAsDataURL(file);
         }
 
@@ -512,15 +514,14 @@
 
         function RenderDepart() {
             if (g_user.job == "1") {// 风场su
-                return '<div class="xTree dropwnd" id="root" >'
+                return '<div class="xTree dropwnd" id="root" />'
             }
             else if (g_user.job == "2" || g_user.job == "3") {// 风场主管、驻场
                 return '<div class="xTree dropwnd" style="width:190px;padding:5px;font-size: 12px;"><div id="' + g_user.depart_table + "_" + g_user.depart_id + "\"><span><img src=\""
                     + branch[g_user.depart_table].image + "\">" + g_user.depart.name + "</span></div></div>"
             }
-
-            r += "</div>";
-            return r;
+            else
+                return "";
         }
 
         function TreeAddChildren(id) {  // id格式: 表名_{id}
