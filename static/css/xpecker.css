@@ -306,7 +306,7 @@ $("html").on("click", function () { $("xMenu").hide();});
     border-bottom: 1px solid #dddddd;
     padding: 5px;
 }
-.xEFanPanel>header>strong {padding-left: 8px;}
+.xEFanPanel>header>strong {padding-left: 6px;}
 .xEFanPanel>table {width: 100%;}
 .xEFanPanel>table>thead>tr>th {
     text-align: center;

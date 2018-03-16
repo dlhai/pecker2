@@ -83,16 +83,15 @@ function RenderPane2(entity, fields, fun) {
 // 直接为数组用这一版
 function RenderSelect(ar, selid, type) {
     var r = "";
-    for (var i in ar) {
-        var x = ar[i];
+    ar.forEach(x=>{
         if (typeof (type) != "undefined" && x.type != type)
-            continue;
+            return;
 
         if (x["id"] == selid || x["name"] == selid )
             r += '<option value="' + x["id"] + '" selected>' + x["name"] + '</option>';
         else
             r += '<option value="' + x["id"] + '">' + x["name"] + '</option>';
-    }
+    });
     return r;
 }
 
