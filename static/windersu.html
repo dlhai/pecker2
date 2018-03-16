@@ -55,35 +55,35 @@
     </div>
 
     <script id="tpl_efan_list" type="text/template">
-        {% for (var i in it.data) { %}
+        {% it.data.forEach(efan=>{ %}
         <div class="xEFanPanel">
             <header>
                 <img src="img/diy/3.png" />
-                <strong>编号:</strong><span>{%=it.data[i].code%}</span>
-                <strong>型号:</strong><span>{%=it.data[i].type%}</span>
-                <strong>生产厂家:</strong><span class="efanvender_id">{%=it.data[i].efanvender_id%}</span>
+                <strong>编号:</strong><span>{%=efan.code%}</span>
+                <strong>型号:</strong><span>{%=efan.type%}</span>
+                <strong>生产厂家:</strong><span class="efanvender_id">{%=efan.efanvender_id%}</span>
                 <div style="float: right;">
-                    <a id="{%=it.data[i].id%}" onClick="EditEfan(this)">编辑</a>
+                    <a id="{%=efan.id%}" onClick="EditEfan(this)">编辑</a>
                 </div>
             </header>
             <table>
                 <thead><tr><th>编号</th><th>主要材料</th><th>出厂时间</th><th>挂机时间</th><th>生产厂家</th></tr></thead>
                 <tbody>
-                    {% for (var j in additlist.data) { %}
-                    {% if (additlist.data[j].efan_id==it.data[i].id) { %}
+                    {% additlist.data.forEach(leaf=>{ %}
+                    {% if (leaf.efan_id==efan.id) { %}
                     <tr>
-                        <td>{%=additlist.data[j].code%}</td>
-                        <td>{%=additlist.data[j].mat%}</td>
-                        <td>{%=additlist.data[j].producedate%}</td>
-                        <td>{%=additlist.data[j].putondate%}</td>
-                        <td class="leafvender_id">{%=additlist.data[j].leafvender_id%}</td>
+                        <td>{%=leaf.code%}</td>
+                        <td>{%=leaf.mat%}</td>
+                        <td>{%=leaf.producedate%}</td>
+                        <td>{%=leaf.putondate%}</td>
+                        <td class="leafvender_id">{%=leaf.leafvender_id%}</td>
                     </tr>
                     {% } %}
-                    {% } %}
+                    {% }); %}
                 </tbody>
             </table>
         </div>
-        {% } %}
+        {% }); %}
     </script>
 
     <script id="tpl_efan_edit2" type="text/template">
@@ -124,81 +124,32 @@
         var sublist = null;// 表格当前显示的列表
         var additlist = null; // 表格元素中的子元素列表（叶片列表）
 
-        request2("root");
-
-        // 给出文档节点ID，展开下级列表 id格式：root或winderco_1
-        function request2(id) {
-            var at = id.split("_");
-            var type = branch.sub(at[0]).type;
-            Reqdata("/rd?ls=" + type + (at[1] ? "&"+at[0]+"_id=" + at[1] : ""), "", function (res) {
-                var html = "";
-                var data = res.data;
-                for (var i in data) {
-                    if (type != "winderarea") {
-                        html += "<div id=\"" + type + "_" + data[i].id + "\">"
-                            + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
-                            + branch[type].image + "\">" + data[i].name + "</span></div>\n"
-                    }
-                    else { // 少了左边的加号，为缩进对齐加了一层div
-                        html += "<div><div id=\"" + type + "_" + data[i].id + "\"><span><img src=\""
-                            + branch[type].image + "\">" + data[i].name + "</span></div></div>\n"
-                    }
-                }
-
-                $("#" + id).append(html);
-                $("#" + id).children("img").attr("src", "img/nolines_minus.gif");
-
-                $(".xTree div>img").unbind("click", itemexpand);
-                $(".xTree div>span").unbind("click", itemclick);
-                $(".xTree div>img").bind("click", itemexpand);
-                $(".xTree div>span").bind("click", itemclick);
-            });
-        }
-
-        function itemexpand() {
-            var siblings = $(this).siblings("div");
-            if (siblings.length == 0) {
-                var id = $(this).parent().attr("id");
-                request2(id);
-            }
-            else if (siblings.css("display") == "none") {
-                $(event.srcElement).attr("src", "img/nolines_minus.gif");
-                siblings.css("display", "block");
-            }
-            else {
-                $(event.srcElement).attr("src", "img/nolines_plus.gif");
-                siblings.css("display", "none");
-            }
-        }
-        //点击树节点
-        function itemclick() {
+        g.root = new x4Tree("#root", "winderco", "", "winderarea", function (type, id) { // 点击树节点
             $("#subitem_list").html("");
-            var at = $(this).parent().attr("id").split("_");
 
             // 显示节点详细，这步的查询有优化掉的可能
-            Reqdata("/rd?ls=" + at[0] + "&id=" + at[1], "", function (d) {
+            Reqdata("/rd?ls=" + type + "&id=" + id, "", function (d) {
                 cur = d;
                 $("#item_detail").html(RenderPane2(d.data[0], d.fields));
                 ID2Name(d, 0);
             });
 
             // 显示节点下级列表
-            var type = branch.sub(at[0]).type;
-            Reqdata("/rd?ls=" + type + "&" + at[0] + "_id=" + at[1], "", function (d2) {
+            var subtype = branch.sub(type).type;
+            Reqdata("/rd?ls=" + subtype + "&" + type + "_id=" + id, "", function (d2) {
                 sublist = d2;
-                if (at[0] != "winderarea") // 普通列表
+                if (type != "winderarea") // 普通列表
                     $("#subitem_list").html(RenderTable2(d2, 0));   
                 else {                     // 风机列表
-                    Reqdata("/rd?ls=leaf&" + at[0] + "_id=" + at[1], "", function (d3) {
+                    Reqdata("/rd?ls=leaf&" + type + "_id=" + id, "", function (d3) {
                         additlist = d3;
                         var tpl_efan_list = doT.template(document.getElementById('tpl_efan_list').innerHTML);
                         $("#subitem_list").html(tpl_efan_list(d2));
 
                         Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (d4) {
                             var nodes = $(".efanvender_id");
-                            for (var i = 0; i < nodes.length; i++)
-                                nodes[i].innerHTML = GetSub(d4.data, "id", nodes[i].innerHTML).name;
-                            nodes.removeClass("efanvender_id");
+							nodes.each((i,n)=>{n.innerHTML = GetSub(d4.data, "id", n.innerHTML).name;});
+							nodes.removeClass("efanvender_id");
                         });
                         Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (d5) {
                             var nodes = $(".leafvender_id");
@@ -209,7 +160,7 @@
                     });
                 }
             });
-        }
+        });
 
         function ImportData() {
             var tpl_efan_list = doT.template(document.getElementById('tpl_efan_import').innerHTML);
