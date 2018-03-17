@@ -8,7 +8,14 @@
     <link rel="stylesheet" href="css/bootstrap.css"/>
     <script src="js/bootstrap.js"></script>
     <script type="text/javascript" src="js/doTe.js"></script>
-    <script src="js/utils.js"></script>
+
+	<script src="laydate/laydate.js"></script>
+    <style>/*为了解决BootStrap中css和layDate的css样式冲突*/
+        .laydate_box, .laydate_box * {box-sizing: content-box;}
+        .laydate_box th {text-align: center;}
+    </style>
+
+	<script src="js/utils.js"></script>
     <script src="js/Cube.js"></script>
     <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
@@ -66,7 +73,7 @@
             <div class="pane_image" style="width: 100%; height: 80px; margin: 0px; padding:0px; display:block;border:0px;">
                 <div style="float: left; margin:0px;"><img style="width: 78px; height: 78px;" src="{%=it.face%}" /></div>
                 <div style="margin-top:0px;"><label>编号</label><div style="display:inline-block;">{%=it.code%}</div></div>
-                <div><label>分类</label><div>{%=it.clss%}</div></div>
+                <div><label>分类</label><div>{%=ShowField(it,"clss")%}</div></div>
             </div>
             <img style="width: 280px; height: 160px;" src="{%=it.img%}" />
         </div>
@@ -100,8 +107,8 @@
         Reqdata("/rduser?depart_table=" + GetSub(db_tbl, "name", "devwh").id + "&depart_id=" + g_user.depart.id, "", function (res2) { g_driver = res2; });
         Reqdata("/rd?ls=dev&devwh_id="+g_user.depart.id, "", function (res3) {
             g_devs = res3;
-            GetSub(g_devs.fields, "name", "code").forder = -1;
-            GetSub(g_devs.fields, "name", "clss").forder = -1;
+            GetSub(g_devs.fields, "name", "code").ftype = "none";
+            GetSub(g_devs.fields, "name", "clss").ftype = "none";
             GetSub(g_devs.fields, "name", "devwh_id").twidth = 0;
             GetSub(g_devs.fields, "name", "producedate").twidth = 0;
             GetSub(g_devs.fields, "name", "buydate").twidth = 0;
@@ -125,6 +132,10 @@
                 });
             });
         });
+        function ShowField(data, field) {
+            if (field == "clss") return GetSub(db_devclss, "id", data[field]).name;
+            else return data[field];
+        }
         function FieldToShow(data, field) {
             if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
             else if (field.name == "devwh_id") return g_user.depart.name;
@@ -137,7 +148,8 @@
             if (field.name == "clss") return RenderSelect(db_devclss, data[field.name]);
             else if (field.name == "devwh_id") return RenderSelect([g_user.depart], data[field.name]);
             else if (field.name == "status") return RenderSelect(status_dev, data[field.name]);
-            else if (field.name == "vender") return RenderSelect(g_devvenders.data, data[field.name]);
+            else if (field.name == "vender_id") return RenderSelect(g_devvenders.data, data[field.name]);
+            else if (field.name == "driver_id") return RenderSelect(g_driver.data, data[field.name]);
             else return data[field.name];
         }
 

@@ -9,6 +9,16 @@
     <link rel="stylesheet" href="css/bootstrap.css"/>
     <script src="js/bootstrap.js"></script>
     <script src="laydate/laydate.js"></script>
+    <style>
+        /*为了解决BootStrap中css和layDate的css样式冲突*/
+        .laydate_box, .laydate_box * {
+            box-sizing: content-box;
+        }
+        .laydate_box th {
+            text-align: center;
+        }
+    </style>
+
     <script src="js/utils.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/Cube.js"></script>
@@ -31,11 +41,14 @@
         </section>
     </div>
     <script type="text/javascript">
-        var g_devwhs, g_curwh, g_devs, g_curdev, g_devvenders;
+        var g_devwhs, g_curwh, g_devs, g_curdev, g_devvenders,g_drivers;
         Reqdata("/rd?ls=devwh", "", function (res) { g_devwhs = res; });
         Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res) { g_devvenders = res; });
         g.xTree = new x4Tree("#xTree", "devwh", "", "devwh", function (type,id) {
             g_curwh = GetSub(g_devwhs.data, "id", id);
+			var query = "/rduser?depart_table={0}&depart_id={1}&job={2}".format(
+				GetSub(db_tbl, "name", "devwh").id, id, GetSub(db_job, "name", "设备司机").id );
+			Reqdata(query, "", function (res) { g_drivers = res; });
             $("#item_detail").html(RenderPane2(g_curwh, g_devwhs.fields));
             Reqdata("/rd?ls=dev&devwh_id=" + id, "", function (res) {
                 g_devs = res;
@@ -54,14 +67,17 @@
             if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
             else if (field.name == "devwh_id") return GetSub(g_devwhs.data, "id", data[field.name]).name;
             else if (field.name == "status") return GetSub(status_dev, "id", data[field.name]).name;
-            else if (field.name == "vender") return GetSub(g_devvenders.data, "id", data[field.name]).name;
+            else if (field.name == "vender_id") return GetSub(g_devvenders.data, "id", data[field.name]).name;
+            else if (field.name == "driver_id")
+				return GetSub(g_drivers.data, "id", data[field.name]).name;
             else return data[field.name];
         }
         function FieldToEdit(data, field) {
             if (field.name == "clss") return RenderSelect(db_devclss, data[field.name] );
             else if (field.name == "devwh_id") return RenderSelect(g_devwhs.data, data[field.name]);
             else if (field.name == "status") return RenderSelect(status_dev, data[field.name]);
-            else if (field.name == "vender") return RenderSelect(g_devvenders.data, data[field.name]);
+            else if (field.name == "vender_id") return RenderSelect(g_devvenders.data, data[field.name]);
+            else if (field.name == "driver_id") return RenderSelect(g_drivers.data, data[field.name]);
             else return data[field.name];
         }
     </script>

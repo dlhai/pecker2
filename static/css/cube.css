@@ -1,6 +1,6 @@
 ﻿/*图片框无图时的背景十字架图片*/
 .imagelistlive {}
-.imagelistlive>label {
+.imagelistlive>label,.imagelive {
     background: url(/static/img/add2.png);
     background-size: 50% 50%;
     background-repeat: no-repeat;
@@ -9,6 +9,6 @@
     margin: 0px;
     width: 120px; height: 80px;
 }
-.imagelistlive>label>input {
+.imagelistlive>label>input,.imagelive>input {
     display: none;
 }
