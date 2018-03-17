@@ -119,7 +119,7 @@
     </div>
 
     <script id="tpl_matout_card" type="text/template">
-        {% for (var i=0,x=it[0];i<it.length;i++,x=it[i]) { %}
+        {% it.forEach(x=>{ %}
         <div id={%=x.id%} class="card" onclick="onclickcard(this)">
             <div class="header">
                 <div class="lefttop">{%=x.type%}</div>
@@ -132,13 +132,13 @@
             </div>
             <div class="body">
                 <table cellpadding="2px">
-                    {% for (var j=0,y=x.subs[0];j<x.subs.length && y.mat_id>0;j++,y=x.subs[j]) { %}
+                    {% x.subs.forEach(y=>{ %}
                     <tr><td style="width: 140px; text-align: left;">{%=f2s(y,"mat_id")%}</td><td>{%=y.num%}</td><td>{%=f2s(y,"unit")%}</td></tr>
-                    {% } %}
+                    {% }); %}
                 </table>
             </div>
         </div>
-        {% } %}
+        {% }); %}
     </script>
 
     <script type="text/javascript">
@@ -157,24 +157,24 @@
         Reqdata("/rdmatouts?user_id=" + g_user.id, "", function (matouts) {
             g_matouts = matouts;
 
-            for (var i in matouts.mdata) {
+            matouts.mdata.forEach( mdata=> {
                 // 添加到主表的子记录中
-                var mdata = matouts.mdata[i];
-                mdata.subs = new Array();
                 mdata.type = "出库单";
-                for (var j in matouts.rdata) {
-                    if (mdata.id == matouts.rdata[j].matout_id)
-                        mdata.subs.push(matouts.rdata[j]);
-                }
+				mdata.subs = matouts.rdata.fmap(rec=>{
+                    if (mdata.id == rec.matout_id)
+                        return rec;
+                });
 
                 //分类
-                if (mdata.status == 2) g_matouts_editing.push(mdata);
-                else if (mdata.status == 3) g_matouts_checking.push(mdata);
-                else if (mdata.status == 4) g_matouts_outwh.push(mdata);
-                else if (mdata.status == 5) g_matouts_waitrecv.push(mdata);
-            }
-            // 将子项不够10个补足
-            g_matouts_editing.map(x => x.subs = x.subs.concat(Array(10 - x.subs.length).fill(0).map(v => Create(g_matouts.rfields))));
+                if (mdata.status == 2)
+					g_matouts_editing.push(mdata);
+                else if (mdata.status == 3)
+					g_matouts_checking.push(mdata);
+                else if (mdata.status == 4) 
+					g_matouts_outwh.push(mdata);
+                else if (mdata.status == 5) 
+					g_matouts_waitrecv.push(mdata);
+            });
 
             var tpl_matout_card = doT.template(document.getElementById('tpl_matout_card').innerHTML);
             $("#g_matouts_editing").html(tpl_matout_card(g_matouts_editing));
@@ -197,6 +197,13 @@
 
         function RendermatoutDetail(matout) {
             if (matout.status == 2) { // 编辑状态
+	            // 将子项不够10个补足
+            	if ( matout.subs.length < 10 ){
+					var ar = Array(10 - matout.subs.length).fill(0);
+					ar = ar.map(v=>Create(g_matouts.rfields));
+					matout.subs = matout.subs.concat(ar);
+				}
+
                 $("#usage").html('<input class="formtitle xRndAngle" style="width:200px;border: 1px solid #95b7ff;" value="{0}"/>'.format(matout.usage));
                 $("#sect_code").html(RenderFormIn(matout, [GetSub(g_matouts.mfields, "name", "code")]));
                 $("#recs_table").html(RenderTable2({ fields: g_matouts.rfields, data: matout.subs }, "", (data, field) => {
@@ -304,9 +311,12 @@
             if (typeof field != "string")
                 field = field.name;
             if (field == "stocker_id") return GetSub(g_users, "id", data[field]).name;
-            else if (field == "creater_id") return GetSub(g_users, "id", data[field]).name;
-            else if (field == "user_id") return GetSub(g_users, "id", data[field]).name;
-            else if (field == "mat_id") return GetSub(g_mats.data, "id", data[field]).name;
+         //   else if (field == "creater_id")
+		//	  return GetSub(g_users, "id", data[field]).name;
+         //   else if (field == "user_id")
+		//		return GetSub(g_users, "id", data[field]).name;
+            else if (field == "mat_id")
+				return GetSub(g_mats.data, "id", data[field]).name;
             else if (field == "unit") return GetSub(g_mats.data, "id", data["mat_id"]).unit;
             else return data[field];
         }
