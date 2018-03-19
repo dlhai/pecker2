@@ -140,7 +140,7 @@ def query4(ls,**kw):
     return Response(r, mimetype='application/json')
 
 def loaduser(where):
-    ret = QueryObj( "select id,account,name,face,depart_id,depart_table,job from user where "+where)
+    ret = QueryObj( "select * from user where "+where)
     if len(ret) <= 0:
         return
     #找到用户的所在单位，若所在单位是风场，则需要读取风区列表
@@ -162,10 +162,9 @@ def load_user(user_id):
 @app.route('/login')
 def login():
     param = request.args.to_dict()
-    user = loaduser("id='%d'"%user_id)
-    user = QueryObj( "select * from user where account='%s'"%param["account"])
-    if len(user)>0 and hasattr( user[0], "account" ) and user[0].pwd == param["pwd"]:
-        login_user(User(user[0]))
+    user = loaduser("account='%s'"%param["account"])
+    if user is not None and user.pwd == param["pwd"]:
+        login_user(User(user))
         return '{"login":"'+param['account']+'","result":200}\n'
     else:
         return '{"login":"'+param['account']+'","result":404}\n'

@@ -71,7 +71,7 @@
 
     // 更新当前编辑对象
     function UpdateCurData(type, data) {
-        if (curdata.type == type && curdata.data.id == data.id)
+        if (curdata.type == type && type != "undefine" && curdata.data.id == data.id)
             return;
         if (curdata.type == "winder") {
             curdata.data.mk.disableDragging();

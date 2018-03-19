@@ -90,8 +90,8 @@
                 var dlg = new cbDlg();
                 dlg.title = "报修";
                 dlg.css = "width:610px";
-                if (!res.fields.some(x => x.name =="devices"))
-                    res.fields.push({ "title": "报修设备", "name": "devices", "forder": "2", "ftype": "div_long" } );
+                if (!res.fields.some(x => x.name == "devices"))
+                    res.fields.push({ "title": "报修设备", "name": "devices", "forder": "2", "ftype": "div_long" });
                 xfieldsort(res.fields);
                 var data = Create(res.fields);
                 data.devices = "02548973,7018263954,6578329041,049385176,6730259481,742630958";
@@ -99,7 +99,7 @@
                 data.report_id = g_user.id;
                 dlg.Add(RenderForm4(data, res.fields));
                 dlg.Add(xrimagelistlive([""]));
-         
+            });
         }
 
         function onNew() {
