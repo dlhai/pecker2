@@ -30,7 +30,7 @@
             <table>
                 <thead><tr><th>编号</th><th>主要材料</th><th>出厂时间</th><th>挂机时间</th><th style="width:90px">生产厂家</th></tr></thead>
                 <tbody>
-                    {% it.leafs.forEach(leaf,i=>{ %}
+                    {% it.leafs.forEach((leaf,i)=>{ %}
                     <tr>
                         <td><input form="form_leaf{%=i%}" name="code" value="{%=leaf.code%}" /></td>
                         <td><input form="form_leaf{%=i%}" name="mat" value="{%=leaf.mat%}" /></td>
@@ -90,7 +90,7 @@
             data.leafs = res.data;
 
             var tpl_efan_edit = doT.template(document.getElementById('tpl_efan_edit2').innerHTML);
-            var infoWindow = new BMap.InfoWindow(tpl_efan_edit(ar[i]), {
+            var infoWindow = new BMap.InfoWindow(tpl_efan_edit(data), {
                 width: 610,     // 信息窗口宽度
                 height: 180,     // 信息窗口高度
                 title: "风机信息", // 信息窗口标题
@@ -189,6 +189,15 @@
 
     // 创建"编辑/浏览"控件
     g_modectrl = new ModeControl(270, 10, function (mode) {
+        if (mode) {
+            g_winders.data.forEach(x => x.mk.enableDragging());
+            g_efans.data.forEach(x => x.mk.enableDragging());
+        }
+        else {
+            g_winders.data.forEach(x => x.mk.disableDragging());
+            g_efans.data.forEach(x => x.mk.disableDragging());
+            UpdateCurData();
+        }
 
     });
     g_map.addControl(g_modectrl);
