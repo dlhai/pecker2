@@ -1,25 +1,72 @@
 ﻿// CreateMark中的 UpdateCurData 需要先定义
 // ShowWindow中的 FieldToShow 需要先定义
 
-function CreateMap( id ) {
-    var map = new BMap.Map(id);
-    map.centerAndZoom(new BMap.Point(116.404, 39.915), 6); //设置中心点坐标和地图级别
-    map.addControl(new BMap.ScaleControl({ anchor: BMAP_ANCHOR_BOTTOM_RIGHT })); // 左下角，添加比例尺
-    map.addControl(new BMap.NavigationControl({ anchor: BMAP_ANCHOR_TOP_RIGHT })); //左上角，添加默认缩放平移控件
-    map.enableScrollWheelZoom();//开启鼠标滚轮缩放
-    return map;
+// 更新当前对象
+function UpdateCurData(type, data) {
+    if (typeof g_curdata == "undefined"){
+        g_curdata = { "type": type, "data": data };
+        return;
+    }
+    if (type == "undefine")
+        return;
+    if (g_curdata.type == type && g_curdata.data.id == data.id)
+        return;
+
+    if (g_curdata.type == "winderarea") {
+        g_curdata.data.plg.disableEditing();
+    }
+    //else if (g_curdata.type == "winder") {
+    //    g_curdata.data.mk.disableDragging();
+    //}
+    //else if (g_curdata.type == "efan") {
+    //    g_curdata.data.mk.disableDragging();
+    //}
+
+    g_curdata = { "type": type, "data": data };
 }
 
-function CreateMark(iconname, data, type, fields) {
+function IsCurData(type, data) {
+    if (typeof g_curdata == "undefined" && type == "undefine")
+        return true;
+
+    if (typeof g_curdata == "undefined") 
+        return false;
+    if (type == "undefine")
+        return false;
+
+    if (g_curdata.type == type && g_curdata.data.id == data.id)
+        return true;
+}
+
+
+function CreateMap( id ) {
+    g_map = new BMap.Map(id);
+    g_map.centerAndZoom(new BMap.Point(116.404, 39.915), 6); //设置中心点坐标和地图级别
+    g_map.addControl(new BMap.ScaleControl({ anchor: BMAP_ANCHOR_BOTTOM_RIGHT })); // 左下角，添加比例尺
+    g_map.addControl(new BMap.NavigationControl({ anchor: BMAP_ANCHOR_TOP_RIGHT })); //左上角，添加默认缩放平移控件
+    g_map.enableScrollWheelZoom();//开启鼠标滚轮缩放
+    return g_map;
+}
+
+function CreateMark(iconname, data, type, fields, cbclick) {
     var marker = new BMap.Marker(CreatePoint(data.position), { icon: GetIcon(iconname) });
     var label = new BMap.Label("name" in data ? data.name : data.code, { offset: new BMap.Size(-10, 32) });
     label.setStyle({ border: "0px", color: "blue" });
     marker.setLabel(label);
     g_map.addOverlay(marker);
     data.mk = marker;
-//  marker.addEventListener("dragend", function (type, target, pixel, point) { UpdateCurData(type, data); });
-    marker.addEventListener("click", function (e) { ShowWindow(type, data, fields, e); });
-    label.addEventListener("click", function (e) { ShowWindow(type, data, fields, e); });
+    marker.addEventListener("dragend", function (map_type, target, pixel, point) { UpdateCurData(type, data); });
+    marker.addEventListener("click", function (e) { cbclick != undefined ? cbclick(type, data, fields, e) : ShowWindow(type, data, fields, e); });
+    label.addEventListener("click", function (e) { cbclick != undefined ? cbclick(type, data, fields, e) : ShowWindow(type, data, fields, e); });
+}
+
+function CreateArea(area, cbclick) {
+    area.plg = CreatePolygon(area.position);
+    g_map.addOverlay(area.plg);
+    area.lbl = CreateAreaLabel(area);
+    g_map.addOverlay(area);
+    area.plg.addEventListener("click", function (type, target, point, pixel) { cbclick(type, target, point, pixel,area); });
+    area.plg.addEventListener("lineupdate", function (type, target) { area.lbl.setPosition(CalCenter(area.plg.getPath())); });
 }
 
 function GetIcon(iconname) {
@@ -38,12 +85,37 @@ function CreatePoint(pos) {
 }
 
 function CreatePolygon(pos) {
-    var ar = pos.split(",");
-    var arr = [];
-    for (var i in ar)
-        arr.push(CreatePoint(ar[i]));
-    return new BMap.Polygon(arr, { strokeColor: "Chocolate", strokeWeight: 2, strokeOpacity: 0.5 });
+    var ar = pos.split(",").map(x => CreatePoint(x));
+    return new BMap.Polygon(ar, { strokeColor: "Chocolate", strokeWeight: 2, strokeOpacity: 0.5 });
 }
+
+// 计算中心点位置
+function CalCenter(path) {
+    var lng = 0, lat = 0;
+    for (var i in path) {
+        lng += path[i].lng;
+        lat += path[i].lat;
+    }
+    return new BMap.Point(lng / path.length, lat / path.length);
+}
+function CreateAreaLabel(area) {
+    var opts = {
+        position: CalCenter(area.plg.getPath()),
+        offset: new BMap.Size(-6 * area.name.length, -6)    //设置文本偏移量
+    }
+    var label = new BMap.Label(area.name, opts);  // 创建文本标注对象
+    label.setStyle({
+        border: "0px",
+        color: "Chocolate",
+        fontSize: "12px",
+        height: "20px",
+        lineHeight: "20px",
+        fontFamily: "微软雅黑"
+    });
+    g_map.addOverlay(label);
+    return label;
+}
+
 
 function ShowWindow(type, data, fields, e) {
     var p = e.target;
@@ -59,10 +131,13 @@ function ShowWindow(type, data, fields, e) {
 
 //-----------------ModeControl begin------------------------------------------------
 // 定义模式控件,即function
-function ModeControl(onmodechange) {
+function ModeControl( x,y, onmodechange) {
+    var x = arguments[0] ? arguments[0] : 10;
+    var y = arguments[1] ? arguments[1] : 10;
+
     // 默认停靠位置和偏移量
     this.defaultAnchor = BMAP_ANCHOR_TOP_LEFT;
-    this.defaultOffset = new BMap.Size(10, 10);
+    this.defaultOffset = new BMap.Size(x,y);
     this.onmodechange = onmodechange;
     this.editmode = false;
 }

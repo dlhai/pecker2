@@ -140,17 +140,8 @@
         var tpl_module = doT.template(document.getElementById('tpl_module').innerHTML);
         var g_user, g_role; // 当前用户、当前角色
 
-        // {{发布版要删掉这部分代码！
-        document.getElementById("roleselect").innerHTML = RenderSelect(db_job);
-        function OnRoleChange() {
-            var role = GetSub(db_job, "id", $("#roleselect").val());
-            ChangCurUser(GetRoleUser(role.name).account);
-        }
-
-        ChangCurUser(GetParam("account"));
-
-        function ChangCurUser(account) {
-            Reqdata("/roleuser?account=" + account, "", function (res) {
+        function ReadCurUser() {
+            Reqdata("/curuserinf", "", function (res) {
                 g_user = res.data;
                 g_role = GetSub(db_roles, "id", g_user.job);
                 $('#usr_name').html(g_user.name);
@@ -162,6 +153,22 @@
                 $('#job').html(g_role.name);
                 $('#modulelist').html(tpl_module(g_role.modules));
                 UpdateSubmode(0);
+            });
+        }
+        ReadCurUser();
+
+        // {{发布版要删掉这部分代码！
+        document.getElementById("roleselect").innerHTML = RenderSelect(db_job);
+        function OnRoleChange() {
+            var role = GetSub(db_job, "id", $("#roleselect").val());
+            var account = GetRoleUser(role.name).account;
+            Reqdata('/login?account=' + account + "&pwd=" + account, "", function (res) {
+                if (res.result == 200) {
+                    ReadCurUser();
+                }
+                else {
+                    alert("用户名或密码错");
+                }
             });
         }
         //}}

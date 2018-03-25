@@ -246,13 +246,13 @@ var db_tbl = [
 ]
 function GetTbl(name) { return GetSub(db_tbl, "name", name); }
 
-cache = new Object()
+//cache = new Object()
 
 function Reqdata(url, ctx, fun) {
-    if (cache[url]) { // 优先使用缓冲数据
-        fun(cache[url], ctx);
-        return;
-    }
+    //if (cache[url]) { // 优先使用缓冲数据
+    //    fun(cache[url], ctx);
+    //    return;
+    //}
 
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("GET", url, true);
@@ -260,7 +260,7 @@ function Reqdata(url, ctx, fun) {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             jdata = $.parseJSON(xmlhttp.responseText);
             fun(jdata, ctx);
-            cache[url] = jdata;
+//            cache[url] = jdata;
         }
     };
     xmlhttp.send();
@@ -282,9 +282,9 @@ function ReqdataS(url, ctx, fun) {
 
 // 回调函数格式：render_fun(ar, id)
 function ReqRender(url, id, val, render_fun) {
-    if (cache[url]) { // 优先使用缓冲数据
-        return $("#" + id).html(render_fun(cache[url], val));
-    }
+    //if (cache[url]) { // 优先使用缓冲数据
+    //    return $("#" + id).html(render_fun(cache[url], val));
+    //}
 
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("GET", url, true);
@@ -292,7 +292,7 @@ function ReqRender(url, id, val, render_fun) {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             jdata = $.parseJSON(xmlhttp.responseText);
             $("#" + id).html(render_fun(jdata, val));
-            cache[url] = jdata;
+            //cache[url] = jdata;
         }
     };
     xmlhttp.send();

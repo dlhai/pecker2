@@ -13,15 +13,11 @@
     <script src="js/db.js"></script> <!--用到branch-->
     <script type="text/javascript" src="js/doTe.js"></script>
     <script src="laydate/laydate.js"></script>
+    <script src="js/xmap.js"></script>
     <style>
         /*为了解决BootStrap中css和layDate的css样式冲突*/
-        .laydate_box, .laydate_box * {
-            box-sizing: content-box;
-        }
-
-            .laydate_box th {
-                text-align: center;
-            }
+        .laydate_box, .laydate_box * {box-sizing: content-box;}
+        .laydate_box th {text-align: center;}
     </style>
     <script id="tpl_efan_edit2" type="text/template">
         <div class="xEFanForm">
@@ -34,15 +30,15 @@
             <table>
                 <thead><tr><th>编号</th><th>主要材料</th><th>出厂时间</th><th>挂机时间</th><th style="width:90px">生产厂家</th></tr></thead>
                 <tbody>
-                    {% for (var i = 0; i < it.leafs.length; i++) { %}
+                    {% it.leafs.forEach(leaf,i=>{ %}
                     <tr>
-                        <td><input form="form_leaf{%=it.leafs[i]%}" name="code" value="{%=it.leafs[i].code%}" /></td>
-                        <td><input form="form_leaf{%=it.leafs[i]%}" name="mat" value="{%=it.leafs[i].mat%}" /></td>
-                        <td><input form="form_leaf{%=it.leafs[i]%}" name="producedate" value="{%=it.leafs[i].producedate%}" onClick="laydate()" /></td>
-                        <td><input form="form_leaf{%=it.leafs[i]%}" name="putondate" value="{%=it.leafs[i].putondate%}" onClick="laydate()" /></td>
-                        <td><select form="form_leaf{%=it.leafs[i]%}" class="leafvender_id" name="leafvender_id" data-id="{%=it.leafs[i].leafvender_id%}"></select></td>
+                        <td><input form="form_leaf{%=i%}" name="code" value="{%=leaf.code%}" /></td>
+                        <td><input form="form_leaf{%=i%}" name="mat" value="{%=leaf.mat%}" /></td>
+                        <td><input form="form_leaf{%=i%}" name="producedate" value="{%=leaf.producedate%}" onClick="laydate()" /></td>
+                        <td><input form="form_leaf{%=i%}" name="putondate" value="{%=leaf.putondate%}" onClick="laydate()" /></td>
+                        <td><select form="form_leaf{%=i%}" class="leafvender_id" name="leafvender_id" data-id="{%=leaf.leafvender_id%}"></select></td>
                     </tr>
-                    {% } %}
+                    {% }); %}
                 </tbody>
             </table>
         </div>
@@ -53,125 +49,45 @@
 </body>
 </html>
 <script type="text/javascript">
-    // 百度地图API功能
-    var map = new BMap.Map("allmap");
-    map.centerAndZoom(new BMap.Point(116.404, 39.915), 6); //设置中心点坐标和地图级别
-    map.addControl(new BMap.ScaleControl({ anchor: BMAP_ANCHOR_BOTTOM_RIGHT })); // 左下角，添加比例尺
-    map.addControl(new BMap.NavigationControl({ anchor: BMAP_ANCHOR_TOP_RIGHT })); //左上角，添加默认缩放平移控件
-    map.enableScrollWheelZoom();//开启鼠标滚轮缩放
+    var g_winders, g_winderareas, g_efans;
 
-    var winders = new Object();
-    var winderareas = new Object();
-    var efans = new Object();
-    var curdata = new Object();
-    curdata.type == "";
-    var editmode = false;
-    var flower = new BMap.Icon("img/diy/3.png", new BMap.Size(16, 16));
-    var efan_icon = new BMap.Icon("img/efan32.png", new BMap.Size(32, 32));
-
-    // 更新当前编辑对象
-    function UpdateCurData(type, data) {
-        if (curdata.type == type && type != "undefine" && curdata.data.id == data.id)
-            return;
-        if (curdata.type == "winder") {
-            curdata.data.mk.disableDragging();
-        }
-        else if (curdata.type == "winderarea") {
-            curdata.data.plg.disableEditing();
-        }
-        else if (curdata.type == "efan") {
-            curdata.data.mk.disableDragging();
-        }
-        if (type != "undefine") {
-            curdata = new Object();
-            curdata.type = type;
-            curdata.data = data;
-        }
-        else {
-            curdata = new Object();
-            curdata.type = "";
-        }
-    }
+    CreateMap("allmap");
 
     // 在地图上显示风场
-    Reqdata("/rd?ls=winder", "", function (d1) {
-        winders = d1;
-        d1.data.forEach((x,i) => {
-            var marker = new BMap.Marker(CreatePoint(x.position), { icon: flower });
-            var label = new BMap.Label(x.name, { offset: new BMap.Size(20, -1) });
-            label.setStyle({ border: "0px", color: "blue" });
-            marker.setLabel(label);
-            map.addOverlay(marker);
-            x.mk = marker;
-            BindWinderEvent(marker, label, d1, i);
-        });
+    Reqdata("/rd?ls=winder", "", function (res) {
+        g_winders = res;
+        res.data.forEach((x, i) => CreateMark("winder", x, res.ls, res.fields));
     });
-    function BindWinderEvent(mk,lbl,ar,idx) {
-        mk.addEventListener("dragend", function (type, target, pixel, point) {
-            UpdateCurData("winder", ar[idx]);
-        });
-        mk.addEventListener("click", function (e) { ShowInfoWindow(ar, idx, e); });
-        lbl.addEventListener("click", function (e) { ShowInfoWindow(ar, idx, e); });
-    }
 
     // 在地图上显示风区
     Reqdata("/rd?ls=winderarea", "", function (d2) {
-        winderareas = d2;
-        winderareas.data.forEach(x => {
-            var plg = CreatePolygon(x.position);
-            x.plg = plg;
-            map.addOverlay(plg);
-
-            var label = CreateAreaLabel(x);
-            x.lbl = label;
-            map.addOverlay(label);
-
-            BindAreaEvent(x);
-        });
+        g_winderareas = d2;
+        g_winderareas.data.forEach(area => CreateArea(area, onclickarea));
     });
-    function BindAreaEvent(area) {
-        area.plg.addEventListener("click", function (type, target, point, pixel) {
-            if (curdata.data != area) {
-                // 显示本风区的风电机
-                Reqdata("/rd?ls=efan&winderarea_id=" + area.id, "", function (darea) {
-                    if (efans.data) {
-                        for (var i in efans.data)
-                            map.removeOverlay(efans.data[i].mk);
-                    }
-                    efans = darea;
-                    efans.data.forEach((x, i)=>{
-                        var marker = new BMap.Marker(CreatePoint(x.position), { icon: efan_icon });
-                        var label = new BMap.Label(x.code, { offset: new BMap.Size(20, 20) });
-                        label.setStyle({ border: "0px", color: "Chocolate" });
-                        marker.setLabel(label);
-                        map.addOverlay(marker);
-                        x.mk = marker;
-                        BindEfanEvent(marker, label, efans.data, i);
-                    });
-                });
-                // 更新当前对象为自己
-                UpdateCurData("winderarea", area);
-            }
-            if (editmode){
-                area.plg.enableEditing();
-                for (var i in efans.data)
-                    efans.data[i].mk.enableDragging();
-            }
+
+    function onclickarea(type, target, point, pixel,area) {
+        if (IsCurData( "winderarea", area))
+            return;
+        if (g_efans != undefined)
+            g_efans.data.forEach(x=>g_map.removeOverlay(x.mk));
+
+        // 显示本风区的风电机
+        Reqdata("/rd?ls=efan&winderarea_id=" + area.id, "", function (efans) {
+            g_efans = efans;
+            g_efans.data.forEach((x, i) => CreateMark("efan32", x, g_efans.ls, g_efans.fields, ShowEfanWindow));
         });
-        area.plg.addEventListener("lineupdate", function (type, target) {
-            area.lbl.setPosition(CalCenter(area.plg.getPath()));
-        });
+
+        // 更新当前对象为自己
+        UpdateCurData("winderarea", area);
+        if (g_modectrl.editmode){
+            area.plg.enableEditing();
+            g_efans.data.forEach(x => x.mk.enableDragging());
+        }
     }
-    function BindEfanEvent(mk, lbl, ar, idx) {
-        mk.addEventListener("dragend", function (type, target, pixel, point) {
-            UpdateCurData("efan", ar[idx]);
-        });
-        mk.addEventListener("click", function (e) { ShowEfanWindow(ar, idx, e); });
-        lbl.addEventListener("click", function (e) { ShowEfanWindow(ar, idx, e); });
-    }
-    function ShowEfanWindow(ar, i, e) {
-        Reqdata("/rd?ls=leaf&efan_id=" + ar[i].id, "", function (res) {
-            ar[i].leafs = res.data;
+
+    function ShowEfanWindow(type, data, fields, e) {
+        Reqdata("/rd?ls=leaf&efan_id=" + data.id, "", function (res) {
+            data.leafs = res.data;
 
             var tpl_efan_edit = doT.template(document.getElementById('tpl_efan_edit2').innerHTML);
             var infoWindow = new BMap.InfoWindow(tpl_efan_edit(ar[i]), {
@@ -183,7 +99,7 @@
 
             var p = e.target;
             var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
-            map.openInfoWindow(infoWindow, point); //开启信息窗口
+            g_map.openInfoWindow(infoWindow, point); //开启信息窗口
 
             // 填充两个供应商组合框
             Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (d4) {
@@ -209,33 +125,6 @@
         });
     }
 
-    // 计算中心点位置
-    function CalCenter(path) {
-        var lng = 0, lat = 0;
-        for (var i in path) {
-            lng += path[i].lng;
-            lat += path[i].lat;
-        }
-        return new BMap.Point(lng / path.length, lat / path.length);
-    }
-    function CreateAreaLabel(area) {
-        var opts = {
-            position: CalCenter(area.plg.getPath()),
-            offset: new BMap.Size(-6 * area.name.length, -6)    //设置文本偏移量
-        }
-        var label = new BMap.Label(area.name, opts);  // 创建文本标注对象
-        label.setStyle({
-            border: "0px",
-            color: "Chocolate",
-            fontSize: "12px",
-            height: "20px",
-            lineHeight: "20px",
-            fontFamily: "微软雅黑"
-        });
-        map.addOverlay(label);
-        return label;
-    }
-
     //-----------------OrganTreeControl begin------------------------------------------------
     // 定义组织机构控件,即function
     function OrganTreeControl() {
@@ -250,7 +139,12 @@
     OrganTreeControl.prototype.initialize = function (map) {
         // 创建一个DOM元素
         var div = document.createElement("div");
-        div.innerHTML = '<div class="xRndAngle" style="width:250px;padding:5px 10px;"><span id="selitem">选中的项</span><div style="float: right;" onclick="clickcollapse(this)">收起</div></div><div id="root" class="x4Tree xTree xScroll" style="width:250px;height:800px;padding:5px 10px;border:1px solid lavender;"></div>';
+        div.innerHTML = 
+            `<div class="xRndAngle" style="width:250px;padding:5px 10px;">
+                <span id="selitem">选中的项</span>
+                <div style="float: right;" onclick="clickcollapse(this)">收起</div>
+            </div>
+            <div id="root" class="x4Tree xTree xScroll" style="width:250px;height:600px;padding:5px 10px;border:1px solid lavender;"></div>`;
         div.style.backgroundColor = "white";
         div.style.boxShadow = "1px 1px 1px rgba(0,0,0,.1)";
 
@@ -261,9 +155,9 @@
         g.root = new x4Tree("#root", "winderco", "", "winderarea", function (type, id) { // 点击树节点
             $("#selitem").html($("#" + type + "_" + id).children("span").html());
             if (type == "winder") {
-                var mk = GetSub(winders.data, "id", id).mk;
+                var mk = GetSub(g_winders.data, "id", id).mk;
                 mk.setAnimation(BMAP_ANIMATION_BOUNCE);
-                map.centerAndZoom(mk.getPosition(), 12); //设置中心点坐标和地图级别
+                g_map.centerAndZoom(mk.getPosition(), 12); //设置中心点坐标和地图级别
                 if ("undefined" != typeof g_bounce)
                     g_bounce.setAnimation(null);
                 g_bounce = mk;
@@ -274,95 +168,10 @@
         });
 
         // 添加DOM元素到地图中
-        map.getContainer().appendChild(div);
+        g_map.getContainer().appendChild(div);
         // 将DOM元素返回
         return div;
     }
-    // 创建控件
-    var organtree = new OrganTreeControl();
-    // 添加到地图当中
-    map.addControl(organtree);
-    //-----------------OrganTreeControl end------------------------------------------------
-
-    //-----------------ModeControl begin------------------------------------------------
-    // 定义模式控件,即function
-    function ModeControl() {
-        // 默认停靠位置和偏移量
-        this.defaultAnchor = BMAP_ANCHOR_TOP_LEFT;
-        this.defaultOffset = new BMap.Size(270, 10);
-    }
-    // 通过JavaScript的prototype属性继承于BMap.Control
-    ModeControl.prototype = new BMap.Control();
-    // 自定义控件必须实现自己的initialize方法,并且将控件的DOM元素返回
-    // 在本方法中创建个div元素作为控件的容器,并将其添加到地图容器中
-    ModeControl.prototype.initialize = function (map) {
-        // 创建一个DOM元素
-        var div = document.createElement("div");
-        div.innerHTML = '浏览';
-        div.style.backgroundColor = "white";
-        div.style.border = "1px solid lavender";
-        div.style.boxShadow = "1px 1px 1px rgba(0,0,0,.1)";
-        div.style.padding = "5px 10px";
-        $(div).addClass( "xRndAngle" );
-        $(div).on("click", function () {
-            editmode = !editmode;
-            if (editmode) {
-                div.innerHTML = '编辑';
-                for (var i in winders.data)
-                    winders.data[i].mk.enableDragging();
-                for (var i in efans.data)
-                    efans.data[i].mk.enableDragging();
-            }
-            else {
-                div.innerHTML = '浏览';
-                for (var i in winders.data)
-                    winders.data[i].mk.disableDragging();
-                for (var i in efans.data)
-                    efans.data[i].mk.disableDragging();
-                UpdateCurData();
-            }
-        });
-
-        // 添加DOM元素到地图中
-        map.getContainer().appendChild(div);
-        // 将DOM元素返回
-        return div;
-    }
-    // 创建控件
-    var modectrl = new ModeControl();
-    // 添加到地图当中
-    map.addControl(modectrl);
-    // -----------------ModeControl end---------------------------
-
-    function CreatePoint( pos ) {
-        var ar = pos.split(" ");
-        return new BMap.Point(parseFloat(ar[0]), parseFloat(ar[1]));
-    }
-
-    function CreatePolygon(pos) {
-        var ar = pos.split(",").map(x => CreatePoint(x));
-        return new BMap.Polygon(ar, { strokeColor: "Chocolate", strokeWeight: 2, strokeOpacity: 0.5 });
-    }
-
-    function addClickHandler(id, marker) {
-        marker.addEventListener("click", function (e) {
-            Reqdata("/rd?ls=winder&id=" + id, "", function (d1) { openInfo(d1, e); });
-        });
-    }
-    function ShowInfoWindow(ar,i,e) {
-        var p = e.target;
-        var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
-        var content = '<div class="xRndAngle x2Form" style="overflow-y: scroll;height:290px;padding:5px 0px">' + RenderPane2(ar.data[0], ar.fields) + '</div>';
-        var infoWindow = new BMap.InfoWindow(content, {
-            width: 619,     // 信息窗口宽度
-            height: 320,     // 信息窗口高度
-            title: "风场信息", // 信息窗口标题
-            enableMessage: true//设置允许信息窗发送短息
-        });  // 创建信息窗口对象 
-        map.openInfoWindow(infoWindow, point); //开启信息窗口
-        ID2Name(ar, i);
-    }
-
     function clickcollapse() {
         if ($("#root").css("display") == "none") {
             $("#root").css("display", "block");
@@ -373,5 +182,15 @@
             $(this).html("展开");
         }
     }
+
+    // 创建树控件
+    g_map.addControl(new OrganTreeControl());
+    //-----------------OrganTreeControl end------------------------------------------------
+
+    // 创建"编辑/浏览"控件
+    g_modectrl = new ModeControl(270, 10, function (mode) {
+
+    });
+    g_map.addControl(g_modectrl);
 
 </script>

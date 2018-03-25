@@ -17,14 +17,15 @@ engine = create_engine('sqlite:///./db/pecker.db')
 metadata = MetaData(engine)
 conn = engine.connect()
 
+class obj:
+    pass
+
 # user models
 class User(UserMixin):
     def __init__(self,user ):
         self.__dict__ = user.__dict__
     def get_id(self):
         return self.id
-class obj:
-    pass
 
 def tojson(o):
     if type(o) == type([]):
@@ -157,7 +158,7 @@ def loaduser(where):
 @login_manager.user_loader
 def load_user(user_id):
     user = loaduser("id='%d'"%user_id)
-    return User(user[0])
+    return User(user)
  
 @app.route('/login')
 def login():

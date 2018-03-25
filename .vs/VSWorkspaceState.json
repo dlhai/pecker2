@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\db",
-    "\\static"
+    "\\static",
+    "\\static\\js"
   ],
-  "SelectedNode": "\\static\\winder2.html",
+  "SelectedNode": "\\static\\js\\Cube.js",
   "PreviewInSolutionExplorer": false
 }
