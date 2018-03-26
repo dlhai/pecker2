@@ -251,6 +251,11 @@ def upload():
     f.save("./uploads/" + f.filename)
     return f.filename
 
+#查询
+#测试链接 http://127.0.0.1:5000/wt
+@app.route("/wt")
+def wt():
+   pass
 
 #查询
 #测试链接 http://127.0.0.1:5000/rd?ls=[表名]&key1=val1&key2=val2....

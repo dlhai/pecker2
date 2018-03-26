@@ -266,6 +266,18 @@ function Reqdata(url, ctx, fun) {
     xmlhttp.send();
 }
 
+function ReqdataP(url, data, ctx, cb) {
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", url, true);
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            jdata = $.parseJSON(xmlhttp.responseText);
+            cb(jdata, ctx);
+        }
+    };
+    xmlhttp.send(data);
+}
+
 // 同步方式
 function ReqdataS(url, ctx, fun) {
     var xmlhttp = new XMLHttpRequest();
@@ -279,25 +291,6 @@ function ReqdataS(url, ctx, fun) {
     xmlhttp.send();
 }
 
-
-// 回调函数格式：render_fun(ar, id)
-function ReqRender(url, id, val, render_fun) {
-    //if (cache[url]) { // 优先使用缓冲数据
-    //    return $("#" + id).html(render_fun(cache[url], val));
-    //}
-
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("GET", url, true);
-    xmlhttp.onreadystatechange = function () {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            jdata = $.parseJSON(xmlhttp.responseText);
-            $("#" + id).html(render_fun(jdata, val));
-            //cache[url] = jdata;
-        }
-    };
-    xmlhttp.send();
-    return "";
-}
 
 // 自此以下将被废弃
 
@@ -427,24 +420,6 @@ $(function () {
 });
 
 
-var db_leafvender =
-[
-{ "name": "重庆复合", "fname": "重庆国际复合材料有限公司", "addr": "北京市顺义区新顺南大街8号院1幢F1-51B ", "atten": "顾冰薇", "tel": "0532-86011111", "leader": "常辰淋", "fax": "023-63862607" },
-{ "name": "艾尔姆", "fname": "艾尔姆玻璃纤维制品（天津）有限公司", "addr": "南京东路819号百联世贸广场7号门一层", "atten": "钱振海", "tel": "0551-4243311", "leader": "舒代巧", "fax": "0311-87600111" },
-{ "name": "上海玻璃", "fname": "上海玻璃钢研究院", "addr": "上海市浦东新区祖冲之路1253号长泰广场E1-06号铺位 ", "atten": "雷亦旋", "tel": "0571-87622362", "leader": "阳昕燕", "fax": "0752-95105688" },
-{ "name": "江苏九鼎", "fname": "江苏九鼎新材料股份有限公司", "addr": "常州市新北区通江中路88号万达广场步行街1023号 ", "atten": "陆易绿", "tel": "020-95105105", "leader": "巴以彤", "fax": "0577-88389999" },
-{ "name": "南京先进", "fname": "南京先进复合材料制品有限公司", "addr": "成都市锦江区中纱帽街8号太古里F196 铺 ", "atten": "陈嘉木", "tel": "0371-68356666", "leader": "鲍元柳", "fax": "0769-95105106" },
-{ "name": "上海越科", "fname": "上海越科复合材料有限公司", "addr": "大连经济技术开发区金马路189号大连安盛购物广场 ", "atten": "周绍元", "tel": "021-8008207890", "leader": "戈刚林", "fax": "0530-3982522" },
-{ "name": "中兵五三", "fname": "中国兵器工业集团第五三科技研究院", "addr": "辽宁省大连市甘井子区山东路235号安盛亿合城Y10014/15/16铺位 ", "atten": "杜诗蕾", "tel": "0531-86012520", "leader": "勾觅丹", "fax": "028-86433232" },
-{ "name": "威海碳素", "fname": "威海市碳素渔竿厂", "addr": "大庆市萨尔图区东风路18号万达广场室内步行街一层1026、1027、1028号商铺 ", "atten": "罗鸿彩", "tel": "025-95105105", "leader": "苗新华", "fax": "0351-2233611" },
-{ "name": "帝斯曼", "fname": "金陵帝斯曼树脂有限公司", "addr": "抚顺市新抚区浑河南路（中段）56号 1021，1022，1023铺位 ", "atten": "石梦凡", "tel": "0535-95105175", "leader": "钱小乐", "fax": "0591-87050222" },
-{ "name": "中航惠腾", "fname": "中航（保定）惠腾风电设备有限公司", "addr": "广州市天河区天河路383号以北、天河东路以西地段太古汇商场裙楼地铁上层MU28号商铺 ", "atten": "孙刚毅", "tel": "0512-67513131", "leader": "师子寒", "fax": "0310-3023233" },
-{ "name": "浙江联洋", "fname": "浙江联洋复合材料有限公司", "addr": "哈尔滨道里区中央大街69号金安欧罗巴广场一楼 ", "atten": "谢依霜", "tel": "0592-2088888", "leader": "余涛鸣", "fax": "0898-31686222" },
-{ "name": "常熟卡柏", "fname": "常熟市卡柏（CoreBoard）复合材料有限公司", "addr": "杭州延安西路546号1楼 ", "atten": "严芷容", "tel": "029-95105688", "leader": "相瑶一", "fax": "0536-2972522" },
-{ "name": "恒吉星", "fname": "北京恒吉星工贸有限责任公司", "addr": "杭州银泰城  浙江省杭州市丰登街299号 1F032、1F033、1F035  ", "atten": "余博容", "tel": "021-95105105", "leader": "边星瑶", "fax": "0757-82232940" },
-];
-
-
 var db_attach =
 {
     face: ["img/face/face0.jpg", "img/face/face1.jpg", "img/face/face2.jpg", "img/face/face3.jpg", "img/face/face4.jpg", "img/face/face5.jpg", "img/face/face6.jpg", "img/face/face7.jpg", "img/face/face8.jpg", "img/face/face9.jpg", "img/face/face10.jpg", "img/face/face11.jpg", "img/face/face12.jpg", "img/face/face13.jpg", "img/face/face14.jpg", "img/face/face15.jpg", "img/face/face16.jpg", "img/face/face17.jpg", "img/face/face18.jpg", "img/face/face19.jpg", "img/face/face20.jpg"],
@@ -458,130 +433,6 @@ var db_attach =
     matout_status:["等待备货","正在备货","等待审核","等待发货","等待确认"],
     vtime: ["2008-11-30 5:49:21", "2005-03-09 9:39:7", "2007-11-09 2:0:5", "2009-04-16 21:30:41", "2008-12-20 12:54:26", "2007-09-11 16:41:2", "2008-04-21 22:21:48", "2005-10-11 8:20:35", "2004-01-28 6:0:29", "2008-01-31 20:32:35", "2006-01-19 13:53:12", "2003-12-04 14:13:3", "2008-11-06 14:14:19", "2009-01-31 7:7:30", "2005-03-17 11:11:42", "2010-03-15 18:22:11", "2008-12-24 13:50:9", "2008-03-20 2:7:39", "2008-06-15 10:31:10", "2008-05-04 10:44:11", "2010-09-25 14:57:48", "2009-10-15 4:54:22", "2005-05-31 7:20:18", "2008-07-28 19:24:48", "2004-04-24 10:18:1", "2004-08-16 11:27:22", "2010-04-02 17:57:42", "2008-12-18 1:54:24", "2010-06-19 13:18:11", "2006-01-23 5:26:5", "2010-08-05 10:56:17", "2003-08-30 10:59:20", "2006-11-04 18:56:57"],
     sign:[]
-    };
-
-var db_devwh_list = {
-    fields: [
-        { "title": "名称", "name": "name", },
-        { "title": "全名", "fname": "name", },
-        { "title": "地理位置", "name": "gps", },
-        { "title": "地址", "name": "addr", "ftype": "bigtext" },
-        { "title": "主管", "name": "leader", },
-        { "title": "备注", "name": "remark", "ftype": "bigtext" },
-    ],
-    data: [
-{"name":"长白一驻","fname":"长白山一号驻地","gps":"116.357701,40.596596","addr":"青海省玉树藏族自治州治多县","leader":"顾冰薇","remark":"站在巨人的肩上是为了超过巨人。"},
-{"name":"兴安岭驻","fname":"大兴安岭X号驻地","gps":"123.130206,50.629764","addr":"西藏自治区昌都地区类乌齐县","leader":"钱振海","remark":"泉水，奋斗之路越曲折，心灵越纯洁。"},
-{"name":"大草原驻","fname":"大草原蓝天白云驻地","gps":"85.231774,46.32769","addr":"辽宁省大连市","leader":"雷亦旋","remark":"如果缺少破土面出并与风雪拚搏的勇气，种子的前途并不比落叶美妙一分。"},
-{"name":"风吹草驻","fname":"风吹草低没牛羊驻地","gps":"96.564509,40.766858","addr":"湖北省省直辖行政单位神农架林区","leader":"步孜娴","remark":"竹笋虽然柔嫩，但它不怕重压，敢于奋斗、敢于冒尖。"},
-{"name":"天山林驻","fname":"天山森林驻地","gps":"84.127936,38.201158","addr":"重庆市县奉节县","leader":"陈嘉木","remark":"不要让追求之舟停泊在幻想的港湾，而应扬起奋斗的风帆，驶向现实生活的大海。"},
-{"name":"塔里木驻","fname":"塔里木驻地","gps":"87.513039,32.664229","addr":"河北省沧州市沧县","leader":"周绍元","remark":"智者的梦再美，也不如愚人实干的脚印。"},
-{"name":"准葛尔驻","fname":"准葛尔沙漠驻地","gps":"105.248033,34.267815","addr":"云南省文山壮族苗族自治州文山县","leader":"杜诗蕾","remark":"耕耘者的汗水是哺育种子成长的乳汁。"},
-{"name":"柴达木驻","fname":"柴达木盐湖驻地","gps":"120.996119,38.664246","addr":"湖北省宜昌市点军区","leader":"罗鸿彩","remark":"不去耕耘，不去播种，再肥的沃土也长不出庄稼，不去奋斗，不去创造，再美的青春也结不出硕果。"},
-{"name":"祁连荒驻","fname":"祁连山荒漠驻地","gps":"109.957741,37.148299","addr":"贵州省遵义市正安县","leader":"石梦凡","remark":"让珊瑚远离惊涛骇浪的侵蚀吗？那无异是将它们的美丽葬送。"},
-{"name":"草原蓝驻","fname":"大草原蓝天白云驻地2号","gps":"95.681439,39.808819","addr":"山东省济南市市辖区","leader":"孙刚毅","remark":"再好的种子，不播种下去，也结不出丰硕的果实。"},
-{"name":"无人区驻","fname":"无人区卷心菜驻地","gps":"116.286411,33.777599","addr":"西藏自治区山南地区措美县","leader":"谢依霜","remark":"如果可恨的挫折使你尝到苦果，朋友，奋起必将让你尝到人生的欢乐。"},
-{"name":"昆仑山驻","fname":"昆仑山雪域驻地","gps":"103.113947,32.227408","addr":"陕西省渭南市富平县","leader":"严芷容","remark":"瀑布---为了奔向江河湖海，即使面临百丈深渊，仍然呼啸前行，决不退缩"},
-{"name":"渤海湾驻","fname":"渤海湾无风海浪驻地","gps":"114.446681,19.83017","addr":"甘肃省甘南藏族自治州碌曲县","leader":"余博容","remark":"对于勇士来说，贫病、困窘、责难、诽谤、冷嘲热讽......，一切压迫都是前进的动力。"},
-{"name":"太行山驻","fname":"太行山绝壁攀岩上不去驻地","gps":"111.944649,28.136926","addr":"河南省商丘市永城市","leader":"程含芙","remark":"不从泥泞不堪的小道上迈步，就踏不上铺满鲜花的大路。"},
-{"name":"天府宝驻","fname":"天府之国无限宝贝驻地","gps":"116.948714,28.006373","addr":"浙江省杭州市建德市","leader":"韩德泽","remark":"幻想在漫长的生活征途中顺水行舟的人，他的终点在下游。只有敢于扬起风帆，顶恶浪的勇士，才能争到上游。"},
-]
-};
-
-var db_dev_list ={
-    fields: [
-        { "title": "照片", "name": "image", "ftype": "image", "twidth": "0" },
-        { "title": "名称", "name": "name", },
-        { "title": "型号", "name": "type", },
-        { "title": "编号", "name": "code", },
-        { "title": "当前位置", "name": "gps", },
-        { "title": "状态", "name": "status", },
-        { "title": "司机", "name": "driver", },
-        { "title": "联系电话", "name": "phone", },
-        { "title": "备注", "name": "remark", "ftype": "bigtext", },
-        { "title": "生产厂家", "name": "producer", "ftype": "bigtext", "twidth": "0" },
-        { "title": "生产日期", "name": "producedate", "twidth": "0" },
-        { "title": "购置日期", "name": "buydate", "twidth": "0" },
-        { "title": "年检日期", "name": "checkdate", },
-    ],
-    data:[
-    { "name": "96式主战坦克", "type": "96式", "code": "7030CTA/P2", "status": "空闲", "producer": "嵊州市洒而电器厂", "producedate": "1992-04-06", "buydate": "1984-02-16", "checkdate": "1975-12-18", "remark": "嵊州市洒而电器厂" },
-    { "name": "99式主战坦克", "type": "99式", "code": "7330BM ", "status": "出勤", "producer": "沈阳电机厂销售总公司", "producedate": "1991-01-22", "buydate": "1988-02-02", "checkdate": "1981-09-14", "remark": "沈阳电机厂销售总公司" },
-    { "name": "63A式水陆坦克", "type": "63A式", "code": "D111508A ", "status": "空闲", "producer": "沈阳士林电机制造有限公司", "producedate": "1988-02-17", "buydate": "1985-06-24", "checkdate": "1989-05-29", "remark": "沈阳士林电机制造有限公司" },
-    { "name": "155毫米自行榴弹炮", "type": "155 m", "code": "2528H ", "status": "出勤", "producer": "绍兴市万鹏机电有限公司", "producedate": "1987-07-08", "buydate": "1974-06-07", "checkdate": "1989-02-21", "remark": "绍兴市万鹏机电有限公司" },
-    { "name": "PCZ45弹药支援车", "type": "PCZ45", "code": "1207KTN1/P6 ", "status": "空闲", "producer": "上海任重仪表电器有限公司", "producedate": "1994-03-19", "buydate": "1974-12-18", "checkdate": "1976-07-22", "remark": "上海任重仪表电器有限公司" },
-    { "name": "ZCY45营指挥车", "type": "ZCY45", "code": "2236HDB ", "status": "出勤", "producer": "深圳市英士达机电技术开发有限公司", "producedate": "1981-09-30", "buydate": "1980-08-26", "checkdate": "1970-07-28", "remark": "深圳市英士达机电技术开发有限公司" },
-    { "name": "ZCY45连指挥车", "type": "ZCY45", "code": "BK1712 ", "status": "报废", "producer": "浙江嵊州市大力神机电厂", "producedate": "1987-11-28", "buydate": "1993-01-11", "checkdate": "1989-03-20", "remark": "浙江嵊州市大力神机电厂" },
-    { "name": "95式自动步枪", "type": "95式", "code": "4053156W2K ", "status": "其他", "producer": "湖北万邦机电发展有限公司", "producedate": "1994-08-31", "buydate": "1993-06-03", "checkdate": "1973-09-07", "remark": "湖北万邦机电发展有限公司" },
-    { "name": "03式自动步枪", "type": "03式", "code": "7303C/P4 ", "status": "空闲", "producer": "沈阳嘉晨电机(产品)制造有限公司", "producedate": "1999-02-10", "buydate": "1982-05-25", "checkdate": "1993-08-16", "remark": "沈阳嘉晨电机(产品)制造有限公司" },
-    { "name": "10式阻击步枪", "type": "10式", "code": "E2526EH ", "status": "出勤", "producer": "浙江博佳电机有限公司", "producedate": "1979-07-22", "buydate": "1989-03-11", "checkdate": "1990-08-30", "remark": "浙江博佳电机有限公司" },
-    { "name": "WS-2火箭弹", "type": "WS-2", "code": "N413M/P6 ", "status": "空闲", "producer": "东莞市奥比特化工贸易有限公司", "producedate": "1991-11-12", "buydate": "1994-05-10", "checkdate": "1995-12-28", "remark": "东莞市奥比特化工贸易有限公司" },
-    { "name": "卫士-2远程火箭炮", "type": "卫士-2", "code": "23120EW33K ", "status": "出勤", "producer": "贵州雨田电机有限公司", "producedate": "1976-12-26", "buydate": "1990-12-09", "checkdate": "1976-03-21", "remark": "贵州雨田电机有限公司" },
-    { "name": "WS-2发射车", "type": "WS-2", "code": "SA1-120BSS ", "status": "空闲", "producer": "上海德托精密机电事业部", "producedate": "1984-02-16", "buydate": "1984-12-27", "checkdate": "1989-08-22", "remark": "上海德托精密机电事业部" },
-    { "name": "86式步兵战车", "type": "86式", "code": "7034AC ", "status": "出勤", "producer": "鹤壁市伟琴仪器仪表有限公司", "producedate": "1988-02-02", "buydate": "1990-07-04", "checkdate": "1979-12-22", "remark": "鹤壁市伟琴仪器仪表有限公司" },
-    { "name": "92式步兵战车", "type": "92式", "code": "32907/P6x ", "status": "报废", "producer": "北京和利时电机技术有限公司", "producedate": "1985-06-24", "buydate": "1986-03-23", "checkdate": "1973-02-17", "remark": "北京和利时电机技术有限公司" },
-    { "name": "武直-10武装直升机", "type": "武直-10", "code": "7040X2DF ", "status": "其他", "producer": "常州市丰源微特电机有限公司", "producedate": "1974-06-07", "buydate": "1981-04-15", "checkdate": "1993-02-01", "remark": "常州市丰源微特电机有限公司" },
-    { "name": "武直-19武装侦察直升机", "type": "武直-19", "code": "NNQP6960", "status": "空闲", "producer": "东莞市线源电子有限公司", "producedate": "1974-12-18", "buydate": "1990-02-26", "checkdate": "1978-02-01", "remark": "东莞市线源电子有限公司" },
-
-    ]
-}
-
-var db_devtasklist = {
-    fields: [
-        { "title": "发单人", "name": "create" },
-        { "title": "发单时间", "name": "createdt" },
-        { "title": "接单司机", "name": "receiver" },
-        { "title": "接单时间", "name": "receivedt" },
-        { "title": "预期时长", "name": "span" },
-        { "title": "完成时间", "name": "completedt" },
-        { "title": "任务地点", "name": "place" },
-        { "title": "状态", "name": "status" },
-    ],
-    data: [
-        { "create": "雷亦旋", "createdt": "1992-04-06", "receiver": "庾依玉", "receivedt": "1984-02-16", "span": "3", "completedt": "1975-12-18", "place": "青海省玉树藏族自治州治多县", "status": "拒绝" },
-        { "create": "陆易绿", "createdt": "1991-01-22", "receiver": "万坤", "receivedt": "1988-02-02", "span": "5", "completedt": "1981-09-14", "place": "西藏自治区昌都地区类乌齐县", "status": "完成" },
-        { "create": "陈嘉木", "createdt": "1988-02-17", "receiver": "程新桐", "receivedt": "1985-06-24", "span": "7", "completedt": "1989-05-29", "place": "辽宁省大连市", "status": "拒绝" },
-        { "create": "周绍元", "createdt": "1987-07-08", "receiver": "敖玲沁", "receivedt": "1974-06-07", "span": "6", "completedt": "1989-02-21", "place": "湖北省省直辖行政单位神农架林区", "status": "完成" },
-        { "create": "杜诗蕾", "createdt": "1994-03-19", "receiver": "能丰", "receivedt": "1974-12-18", "span": "10", "completedt": "1976-07-22", "place": "重庆市县奉节县", "status": "完成" },
-        { "create": "罗鸿彩", "createdt": "1981-09-30", "receiver": "计翎妍", "receivedt": "1980-08-26", "span": "8", "completedt": "1970-07-28", "place": "河北省沧州市沧县", "status": "完成" },
-        { "create": "石梦凡", "createdt": "1987-11-28", "receiver": "阎乐晨", "receivedt": "1993-01-11", "span": "4", "completedt": "1989-03-20", "place": "云南省文山壮族苗族自治州文山县", "status": "拒绝" },
-        { "create": "孙刚毅", "createdt": "1994-08-31", "receiver": "吕采南", "receivedt": "1993-06-03", "span": "3", "completedt": "1973-09-07", "place": "湖北省宜昌市点军区", "status": "完成" },
-        { "create": "谢依霜", "createdt": "1999-02-10", "receiver": "堵昕燕", "receivedt": "1982-05-25", "span": "5", "completedt": "1993-08-16", "place": "贵州省遵义市正安县", "status": "完成" },
-        { "create": "严芷容", "createdt": "1979-07-22", "receiver": "萧传军", "receivedt": "1989-03-11", "span": "1", "completedt": "1990-08-30", "place": "山东省济南市市辖区", "status": "完成" },
-        { "create": "余博容", "createdt": "1991-11-12", "receiver": "邓娟", "receivedt": "1994-05-10", "span": "2", "completedt": "1995-12-28", "place": "西藏自治区山南地区措美县", "status": "完成" },
-        { "create": "程含芙", "createdt": "1976-12-26", "receiver": "江智卓", "receivedt": "1990-12-09", "span": "7", "completedt": "1976-03-21", "place": "陕西省渭南市富平县", "status": "拒绝" },
-        { "create": "韩德泽", "createdt": "1984-02-16", "receiver": "柏肜瑛", "receivedt": "1984-12-27", "span": "6", "completedt": "1989-08-22", "place": "甘肃省甘南藏族自治州碌曲县", "status": "完成" },
-        { "create": "姜慕蕊", "createdt": "1988-02-02", "receiver": "水成日", "receivedt": "1990-07-04", "span": "10", "completedt": "1979-12-22", "place": "河南省商丘市永城市", "status": "完成" },
-        { "create": "付高爽", "createdt": "1985-06-24", "receiver": "周宏图", "receivedt": "1986-03-23", "span": "8", "completedt": "1973-02-17", "place": "浙江省杭州市建德市", "status": "完成" },
-        { "create": "石又晴", "createdt": "1974-06-07", "receiver": "齐痴凝", "receivedt": "1981-04-15", "span": "4", "completedt": "1993-02-01", "place": "安徽省芜湖市", "status": "完成" },
-        { "create": "蓝梦槐", "createdt": "1974-12-18", "receiver": "郝紫瞳", "receivedt": "1990-02-26", "span": "3", "completedt": "1978-02-01", "place": "青海省玉树藏族自治州治多县", "status": "拒绝" },
-        { "create": "窦加隆", "createdt": "1984-02-16", "receiver": "云尘", "receivedt": "1981-04-15", "span": "5", "completedt": "1989-02-21", "place": "西藏自治区昌都地区类乌齐县", "status": "完成" },
-        { "create": "盛韩嘉", "createdt": "1988-02-02", "receiver": "储艺璇", "receivedt": "1990-02-26", "span": "1", "completedt": "1976-07-22", "place": "辽宁省大连市", "status": "完成" },
-        { "create": "常辰淋", "createdt": "1985-06-24", "receiver": "荣海龙", "receivedt": "1989-05-11", "span": "2", "completedt": "1970-07-28", "place": "湖北省省直辖行政单位神农架林区", "status": "完成" },
-        { "create": "舒代巧", "createdt": "1974-06-07", "receiver": "卜伟成", "receivedt": "1991-01-06", "span": "7", "completedt": "1989-03-20", "place": "重庆市县奉节县", "status": "完成" },
-        { "create": "阳昕燕", "createdt": "1974-12-18", "receiver": "满玲漪", "receivedt": "1994-11-03", "span": "6", "completedt": "1979-12-22", "place": "河北省沧州市沧县", "status": "完成" },
-        { "create": "巴以彤", "createdt": "1980-08-26", "receiver": "马凌春", "receivedt": "1984-01-10", "span": "7", "completedt": "1973-02-17", "place": "云南省文山壮族苗族自治州文山县", "status": "完成" },
-        { "create": "鲍元柳", "createdt": "1993-01-11", "receiver": "傅微", "receivedt": "1990-11-30", "span": "6", "completedt": "1993-02-01", "place": "湖北省宜昌市点军区", "status": "完成" },
-        { "create": "戈刚林", "createdt": "1993-06-03", "receiver": "凌钟吉", "receivedt": "1978-09-22", "span": "10", "completedt": "1978-02-01", "place": "贵州省遵义市正安县", "status": "拒绝" },
-        { "create": "勾觅丹", "createdt": "1982-05-25", "receiver": "步孜娴", "receivedt": "1981-03-02", "span": "8", "completedt": "1976-04-27", "place": "山东省济南市市辖区", "status": "拒绝" },
-        { "create": "苗新华", "createdt": "1989-03-11", "receiver": "侯星嘉", "receivedt": "1991-09-07", "span": "1", "completedt": "1985-10-30", "place": "西藏自治区山南地区措美县", "status": "完成" },
-        { "create": "钱小乐", "createdt": "1994-05-10", "receiver": "齐任安", "receivedt": "1978-07-28", "span": "2", "completedt": "1985-02-17", "place": "陕西省渭南市富平县", "status": "完成" },
-        { "create": "师子寒", "createdt": "1990-12-09", "receiver": "柏鑫", "receivedt": "1981-09-28", "span": "7", "completedt": "1974-10-31", "place": "甘肃省甘南藏族自治州碌曲县", "status": "完成" },
-        { "create": "余涛鸣", "createdt": "1984-12-27", "receiver": "饶忆丹", "receivedt": "1975-12-18", "span": "6", "completedt": "1994-10-07", "place": "河南省商丘市永城市", "status": "完成" },
-        { "create": "相瑶一", "createdt": "1990-07-04", "receiver": "宿柯朱", "receivedt": "1981-09-14", "span": "10", "completedt": "1978-09-24", "place": "浙江省杭州市建德市", "status": "完成" },
-        { "create": "劳思寒", "createdt": "1986-03-23", "receiver": "孟广斌", "receivedt": "1989-05-29", "span": "8", "completedt": "1985-04-21", "place": "新疆维吾尔自治区巴音郭楞蒙古自治州库尔勒市", "status": "拒绝" },
-        { "create": "魏苑", "createdt": "1978-07-28", "receiver": "安悦", "receivedt": "1990-08-30", "span": "4", "completedt": "1974-10-31", "place": "湖南省邵阳市武冈市", "status": "完成" },
-        { "create": "勾星瑶", "createdt": "1981-09-28", "receiver": "鲁白桃", "receivedt": "1995-12-28", "span": "3", "completedt": "1994-10-07", "place": "安徽省黄山市徽州区", "status": "完成" },
-        { "create": "郎佳", "createdt": "1975-12-18", "receiver": "平勇", "receivedt": "1976-03-21", "span": "5", "completedt": "1978-09-24", "place": "黑龙江省大庆市", "status": "完成" },
-        { "create": "鲍凌春", "createdt": "1981-09-14", "receiver": "肖怜雪", "receivedt": "1989-08-22", "span": "4", "completedt": "1985-04-21", "place": "四川省南充市嘉陵区", "status": "完成" },
-        { "create": "伊帅成", "createdt": "1989-05-29", "receiver": "全曼云", "receivedt": "1979-12-22", "span": "3", "completedt": "1993-11-18", "place": "辽宁省沈阳市新民市", "status": "完成" },
-        { "create": "卫尔容", "createdt": "1989-02-21", "receiver": "元镇国", "receivedt": "1973-02-17", "span": "5", "completedt": "1986-11-13", "place": "黑龙江省伊春市汤旺河区", "status": "拒绝" },
-        { "create": "滕龙", "createdt": "1976-07-22", "receiver": "贾灵泉", "receivedt": "1993-02-01", "span": "1", "completedt": "1984-01-20", "place": "新疆维吾尔自治区和田地区和田县", "status": "完成" },
-        { "create": "傅奕冰", "createdt": "1970-07-28", "receiver": "巩恒霖", "receivedt": "1978-02-01", "span": "2", "completedt": "1983-03-17", "place": "湖北省孝感市汉川市", "status": "完成" },
-        { "create": "范沛凝", "createdt": "1989-03-20", "receiver": "严少", "receivedt": "1976-04-27", "span": "7", "completedt": "1979-10-20", "place": "广东省河源市紫金县", "status": "完成" },
-        { "create": "顾伟祺", "createdt": "1973-09-07", "receiver": "云宇峰", "receivedt": "1985-10-30", "span": "6", "completedt": "1981-11-01", "place": "安徽省淮南市田家庵区", "status": "完成" },
-        { "create": "邱雅懿", "createdt": "1993-08-16", "receiver": "匡贝", "receivedt": "1985-02-17", "span": "10", "completedt": "1993-11-17", "place": "西藏自治区日喀则地区吉隆县", "status": "完成" },
-    ]
 };
 
 var db_userlist = {

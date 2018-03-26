@@ -154,17 +154,13 @@ function EFanCreate(fields1, fields2, winder_id, area_id) {
     return efan;
 }
 
-function xrefan(efan, check) {
+function xrefan(efan) {
     var tpl = doT.template(`<div class="xEFanPanel">
-            <header>`
-    +(check? '<input type="checkbox" style="margin-top:0px;">':"")+
-        //'            <img src="img/diy/3.png" style="vertical-align:top;"/>
-       `        <strong>编号:</strong><span>{%=it.code%}</span>
-                  <strong>型号:</strong><span>{%=it.type%}</span>
-                 <strong>生产厂家:</strong><span>{%=FieldToShow(it,"efanvender_id")%}</span>
-                 <div style="float: right;">
-                     <a id="{%=it.id%}" onClick="EditEfan(this)">编辑</a>
-                 </div>
+            <header>
+                <img src="img/diy/3.png" style="vertical-align:top;"/>
+                <strong>编号:</strong><span>{%=it.code%}</span>
+                <strong>型号:</strong><span>{%=it.type%}</span>
+                <strong>生产厂家:</strong><span>{%=ShowField(it,"efanvender_id")%}</span>
              </header>
              <table>
                  <thead><tr><th>编号</th><th>主要材料</th><th>出厂时间</th><th>挂机时间</th><th>生产厂家</th></tr></thead>
@@ -175,7 +171,7 @@ function xrefan(efan, check) {
                          <td>{%=leaf.mat%}</td>
                          <td>{%=leaf.producedate%}</td>
                          <td>{%=leaf.putondate%}</td>
-                         <td>{%=FieldToShow(leaf,"leafvender_id")%}</td>
+                         <td>{%=ShowField(leaf,"leafvender_id")%}</td>
                      </tr>
                      {% }); %}
                  </tbody>

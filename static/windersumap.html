@@ -19,39 +19,19 @@
         .laydate_box, .laydate_box * {box-sizing: content-box;}
         .laydate_box th {text-align: center;}
     </style>
-    <script id="tpl_efan_edit2" type="text/template">
-        <div class="xEFanForm">
-            <form id="form_efan">
-                <strong>编号:</strong><input name="code" value="{%=it.code%}" />
-                <strong>型号:</strong><input name="type" value="{%=it.type%}" />
-                <strong>生产厂家:</strong><select class="efanvender_id" data-id="{%=it.efanvender_id%}" name="efanvender_id" style="margin-right:0px;"></select>
-            </form>
-            <form id="form_leaf0"></form><form id="form_leaf1"></form><form id="form_leaf3"></form>
-            <table>
-                <thead><tr><th>编号</th><th>主要材料</th><th>出厂时间</th><th>挂机时间</th><th style="width:90px">生产厂家</th></tr></thead>
-                <tbody>
-                    {% it.leafs.forEach((leaf,i)=>{ %}
-                    <tr>
-                        <td><input form="form_leaf{%=i%}" name="code" value="{%=leaf.code%}" /></td>
-                        <td><input form="form_leaf{%=i%}" name="mat" value="{%=leaf.mat%}" /></td>
-                        <td><input form="form_leaf{%=i%}" name="producedate" value="{%=leaf.producedate%}" onClick="laydate()" /></td>
-                        <td><input form="form_leaf{%=i%}" name="putondate" value="{%=leaf.putondate%}" onClick="laydate()" /></td>
-                        <td><select form="form_leaf{%=i%}" class="leafvender_id" name="leafvender_id" data-id="{%=leaf.leafvender_id%}"></select></td>
-                    </tr>
-                    {% }); %}
-                </tbody>
-            </table>
-        </div>
-    </script>
 </head>
 <body onbeforeunload="UpdateCurData()">
     <div id="allmap" style="height: 100%;width: 100%;"></div>
 </body>
 </html>
 <script type="text/javascript">
-    var g_winders, g_winderareas, g_efans;
+    var g_winders, g_winderareas, g_efans, g_efanvenders, g_leafvenders;
 
     CreateMap("allmap");
+
+    // 两个供应商
+    Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (res) {g_efanvenders = res;});
+    Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (res) {g_leafvenders = res;});
 
     // 在地图上显示风场
     Reqdata("/rd?ls=winder", "", function (res) {
@@ -89,10 +69,9 @@
         Reqdata("/rd?ls=leaf&efan_id=" + data.id, "", function (res) {
             data.leafs = res.data;
 
-            var tpl_efan_edit = doT.template(document.getElementById('tpl_efan_edit2').innerHTML);
-            var infoWindow = new BMap.InfoWindow(tpl_efan_edit(data), {
-                width: 610,     // 信息窗口宽度
-                height: 180,     // 信息窗口高度
+            var infoWindow = new BMap.InfoWindow(xrefan(data), {
+                width: 450,     // 信息窗口宽度
+                height: 150,     // 信息窗口高度
                 title: "风机信息", // 信息窗口标题
                 enableMessage: true//设置允许信息窗发送短息
             });  // 创建信息窗口对象 
@@ -100,28 +79,6 @@
             var p = e.target;
             var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
             g_map.openInfoWindow(infoWindow, point); //开启信息窗口
-
-            // 填充两个供应商组合框
-            Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (d4) {
-                var nodes = $(".efanvender_id");
-                for (var i = 0; i < nodes.length; i++) {
-                    var selid = nodes[i].getAttribute("data-id");
-                    nodes[i].innerHTML = RenderSelect(d4.data, selid);
-                    if (selid == "")
-                        nodes[i].selectedIndex = -1;
-                }
-                nodes.removeClass("efanvender_id");
-            });
-            Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (d5) {
-                var nodes = $(".leafvender_id");
-                for (var i = 0; i < nodes.length; i++) {
-                    var selid = nodes[i].getAttribute("data-id");
-                    nodes[i].innerHTML = RenderSelect(d5.data, selid);
-                    if (selid == "")
-                        nodes[i].selectedIndex = -1;
-                }
-                nodes.removeClass("leafvender_id");
-            });
         });
     }
 
@@ -198,8 +155,28 @@
             g_efans.data.forEach(x => x.mk.disableDragging());
             UpdateCurData();
         }
-
     });
     g_map.addControl(g_modectrl);
+
+    function ShowField(data, field) {
+        if (field == "efanvender_id") return GetSub(g_efanvenders.data, "id", data[field]).name;
+        else if (field == "leafvender_id") return GetSub(g_leafvenders.data, "id", data[field]).name;
+        return data[field];
+    }
+
+    function SaveData(curdata) {
+        if (curdata.type == undefined)
+            return;
+        if (curdata.type == "winderarea")
+            position = curdata.data.plg.getPath();
+        else
+            position = curdata.data.mk.getPosition();
+
+        var val = `{id={id},{position:{position}}}`.format({
+            "id": curdata.data,
+            "position": ar.map(x => x.lnt + " " + x.lat).join(",")
+        });
+        ReqdataP("wt?ls=" + data.type, val);
+    }
 
 </script>

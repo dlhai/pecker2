@@ -1,4 +1,4 @@
-﻿// CreateMark中的 UpdateCurData 需要先定义
+﻿// UpdateCurData中的 SaveData 需要先定义
 // ShowWindow中的 FieldToShow 需要先定义
 
 // 更新当前对象
@@ -7,21 +7,19 @@ function UpdateCurData(type, data) {
         g_curdata = { "type": type, "data": data };
         return;
     }
-    if (type == "undefine")
+    if (type == "undefine") {
+        if (g_curdata.type == "winderarea")
+            g_curdata.data.plg.disableEditing();
+        SaveData(g_curdata);
         return;
+    }
     if (g_curdata.type == type && g_curdata.data.id == data.id)
         return;
 
-    if (g_curdata.type == "winderarea") {
+    if (g_curdata.type == "winderarea")
         g_curdata.data.plg.disableEditing();
-    }
-    //else if (g_curdata.type == "winder") {
-    //    g_curdata.data.mk.disableDragging();
-    //}
-    //else if (g_curdata.type == "efan") {
-    //    g_curdata.data.mk.disableDragging();
-    //}
 
+    SaveData(g_curdata);
     g_curdata = { "type": type, "data": data };
 }
 
@@ -87,6 +85,10 @@ function CreatePoint(pos) {
 function CreatePolygon(pos) {
     var ar = pos.split(",").map(x => CreatePoint(x));
     return new BMap.Polygon(ar, { strokeColor: "Chocolate", strokeWeight: 2, strokeOpacity: 0.5 });
+}
+
+function points2str( ar ) {
+    return ar.map(x => x.lnt + " " + x.lat).join(",");
 }
 
 // 计算中心点位置
