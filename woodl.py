@@ -4,6 +4,7 @@ from flask import Flask,request, Response, jsonify
 from werkzeug.utils import secure_filename
 from flask_login import (LoginManager, login_required, login_user,
                              logout_user, UserMixin,current_user)
+import json
 import pdb
 
 app = Flask(__name__)
@@ -255,10 +256,15 @@ def upload():
 #测试链接 http://127.0.0.1:5000/wt
 @app.route("/wt", methods=['GET', 'POST'])
 def wt():
-    ss = request
-    upda
-    conn.execute()
-    pass
+    js = json.loads(request.data)
+    ret=obj()
+    ret.fun="wt"
+    ret.result = checkpriv(js)
+    if status == "200":
+        fdv = ",\n".join([ k + "='"+ v+"'" for k,v in js["val"].items()] )
+        sql = "update {0} set {1} where id={2}".format(js["ls"], fdv, js["id"])
+        conn.execute(sql)
+    return Response(tojson(ret), mimetype='application/json')
 
 #查询
 #测试链接 http://127.0.0.1:5000/rd?ls=[表名]&key1=val1&key2=val2....

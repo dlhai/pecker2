@@ -64,7 +64,15 @@ function CreateArea(area, cbclick) {
     area.lbl = CreateAreaLabel(area);
     g_map.addOverlay(area);
     area.plg.addEventListener("click", function (type, target, point, pixel) { cbclick(type, target, point, pixel,area); });
-    area.plg.addEventListener("lineupdate", function (type, target) { area.lbl.setPosition(CalCenter(area.plg.getPath())); });
+    area.plg.addEventListener("lineupdate", function (type, target) {
+       // filterpoint(area.plg.getPath());
+        area.lbl.setPosition(CalCenter(area.plg.getPath()));
+    });
+}
+
+function filterpoint(ar) {
+    if (ar.length <= 3)
+        return false;
 }
 
 function GetIcon(iconname) {

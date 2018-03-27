@@ -139,7 +139,6 @@
             $(this).html("展开");
         }
     }
-    {446565655255656565656556565
     // 创建树控件
     g_map.addControl(new OrganTreeControl());
     //-----------------OrganTreeControl end------------------------------------------------
@@ -172,7 +171,7 @@
         else
             position = [curdata.data.mk.getPosition()];
 
-        var val = `{id:{id},val:{position:"{position}"}}`.format({
+        var val = `{"ls":"{ls}","id":"{id}","val":{"position":"{position}"}}`.format({
             "ls": curdata.type, "id": curdata.data.id,
             "position": position.map(x => x.lng + " " + x.lat).join(",")
         });
