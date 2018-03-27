@@ -268,13 +268,14 @@ function Reqdata(url, ctx, fun) {
 
 function ReqdataP(url, data, ctx, cb) {
     var xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("POST", url, true);
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             jdata = $.parseJSON(xmlhttp.responseText);
             cb(jdata, ctx);
         }
     };
+    xmlhttp.open("POST", url, true);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
     xmlhttp.send(data);
 }
 

@@ -58,8 +58,8 @@
         });
 
         // 更新当前对象为自己
-        UpdateCurData("winderarea", area);
         if (g_modectrl.editmode){
+            UpdateCurData("winderarea", area);
             area.plg.enableEditing();
             g_efans.data.forEach(x => x.mk.enableDragging());
         }
@@ -139,7 +139,7 @@
             $(this).html("展开");
         }
     }
-
+    {446565655255656565656556565
     // 创建树控件
     g_map.addControl(new OrganTreeControl());
     //-----------------OrganTreeControl end------------------------------------------------
@@ -170,13 +170,13 @@
         if (curdata.type == "winderarea")
             position = curdata.data.plg.getPath();
         else
-            position = curdata.data.mk.getPosition();
+            position = [curdata.data.mk.getPosition()];
 
-        var val = `{id={id},{position:{position}}}`.format({
-            "id": curdata.data,
-            "position": ar.map(x => x.lnt + " " + x.lat).join(",")
+        var val = `{id:{id},val:{position:"{position}"}}`.format({
+            "ls": curdata.type, "id": curdata.data.id,
+            "position": position.map(x => x.lng + " " + x.lat).join(",")
         });
-        ReqdataP("wt?ls=" + data.type, val);
+        ReqdataP("/wt?ls=" + curdata.type, val);
     }
 
 </script>

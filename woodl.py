@@ -253,9 +253,12 @@ def upload():
 
 #查询
 #测试链接 http://127.0.0.1:5000/wt
-@app.route("/wt")
+@app.route("/wt", methods=['GET', 'POST'])
 def wt():
-   pass
+    ss = request
+    upda
+    conn.execute()
+    pass
 
 #查询
 #测试链接 http://127.0.0.1:5000/rd?ls=[表名]&key1=val1&key2=val2....
