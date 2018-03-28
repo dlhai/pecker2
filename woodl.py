@@ -252,7 +252,21 @@ def upload():
     f.save("./uploads/" + f.filename)
     return f.filename
 
-#查询
+#新建
+#测试链接 http://127.0.0.1:5000/cr
+@app.route("/cr", methods=['GET', 'POST'])
+def wt():
+    js = json.loads(request.data)
+    ret=obj()
+    ret.fun="cr"
+    ret.result = checkpriv(js)
+    if status == "200":
+        fdv = ",\n".join([ k + "='"+ v+"'" for k,v in js["val"].items()] )
+        sql = "insert into {0} set {1} where id={2}".format(js["ls"], fdv, js["id"])
+        conn.execute(sql)
+    return Response(tojson(ret), mimetype='application/json')
+
+#更新
 #测试链接 http://127.0.0.1:5000/wt
 @app.route("/wt", methods=['GET', 'POST'])
 def wt():

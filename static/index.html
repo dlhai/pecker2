@@ -28,6 +28,28 @@
                 }
             });
         }
+        function register() {
+            var formdata = new FormData(document.getElementById("reg"));
+            var account = formdata.get("account");
+            var password = formdata.get("password");
+            var name = formdata.get("name");
+            var tt = 0;
+            //var val = `{"ls":"{ls}","id":"{id}","val":{"position":"{position}"}}`.format({
+            //    "ls": curdata.type, "id": curdata.data.id,
+            //    "position": position.map(x => x.lng + " " + x.lat).join(",")
+            //});
+            //ReqdataP("/wt?ls=" + curdata.type, val);
+
+            //ReqdataP('/cr', )
+            //    ? account = ' + formdata.get("username") + "&pwd=" + formdata.get("password"), "", function (res) {
+            //    if (res.result == 200) {
+            //        window.location.href = '/static/frame.html'
+            //    }
+            //    else {
+            //        alert("用户名或密码错");
+            //    }
+            //});
+        }
 
     </script>
 
@@ -70,13 +92,13 @@
 		</div>
 		<div class="register w3layouts agileits">
 			<h2>注 册</h2>
-			<form action="#" method="post">
-				<input type="text" Name="Name" placeholder="手机号" required="">
-                <input type="password" Name="Password" placeholder="密码" required="">
-				<input type="text" Name="Email" placeholder="姓名" required="">
+			<form id="reg" action="#" method="post">
+				<input type="text" Name="account" placeholder="手机号" required="">
+                <input type="password" Name="password" placeholder="密码" required="">
+				<input type="text" Name="name" placeholder="姓名" required="">
 			</form>
 			<div class="send-button w3layouts agileits">
-					<input type="button" style='margin:0px 80px;' value="注册" onClick="window.location.href ='static/frame.html'">
+					<input type="button" style='margin:0px 80px;' value="注册" onClick="register()">
 			</div>
 			<div class="clear"></div>
 		</div>
