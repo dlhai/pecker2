@@ -173,21 +173,8 @@
     </section>
 
     <div class="xPanel2 xScroll" style="width:100px;border:0px;">
-        <section class="d_panel d_detail">
-            <header class="heading">基本信息<div style="float: right;"><a onClick="onAddUser()">添加</a> <a onClick="onEditUser(this)">编辑</a></div></header>
-            <div id="d_baseinf" class="x2Form" style="padding:5px 0px 5px 0px;"></div>
-        </section>
-        <section id="d_certiflist" class="d_panel d_detail">
-            <header class="heading">证件信息<div style="float: right;"><a href="#">编辑</a></div></header>
-        </section>
         <section id="d_edulist" class="d_panel d_detail">
             <header class="heading">受教育经历<div style="float: right;"><a href="#">编辑</a></div></header>
-        </section>
-        <section id="d_employlist" class="d_panel d_detail">
-            <header class="heading">就业经历<div style="float: right;"><a href="#">编辑</a></div></header>
-        </section>
-        <section id="d_opuslist" class="d_panel d_detail">
-            <header class="heading">发表作品<div style="float: right;"><a href="#">编辑</a></div></header>
         </section>
     </div>
 
@@ -255,37 +242,6 @@
         </div>
     </script>
 
-    <script id="tpl_certiflist" type="text/template">
-        <header class="heading">证件信息<div style="float: right;"><a href="#">编辑</a></div></header>
-        {% it.forEach((x,i)=>{ %}
-        <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <img style="width: 120px; height: 74px;" src="{%=x.img%}" />
-            </div>
-            <div class="d_data_item"><label>证件名称</label><div>{%=x.name%}</div></div>
-            <div class="d_data_item"><label>颁发时间</label><div>{%=x.issuedate%}</div></div>
-            <div class="d_data_item"><label>颁发机构</label><div style="width:404px;">{%=x.office%}</div></div>
-        </div>
-        {% }); %}
-    </script>
-
-    <script id="tpl_edulist" type="text/template">
-        <header class="heading">受教育经历<div style="float: right;"><a href="#">编辑</a></div></header>
-        {% it.forEach((x,i)=>{ %}
-        <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <img style="width: 120px; height: 74px;" src="{%=x.img1%}" />
-            </div>
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <img style="width: 120px; height: 74px;" src="{%=x.img2%}" />
-            </div>
-            <div class="d_data_item"><label>开始时间</label><div>{%=x.tmstart%}</div></div>
-            <div class="d_data_item"><label>截止时间</label><div>{%=x.tmend%}</div></div>
-            <div class="d_data_item"><label>学历</label><div>{%=x.qualif%}</div></div>
-            <div class="d_data_item"><label>教育机构</label><div>{%=x.edu%}</div></div>
-        </div>
-        {% }); %}
-    </script>
 
     <script id="tpl_employlist" type="text/template">
         <header class="heading">就业经历<div style="float: right;"><a href="#">编辑</a></div></header>

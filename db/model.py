@@ -120,6 +120,52 @@ def dict_user(depart_id,depart_table,job,skill):
     mail=rndmail(person)
     return dict(account=person.pinyin,pwd=person.pinyin,face=rnditem("_faceimage"),depart_id=depart_id,depart_table=str(int(getitembyname("_tbl",depart_table).id)),job=job,skill=skill,name=person.name,code=person.id,sex=id2sex(person.id),ethnic=rnditem("_ethnic"),birth=id2birth(person.id),origin=person.origin,idimg=rndaddition("身份证"),phone=str(int(person.phone)),qq=str(int(person.qq)),mail=mail,wechat=rndwechat(person,mail),addr=rnditem("_麦当劳门店").门店地址)
 
+tbl_certif=Table('certif', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('name',String(64)),
+	Column('time',Date),
+	Column('Organization',String(64)),
+	Column('image',Integer))
+def dict_certif:
+    return dict(name="",time="",Organization="",image="")
+
+tbl_edu=Table('edu', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('starttime',Date),
+	Column('endtime',Date),
+	Column('record',String(16)),
+	Column('Organization',String(32)),
+	Column('image1',Integer),
+	Column('image2',Integer))
+def dict_edu:
+    return dict(starttime="",endtime="",record="",Organization="",image1="",image2="")
+
+tbl_employ=Table('employ', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('Organization',String(32)),
+	Column('position',String(32)),
+	Column('starttime',Date),
+	Column('endtime',Date),
+	Column('image',Integer))
+def dict_employ:
+    return dict(Organization="",position="",starttime="",endtime="",image="")
+
+tbl_opus=Table('opus', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('opus_id',Integer),
+	Column('user_id',Integer),
+	Column('date',Date),
+	Column('title',String(64)),
+	Column('body',String(4096)))
+def dict_opus:
+    return dict(opus_id="",user_id="",date="",title="",body="")
+
+tbl_follow=Table('follow', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('user_id',Integer))
+def dict_follow:
+    return dict(user_id="")
+
 tbl_winderco=Table('winderco', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('name',String(64),unique=True),
@@ -371,6 +417,11 @@ conn.execute(tbl_base.insert(),[dict_base(x) for x in data("_fields")])
 
 
 conn.execute(tbl_admarea.insert(),[dict_admarea(x) for x in data("_全国行政区编号")])
+
+
+
+
+
 
 
 
