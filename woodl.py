@@ -257,12 +257,11 @@ def upload():
 @app.route("/cr", methods=['GET', 'POST'])
 def wt():
     js = json.loads(request.data)
-    ret=obj()
-    ret.fun="cr"
-    ret.result = checkpriv(js)
-    if status == "200":
-        fdv = ",\n".join([ k + "='"+ v+"'" for k,v in js["val"].items()] )
-        sql = "insert into {0} set {1} where id={2}".format(js["ls"], fdv, js["id"])
+    ret=check(js,"cr")
+    if ret.status == "200":
+        fields=",".join(map( x: "'"+x+"'", js["val"].keys()))
+		values=",".join(map( x: "'"+x+"'", js["val"].values()))
+        sql = "insert into {0}({1}) value({2})".format(js["ls"], fields,values)
         conn.execute(sql)
     return Response(tojson(ret), mimetype='application/json')
 
@@ -271,10 +270,8 @@ def wt():
 @app.route("/wt", methods=['GET', 'POST'])
 def wt():
     js = json.loads(request.data)
-    ret=obj()
-    ret.fun="wt"
-    ret.result = checkpriv(js)
-    if status == "200":
+    ret=check(js,"wt")
+    if ret.status == "200":
         fdv = ",\n".join([ k + "='"+ v+"'" for k,v in js["val"].items()] )
         sql = "update {0} set {1} where id={2}".format(js["ls"], fdv, js["id"])
         conn.execute(sql)
