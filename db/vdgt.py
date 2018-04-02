@@ -124,7 +124,7 @@ def rndtype(type):
         s = s[0:2]+"-"+s[2:4]+"-"+s[4:6]+"-"+s[6:]
         return s
     elif type=="car":
-        return ''.join(random.sample('京津冀晋蒙辽吉黑沪苏浙皖闽赣鲁豫鄂湘粤桂琼渝川黔滇藏陕甘青宁新台港澳',1)+
+        return ''.join(random.sample('京津冀晋蒙辽吉黑沪苏浙皖闽赣鲁豫鄂湘粤桂琼渝川黔滇藏陕甘青宁新',1)+
         random.sample("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 1)+['.']+
         random.sample(string.digits, 6))
     return ""

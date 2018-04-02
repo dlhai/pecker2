@@ -255,13 +255,22 @@ def upload():
 #新建
 #测试链接 http://127.0.0.1:5000/cr
 @app.route("/cr", methods=['GET', 'POST'])
-def wt():
+def cr():
     js = json.loads(request.data)
+<<<<<<< HEAD
     ret=check(js,"cr")
     if ret.status == "200":
         fields=",".join(map( x: "'"+x+"'", js["val"].keys()))
 		values=",".join(map( x: "'"+x+"'", js["val"].values()))
         sql = "insert into {0}({1}) value({2})".format(js["ls"], fields,values)
+=======
+    ret=obj()
+    ret.fun="cr"
+    ret.result = checkpriv(js)
+    if ret.result == "200":
+        fdv = ",\n".join([ k + "='"+ v+"'" for k,v in js["val"].items()] )
+        sql = "insert into {0} set {1} where id={2}".format(js["ls"], fdv, js["id"])
+>>>>>>> 8cd50902b72dd1ea47347099823b7b2750a21589
         conn.execute(sql)
     return Response(tojson(ret), mimetype='application/json')
 
