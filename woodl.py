@@ -255,7 +255,7 @@ def upload():
 #新建
 #测试链接 http://127.0.0.1:5000/cr
 @app.route("/cr", methods=['GET', 'POST'])
-def wt():
+def cr():
     js = json.loads(request.data)
     ret=obj()
     ret.fun="cr"
