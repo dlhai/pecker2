@@ -31,24 +31,32 @@
         function register() {
             var formdata = new FormData(document.getElementById("reg"));
             var account = formdata.get("account");
-            var password = formdata.get("password");
-            var name = formdata.get("name");
-            var tt = 0;
-            //var val = `{"ls":"{ls}","id":"{id}","val":{"position":"{position}"}}`.format({
-            //    "ls": curdata.type, "id": curdata.data.id,
-            //    "position": position.map(x => x.lng + " " + x.lat).join(",")
-            //});
-            //ReqdataP("/wt?ls=" + curdata.type, val);
+            if (account.length != 11) {
+                alert("手机号位数不正确！");
+                return;
+            }
 
-            //ReqdataP('/cr', )
-            //    ? account = ' + formdata.get("username") + "&pwd=" + formdata.get("password"), "", function (res) {
-            //    if (res.result == 200) {
-            //        window.location.href = '/static/frame.html'
-            //    }
-            //    else {
-            //        alert("用户名或密码错");
-            //    }
-            //});
+            var password1 = formdata.get("password1");
+            var password2 = formdata.get("password2");
+            if (password1 != password2) {
+                alert("两次输入的密码不一致！");
+                return;
+            }
+
+            var name = formdata.get("name");
+            if (account.length < 2) {
+                alert("名字长度不能少于2个汉字！");
+                return;
+            }
+
+            var val = `{"ls":"{ls}","val":{"account":"{account}","pwd":"{pwd}","name":"{name}"}}`.format({
+                "ls": "user", "account": account, "pwd": password1, "name":name});
+            ReqdataP('/cr', val, "", function (res) {
+                if (res.result == 200)
+                    alert("注册成功！");
+                else
+                    alert("注册失败！");
+            });
         }
 
     </script>
@@ -94,7 +102,8 @@
 			<h2>注 册</h2>
 			<form id="reg" action="#" method="post">
 				<input type="text" Name="account" placeholder="手机号" required="">
-                <input type="password" Name="password" placeholder="密码" required="">
+                <input type="password" Name="password1" placeholder="密码" required="">
+                <input type="password" Name="password2" placeholder="密码" required="">
 				<input type="text" Name="name" placeholder="姓名" required="">
 			</form>
 			<div class="send-button w3layouts agileits">

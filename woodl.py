@@ -260,7 +260,7 @@ def wt():
     ret=obj()
     ret.fun="cr"
     ret.result = checkpriv(js)
-    if status == "200":
+    if ret.result == "200":
         fdv = ",\n".join([ k + "='"+ v+"'" for k,v in js["val"].items()] )
         sql = "insert into {0} set {1} where id={2}".format(js["ls"], fdv, js["id"])
         conn.execute(sql)
