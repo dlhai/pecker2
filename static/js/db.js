@@ -74,6 +74,7 @@
             { name: "人员", url: "user3.html" }]
     },
     { "id": "17", "type": "repair", "name": "技工", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
+    { "id": "18", "type": "repair", "name": "公众", },
 ];
 
 var branch = {
