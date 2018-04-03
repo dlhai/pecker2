@@ -20,9 +20,12 @@ function xrimagelist(img) {
 
 //背景带十字，点击可换图
 function xrimagelive(img) {
-    var tpl = `<label for="{id}"><img style="width: 100%; height: 100%;" {img} />
+    var image = img == "" ? "" : 'src="' + img + '"')
+    var width = arguments[1] ? arguments[1] : "100%";
+    var heigh = arguments[2] ? arguments[2] : "100%";
+    var tpl = `<label for="{id}"><img style="width: {width}; height: {heigh};" {image} />
                         <input type="file" id="{id}" accept="image/*"></label>`;
-    return tpl.format({ id: rndstr(8), img: (img == "" ? "" : 'src="' + img + '"') });
+    return tpl.format({ id: rndstr(8), image: image, width: width, height: heigh });
 }
 //背景带十字，点击可换图的列表
 function xrimagelistlive(imglist) {

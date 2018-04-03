@@ -4,15 +4,15 @@
     <meta charset="utf-8">
     <title>啄木鸟风电维保系统</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link rel="stylesheet" href="css/bootstrap.css" />
-    <script src="js/jquery.js"></script>
-    <script src="js/bootstrap.js"></script>
-    <script type="text/javascript" src="js/doTe.js"></script>
-    <script src="js/utils.js"></script>
-    <link rel="stylesheet" href="css/xpecker.css" />
-    <script src="js/Cube.js"></script>
-    <script src="js/db.js"></script>
-    <script src="js/xpecker.js"></script>
+    <link rel="stylesheet" href="static/css/bootstrap.css" />
+    <script src="static/js/jquery.js"></script>
+    <script src="static/js/bootstrap.js"></script>
+    <script type="text/javascript" src="static/js/doTe.js"></script>
+    <script src="static/js/utils.js"></script>
+    <link rel="stylesheet" href="static/css/xpecker.css" />
+    <script src="static/js/Cube.js"></script>
+    <script src="static/js/db.js"></script>
+    <script src="static/js/xpecker.js"></script>
 
     <script src="laydate/laydate.js"></script>
     <style>
@@ -42,42 +42,41 @@
         }
     </style>
 </head>
-<body class="xFCsrow">
-    <div id="curitem" class="xFCscol xFIfixed" style="width: 300px;">
-        <section class="xPanel2">
-            <header>栏目<div style="float: right;"><a id="btn_new" href="javascript:onNewMatin()">新建</a></div></header>
-            <div id="g_matouts_editing" class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"></div>
-        </section>
-        <section class="xPanel2">
-            <header>栏目</header>
-            <div id="g_matouts_checking" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
-        </section>
-    </div>
-    <section class="xPanel2">
-        <header>栏目</header>
-        <div class="matin xScroll" style="padding: 5px;height:100px;flex-grow: 1;">
-            <header class="xFCsrow">
-            </header>
-            <div id="recs_table" style="margin:20px;">
-                <table class="xTable">
-                </table>
-            </div>
-            <footer class="xFCsrow" sstyle="margin-top:20px;">
-            </footer>
-            <div class="buttonarray" style="margin-top:20px;margin-right:20px;border-top:2px dashed #6a923d;padding-top:30px;">
-            </div>
-            <div id="sect_flowlist" style="margin-top:50px;"></div>
+<body>
+    <header style="height:30px;" ><div style="float:right;"><a href="static/login.html">登录&nbsp;&nbsp;注册</a></div></header>
+    <div class="xFCsrow">
+        <div id="curitem" class="xFCscol xFIfixed" style="width: 300px;">
+            <section class="xPanel2">
+                <header>积分榜</header>
+                <div id="g_matouts_editing" style="padding: 5px;height:100px;flex-grow: 1;"></div>
+            </section>
+            <section class="xPanel2">
+                <header>新人榜</header>
+                <div id="g_matouts_checking" style="padding:5px;height:100px;flex-grow: 1;"></div>
+            </section>
         </div>
-    </section>
-    <div class="xFCscol xFIfixed" style="width: 300px;">
-        <section class="xPanel2">
-            <header>栏目</header>
-            <div id="g_matouts_outwh" class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"></div>
-        </section>
-        <section class="xPanel2">
-            <header>栏目</header>
-            <div id="g_matouts_waitrecv" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
-        </section>
+        <div class="xFCscol">
+            <section class="xPanel2">
+                <header>新闻</header>
+                <div class="matin" style="padding: 5px;height:100px;flex-grow: 1;">
+                </div>
+            </section>
+            <section class="xPanel2">
+                <header>最新</header>
+                <div class="matin" style="padding: 5px;height:100px;flex-grow: 1;">
+                </div>
+            </section>
+        </div>
+        <div class="xFCscol xFIfixed" style="width: 300px;">
+            <section class="xPanel2">
+                <header>推荐</header>
+                <div id="g_matouts_outwh" style="padding: 5px;height:100px;flex-grow: 1;"></div>
+            </section>
+            <section class="xPanel2">
+                <header>排行</header>
+                <div id="g_matouts_waitrecv" style="padding:5px;height:100px;flex-grow: 1;"></div>
+            </section>
+        </div>
     </div>
 
     <script type="text/javascript">

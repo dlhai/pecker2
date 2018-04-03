@@ -71,99 +71,7 @@
         }
     </style>
 
-    <style>/*旧的style，在更新完用户详细信息后将被删除*/
-        html, body {
-            height: 100%;
-            overflow: hidden;
-        }
-        .d_dtree-scroll {
-            width: 100%;
-            height: 100%;
-            overflow-y: scroll;
-            overflow-x: scroll;
-        }
 
-        .d_panel {
-            border-radius: 4px;
-            background-color: #ffffff;
-            border: 1px solid #dddddd;
-            border-color: #e0e4e8;
-        }
-        .d_panel .heading {
-            border-bottom: 1px solid #dddddd;
-            padding: 10px 15px;
-            color: #656565;
-        }
-        .d_panel .heading2 {
-            border-bottom: 1px solid #dddddd;
-            padding: 5px;
-        }
-        .d_panel .heading2 strong {
-            padding-left: 10px;
-        }
-
-        .d_data_item {
-            margin: 5px 10px;
-            display: inline-block;
-        }
-
-        .d_data_item label {
-            width: 60px;
-            text-align:right;
-        }
-        .d_data_item div {
-            border-radius: 4px;
-            border: 1px solid #dddddd;
-            display:inline-block;
-            padding:5px 10px;
-            margin:0px 5px;
-            width:200px;
-        }
-
-        .d_detail {
-            margin-right: 2px;
-            margin-bottom: 10px;
-        }
-
-        .d_table {
-            width: 100%;
-        }
-        .d_table thead > tr > th {
-            text-align: center;
-            background-color: #f0f0f0;
-        }
-        .d_table > tbody > tr:nth-child(2n) > td {
-            background-color: #f5f5f5;
-        }
-        .d_table thead > tr > th, .d_table tbody > tr > td{
-            padding: 2px 4px;
-            vertical-align: top;
-        }
-
-        .table-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
-            background-color: #f0f0f5 !important;
-        }
-
-        .d_rAngle {
-            border-radius: 4px;
-            border: 1px solid #dddddd;
-            border-color: #e0e4e8;
-        }
-
-        .d_dItem {
-            margin: 5px 15px;
-            display: inline-block;
-        }
-
-        .d_dImage {
-            margin-top: 5px;
-            margin-bottom: 5px;
-            margin-left: 15px;
-            margin-right: 23px;
-            display: inline-block;
-        }
-
-    </style> 
 </head>
 <body class="xFCsrow" >
     <section class="xPanel2" style="width:100px"><!--两个子项都固定宽度100，使它们获得相同的增量-->
@@ -178,99 +86,24 @@
         </section>
     </div>
 
-    <div class="modal fade" id="ModalDlg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">
-        <div class="modal-dialog" style="width:900px">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" id="ModalDlgTitle">模态框（Modal）标题</h4>
-                </div>
-                <div id="ModalDlgContent" class="modal-body" style="padding:5px 0px">
-                    <div><label>标识</label><input name="id" value="1234"></div>
-                    <div><label>所属风场</label><input value="69" /></div>
-                    <div><label>名称</label><input value="达尔罕茂明安联合旗风区" /></div>
-                    <div><label>备注</label><textarea name="a" style="resize:none;width:500px;max-height:45px;">小重山章良能柳暗花明春事深,小阑红芍药,已抽簪。雨馀风软碎鸣禽,迟迟日,犹带一分阴。往事莫沉吟，身闲时序好、且凳临。旧游无处不堪寻，无寻处、惟有少年心。</textarea></div>
-                    <div><label>位置</label><textarea name="a" style="resize:none;width:500px;max-height:45px;">109.790407 40.523169,109.857074 40.523169,109.857074 40.613169,109.790407 40.613169</textarea></div>
-                </div>
-                <div class="modal-footer">
-                    <div style="float:left;"><button type="button" class="btn btn-default" style="color:#aaaaaa">删除</button></div>
-                    <button type="button" class="btn btn-primary">提交</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal -->
-    </div>
-
-    <script id="tpl_user_pane" type="text/template">
-        <div style="height:240px;width:280px;float: left; display:block;">
-            <div class="pane_image" style="width: 100%; height: 80px; margin: 0px; padding:0px; display:block;border:0px;">
-                <div style="float: left; margin:0px;"><img style="width: 78px; height: 78px;" src="{%=it.face%}" /></div>
-                <div style="margin-top:0px;"><label>帐号</label><div style="display:inline-block;">{%=it.account%}</div></div>
-                <div><label>密码</label><div>***</div></div>
-            </div>
-            <img style="width: 280px; height: 160px;" src="{%=it.idimg%}" />
-        </div>
-    </script>
-
-    <script id="tpl_user_new" type="text/template">
-        <div class="x2Form" style="padding: 0px 0px 0px 30px;">
-            <div style="float: left; margin:0px;"><img style="width: 100px;height: 180px;" src="img/bird.jpg" /></div>
-            <div><label>帐号</label><input id="username"/></div>
-            <div><label>密码</label><input /></div>
-            <div><label>密码</label><input /></div>
-        </div>
-    </script>
-
-    <script id="tpl_user_form" type="text/template">
-        <div style="height:240px;width:280px;float: left; display:block;">
-            <div class="pane_image" style="width: 100%; height: 80px; margin: 0px; padding:0px; display:block;border:0px;">
-                <div style="float: left; margin:0px;">
-                    <label class="ImgBlank" style="display:inline-block;width:78px;margin:0px;" for="SelectFace"> <img id="viewface" style="width: 78px; height: 78px;;z-index: 999;" src="{%=it.face%}"/> </label>
-                    <input type="file" id="SelectFace" accept="image/*" style="display:none;" onchange="imgPreview(this,'viewface')">
-                </div>
-                <div style="margin-top:0px;"><label>帐号</label><div style="display:inline-block;">{%=it.account%}</div></div>
-                <div style="position:relative;"><label>密码</label><div class="drop" style="border: 1px solid #95b7ff;"><label style="color:royalblue;margin:0px;">点击修改</label></div>
-                <div class="dropwnd" style="left:-6px;width:190px;height:100px;padding:5px;display:none;">
-                    <label style="margin-right:5px;">旧密码</label><input style="width:140px;height:20px;">
-                    <label style="margin-right:5px;">新密码</label><input style="width:140px;height:20px;">
-                    <label style="margin-right:5px;">新密码</label><input style="width:140px;height:20px;">
-                    <div style="float:right"><button onclick="HideWnd(this)">确定</button> <button onclick="HideWnd(this)">取消</button></div>
-                </div></div>
-            </div>
-            <label class="ImgBlank" style="display:inline-block;" for="selectidimg"> <img id="viewidimg" style="width: 280px; height: 160px;z-index: 999;" src="{%=it.idimg%}" /> </label>
-            <input type="file" id="selectidimg" accept="image/*" style="display:none;" onchange="imgPreview(this,'viewidimg')">
-        </div>
-    </script>
-
-
-    <script id="tpl_employlist" type="text/template">
-        <header class="heading">就业经历<div style="float: right;"><a href="#">编辑</a></div></header>
+    <script id="tpl_edulist" type="text/template">
+        <header class="heading">受教育经历<div style="float: right;"><a href="#">编辑</a></div></header>
         {% it.forEach((x,i)=>{ %}
-        <div style="width: 100%;{% if (i%2==0){ %}background: #f5f5f5; {% } %}">
+        <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
             <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <img style="width: 120px; height: 74px;" src="{%=x.img%}" />
+                <img style="width: 120px; height: 74px;" src="{%=x.img1%}" />
             </div>
-            <div class="d_data_item"><label>工作单位</label><div>{%=x.workin%}</div></div>
-            <div class="d_data_item"><label>岗位</label><div>{%=x.pos%}</div></div>
+            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
+                <img style="width: 120px; height: 74px;" src="{%=x.img2%}" />
+            </div>
             <div class="d_data_item"><label>开始时间</label><div>{%=x.tmstart%}</div></div>
-            <div class="d_data_item"><label>结束时间</label><div>{%=x.tmend%}</div></div>
+            <div class="d_data_item"><label>截止时间</label><div>{%=x.tmend%}</div></div>
+            <div class="d_data_item"><label>学历</label><div>{%=x.qualif%}</div></div>
+            <div class="d_data_item"><label>教育机构</label><div>{%=x.edu%}</div></div>
         </div>
         {% }); %}
     </script>
 
-    <script id="tpl_opuslist" type="text/template">
-        <header class="heading">发表作品<div style="float: right;"><a href="#">编辑</a></div></header>
-        {% it.forEach((x,i)=>{ %}
-        <div style="width: 100%;{% if (i%2==0){ %}background: #f5f5f5; {% } %}">
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <a href="{%=x.link%}"><img style="width: 120px; height: 74px;" src="{%=x.img%}" /></a>
-            </div>
-            <div class="d_data_item"><label>发表媒体</label><div>{%=x.journal%}</div></div>
-            <div class="d_data_item"><label>发表时间</label><div>{%=x.date%}</div></div>
-            <div class="d_data_item"><label>标题</label><div style="width:404px;">{%=x.title%}</div></div>
-        </div>
-        {% }); %}
-    </script>
 
     <script type="text/javascript">
         var tpl_certiflist = doT.template(document.getElementById('tpl_certiflist').innerHTML);
