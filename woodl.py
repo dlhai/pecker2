@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.secret_key = '1The2quick3brown4fox5jumps6over7the8lazy9dog0'
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
-login_manager.login_view = '/static/index.html'
+login_manager.login_view = '/static/login.json'
 login_manager.init_app(app)
 engine = create_engine('sqlite:///./db/pecker.db')
 #engine.echo = True
@@ -122,6 +122,7 @@ def QueryObj( sql ):
 #def to_json( qa ):
 #    return "["+ ",\n".join(["{"+",".join(['"'+str(t[0])+'":"'+str(t[1])+'"' for t in zip(row._parent.keys,row._row)])+"}" for row in qa ]) + "]"
 
+#把(a,b,c) 变成 in ('a','b','c')
 def To(k,v):
     if v[0] == "(":
         return k +" in ("+",".join( ["'"+i+"'" for i in v.strip("()").split(",")]) + ")"
@@ -143,6 +144,13 @@ def query4(ls,**kw):
     r += "\n}\n"
     return Response(r, mimetype='application/json')
 
+#替代query4， 与之区别是先查询成对象，然后再对对象json化，更条理，更精简，query4与jquery都可以不要了
+def query5(ls,**kw):
+    r=obj(result=200,ls=ls)
+    for k,v in kw.items():
+        setattr(r,k,QueryObj(v))
+    return Response(tojson(r), mimetype='application/json')
+
 def loaduser(where):
     ret = QueryObj( "select * from user where "+where)
     if len(ret) <= 0:
@@ -161,6 +169,26 @@ def check(js,th):
     return obj(result="200")
 
 #############################################################
+
+#首页
+@app.route("/")
+def index():
+    return app.send_static_file('index.html')
+
+#注册
+#测试链接 http://127.0.0.1:5000/cr
+@app.route("/reg", methods=['GET', 'POST'])
+@login_required
+def reg():
+    js = json.loads(request.data)
+    ret=check(js,"reg")
+    if ret.result == "200":
+        fields=",".join(map( lambda x: "'"+x+"'", js["val"].keys()))
+        values=",".join(map( lambda x: "'"+x+"'", js["val"].values()))
+        sql = "insert into user({0}) values({1})".format(fields,values)
+        conn.execute(sql)
+        user = loaduser("account='%s'"%js["account"])
+    return Response(tojson(ret), mimetype='application/json')
  
 @login_manager.user_loader
 def load_user(user_id):
@@ -176,44 +204,16 @@ def login():
         return '{"login":"'+param['account']+'","result":200}\n'
     else:
         return '{"login":"'+param['account']+'","result":404}\n'
- 
-@app.route('/logout', methods=['GET', 'POST'])
-
-@login_required
-def logout():
-    logout_user()
-    return "logout page"
- 
-# test method
-@app.route('/test')
-@login_required
-def test():
-    return current_user.name+" you allowed！"
-
-#############################################################
-
-#登录表单
-@app.route("/")
-def index():
-    return app.send_static_file('index.html')
-
-#@app.route("/login")
-#def login():
-#    param = request.args.to_dict()
-#    user = QueryObj( "select * from user where account='%s'"%param["account"])
-#    if len(user)>0 and hasattr( user[0], "account" ) and user[0].pwd == param["pwd"]:
-#        return '{"login":"'+param['account']+'","result":200}\n'
-#    else:
-#        return '{"login":"'+param['account']+'","result":404}\n'
 
 #frame用来读取当前用户信息，需要所在单位名称、下级单位列表
 @app.route("/curuserinf")
 @login_required
 def curuserinf():
-    ret = QueryObj( "select id,account,name,face,depart_id,depart_table,job from user where id="+str(current_user.id))
+    ret = QueryObj( "select * from user where id="+str(current_user.id))
     if len(ret) <= 0:
         return '{"roleuser":"'+param['account']+'","result":404}\n'
     user = ret[0]
+    del user.pwd
 
     #找到用户的所在单位，若所在单位是风场，则需要读取风区列表
     if user.depart_table != 0: 
@@ -225,7 +225,33 @@ def curuserinf():
     ret.fun="curuserinf"
     ret.result = "200"
     ret.data = user
+    ret.fields=QueryObj(select(base.sl).where(base.c.table=="user"))
+    print(tojson(ret))
     return Response(tojson(ret), mimetype='application/json')
+ 
+# test method
+@app.route('/test')
+@login_required
+def test():
+    return current_user.name+" you allowed！"
+
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    logout_user()
+    return "logout page"
+ 
+#############################################################
+
+#@app.route("/login")
+#def login():
+#    param = request.args.to_dict()
+#    user = QueryObj( "select * from user where account='%s'"%param["account"])
+#    if len(user)>0 and hasattr( user[0], "account" ) and user[0].pwd == param["pwd"]:
+#        return '{"login":"'+param['account']+'","result":200}\n'
+#    else:
+#        return '{"login":"'+param['account']+'","result":404}\n'
+
 
 #frame用来填用户角色组合框
 @app.route("/roleuserall") 
@@ -261,6 +287,7 @@ def upload():
 #新建
 #测试链接 http://127.0.0.1:5000/cr
 @app.route("/cr", methods=['GET', 'POST'])
+@login_required
 def cr():
     js = json.loads(request.data)
     ret=check(js,"cr")

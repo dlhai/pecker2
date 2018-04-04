@@ -259,8 +259,10 @@ function Reqdata(url, ctx, fun) {
     xmlhttp.open("GET", url, true);
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            jdata = $.parseJSON(xmlhttp.responseText);
-            fun(jdata, ctx);
+            json = $.parseJSON(xmlhttp.responseText);
+            if (json.result != "200")
+                alert("方法："+ctx+"\n应答：["+json.result+"]"+json.msg)
+            fun(json, ctx);
 //            cache[url] = jdata;
         }
     };
@@ -271,8 +273,10 @@ function ReqdataP(url, data, ctx, cb) {
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            jdata = $.parseJSON(xmlhttp.responseText);
-            cb(jdata, ctx);
+            json = $.parseJSON(xmlhttp.responseText);
+            if (json.result != "200")
+                alert("方法：" + ctx + "\n应答：[" + json.result + "]" + json.msg)
+            cb(json, ctx);
         }
     };
     xmlhttp.open("POST", url, true);
@@ -286,8 +290,10 @@ function ReqdataS(url, ctx, fun) {
     xmlhttp.open("GET", url, false);
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            jdata = $.parseJSON(xmlhttp.responseText);
-            fun(jdata, ctx);
+            json = $.parseJSON(xmlhttp.responseText);
+            if (json.result != "200")
+                alert("方法：" + ctx + "\n应答：[" + json.result + "]" + json.msg)
+            fun(json, ctx);
         }
     };
     xmlhttp.send();

@@ -32,10 +32,10 @@
         function register() {
             var formdata = new FormData(document.getElementById("reg"));
             var account = formdata.get("account");
-            if (account.length != 11) {
-                alert("手机号位数不正确！");
-                return;
-            }
+            //if (account.length != 11) {
+            //    alert("手机号位数不正确！");
+            //    return;
+            //}
 
             var password1 = formdata.get("password1");
             var password2 = formdata.get("password2");
@@ -44,15 +44,15 @@
                 return;
             }
 
-            var name = formdata.get("name");
-            if (account.length < 2) {
-                alert("名字长度不能少于2个汉字！");
-                return;
-            }
+            //var name = formdata.get("name");
+            //if (account.length < 2) {
+            //    alert("名字长度不能少于2个汉字！");
+            //    return;
+            //}
 
-            var val = `{"ls":"{ls}","val":{"account":"{account}","pwd":"{pwd}","name":"{name}"}}`.format({
-                "ls": "user", "account": account, "pwd": password1, "name":name});
-            ReqdataP('/cr', val, "", function (res) {
+            var val = `{"val":{"account":"{account}","pwd":"{pwd}"}}`.format({
+                "account": account, "pwd": password1});
+            ReqdataP('/reg', val, "", function (res) {
                 if (res.result == 200)
 					window.location.href = '/static/user_init0.html'
                 else
@@ -105,7 +105,7 @@
 				<input type="text" Name="account" placeholder="手机号" required="">
                 <input type="password" Name="password1" placeholder="密码" required="">
                 <input type="password" Name="password2" placeholder="密码" required="">
-				<input type="text" Name="name" placeholder="姓名" required="">
+				<!--input type="text" Name="name" placeholder="姓名" required=""-->
 			</form>
 			<div class="send-button w3layouts agileits">
 					<input type="button" style='margin:0px 80px;' value="注册" onClick="register()">

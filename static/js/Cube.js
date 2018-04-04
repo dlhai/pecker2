@@ -20,7 +20,7 @@ function xrimagelist(img) {
 
 //背景带十字，点击可换图
 function xrimagelive(img) {
-    var image = img == "" ? "" : 'src="' + img + '"')
+    var image = img == "" ? "" : 'src="' + img + '"';
     var width = arguments[1] ? arguments[1] : "100%";
     var heigh = arguments[2] ? arguments[2] : "100%";
     var tpl = `<label for="{id}"><img style="width: {width}; height: {heigh};" {image} />
@@ -130,6 +130,8 @@ function RenderFormItem(type, attr, val )
     var r = "";
     if (type == "div")
         r += "<div " + attr + ">" + val + "</div>";
+    else if (field.ftype == "div_long")
+        r += "<div " + attr + ' style="width: 490px;">' + val + "</div>";
     else if (type == "input")
         r += '<input ' + attr + '" value="' + val + '"/>';
     else if (type == "input_long")
@@ -157,20 +159,7 @@ function RenderFormIn(entity, fields, cb) {
         var val = cb != undefined ? cb(entity, field) : val;
 
         r += "<div><label>" + field.title + "</label>";
-        if (field.ftype == "div")
-            r += "<div " + attr + ">" + val + "</div>";
-        if (field.ftype == "div_long")
-            r += "<div " + attr + ' style="width: 490px;">' + val + "</div>";
-        else if (field.ftype == "input")
-            r += '<input ' + attr + ' name="' + field.name + '" value="' + val + '"/>';
-        else if (field.ftype == "input_long")
-            r += '<input ' + attr + ' style="width:490px;" name="' + field.name + '" value="' + val + '" />';
-        else if (field.ftype == "textarea")
-            r += '<textarea ' + attr + ' style="resize:none;width:490px;max-height:45px;" name="' + field.name + '">' + val + '</textarea>';
-        else if (field.ftype == "select")
-            r += '<select ' + attr + ' name="' + field.name + '">' + val + '</select>';
-        else if (field.ftype == "date")
-            r += '<input ' + attr + ' name="' + field.name + '" value="' + val + '" onClick="laydate()" />';
+        r += RenderFormItem(field.ftype, attr, val);
         r += "</div>";
     });
     return r;
