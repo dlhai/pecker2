@@ -1,11 +1,34 @@
-#encoding:utf-8
+#encoding:utf8
 from sqlalchemy import *
 from flask import Flask,request, Response, jsonify
 from werkzeug.utils import secure_filename
+from flask_login import (LoginManager, login_required, login_user,
+                             logout_user, UserMixin,current_user)
+import json
 import pdb
 
+app = Flask(__name__)
+app.secret_key = '1The2quick3brown4fox5jumps6over7the8lazy9dog0'
+login_manager = LoginManager()
+login_manager.session_protection = 'strong'
+login_manager.login_view = '/static/login.json'
+login_manager.init_app(app)
+engine = create_engine('sqlite:///./db/pecker.db')
+#engine.echo = True
+metadata = MetaData(engine)
+conn = engine.connect()
+
 class obj:
-    pass
+    def __init__(self,  **kw ):
+        for k,v in kw.items():
+            setattr( self, k, v)
+
+# user models
+class User(UserMixin):
+    def __init__(self,user ):
+        self.__dict__ = user.__dict__
+    def get_id(self):
+        return self.id
 
 def tojson(o):
     if type(o) == type([]):
@@ -14,15 +37,10 @@ def tojson(o):
         return "{"+",".join(['"'+k+'":'+tojson(v) for k,v in o.items() ])+"}\n";
     elif type(o) == type(obj()):
         return tojson(o.__dict__)
+    elif o == None:
+        return '""'
     else:
         return '"'+str(o)+'"'
-
-app = Flask(__name__) 
-
-engine = create_engine('sqlite:///./db/pecker.db')
-#engine.echo = True
-metadata = MetaData(engine)
-conn = engine.connect()
 
 db_tbl = [
     { "id": "0", "name": "none", "title": "占位" },
@@ -91,7 +109,6 @@ base=tables["base"]
 base.sl = [base.c.title, base.c.name, base.c.forder, base.c.ftype, base.c.twidth, base.c.tstyle]
 organ = { "root": "winderco", "winderco": "winderprov", "winderprov": "winder", "winder":"winderarea","winderarea":"efan" }
 
-
 def QueryObj( sql ):
     result = conn.execute(sql).fetchall()
     ret = []
@@ -107,6 +124,7 @@ def QueryObj( sql ):
 #def to_json( qa ):
 #    return "["+ ",\n".join(["{"+",".join(['"'+str(t[0])+'":"'+str(t[1])+'"' for t in zip(row._parent.keys,row._row)])+"}" for row in qa ]) + "]"
 
+#把(a,b,c) 变成 in ('a','b','c')
 def To(k,v):
     if v[0] == "(":
         return k +" in ("+",".join( ["'"+i+"'" for i in v.strip("()").split(",")]) + ")"
@@ -128,45 +146,124 @@ def query4(ls,**kw):
     r += "\n}\n"
     return Response(r, mimetype='application/json')
 
-#登录表单
-@app.route("/")
-def index():
-    return app.send_static_file('index.html')
+#替代query4， 与之区别是先查询成对象，然后再对对象json化，更条理，更精简，query4与jquery都可以不要了
+def query5(ls,**kw):
+    r=obj(result=200,ls=ls)
+    for k,v in kw.items():
+        setattr(r,k,QueryObj(v))
+    return Response(tojson(r), mimetype='application/json')
 
-@app.route("/login")
-def login():
-    param = request.args.to_dict()
-    user = QueryObj( "select * from user where account='%s'"%param["account"])
-    if len(user)>0 and hasattr( user[0], "account" ) and user[0].pwd == param["pwd"]:
-        return '{"login":"'+param['account']+'","result":200}\n'
-    else:
-        return '{"login":"'+param['account']+'","result":404}\n'
-
-#frame用来读取当前用户信息，需要所在单位名称、下级单位列表
-@app.route("/roleuser") 
-def roleuser():
-    param = request.args.to_dict()
-    
-    ret = QueryObj( "select id,account,name,face,depart_id,depart_table,job from user where account='%s'"%(param["account"]))
+def loaduser(where):
+    ret = QueryObj( "select * from user where "+where)
     if len(ret) <= 0:
-        return '{"roleuser":"'+param['account']+'","result":404}\n'
-    user = ret[0]
-
+        return
     #找到用户的所在单位，若所在单位是风场，则需要读取风区列表
-    if user.depart_table != 0: 
+    user = ret[0]
+    if user.depart_table != None: 
         tbl = gettbl(user.depart_table)
         user.depart = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0]
         if tbl["name"] == "winder":
             user.sub = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
-    else:
-        user.depart_name = ""
+    return user
 
+#权限检查
+def check(js,th):
+    return obj(result="200")
+
+#############################################################
+@login_manager.user_loader
+def load_user(user_id):
+    user = loaduser("id='%d'"%user_id)
+    return User(user)
+
+#首页
+@app.route("/")
+def index():
+    return app.send_static_file('index.html')
+
+#注册
+#测试链接 http://127.0.0.1:5000/cr
+@app.route("/reg", methods=['GET', 'POST'])
+def reg():
+    js = json.loads(request.data)
+    ret=check(js,"reg")
+    if ret.result == "200":
+        fields=",".join(map( lambda x: "'"+x+"'", js["val"].keys()))
+        values=",".join(map( lambda x: "'"+x+"'", js["val"].values()))
+        sql = "insert into user({0}) values({1})".format(fields,values)
+        try:
+            conn.execute(sql)
+            user = loaduser("account='%s'"%js["account"])
+        except Exception as e:
+            if e.args[0].find( 'UNIQUE constraint failed: user.account' ) != -1:
+                ret.result = 1001
+                ret.msg = "用户名已存在"
+            else:
+                ret.result = 1000
+                ret.msg = "其他错误"
+    return Response(tojson(ret), mimetype='application/json')
+ 
+@app.route('/login')
+def login():
+    param = request.args.to_dict()
+    user = loaduser("account='%s'"%param["account"])
+    if user is not None and user.pwd == param["pwd"]:
+        login_user(User(user))
+        fmt = '{"login":"%s","result":"200","nexturl":"%s"}'
+        if 0<user.status<5:
+            return fmt%(param['account'], '/static/user_init'+str(user.status)+'.html')
+        else:
+            return fmt%(param['account'], '/static/frame.html')
+    else:
+        return '{"login":"'+param['account']+'","result":404}\n'
+
+#frame用来读取当前用户信息，需要所在单位名称、下级单位列表
+@app.route("/curuserinf")
+@login_required
+def curuserinf():
+    ret = QueryObj( "select * from user where id="+str(current_user.id))
+    if len(ret) <= 0:
+        return '{"roleuser":"'+param['account']+'","result":404}\n'
+    user = ret[0]
+    del user.pwd
+
+    #找到用户的所在单位，若所在单位是风场，则需要读取风区列表
+    if user.depart_table != None: 
+        tbl = gettbl(user.depart_table)
+        user.depart = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0]
+        if tbl["name"] == "winder":
+            user.sub = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
     ret=obj()
-    ret.fun="roleuser"
-    ret.param=param
+    ret.fun="curuserinf"
     ret.result = "200"
     ret.data = user
+    ret.fields=QueryObj(select(base.sl).where(base.c.table=="user"))
+    print(tojson(ret))
     return Response(tojson(ret), mimetype='application/json')
+ 
+# test method
+@app.route('/test')
+@login_required
+def test():
+    return current_user.name+" you allowed！"
+
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    logout_user()
+    return "logout page"
+ 
+#############################################################
+
+#@app.route("/login")
+#def login():
+#    param = request.args.to_dict()
+#    user = QueryObj( "select * from user where account='%s'"%param["account"])
+#    if len(user)>0 and hasattr( user[0], "account" ) and user[0].pwd == param["pwd"]:
+#        return '{"login":"'+param['account']+'","result":200}\n'
+#    else:
+#        return '{"login":"'+param['account']+'","result":404}\n'
+
 
 #frame用来填用户角色组合框
 @app.route("/roleuserall") 
@@ -199,6 +296,31 @@ def upload():
     f.save("./uploads/" + f.filename)
     return f.filename
 
+#新建
+#测试链接 http://127.0.0.1:5000/cr
+@app.route("/cr", methods=['GET', 'POST'])
+@login_required
+def cr():
+    js = json.loads(request.data)
+    ret=check(js,"cr")
+    if ret.result == "200":
+        fields=",".join(map( lambda x: "'"+x+"'", js["val"].keys()))
+        values=",".join(map( lambda x: "'"+x+"'", js["val"].values()))
+        sql = "insert into {0}({1}) values({2})".format(js["ls"], fields,values)
+        conn.execute(sql)
+    return Response(tojson(ret), mimetype='application/json')
+
+#更新
+#测试链接 http://127.0.0.1:5000/wt
+@app.route("/wt", methods=['GET', 'POST'])
+def wt():
+    js = json.loads(request.data)
+    ret=check(js,"wt")
+    if ret.status == "200":
+        fdv = ",\n".join([ k + "='"+ v+"'" for k,v in js["val"].items()] )
+        sql = "update {0} set {1} where id={2}".format(js["ls"], fdv, js["id"])
+        conn.execute(sql)
+    return Response(tojson(ret), mimetype='application/json')
 
 #查询
 #测试链接 http://127.0.0.1:5000/rd?ls=[表名]&key1=val1&key2=val2....

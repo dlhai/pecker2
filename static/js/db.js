@@ -247,23 +247,15 @@ var db_tbl = [
 ]
 function GetTbl(name) { return GetSub(db_tbl, "name", name); }
 
-//cache = new Object()
-
 function Reqdata(url, ctx, fun) {
-    //if (cache[url]) { // 优先使用缓冲数据
-    //    fun(cache[url], ctx);
-    //    return;
-    //}
-
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("GET", url, true);
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             json = $.parseJSON(xmlhttp.responseText);
             if (json.result != "200")
-                alert("方法："+ctx+"\n应答：["+json.result+"]"+json.msg)
+                alert("方法：" + url+"\n应答：["+json.result+"]"+json.msg)
             fun(json, ctx);
-//            cache[url] = jdata;
         }
     };
     xmlhttp.send();
@@ -275,7 +267,7 @@ function ReqdataP(url, data, ctx, cb) {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             json = $.parseJSON(xmlhttp.responseText);
             if (json.result != "200")
-                alert("方法：" + ctx + "\n应答：[" + json.result + "]" + json.msg)
+                alert("方法：" + url + "\n应答：[" + json.result + "]" + json.msg)
             cb(json, ctx);
         }
     };
@@ -292,7 +284,7 @@ function ReqdataS(url, ctx, fun) {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             json = $.parseJSON(xmlhttp.responseText);
             if (json.result != "200")
-                alert("方法：" + ctx + "\n应答：[" + json.result + "]" + json.msg)
+                alert("方法：" + url + "\n应答：[" + json.result + "]" + json.msg)
             fun(json, ctx);
         }
     };

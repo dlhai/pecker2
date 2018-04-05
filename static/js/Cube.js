@@ -12,6 +12,13 @@
     }
 });
 
+function RenderMultiSelect(field, data) {
+    var val = data[field.name];
+    if (val == "") val = "　";
+    var cnt = db_skill.map(x => { return val.indexOf(x.name) == -1 ? ("<div>" + x.name + "</div>") : ('<div class="selected">' + x.name + "</div>") });
+    return `<div class="xCombox"><span>` + val + `</span><div class="xMenu">` + cnt.join("") + `</div></div>`;
+}
+
 function xrimagelist(img) {
     var tpl = `<label for="{id}"><img style="width: 100%; height: 100%;" {img} />
                         <input type="file" id="{id}" accept="image/*"></label>`;
@@ -21,12 +28,25 @@ function xrimagelist(img) {
 //背景带十字，点击可换图
 function xrimagelive(img) {
     var image = img == "" ? "" : 'src="' + img + '"';
-    var width = arguments[1] ? arguments[1] : "100%";
-    var heigh = arguments[2] ? arguments[2] : "100%";
-    var tpl = `<label for="{id}"><img style="width: {width}; height: {heigh};" {image} />
+    var clss = arguments[1] ? 'class="'+arguments[1]+'"' : "";
+    var width = arguments[2] ? arguments[2] : "100%";
+    var heigh = arguments[3] ? arguments[3] : "100%";
+    var tpl = `<label {clss} for="{id}"><img style="width: {width}; height: {heigh};" {image} />
                         <input type="file" id="{id}" accept="image/*"></label>`;
-    return tpl.format({ id: rndstr(8), image: image, width: width, height: heigh });
+    return tpl.format({ id: rndstr(8), clss: clss, image: image, width: width, heigh: heigh });
 }
+
+//背景带十字，点击可换图(第2版)
+function xrimagelive2(img, name, clss, style) {
+    var image = img == "" ? "" : 'src="' + img + '"';
+    name = name ? 'name="' + name + '"' : "";
+    clss = clss ? 'class="' + clss + '"' : "";
+    style = style ? style : "";
+    var tpl = `<label {clss} style="{style}" for="{id}"><img style="width:100%;height:100%;" {image} />
+                        <input type="file" id="{id}" {name} accept="image/*"></label>`;
+    return tpl.format({ id: rndstr(8), name:name, clss: clss, image: image, style: style });
+}
+
 //背景带十字，点击可换图的列表
 function xrimagelistlive(imglist) {
     return `<div class="imagelistlive">` + imglist.map(x => xrimagelive(x)) + `</div>`;
@@ -130,7 +150,7 @@ function RenderFormItem(type, attr, val )
     var r = "";
     if (type == "div")
         r += "<div " + attr + ">" + val + "</div>";
-    else if (field.ftype == "div_long")
+    else if (type == "div_long")
         r += "<div " + attr + ' style="width: 490px;">' + val + "</div>";
     else if (type == "input")
         r += '<input ' + attr + '" value="' + val + '"/>';
@@ -142,6 +162,8 @@ function RenderFormItem(type, attr, val )
         r += '<select ' + attr + '">' + val + '</select>';
     else if (type == "date")
         r += '<input ' + attr + '" value="' + val + '" onClick="laydate()" />';
+    else if (type == "multiselect")
+        r += RenderMultiSelect(field, user);
     return r;
 }
 //2.控件加标签
@@ -152,9 +174,9 @@ function RenderFormIn(entity, fields, cb) {
             return;
 
         var val = entity[field.name];
-        var attr = "";
+        var attr = 'name="' + field.name+'" ';
         if (field.name.indexOf("_") != -1)
-            attr = 'id="' + field.name + "_" + val + '"';
+            attr += 'id="' + field.name + "_" + val + '"';
 
         var val = cb != undefined ? cb(entity, field) : val;
 

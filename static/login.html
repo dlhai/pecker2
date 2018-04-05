@@ -22,7 +22,7 @@
             var formdata = new FormData(form);
             Reqdata('/login?account=' + formdata.get("username") + "&pwd=" + formdata.get("password"), "", function (res) {
                 if (res.result == 200){
-                    window.location.href = '/static/frame.html'
+                    window.location.href = res.nexturl
                 }
                 else {
                     alert("用户名或密码错");

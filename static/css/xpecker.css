@@ -223,7 +223,7 @@ body {
     text-decoration: none;
 }
 
-/*组合框
+/*组合框，右侧带下三角
 <div class="xCombox">
     <span>msg to show</span>
     <div class="xMenu">
