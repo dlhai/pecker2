@@ -29,9 +29,11 @@
     </style>
 </head>
 <body>
-    <header>总步骤</header>
-    <div id="main" style="width:1000px;height:400px;"></div>
-    <footer><button onclick="save()">保存</button> <button onclick="skip()">下一步</button></footer>
+    <div style="width:900px;height:600px;margin:100px;">
+        <header style="height:40px;">总步骤</header>
+        <form id="main" style="height:350px;"></form>
+        <footer><div style="float:right"><button onclick="save()">保存</button> <button onclick="nextstep()">下一步</button></div></footer>
+    </div>
     <script type="text/javascript">
         init();
         function init() {
@@ -42,63 +44,97 @@
             });
         }
 
-        function hidechgpwd(This) {
-            $(This).parent().parent().css("display", "none");
-        }
         function xruserform(user, fields) {
-            var ui =
-                `<div class="x2Form narrow" >
-                    <div style="margin-top:0px;"><label>帐号</label><div style="display:inline-block;">{account}</div></div>
-                    <div style="position:relative;">
-                        <label>密码</label>
-                        <div class="xCombox" style="border: 1px solid #95b7ff;">
-                            <label style="color:royalblue;margin:0px;">点击修改</label>
-                            <div class="xPopWnd" style="left:-6px;width:200px;height:115px;padding:5px;display:none;">
-                                <label style="margin-right:5px;">旧密码</label><input name="pwd" type="password" style="width:140px;height:20px;">
-                                <label style="margin-right:5px;">新密码</label><input name="newpwd1" type="password" style="width:140px;height:20px;">
-                                <label style="margin-right:5px;">新密码</label><input name="newpwd2" type="password" style="width:140px;height:20px;">
-                                <div style="float:right"><button onclick="hidechgpwd(this)">确定</button> <button onclick="hidechgpwd(this)">取消</button></div>
-                </div></div></div></div>`
-            function f2f(user, field) {
+            var ui2 = `
+                <div style="float:left;display:block;height:240px;width:280px;margin-top:5px;">
+                    <div style="float:left;display:block;">
+                        <label class="imagelive" style="height:78px;width:78px;" for="face">
+                            <img style="width:100%;height:100%;"  {face} >
+                            <input type="file" id="face" name="face" accept="image/*">
+                        </label>
+                    </div><div class="x2Form narrow">
+                        <div style="margin-top:0px;"><label>帐号</label><div style="display:inline-block;">{account}</div></div>
+                        <div style="position:relative;">
+                            <label>密码</label>
+                            <div class="xCombox" style="border: 1px solid #95b7ff;">
+                                <label style="color:royalblue;margin:0px;">点击修改</label>
+                                <div class="xPopWnd" style="left: -6px; width: 200px; height: 115px; padding: 5px; display: none;">
+                                    <label style="margin-right:5px;">旧密码</label><input name="pwd" type="password" style="width:140px;height:20px;">
+                                    <label style="margin-right:5px;">新密码</label><input name="newpwd1" type="password" style="width:140px;height:20px;">
+                                    <label style="margin-right:5px;">新密码</label><input name="newpwd2" type="password" style="width:140px;height:20px;">
+                                    <div style="float:right"><input type="button" onclick="hidechgpwd(this)" value="确定"/> <input type="button" onclick="hidechgpwd(this)" value="取消" /></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div><label class="imagelive" style="width:280px;height:160px;margin-top:5px" for="idimg">
+                        <img style="width:100%;height:100%;" {idimg} >
+                        <input type="file" id="idimg" name="idimg" accept="image/*">
+                    </label>
+                </div>`;
+
+            return ui2.format({ "account": user.account, face: (user.face == "" ? "" : 'src="' + user.face + '"'),
+                idimg: (user.idimg == "" ? "" : 'src="' + user.idimg + '"')}) + RenderForm4(g_user, fields, function (user, field) {
                 var name = field.name ? field.name : field;
                 var val = user[name];
-
-                var r = "";
-                if (field.name == "sex")
-                    r = RenderSelect(db_sex, val);
-                else if (field.name == "job")
-                    r = RenderSelect(GetsubJob(g_user.job, "array"), val);
-                else if (field.name == "ethnic")
-                    r = RenderSelect(g_ethnic, val);
-                else
-                    r = user[name];
-                return r;
-            }
-
-            return xrfloatleft("height:240px;width:280px;margin-top:5px;", xrfloatleft("", xrimagelive2(user.face, "face", "imagelive", "height:78px;width:78px;"))
-                + ui.format(user) + xrimagelive2(user.idimg, "idimg", "imagelive", "width:280px;height:160px;margin-top:5px")) + RenderForm4(g_user, fields, f2f);
+                if (field.name == "sex") return RenderSelect(db_sex, val);
+                else if (field.name == "job") return RenderSelect(GetsubJob(g_user.job, "array"), val);
+                else if (field.name == "ethnic") return RenderSelect(g_ethnic, val);
+                else return user[name];
+            });
         }
 
-        function xrfloatleft(style,body) {
-            return `<div style="float:left;display:block;{0}">{1}</div>`.format(style, body);
+        function hidechgpwd(This) {
+            if ($(This).attr("value") != "确定") {
+                $(This).parent().parent().css("display", "none");
+                return;
+            }
+
+            var formdata = new FormData(document.getElementById("main"));
+            var pwd = formdata.get("pwd");
+            var password1 = formdata.get("newpwd1");
+            var password2 = formdata.get("newpwd2");
+            if (password1 != password2) {
+                alert("两次输入的密码不一致！");
+                return;
+            }
+
+            var val = `{"id":"{id}","pwd":"{pwd}","newpwd":"{newpwd}"}`.format({
+                "id": g_user.id, "pwd": pwd, "newpwd": password1 });
+            ReqdataP("/chgpwd", val, "修改密码", function (jsn) {
+                if (jsn.result != 200) {
+                    alert(jsn.msg);
+                    return;
+                }
+                alert("修改成功！");
+                $(This).parent().parent().css("display", "none");
+            });
         }
 
         function save() {
+            delete g_chged.pwd;
+            delete g_chged.newpwd1;
+            delete g_chged.newpwd2;
+
             var formdata = new FormData(document.getElementById("main"));
+            var fd = new FormData();
+            for (var x in g_chged) {
+                if (x == "face" || x == "idimg")
+                    fd.append(x, $("#"+x).get(0).files[0]);
+                else 
+                    fd.append(x, formdata.get(x));
+            }
 
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/upload');
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4 && xhr.status == 200) {
-                    console.log('上传成功' + xhr.responseText);
-                    //处理其他数据，这里根据需要进行调整
+                    alert('保存成功' + xhr.responseText);
                 }
             };
-            xhr.setRequestHeader("Content-Type","multipart/form-data");
-            xhr.send(formdata);
+            xhr.open('POST', '/wt?ls=user&id='+g_user.id, true);
+            xhr.send(fd);
         }
-        function skip() {
-            return `<div style="float:left;display:block;{0}">{1}</div>`.format(style, body);
+        function nextstep() {
+            return window.location.href = '/static/user_init2.html'
         }
         var g_chged = new Object();
         $("html").on("change", function () {

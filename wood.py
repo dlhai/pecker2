@@ -4,6 +4,7 @@ from flask import Flask,request, Response, jsonify
 from werkzeug.utils import secure_filename
 from flask_login import (LoginManager, login_required, login_user,
                              logout_user, UserMixin,current_user)
+import os.path
 import json
 import pdb
 
@@ -119,11 +120,6 @@ def QueryObj( sql ):
         ret.append(r)
     return ret;
 
-#def to_array( qa ):
-#    return "["+ ",\n".join(["{"+",".join(['"'+str(t[0])+'":"'+str(t[1])+'"' for t in zip(row._parent.keys,row._row)])+"}" for row in qa ]) + "]"
-#def to_json( qa ):
-#    return "["+ ",\n".join(["{"+",".join(['"'+str(t[0])+'":"'+str(t[1])+'"' for t in zip(row._parent.keys,row._row)])+"}" for row in qa ]) + "]"
-
 #把(a,b,c) 变成 in ('a','b','c')
 def To(k,v):
     if v[0] == "(":
@@ -193,7 +189,8 @@ def reg():
         sql = "insert into user({0}) values({1})".format(fields,values)
         try:
             conn.execute(sql)
-            user = loaduser("account='%s'"%js["account"])
+            user = loaduser("account='%s'"%js["val"]["account"])
+            login_user(User(user))
         except Exception as e:
             if e.args[0].find( 'UNIQUE constraint failed: user.account' ) != -1:
                 ret.result = 1001
@@ -241,28 +238,29 @@ def curuserinf():
     print(tojson(ret))
     return Response(tojson(ret), mimetype='application/json')
  
-# test method
-@app.route('/test')
+@app.route('/chgpwd', methods=['POST'])
 @login_required
-def test():
-    return current_user.name+" you allowed！"
+def chgpwd():
+    jsn = json.loads(request.data)
+    ret=obj(fun="chgpwd", result="200")
+    if current_user.id != int(jsn["id"]):
+        ret.result = "1002"
+        ret.msg = "你不能修改别人的密码"
+    if current_user.pwd != jsn["pwd"]:
+        ret.result = "1002"
+        ret.msg = "旧密码不正确"
+    if ret.result == "200":
+        sql = "update user set pwd='{0}' where id={1}".format(jsn["newpwd"], jsn["id"])
+        conn.execute(sql)
+    return Response(tojson(ret), mimetype='application/json')
+ 
+#############################################################
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
     return "logout page"
- 
-#############################################################
-
-#@app.route("/login")
-#def login():
-#    param = request.args.to_dict()
-#    user = QueryObj( "select * from user where account='%s'"%param["account"])
-#    if len(user)>0 and hasattr( user[0], "account" ) and user[0].pwd == param["pwd"]:
-#        return '{"login":"'+param['account']+'","result":200}\n'
-#    else:
-#        return '{"login":"'+param['account']+'","result":404}\n'
 
 
 #frame用来填用户角色组合框
@@ -292,6 +290,9 @@ def id2name():
 
 @app.route("/upload",methods=['POST'])
 def upload():
+    d1 =request.files.to_dict(); 
+    d2 =request.form.to_dict(); 
+
     f = request.files["file"]
     f.save("./uploads/" + f.filename)
     return f.filename
@@ -310,15 +311,33 @@ def cr():
         conn.execute(sql)
     return Response(tojson(ret), mimetype='application/json')
 
-#更新
+#更新，使用formdata时，url必须携带ls和id参数
 #测试链接 http://127.0.0.1:5000/wt
-@app.route("/wt", methods=['GET', 'POST'])
+@app.route("/wt", methods=['POST'])
+@login_required
 def wt():
-    js = json.loads(request.data)
-    ret=check(js,"wt")
-    if ret.status == "200":
+    ret=check(request, wt)
+    if ret.result != "200":
+        return Response(tojson(ret), mimetype='application/json')
+
+    if request.content_type == 'application/json':
+        js = json.loads(request.data)
         fdv = ",\n".join([ k + "='"+ v+"'" for k,v in js["val"].items()] )
         sql = "update {0} set {1} where id={2}".format(js["ls"], fdv, js["id"])
+        conn.execute(sql)
+    else:
+        params = request.args.to_dict()
+        files = request.files.to_dict()
+        fields =request.form.to_dict()
+        # 1. 保存附件
+        fmt = "./uploads/{ls}_{fd}/{ls}_{fd}_{id}{ext}"
+        for k,v in files.items(): 
+            fname = fmt.format(ls=params["ls"],fd=k, id=params["id"],ext=os.path.splitext(v.filename)[1] )
+            fields[k]=fname
+            v.save("./static/"+fname)
+        # 2. 保存字段数据
+        fdv = ",\n".join([ k + "='"+ v+"'" for k,v in fields.items()] )
+        sql = "update {0} set {1} where id={2}".format(params["ls"], fdv, params["id"])
         conn.execute(sql)
     return Response(tojson(ret), mimetype='application/json')
 

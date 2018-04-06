@@ -17,50 +17,6 @@
     <script src="js/Cube.js"></script>
 
     <style>
-        .pane_image>div {
-            margin: 5px 0px 5px 5px;
-            display: inline-flex;
-            flex-direction: row;
-            align-items: flex-start;
-            border: 0px;
-        }
-        .pane_image>div>label {
-            width: 40px;
-            text-align: right;
-            margin: 5px;
-        }
-        .pane_image>div>div:first-of-type {
-            border-radius: 4px;
-            border: 1px solid #dddddd;
-            display: inline-block;
-            padding: 5px 10px;
-            margin: 0px 5px;
-            width: 137px;
-        }
-
-        /*图片框无图时的背景十字架图片*/
-        .ImgBlank {
-            position: relative;
-            background: url(img/add.png);
-            background-size: cover;
-        }
-
-        /*dropdown*/
-        .drop {
-        }
-        .dropwnd {
-            display: none;
-            position: absolute;
-            z-index: 9999;
-            left: 74px;
-            top: 100%;
-            width: 100%;
-            border: 2px solid #95b7ff;
-            border-radius: 4px;
-            background: #ffffff;
-            box-sizing: content-box;
-            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-        }
 
         /*为了解决BootStrap中css和layDate的css样式冲突*/
         .laydate_box, .laydate_box * {
@@ -74,20 +30,11 @@
 
 </head>
 <body class="xFCsrow" >
-    <section class="xPanel2" style="width:100px"><!--两个子项都固定宽度100，使它们获得相同的增量-->
-        <header class="heading">列表<div style="float: right;"><a onClick="onAddUser()">添加</a></div></header>
-        <div id="d_table_item" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;">
-        </div>
-    </section>
-
-    <div class="xPanel2 xScroll" style="width:100px;border:0px;">
-         <section id="d_certiflist" class="d_panel d_detail">
-            <header class="heading">证件信息<div style="float: right;"><a href="#">编辑</a></div></header>
-        </section>
-
+    <div style="width:900px;height:600px;margin:100px;">
+        <header style="height:40px;">总步骤</header>
+        <form id="main" style="min-height:350px;"></form>
+        <footer><div style="float:right"><button onclick="save()">保存</button> <button onclick="nextstep()">下一步</button></div></footer>
     </div>
-
-
 
     <script id="tpl_certiflist" type="text/template">
         <header class="heading">证件信息<div style="float: right;"><a href="#">编辑</a></div></header>
