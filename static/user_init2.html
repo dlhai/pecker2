@@ -11,13 +11,13 @@
     <script src="js/bootstrap.js"></script>
     <script src="laydate/laydate.js"></script>
     <script src="js/utils.js"></script>
+    <link rel="stylesheet" href="css/cube.css" />
+    <script src="js/Cube.js"></script>
     <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
-    <script src="js/Cube.js"></script>
 
     <style>
-
         /*为了解决BootStrap中css和layDate的css样式冲突*/
         .laydate_box, .laydate_box * {
             box-sizing: content-box;
@@ -29,15 +29,31 @@
 
 
 </head>
-<body class="xFCsrow" >
-    <div style="width:900px;height:600px;margin:100px;">
+<body>
+    <div class="xFCscol" style="width:900px;margin:100px;">
         <header style="height:40px;">总步骤</header>
-        <form id="main" style="min-height:350px;"></form>
-        <footer><div style="float:right"><button onclick="save()">保存</button> <button onclick="nextstep()">下一步</button></div></footer>
+        <form id="certif" class="xRndAngle" style="margin:5px;padding:5px;">
+            <div style="float:left;display:block;">
+                <label class="imagelive" style="height:120px;width:180px;" for="face">
+                    <img style="width:100%;height:100%;" >
+                    <input type="file" id="face" name="face" accept="image/*">
+                </label>
+            </div>
+            <div class="x2Form">
+                <div><label>证件名称</label><input name="mail" value=""></div>
+                <div><label>颁发时间</label><input name="birth" value="" onclick="laydate()"></div>
+                <div><label>颁发机构</label><input name="addr" style="width:495px;" value=""></div>
+            </div>
+            <div style="float:right;margin:10px;margin-right:50px;"><input type="button" onclick="newcertif(this)" value="确定" /> <button type="reset">清除</button></div>
+        </form>
+        <section class="xPanel2">
+            <header>证件信息<div style="float: right;"><a href="javascript:onEditDev()">编辑</a></div></header>
+            <div id="main" style="padding: 5px;height:100px;flex-grow: 1;"></div>
+        </section>
+        <footer><div style="float:right"><button onclick="nextstep()">下一步</button></div></footer>
     </div>
 
     <script id="tpl_certiflist" type="text/template">
-        <header class="heading">证件信息<div style="float: right;"><a href="#">编辑</a></div></header>
         {% it.forEach((x,i)=>{ %}
         <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
             <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
@@ -52,266 +68,15 @@
 
 
     <script type="text/javascript">
-        var tpl_certiflist = doT.template(document.getElementById('tpl_certiflist').innerHTML);
-        var tpl_edulist = doT.template(document.getElementById('tpl_edulist').innerHTML);
-        var tpl_employlist = doT.template(document.getElementById('tpl_employlist').innerHTML);
-        var tpl_opuslist = doT.template(document.getElementById('tpl_opuslist').innerHTML);
-        var tpl_user_pane = doT.template(document.getElementById('tpl_user_pane').innerHTML);
-
-        var g_cur, g_fields = new Array(), g_ethnic, g_departs, g_user = parent.g_user;
-        if (g_user == undefined)
-            g_user = GetRoleUser("叶片超级帐号");
-
-        if( isInArray(["1", "4", "7"], g_user.job ))
-            Reqdata("/rd?ls=" + { "1": "winder", "4": "devwh", "7": "matwh" }[g_user.job], "", function (res) { g_departs = res; });
-
-        Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
-
-        param = (g_user.depart_id == "0") ? "" : ("&depart_id=" + g_user.depart_id);
-        var url = "/rduser?job=" + GetsubJob(g_user.job, "string") + param
-        if (g_user.job == "16") // 维修队长
-            url = "/rdteam?user_id=" + g_user.id;
-        Reqdata(url, "", function (res) {
-            g_users = res;
-            if (!isInArray(["1", "4", "7"], g_user.job)) { // 除此三类超级用户外不显示所在单位
-                var idx = GetIdx(g_users.fields, "name", "depart_id");
-                g_users.fields.splice(idx,1); 
-            }
-            $("#d_table_item").html(RenderTable2(g_users, undefined, ValToView));
-
-            g_users.fields.forEach(field => {
-                if (field.name == "account" || field.name == "pwd"
-                    || field.name == "face" || field.name == "idimg")
-                    return;
-                if (field.name == "skill" && g_user.job != "13") // 专家su
-                    return;
-                g_fields.push(field);
-            });
-            TableBindClick3(g_users.ls, function (data_id) {
-                g_cur = GetSub(g_users.data, "id", data_id);
-                var pane = tpl_user_pane(g_cur);
-                pane += RenderPane2(g_cur, g_fields, ValToView);
-                $("#d_baseinf").html(pane);
-
-                // 以下为虚拟数据
-                var idx = rndrange(0, db_addition.length);
-                $("#d_certiflist").html(tpl_certiflist(db_addition[idx].certif));
-                $("#d_edulist").html(tpl_edulist(db_addition[idx].edu));
-                $("#d_employlist").html(tpl_employlist(db_addition[idx].employ));
-                $("#d_opuslist").html(tpl_opuslist(db_addition[idx].opus));
+        Reqdata("/curuserinf", "", function (res) {
+            g_user = res.data;
+            Reqdata("/rd?ls=certif&user_id=" + g_user.id, "", function (ctf) {
+                $("#main").html(dtpl2('tpl_certiflist')(ctf.data));
             });
         });
-        function ValToView(user, field) {
-            var name = field.name ? field.name :field;
-            if (name == "sex") return GetSub(db_sex, "id", user.sex).name;
-            else if (name == "job") return GetSub(db_job, "id", user.job).name;
-            else if (name == "depart_id") return GetSub(g_departs.data, "id", user.depart_id).name;
-            else return user[name];
+        function newcertif() {
+
         }
-
-        function onAddUser() {
-            var tpl_user_new = doT.template(document.getElementById('tpl_user_new').innerHTML);
-            var dlg = new cbDlg();
-            dlg.title = "新建 用户";
-            var newuser = Create(g_users.fields);
-            dlg.Add(tpl_user_new(newuser));
-            dlg.submit = function () {
-                newuser.account = $("#username").val();
-                newuser.depart_name = g_user.depart_name;
-                var form = new Userform();
-                var dlg2 = new cbDlg();
-                dlg2.Add(form.render(newuser, g_fields));
-                dlg2.css = "width:900px;";
-                dlg2.Show();
-                $(".drop").on("click", function () { $(this).siblings("div.dropwnd").css("display", "block"); });
-                $("#job").on("click", function () { TreeAddChildren($("#job>div").attr("id")); });
-                $(".xTree div>img").unbind("click", TreeItemExpand);
-                $(".xTree div>span").unbind("click", TreeItemClick);
-                $(".xTree div>img").bind("click", TreeItemExpand);
-                $(".xTree div>span").bind("click", TreeItemClick);
-                rebindevent();
-            }
-            dlg.Show();
-        }
-
-        function onEditUser() {
-            var form = new Userform();
-            $("#ModalDlgContent").html(form.render(g_cur, g_fields));
-            $(".drop").on("click", function () { $(this).siblings("div.dropwnd").css("display", "block"); });
-            $("#job").on("click", function () { TreeAddChildren($("#job>div").attr("id")); });
-
-            $(".xTree div>img").unbind("click", TreeItemExpand);
-            $(".xTree div>span").unbind("click", TreeItemClick);
-            $(".xTree div>img").bind("click", TreeItemExpand);
-            $(".xTree div>span").bind("click", TreeItemClick);
-
-            $("#ModalDlgTitle").html("编辑 用户");
-            $('#ModalDlg').modal('show');
-            rebindevent();
-        }
-
-        function Userform() {
-            // 默认停靠位置和偏移量
-            this.defaultAnchor = 0
-            this.defaultOffset = 0;
-        }
-
-        function imgPreview(fileDom, idimg) {
-            var file = fileDom.files[0];
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                $("#" + idimg).attr("src", e.target.result);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // 通过JavaScript的prototype属性继承于BMap.Control
-        Userform.prototype = new Object();
-        Userform.prototype.render = function (user, fields) {
-            var tpl_user_form = doT.template(document.getElementById('tpl_user_form').innerHTML);
-            var r = '<div class="x2Form">';
-            r += tpl_user_form(user);
-            fields.forEach(field => {
-                var val = user[field.name];
-                if (field.forder == -1 || field.ftype == "none")
-                    return;
-
-                var attr = "";
-                if (field.name.indexOf("_") != -1)
-                    attr = 'id="' + field.name + "_" + val + '"';
-
-                r += '<div style="position:relative;" ><label>' + field.title + "</label>";
-                if (field.ftype == "div") {
-                    if (field.name == "depart_id") {
-                        attr += ' class="drop" + style="border: 1px solid #95b7ff;"';
-                        r += "<div " + attr + ">" + user.depart_name + "</div>" + RenderDepart();
-                    }
-                    else {
-                        r += "<div " + attr + ">" + val + "</div>";
-                    }
-                }
-                else if (field.ftype == "multiselect")
-                    r += RenderMultiSelect(field, user);
-                else if (field.ftype == "input")
-                    r += '<input ' + attr + ' name="' + field.name + '" value="' + val + '"/>';
-                else if (field.ftype == "date")
-                    r += '<input name="' + field.name + '" value="' + val + '" onClick="laydate()" />';
-                else if (field.ftype == "input_long")
-                    r += '<input ' + attr + ' style="width:490px;" name="' + field.name + '" value="' + val + '" />';
-                else if (field.ftype == "textarea")
-                    r += '<textarea ' + attr + ' style="resize:none;width:490px;max-height:45px;" name="' + field.name + '">' + val + '</textarea>';
-                else if (field.ftype == "select") {
-                    var render = "";
-                    if (field.name == "sex")
-                        render = RenderSelect(db_sex, val);
-                    else if (field.name == "job")
-                        render = RenderSelect(GetsubJob(g_user.job, "array"), val);
-                    else if (field.name == "ethnic")
-                        render = RenderSelect(g_ethnic, val);
-                    r += '<select ' + attr + ' name="' + field.name + '">' + render + '</select>';
-                }
-                r += "</div>";
-            });
-            r += "</div>";
-            return r;
-        }
-
-        function RenderMultiSelect( field, data )
-        {
-            var val = data[field.name];
-            if (val == "") val = "　";
-            var cnt = db_skill.map(x => { return val.indexOf(x.name) == -1 ? ("<div>" + x.name + "</div>") : ('<div class="selected">' + x.name + "</div>") });
-            return `<div class="xCombox"><span>` + val + `</span><div class="xMenu">` + cnt.join("") + `</div></div>`;
-        }
-
-        function rebindevent()
-        {
-            $(".xCombox").on("click", function () {
-                $(this).children(".xMenu").toggle();
-                event.cancelBubble = true;
-            });
-            $(".xMenu div").on("click", function () {
-                $(this).toggleClass("selected");
-                var sels = $(this).parent().children(".selected");
-                if (sels.length == 0){ // 至少要选一个
-                    $(this).toggleClass("selected");
-                    return;
-                }
-                $(this).parent().prev().html(sels.map((i, x) => { return $(x).html(); }).toArray().join(","));
-            });
-
-            // 点击外部隐藏
-            if (typeof __dropwindowglobalvar__ == "undefined") {
-                __dropwindowglobalvar__ = 1;
-                $("html").on("click", function () { $("xMenu").hide(); });
-            }
-        }
-
-        function RenderDepart() {
-            if (g_user.job == "1") {// 风场su
-                return '<div class="xTree dropwnd" id="root" />'
-            }
-            else if (g_user.job == "2" || g_user.job == "3") {// 风场主管、驻场
-                return '<div class="xTree dropwnd" style="width:190px;padding:5px;font-size: 12px;"><div id="' + g_user.depart_table + "_" + g_user.depart_id + "\"><span><img src=\""
-                    + branch[g_user.depart_table].image + "\">" + g_user.depart.name + "</span></div></div>"
-            }
-            else
-                return "";
-        }
-
-        function TreeAddChildren(id) {  // id格式: 表名_{id}
-            var at = id.split("_");
-            var type = branch.sub(at[0]).type;
-            Reqdata("/rd?ls=" + type + (at[1] ? "&" + at[0] + "_id=" + at[1] : ""), "", function (res) {
-                var html = "";
-                for (var i in res.data) {
-                    if (type == "winder") { // 叶节点，少了左边的加号，为缩进对齐加了一层div
-                        html += "<div><div id=\"" + type + "_" + data[i].id + "\"><span><img src=\""
-                            + branch[type].image + "\">" + data[i].name + "</span></div></div>\n"
-                    }
-                    else { // 
-                        html += "<div id=\"" + type + "_" + data[i].id + "\">"
-                            + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
-                            + branch[type].image + "\">" + data[i].name + "</span></div>\n"
-                    }
-                }
-
-                $("#" + id).append(html);
-                $("#" + id).children("img").attr("src", "img/nolines_minus.gif"); // 把加号改成减号
-                $(".xTree div>img").unbind("click", TreeItemExpand);
-                $(".xTree div>span").unbind("click", TreeItemClick);
-                $(".xTree div>img").bind("click", TreeItemExpand);
-                $(".xTree div>span").bind("click", TreeItemClick);
-            });
-        }
-
-        function TreeItemExpand() {
-            var siblings = $(this).siblings("div");
-            if (siblings.length == 0) {
-                var id = $(this).parent().attr("id");
-                TreeAddChildren(id);
-            }
-            else if (siblings.css("display") == "none") {
-                $(event.srcElement).attr("src", "img/nolines_minus.gif");
-                siblings.css("display", "block");
-            }
-            else {
-                $(event.srcElement).attr("src", "img/nolines_plus.gif");
-                siblings.css("display", "none");
-            }
-        }
-
-        function HideWnd(This) {
-            $(This).parent().parent().css("display", "none");
-        }
-
-        //点击树节点
-        function TreeItemClick() {
-            //var at = $(this).parent().attr("id").split("_");
-
-            $(this).parent().parent().css("display", "none");
-        }
-
     </script>
 </body>
 </html>

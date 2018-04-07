@@ -184,6 +184,7 @@ def reg():
     js = json.loads(request.data)
     ret=check(js,"reg")
     if ret.result == "200":
+        js["val"]["status"]="1"
         fields=",".join(map( lambda x: "'"+x+"'", js["val"].keys()))
         values=",".join(map( lambda x: "'"+x+"'", js["val"].values()))
         sql = "insert into user({0}) values({1})".format(fields,values)
@@ -496,7 +497,13 @@ def rdteam():
     sql='''select * from user where id in ( select b_id from link where type ='team' and a_id = {0})'''
     return query4("rdteam",fields=select(base.sl).where(base.c.table=="user"),data = sql.format(user.id))
 
+def newdir(path):
+    for p in path:
+        if not os.path.exists(p):
+            os.mkdir(p)
+
 if __name__ == "__main__":
+    newdir(["./static/uploads","./static/uploads/user_face","./static/uploads/user_idimg"]);
     app.config['JSON_AS_ASCII'] = False
     app.run( host="0.0.0.0")
 

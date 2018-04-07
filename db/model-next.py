@@ -35,15 +35,15 @@ for u in [x for x in roleusers if x.depart_table != 0]:
     if tbl.name == "winder":
         u.sub = QueryObj( "select id, name from winderarea where winder_id="+str(u.depart_id))
 def GetUser( job ):
-    jobid = int(getjob(job).id)
+    jobid = int(float(getjob(job).id))
     for u in roleusers:
         if u.job == jobid:
             return u
     raise KeyError
 
 def create_team():
-    leaders = QueryObj( "select * from user where job="+str(int(getjob( "维修队长" ).id)))
-    skillers = QueryObj( "select * from user where job="+str(int(getjob( "技工" ).id)))
+    leaders = QueryObj( "select * from user where job="+intstr(getjob( "维修队长" ).id))
+    skillers = QueryObj( "select * from user where job="+intstr(getjob( "技工" ).id))
     conn.execute(tbl_link.insert(),[ dict_link(obj2(type="team",a_id=random.choice(leaders).id,b_id=x.id,remark="", date=rnddate(30,60))) for x in skillers])
 create_team()
 
@@ -199,22 +199,22 @@ gen_matout()
 class gen_case():
     def __init__(self):
         #各种需要的数据
-        self.winder = QueryObj( "select * from winder where id="+str(int(GetUser("风场主管").depart_id)) )[0]
+        self.winder = QueryObj( "select * from winder where id="+intstr(GetUser("风场主管").depart_id) )[0]
         self.winder.leader = GetUser("风场主管")
-        self.winder.clerks = QueryObj( "select * from user where depart_table="+str(int(gettbl("winder").id)) + " and depart_id="+str(int(self.winder.id)) )
-        self.winder.winderareas = QueryObj( "select * from winderarea where winder_id="+str(int(self.winder.id)) )
-        self.winder.efans = QueryObj( "select * from efan where winderarea_id="+str(int(self.winder.winderareas[0].id)) )
-        self.winder.leafs = QueryObj( "select * from leaf where winderarea_id="+str(int(self.winder.winderareas[0].id)) )
-        #self.guides = QueryObj( "select * from user where job="+str(int(getjob("调度").id)) )
-        self.experts = QueryObj( "select * from user where job="+str(int(getjob("专家").id)) )
+        self.winder.clerks = QueryObj( "select * from user where depart_table="+intstr(gettbl("winder").id) + " and depart_id="+intstr(self.winder.id) )
+        self.winder.winderareas = QueryObj( "select * from winderarea where winder_id="+intstr(self.winder.id) )
+        self.winder.efans = QueryObj( "select * from efan where winderarea_id="+intstr(self.winder.winderareas[0].id) )
+        self.winder.leafs = QueryObj( "select * from leaf where winderarea_id="+intstr(self.winder.winderareas[0].id) )
+        #self.guides = QueryObj( "select * from user where job="+intstr(getjob("调度").id) )
+        self.experts = QueryObj( "select * from user where job="+intstr(getjob("专家").id) )
         self.teams = QueryObj( '''select * from user where id in ( select b_id from link where type ='team' and a_id = {0})'''.format(GetUser("维修队长").id) )
-        self.devwh = QueryObj( "select * from devwh where id="+str(int(GetUser("驻地主管").depart_id)) )[0]
+        self.devwh = QueryObj( "select * from devwh where id="+intstr(GetUser("驻地主管").depart_id) )[0]
         self.devwh.leader = GetUser("驻地主管")
-        self.devwh.clerks = QueryObj( "select * from user where depart_table="+str(int(gettbl("devwh").id)) + " and depart_id="+str(int(self.devwh.id)))
-        self.devwh.devs = QueryObj( "select * from dev where devwh_id="+str(int(self.devwh.id)))
-        self.matwh = QueryObj( "select * from matwh where id="+str(int(GetUser("仓库主管").depart_id)))[0]
+        self.devwh.clerks = QueryObj( "select * from user where depart_table="+intstr(gettbl("devwh").id) + " and depart_id="+intstr(self.devwh.id))
+        self.devwh.devs = QueryObj( "select * from dev where devwh_id="+intstr(self.devwh.id))
+        self.matwh = QueryObj( "select * from matwh where id="+intstr(GetUser("仓库主管").depart_id))[0]
         self.matwh.leader = GetUser("仓库主管")
-        self.matwh.clerks = QueryObj( "select * from user where depart_table="+str(int(gettbl("matwh").id)) + " and depart_id="+str(int(self.matwh.id)))
+        self.matwh.clerks = QueryObj( "select * from user where depart_table="+intstr(gettbl("matwh").id) + " and depart_id="+intstr(self.matwh.id))
 
         #生成30个故障报告，并把它们找出来
         conn.execute(tbl_fault.insert(),[dict_fault(random.choice(self.winder.clerks)) for i in range(30)])
@@ -254,7 +254,7 @@ class gen_case():
                 fault_id=fault.id,	#故障单号
                 guide_id=fault.guide_id,	#发单人
                 guidedt=rnddatespan(fault.guidetime,0,1),	#发单时间
-                clss=int(random.choice(data("_devclss").data)[0]),	#设备分类
+                clss=int(float(random.choice(data("_devclss").data)[0])),	#设备分类
                 devwh_id=self.devwh.id,	#所属驻地
                 timelen=rndnum(3,5),	#预计工期
                 winder_id=self.winder.id,	#任务风场
@@ -335,7 +335,7 @@ class gen_case():
                     name = "维修方案_"+user.name+"_" + date.strftime("%m-%d %H:%M")
                     repairprogs.append( obj2(type="repairprog",ref_id=fault.id, name=name, remark="", user_id=user.id, date=date ))
                 self.add_data("addit",repairprogs)
-                repairprogs = QueryObj( "select * from addit where type='repairprog' and ref_id="+str(int(fault.id)) )
+                repairprogs = QueryObj( "select * from addit where type='repairprog' and ref_id="+intstr(fault.id) )
             if i>=11:#维修方案（调度主管签字）
                 conn.execute(tbl_link.insert(),dict_link(obj2(type="conform",a_id=random.choice(repairprogs).id, \
                     b_id=guideleader.id, name="", remark="", date=rnddatespan(fault.reporttime,11,12) )))
@@ -375,7 +375,7 @@ class gen_case():
                     name = "维修报告_"+user.name+"_" + date.strftime("%m-%d %H:%M")
                     repairreps.append( obj2(type="repairrep",ref_id=fault.id, name=name, remark="", user_id=teamleader.id, date=date ))
                 self.add_data("addit",repairreps)
-                repairreps = QueryObj( "select * from addit where type='repairrep' and ref_id="+str(int(fault.id)) )
+                repairreps = QueryObj( "select * from addit where type='repairrep' and ref_id="+intstr(fault.id) )
 
                 #维修队长签字
                 conn.execute(tbl_link.insert(),dict_link(obj2(type="conform",a_id=random.choice(repairreps).id, 
@@ -392,7 +392,7 @@ class gen_case():
                 conn.execute(tbl_flow.insert(),dict_flow(obj2(table_id=gettbl("fault").id,record_id=fault.id,status=5,user_id=fault.guide_id, remark="付款完成")))
 
             #为所有的维修记录增加图片
-            repairlogs = QueryObj( "select * from addit where type='repairlog' and ref_id="+str(int(fault.id)))
+            repairlogs = QueryObj( "select * from addit where type='repairlog' and ref_id="+intstr(fault.id))
             if len(repairlogs)>0:
                 self.add_data("addit", [obj2(type="repairrep",ref_id=x.id, name=random.choice(damageimg), remark="", user_id=random.choice(repairteam).id, date=datetime.datetime.strptime(x.date,"%Y-%m-%d") ) for x in repairlogs for y in range(3,5)])
             
@@ -403,8 +403,8 @@ class gen_case():
             conn.execute(tbl_chat.insert(),[dict_chat(obj2(fault_id=fault.id,user_id=random.choice(chatmans).id, say=rnditem("_songci"),date=rnddatespan(fault.reporttime,3,20))) for i in range(rndnum(30,50))])
 
             #更新报修单
-            self.add_data("addit", [obj2(type="faultspot",ref_id=fault.id, name=random.choice(damageimg), remark="", user_id=random.choice(repairteam).id, date=fault.reporttime ) for x in range(3,5)])
-            sql = "update fault set " + ",".join([k+"='"+str(v)+"'" for k,v in cols.items()])+ " where id="+ str(int(fault.id))
+            self.add_data("addit", [obj2(type="faultspot",ref_id=fault.id, name=random.choice(damageimg), remark="", user_id=random.choice(repairteam).id, date=datetime.datetime.strptime(fault.reporttime,'%Y-%m-%d') ) for x in range(3,5)])
+            sql = "update fault set " + ",".join([k+"='"+str(v)+"'" for k,v in cols.items()])+ " where id="+ intstr(fault.id)
             conn.execute(sql)
 
 gc=gen_case()

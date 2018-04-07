@@ -81,7 +81,7 @@ tbl_vender=Table('vender', metadata,
 def dict_vender(x,type):
     p1=rnditem("_person")
     p2=rnditem("_station")
-    return dict(type=type,name=x.name,fname=x.fname,atten=p1.name,tel=str(int(p1.phone)),leader=p1.name,fax=p2.phone,addr=p1.origin)
+    return dict(type=type,name=x.name,fname=x.fname,atten=p1.name,tel=intstr(p1.phone),leader=p1.name,fax=p2.phone,addr=p1.origin)
 
 tbl_flow=Table('flow', metadata,
 	Column('id',Integer,primary_key=True),
@@ -94,10 +94,22 @@ tbl_flow=Table('flow', metadata,
 def dict_flow(x):
     return dict(table_id=x.table_id,record_id=x.record_id,status=x.status,user_id=x.user_id,date=rnddate(30,60),remark=x.remark)
 
+tbl_msg=Table('msg', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('type',Integer),
+	Column('when',Integer),
+	Column('frm',Integer),
+	Column('to',Integer),
+	Column('readtime',Date),
+	Column('result',String(128)))
+def dict_msg(x):
+    return dict(type="",when="",frm="",to="",readtime="",result="")
+
 tbl_user=Table('user', metadata,
 	Column('id',Integer,primary_key=True),
-	Column('account',String(32)),
+	Column('account',String(32),unique=True),
 	Column('pwd',String(32)),
+	Column('status',Integer),
 	Column('face',String(32)),
 	Column('depart_id',Integer),
 	Column('depart_table',Integer),
@@ -118,53 +130,60 @@ tbl_user=Table('user', metadata,
 def dict_user(depart_id,depart_table,job,skill):
     person=rnditem("_person")
     mail=rndmail(person)
-    return dict(account=person.pinyin,pwd=person.pinyin,face=rnditem("_faceimage"),depart_id=depart_id,depart_table=str(int(getitembyname("_tbl",depart_table).id)),job=job,skill=skill,name=person.name,code=person.id,sex=id2sex(person.id),ethnic=rnditem("_ethnic"),birth=id2birth(person.id),origin=person.origin,idimg=rndaddition("身份证"),phone=str(int(person.phone)),qq=str(int(person.qq)),mail=mail,wechat=rndwechat(person,mail),addr=rnditem("_麦当劳门店").门店地址)
+    return dict(account=person.pinyin,pwd=person.pinyin,status=8.0,face=rnditem("_faceimage"),depart_id=depart_id,depart_table=intstr(getitembyname("_tbl",depart_table).id),job=job,skill=skill,name=person.name,code=person.id,sex=id2sex(person.id),ethnic=rnditem("_ethnic"),birth=id2birth(person.id),origin=person.origin,idimg=rndaddition("身份证"),phone=intstr(person.phone),qq=intstr(person.qq),mail=mail,wechat=rndwechat(person,mail),addr=rnditem("_麦当劳门店").门店地址)
 
 tbl_certif=Table('certif', metadata,
 	Column('id',Integer,primary_key=True),
+	Column('user_id',Integer),
 	Column('name',String(64)),
-	Column('time',Date),
-	Column('Organization',String(64)),
+	Column('issuedate',Date),
+	Column('issue',String(64)),
 	Column('image',Integer))
-def dict_certif:
-    return dict(name="",time="",Organization="",image="")
+def dict_certif():
+    return dict(user_id="",name="",issuedate="",issue="",image="")
 
 tbl_edu=Table('edu', metadata,
 	Column('id',Integer,primary_key=True),
-	Column('starttime',Date),
-	Column('endtime',Date),
-	Column('record',String(16)),
-	Column('Organization',String(32)),
+	Column('user_id',Integer),
+	Column('startdate',Date),
+	Column('enddate',Date),
+	Column('degree',String(16)),
+	Column('issue',String(32)),
 	Column('image1',Integer),
 	Column('image2',Integer))
-def dict_edu:
-    return dict(starttime="",endtime="",record="",Organization="",image1="",image2="")
+def dict_edu():
+    return dict(user_id="",startdate="",enddate="",degree="",issue="",image1="",image2="")
 
 tbl_employ=Table('employ', metadata,
 	Column('id',Integer,primary_key=True),
+	Column('user_id',Integer),
 	Column('Organization',String(32)),
 	Column('position',String(32)),
-	Column('starttime',Date),
-	Column('endtime',Date),
+	Column('startdate',Date),
+	Column('enddate',Date),
 	Column('image',Integer))
-def dict_employ:
-    return dict(Organization="",position="",starttime="",endtime="",image="")
+def dict_employ():
+    return dict(user_id="",Organization="",position="",startdate="",enddate="",image="")
 
 tbl_opus=Table('opus', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('opus_id',Integer),
+	Column('keyword',String(64)),
+	Column('clss',String(64)),
 	Column('user_id',Integer),
 	Column('date',Date),
 	Column('title',String(64)),
 	Column('body',String(4096)))
-def dict_opus:
-    return dict(opus_id="",user_id="",date="",title="",body="")
+def dict_opus():
+    return dict(opus_id="",keyword="",clss="",user_id="",date="",title="",body="")
 
 tbl_follow=Table('follow', metadata,
 	Column('id',Integer,primary_key=True),
-	Column('user_id',Integer))
-def dict_follow:
-    return dict(user_id="")
+	Column('user_id',Integer),
+	Column('user2_id',Integer),
+	Column('date',Date))
+def dict_follow():
+    return dict(user_id="",user2_id="",date="")
 
 tbl_winderco=Table('winderco', metadata,
 	Column('id',Integer,primary_key=True),
@@ -417,6 +436,7 @@ conn.execute(tbl_base.insert(),[dict_base(x) for x in data("_fields")])
 
 
 conn.execute(tbl_admarea.insert(),[dict_admarea(x) for x in data("_全国行政区编号")])
+
 
 
 

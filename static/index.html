@@ -80,16 +80,16 @@
     </div>
 
     <script type="text/javascript">
-        var g_user = parent.g_user, g_mats, g_users = [], g_clerks, g_guides, g_matout, g_matouts, g_matvenders,
-            g_matouts_editing = new Array(), g_matouts_checking = new Array(), g_matouts_outwh = new Array(), g_matouts_waitrecv = new Array();
-        if (g_user == undefined)
-            g_user = GetRoleUser("仓库主管");
+        //var g_user = parent.g_user, g_mats, g_users = [], g_clerks, g_guides, g_matout, g_matouts, g_matvenders,
+        //    g_matouts_editing = new Array(), g_matouts_checking = new Array(), g_matouts_outwh = new Array(), g_matouts_waitrecv = new Array();
+        //if (g_user == undefined)
+        //    g_user = GetRoleUser("仓库主管");
 
-        ReqdataS("/rd?ls=mat", "", function (mats) { g_mats = mats; });
-        Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_matvenders = res; });
-        Reqdata("/rduser?depart_table=" + GetSub(db_tbl, "name", "matwh").id + "&depart_id=" + g_user.depart.id, "", function (res2) {
-            g_clerks = res2; g_users = g_users.concat(res2.data);
-        });
+        //ReqdataS("/rd?ls=mat", "", function (mats) { g_mats = mats; });
+        //Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_matvenders = res; });
+        //Reqdata("/rduser?depart_table=" + GetSub(db_tbl, "name", "matwh").id + "&depart_id=" + g_user.depart.id, "", function (res2) {
+        //    g_clerks = res2; g_users = g_users.concat(res2.data);
+        //});
 
     </script>
 </body>

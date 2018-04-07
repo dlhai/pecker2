@@ -25,7 +25,9 @@ def loadpkl(filename):
     r=pickle.load(f)
     f.close()
     return r
-    
+
+def intstr(s):
+    return str(int(float(s)))
 
 class objit(object):
     def __next__(self):
@@ -36,7 +38,7 @@ class objit(object):
         return self
     def __getattr__(self,name):
         if name == "编号" or name == "父级":
-            return str(int(self.obj.GetValue(self.idx,name)))
+            return intstr(self.obj.GetValue(self.idx,name))
         else:
             return self.obj.GetValue(self.idx,name)
 
@@ -106,7 +108,7 @@ def rndaddition(type):
 
 def getitem( tblname, id ):
     for x in dat_all[tblname]:
-        if str(int(x.id)) == str(id):
+        if intstr(x.id) == str(id):
             return x
 
 def getitembyname( tblname, name ):
@@ -141,11 +143,11 @@ def rndqq():
 
 def rndmail(person):
     mailaddr = random.choice( ["21cn.com","sina.com","163.com", "163.net", "qq.com"])
-    mailname = random.choice( [person.pinyin,str(int(person.qq))])
+    mailname = random.choice( [person.pinyin,intstr(person.qq)])
     return mailname+"@"+mailaddr
 
 def rndwechat(person,mail):
-    return random.choice([str(int(person.phone)),mail,person.pinyin,str(int(person.qq))])
+    return random.choice([intstr(person.phone),mail,person.pinyin,intstr(person.qq)])
 
 #float转str，仅保留小数点后5位
 def f2s(f):

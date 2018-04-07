@@ -142,6 +142,9 @@
 	};
 }());
 
- function dtpl(tmpl, c, def) {
+function dtpl(tmpl, c, def) {
     return doT.template(tmpl, c, def);
+}
+function dtpl2(id, c, def) {
+    return doT.template(document.getElementById(id).innerHTML, c, def);
 }

@@ -11,7 +11,7 @@ class objit(object):
         return self
     def __getattr__(self,name):
         if name == "编号" or name == "父级":
-            return str(int(self.obj.GetValue(self.idx,name)))
+            return str(int(float(self.obj.GetValue(self.idx,name))))
         else:
             return self.obj.GetValue(self.idx,name)
 
@@ -72,8 +72,7 @@ class xlread(object):
             #        val = .strip(" \t")
             #    row.append(val)
             #rt.append(row)
-            row = [sh.cell(r+y,c+x).value for x in range(cc)]
-            row = map(lambda x : x if not isinstance(x,type('')) else x.strip(" \t"), row)
+            row = [str(sh.cell(r+y,c+x).value).strip(" \t") for x in range(cc)]
             rt.append(list(row))
         return rt
 
