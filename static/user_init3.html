@@ -11,361 +11,107 @@
     <script src="js/bootstrap.js"></script>
     <script src="laydate/laydate.js"></script>
     <script src="js/utils.js"></script>
+    <link rel="stylesheet" href="css/cube.css" />
+    <script src="js/Cube.js"></script>
     <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
-    <script src="js/Cube.js"></script>
 
     <style>
-        .pane_image>div {
-            margin: 5px 0px 5px 5px;
-            display: inline-flex;
-            flex-direction: row;
-            align-items: flex-start;
-            border: 0px;
-        }
-        .pane_image>div>label {
-            width: 40px;
-            text-align: right;
-            margin: 5px;
-        }
-        .pane_image>div>div:first-of-type {
-            border-radius: 4px;
-            border: 1px solid #dddddd;
-            display: inline-block;
-            padding: 5px 10px;
-            margin: 0px 5px;
-            width: 137px;
-        }
-
-        /*图片框无图时的背景十字架图片*/
-        .ImgBlank {
-            position: relative;
-            background: url(img/add.png);
-            background-size: cover;
-        }
-
-        /*dropdown*/
-        .drop {
-        }
-        .dropwnd {
-            display: none;
-            position: absolute;
-            z-index: 9999;
-            left: 74px;
-            top: 100%;
-            width: 100%;
-            border: 2px solid #95b7ff;
-            border-radius: 4px;
-            background: #ffffff;
-            box-sizing: content-box;
-            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-        }
-
         /*为了解决BootStrap中css和layDate的css样式冲突*/
-        .laydate_box, .laydate_box * {
-            box-sizing: content-box;
-        }
-        .laydate_box th {
-            text-align: center;
-        }
+        .laydate_box, .laydate_box * {box-sizing: content-box;}
+        .laydate_box th {text-align: center;}
     </style>
-
-
 </head>
-<body class="xFCsrow" >
-    <section class="xPanel2" style="width:100px"><!--两个子项都固定宽度100，使它们获得相同的增量-->
-        <header class="heading">列表<div style="float: right;"><a onClick="onAddUser()">添加</a></div></header>
-        <div id="d_table_item" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;">
-        </div>
-    </section>
-
-    <div class="xPanel2 xScroll" style="width:100px;border:0px;">
-        <section id="d_edulist" class="d_panel d_detail">
-            <header class="heading">受教育经历<div style="float: right;"><a href="#">编辑</a></div></header>
+<body>
+    <div class="xFCscol" style="width:900px;margin:100px;">
+        <header style="height:40px;">总步骤</header>
+        <form id="x" class="xRndAngle" style="margin:5px;padding:5px;">
+            <div style="float:left;display:inline-block;">
+                <label class="imagelive" style="width:126px;height:84px;" for="image1">
+                    <img style="width:100%;height:100%;">
+                    <input type="file" id="image1" name="image1" accept="image/*">
+                </label>
+                <label class="imagelive" style="width:126px;height:84px;" for="image2">
+                    <img style="width:100%;height:100%;">
+                    <input type="file" id="image2" name="image2" accept="image/*">
+                </label>
+            </div>
+            <div class="x2Form" style="display:inline-block; width:620px;">
+                <div><label>开始时间</label><input name="startdate" value="" onclick="laydate()"></div>
+                <div><label>截止时间</label><input name="enddate" value="" onclick="laydate()"></div>
+                <div><label>学历</label><input name="degree" value=""></div>
+                <div><label>教育机构</label><input name="issue" value=""></div>
+            </div>
+            <div style="display:inline-block;height:20px;"><input type="button" onclick="newx(this)" value="确定" /> <button type="reset">清除</button></div>
+        </form>
+        <section class="xPanel2" style="display:inline-block;">
+            <header>受教育情况</header>
+            <div id="main" class="xScroll" style="padding: 5px;height:240px;flex-grow: 1;"></div>
         </section>
+        <footer><div style="float:right"><button onclick="nextstep()">下一步</button></div></footer>
     </div>
 
-    <script id="tpl_edulist" type="text/template">
-        <header class="heading">受教育经历<div style="float: right;"><a href="#">编辑</a></div></header>
+    <script id="tpl_xlist" type="text/template">
         {% it.forEach((x,i)=>{ %}
         <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <img style="width: 120px; height: 74px;" src="{%=x.img1%}" />
+            <div class="xRndAngle" style="width: 126px; height: 84px; float: left; margin-right: 5px; ">
+                <img style="width: 126px; height: 84px;" src="{%=x.image1%}" />
+                <img style="width: 126px; height: 84px;" src="{%=x.image2%}" />
             </div>
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <img style="width: 120px; height: 74px;" src="{%=x.img2%}" />
+            <div class="x2Form">
+                <div><label>开始时间</label><div>{%=x.startdate%}</div></div>
+                <div><label>截止时间</label><div>{%=x.enddate%}</div></div>
+                <div><label>学历</label><div>{%=x.degree%}</div></div>
+                <div><label>教育机构</label><div>{%=x.issue%}</div></div>
             </div>
-            <div class="d_data_item"><label>开始时间</label><div>{%=x.tmstart%}</div></div>
-            <div class="d_data_item"><label>截止时间</label><div>{%=x.tmend%}</div></div>
-            <div class="d_data_item"><label>学历</label><div>{%=x.qualif%}</div></div>
-            <div class="d_data_item"><label>教育机构</label><div>{%=x.edu%}</div></div>
         </div>
         {% }); %}
     </script>
 
 
     <script type="text/javascript">
-        var tpl_certiflist = doT.template(document.getElementById('tpl_certiflist').innerHTML);
-        var tpl_edulist = doT.template(document.getElementById('tpl_edulist').innerHTML);
-        var tpl_employlist = doT.template(document.getElementById('tpl_employlist').innerHTML);
-        var tpl_opuslist = doT.template(document.getElementById('tpl_opuslist').innerHTML);
-        var tpl_user_pane = doT.template(document.getElementById('tpl_user_pane').innerHTML);
-
-        var g_cur, g_fields = new Array(), g_ethnic, g_departs, g_user = parent.g_user;
-        if (g_user == undefined)
-            g_user = GetRoleUser("叶片超级帐号");
-
-        if( isInArray(["1", "4", "7"], g_user.job ))
-            Reqdata("/rd?ls=" + { "1": "winder", "4": "devwh", "7": "matwh" }[g_user.job], "", function (res) { g_departs = res; });
-
-        Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
-
-        param = (g_user.depart_id == "0") ? "" : ("&depart_id=" + g_user.depart_id);
-        var url = "/rduser?job=" + GetsubJob(g_user.job, "string") + param
-        if (g_user.job == "16") // 维修队长
-            url = "/rdteam?user_id=" + g_user.id;
-        Reqdata(url, "", function (res) {
-            g_users = res;
-            if (!isInArray(["1", "4", "7"], g_user.job)) { // 除此三类超级用户外不显示所在单位
-                var idx = GetIdx(g_users.fields, "name", "depart_id");
-                g_users.fields.splice(idx,1); 
-            }
-            $("#d_table_item").html(RenderTable2(g_users, undefined, ValToView));
-
-            g_users.fields.forEach(field => {
-                if (field.name == "account" || field.name == "pwd"
-                    || field.name == "face" || field.name == "idimg")
-                    return;
-                if (field.name == "skill" && g_user.job != "13") // 专家su
-                    return;
-                g_fields.push(field);
-            });
-            TableBindClick3(g_users.ls, function (data_id) {
-                g_cur = GetSub(g_users.data, "id", data_id);
-                var pane = tpl_user_pane(g_cur);
-                pane += RenderPane2(g_cur, g_fields, ValToView);
-                $("#d_baseinf").html(pane);
-
-                // 以下为虚拟数据
-                var idx = rndrange(0, db_addition.length);
-                $("#d_certiflist").html(tpl_certiflist(db_addition[idx].certif));
-                $("#d_edulist").html(tpl_edulist(db_addition[idx].edu));
-                $("#d_employlist").html(tpl_employlist(db_addition[idx].employ));
-                $("#d_opuslist").html(tpl_opuslist(db_addition[idx].opus));
+        Reqdata("/curuserinf", "", function (res) {
+            g_user = res.data;
+            Reqdata("/rd?ls=x&user_id=" + g_user.id, "", function (ctf) {
+                $("#main").html(dtpl2('tpl_xlist')(ctf.data));
             });
         });
-        function ValToView(user, field) {
-            var name = field.name ? field.name :field;
-            if (name == "sex") return GetSub(db_sex, "id", user.sex).name;
-            else if (name == "job") return GetSub(db_job, "id", user.job).name;
-            else if (name == "depart_id") return GetSub(g_departs.data, "id", user.depart_id).name;
-            else return user[name];
-        }
-
-        function onAddUser() {
-            var tpl_user_new = doT.template(document.getElementById('tpl_user_new').innerHTML);
-            var dlg = new cbDlg();
-            dlg.title = "新建 用户";
-            var newuser = Create(g_users.fields);
-            dlg.Add(tpl_user_new(newuser));
-            dlg.submit = function () {
-                newuser.account = $("#username").val();
-                newuser.depart_name = g_user.depart_name;
-                var form = new Userform();
-                var dlg2 = new cbDlg();
-                dlg2.Add(form.render(newuser, g_fields));
-                dlg2.css = "width:900px;";
-                dlg2.Show();
-                $(".drop").on("click", function () { $(this).siblings("div.dropwnd").css("display", "block"); });
-                $("#job").on("click", function () { TreeAddChildren($("#job>div").attr("id")); });
-                $(".xTree div>img").unbind("click", TreeItemExpand);
-                $(".xTree div>span").unbind("click", TreeItemClick);
-                $(".xTree div>img").bind("click", TreeItemExpand);
-                $(".xTree div>span").bind("click", TreeItemClick);
-                rebindevent();
+        function newx() {
+            var formdata = new FormData(document.getElementById("x"));
+            if (formdata.get("degree") == "") {
+                alert("学历不能为空！");
+                return;
             }
-            dlg.Show();
-        }
+            if (formdata.get("startdate") == "") {
+                alert("开始时间不能为空！");
+                return;
+            }
+            if (formdata.get("enddate") == "") {
+                alert("截止时间不能为空！");
+                return;
+            }
+            if (formdata.get("issue") == "") {
+                alert("教育机构不能为空！");
+                return;
+            }
 
-        function onEditUser() {
-            var form = new Userform();
-            $("#ModalDlgContent").html(form.render(g_cur, g_fields));
-            $(".drop").on("click", function () { $(this).siblings("div.dropwnd").css("display", "block"); });
-            $("#job").on("click", function () { TreeAddChildren($("#job>div").attr("id")); });
-
-            $(".xTree div>img").unbind("click", TreeItemExpand);
-            $(".xTree div>span").unbind("click", TreeItemClick);
-            $(".xTree div>img").bind("click", TreeItemExpand);
-            $(".xTree div>span").bind("click", TreeItemClick);
-
-            $("#ModalDlgTitle").html("编辑 用户");
-            $('#ModalDlg').modal('show');
-            rebindevent();
-        }
-
-        function Userform() {
-            // 默认停靠位置和偏移量
-            this.defaultAnchor = 0
-            this.defaultOffset = 0;
-        }
-
-        function imgPreview(fileDom, idimg) {
-            var file = fileDom.files[0];
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                $("#" + idimg).attr("src", e.target.result);
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    Reqdata("/rd?ls=x&user_id=" + g_user.id, "", function (ctf) {
+                        $("#main").html(dtpl2('tpl_xlist')(ctf.data));
+                    });
+                }
             };
-            reader.readAsDataURL(file);
+
+            formdata.append("user_id", g_user.id);
+            xhr.open('POST', '/cr?ls=x', true);
+            xhr.send(formdata);
         }
-
-        // 通过JavaScript的prototype属性继承于BMap.Control
-        Userform.prototype = new Object();
-        Userform.prototype.render = function (user, fields) {
-            var tpl_user_form = doT.template(document.getElementById('tpl_user_form').innerHTML);
-            var r = '<div class="x2Form">';
-            r += tpl_user_form(user);
-            fields.forEach(field => {
-                var val = user[field.name];
-                if (field.forder == -1 || field.ftype == "none")
-                    return;
-
-                var attr = "";
-                if (field.name.indexOf("_") != -1)
-                    attr = 'id="' + field.name + "_" + val + '"';
-
-                r += '<div style="position:relative;" ><label>' + field.title + "</label>";
-                if (field.ftype == "div") {
-                    if (field.name == "depart_id") {
-                        attr += ' class="drop" + style="border: 1px solid #95b7ff;"';
-                        r += "<div " + attr + ">" + user.depart_name + "</div>" + RenderDepart();
-                    }
-                    else {
-                        r += "<div " + attr + ">" + val + "</div>";
-                    }
-                }
-                else if (field.ftype == "multiselect")
-                    r += RenderMultiSelect(field, user);
-                else if (field.ftype == "input")
-                    r += '<input ' + attr + ' name="' + field.name + '" value="' + val + '"/>';
-                else if (field.ftype == "date")
-                    r += '<input name="' + field.name + '" value="' + val + '" onClick="laydate()" />';
-                else if (field.ftype == "input_long")
-                    r += '<input ' + attr + ' style="width:490px;" name="' + field.name + '" value="' + val + '" />';
-                else if (field.ftype == "textarea")
-                    r += '<textarea ' + attr + ' style="resize:none;width:490px;max-height:45px;" name="' + field.name + '">' + val + '</textarea>';
-                else if (field.ftype == "select") {
-                    var render = "";
-                    if (field.name == "sex")
-                        render = RenderSelect(db_sex, val);
-                    else if (field.name == "job")
-                        render = RenderSelect(GetsubJob(g_user.job, "array"), val);
-                    else if (field.name == "ethnic")
-                        render = RenderSelect(g_ethnic, val);
-                    r += '<select ' + attr + ' name="' + field.name + '">' + render + '</select>';
-                }
-                r += "</div>";
-            });
-            r += "</div>";
-            return r;
+        function nextstep() {
+            ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"4"}}`.format(g_user.id));
         }
-
-        function RenderMultiSelect( field, data )
-        {
-            var val = data[field.name];
-            if (val == "") val = "　";
-            var cnt = db_skill.map(x => { return val.indexOf(x.name) == -1 ? ("<div>" + x.name + "</div>") : ('<div class="selected">' + x.name + "</div>") });
-            return `<div class="xCombox"><span>` + val + `</span><div class="xMenu">` + cnt.join("") + `</div></div>`;
-        }
-
-        function rebindevent()
-        {
-            $(".xCombox").on("click", function () {
-                $(this).children(".xMenu").toggle();
-                event.cancelBubble = true;
-            });
-            $(".xMenu div").on("click", function () {
-                $(this).toggleClass("selected");
-                var sels = $(this).parent().children(".selected");
-                if (sels.length == 0){ // 至少要选一个
-                    $(this).toggleClass("selected");
-                    return;
-                }
-                $(this).parent().prev().html(sels.map((i, x) => { return $(x).html(); }).toArray().join(","));
-            });
-
-            // 点击外部隐藏
-            if (typeof __dropwindowglobalvar__ == "undefined") {
-                __dropwindowglobalvar__ = 1;
-                $("html").on("click", function () { $("xMenu").hide(); });
-            }
-        }
-
-        function RenderDepart() {
-            if (g_user.job == "1") {// 风场su
-                return '<div class="xTree dropwnd" id="root" />'
-            }
-            else if (g_user.job == "2" || g_user.job == "3") {// 风场主管、驻场
-                return '<div class="xTree dropwnd" style="width:190px;padding:5px;font-size: 12px;"><div id="' + g_user.depart_table + "_" + g_user.depart_id + "\"><span><img src=\""
-                    + branch[g_user.depart_table].image + "\">" + g_user.depart.name + "</span></div></div>"
-            }
-            else
-                return "";
-        }
-
-        function TreeAddChildren(id) {  // id格式: 表名_{id}
-            var at = id.split("_");
-            var type = branch.sub(at[0]).type;
-            Reqdata("/rd?ls=" + type + (at[1] ? "&" + at[0] + "_id=" + at[1] : ""), "", function (res) {
-                var html = "";
-                for (var i in res.data) {
-                    if (type == "winder") { // 叶节点，少了左边的加号，为缩进对齐加了一层div
-                        html += "<div><div id=\"" + type + "_" + data[i].id + "\"><span><img src=\""
-                            + branch[type].image + "\">" + data[i].name + "</span></div></div>\n"
-                    }
-                    else { // 
-                        html += "<div id=\"" + type + "_" + data[i].id + "\">"
-                            + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
-                            + branch[type].image + "\">" + data[i].name + "</span></div>\n"
-                    }
-                }
-
-                $("#" + id).append(html);
-                $("#" + id).children("img").attr("src", "img/nolines_minus.gif"); // 把加号改成减号
-                $(".xTree div>img").unbind("click", TreeItemExpand);
-                $(".xTree div>span").unbind("click", TreeItemClick);
-                $(".xTree div>img").bind("click", TreeItemExpand);
-                $(".xTree div>span").bind("click", TreeItemClick);
-            });
-        }
-
-        function TreeItemExpand() {
-            var siblings = $(this).siblings("div");
-            if (siblings.length == 0) {
-                var id = $(this).parent().attr("id");
-                TreeAddChildren(id);
-            }
-            else if (siblings.css("display") == "none") {
-                $(event.srcElement).attr("src", "img/nolines_minus.gif");
-                siblings.css("display", "block");
-            }
-            else {
-                $(event.srcElement).attr("src", "img/nolines_plus.gif");
-                siblings.css("display", "none");
-            }
-        }
-
-        function HideWnd(This) {
-            $(This).parent().parent().css("display", "none");
-        }
-
-        //点击树节点
-        function TreeItemClick() {
-            //var at = $(this).parent().attr("id").split("_");
-
-            $(this).parent().parent().css("display", "none");
-        }
-
     </script>
 </body>
 </html>

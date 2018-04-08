@@ -135,6 +135,7 @@
             xhr.send(fd);
         }
         function nextstep() {
+            ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"2"}}`.format(g_user.id));
             return window.location.href = '/static/user_init2.html'
         }
         var g_chged = new Object();

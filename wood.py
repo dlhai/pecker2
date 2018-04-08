@@ -158,7 +158,7 @@ def loaduser(where):
         return
     #找到用户的所在单位，若所在单位是风场，则需要读取风区列表
     user = ret[0]
-    if user.depart_table != None: 
+    if user.depart_table != "": 
         tbl = gettbl(user.depart_table)
         user.depart = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0]
         if tbl["name"] == "winder":
@@ -229,7 +229,7 @@ def curuserinf():
     del user.pwd
 
     #找到用户的所在单位，若所在单位是风场，则需要读取风区列表
-    if user.depart_table != None: 
+    if user.depart_table != "": 
         tbl = gettbl(user.depart_table)
         user.depart = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0]
         if tbl["name"] == "winder":
@@ -527,7 +527,7 @@ def newdir(path):
             os.mkdir(p)
 
 if __name__ == "__main__":
-    newdir(["./static/uploads","./static/uploads/user_face","./static/uploads/user_idimg"]);
+    newdir(["./static/uploads","./static/uploads/user_face","./static/uploads/user_idimg","./static/uploads/certif_image"]);
     app.config['JSON_AS_ASCII'] = False
     app.run( host="0.0.0.0")
 

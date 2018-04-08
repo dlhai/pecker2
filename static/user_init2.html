@@ -27,22 +27,22 @@
     <div class="xFCscol" style="width:900px;margin:100px;">
         <header style="height:40px;">总步骤</header>
         <form id="certif" class="xRndAngle" style="margin:5px;padding:5px;">
-            <div style="float:left;display:block;">
-                <label class="imagelive" style="height:120px;width:180px;" for="image">
+            <div style="float:left;display:inline-block;">
+                <label class="imagelive" style="width:126px;height:84px;" for="image">
                     <img style="width:100%;height:100%;" >
                     <input type="file" id="image" name="image" accept="image/*">
                 </label>
             </div>
-            <div class="x2Form">
-                <div><label>证件名称</label><input name="mail" value=""></div>
-                <div><label>颁发时间</label><input name="birth" value="" onclick="laydate()"></div>
-                <div><label>颁发机构</label><input name="addr" style="width:495px;" value=""></div>
+            <div class="x2Form" style="display:inline-block; width:620px;">
+                <div><label>证件名称</label><input name="name" value=""></div>
+                <div><label>颁发时间</label><input name="issuedate" value="" onclick="laydate()"></div>
+                <div><label>颁发机构</label><input name="issue" style="width:495px;" value=""></div>
             </div>
-            <div style="float:right;margin:10px;margin-right:50px;"><input type="button" onclick="newcertif(this)" value="确定" /> <button type="reset">清除</button></div>
+            <div style="display:inline-block;height:20px;"><input type="button" onclick="newcertif(this)" value="确定" /> <button type="reset">清除</button></div>
         </form>
-        <section class="xPanel2">
-            <header>证件信息<div style="float: right;"><a href="javascript:onEditDev()">编辑</a></div></header>
-            <div id="main" style="padding: 5px;height:100px;flex-grow: 1;"></div>
+        <section class="xPanel2" style="display:inline-block;">
+            <header>证件列表</header>
+            <div id="main" class="xScroll" style="padding: 5px;height:240px;flex-grow: 1;"></div>
         </section>
         <footer><div style="float:right"><button onclick="nextstep()">下一步</button></div></footer>
     </div>
@@ -50,12 +50,14 @@
     <script id="tpl_certiflist" type="text/template">
         {% it.forEach((x,i)=>{ %}
         <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <img style="width: 120px; height: 74px;" src="{%=x.img%}" />
+            <div class="xRndAngle" style="width: 126px; height: 84px; float: left; margin-right: 5px; ">
+                <img style="width: 126px; height: 84px;" src="{%=x.image%}" />
             </div>
-            <div class="d_data_item"><label>证件名称</label><div>{%=x.name%}</div></div>
-            <div class="d_data_item"><label>颁发时间</label><div>{%=x.issuedate%}</div></div>
-            <div class="d_data_item"><label>颁发机构</label><div style="width:404px;">{%=x.office%}</div></div>
+            <div class="x2Form">
+                <div><label>证件名称</label><div>{%=x.name%}</div></div>
+                <div><label>颁发时间</label><div>{%=x.issuedate%}</div></div>
+                <div><label>颁发机构</label><div style="width:495px;">{%=x.issue%}</div></div>
+            </div>
         </div>
         {% }); %}
     </script>
@@ -69,25 +71,36 @@
             });
         });
         function newcertif() {
+            var formdata = new FormData(document.getElementById("certif"));
+            if (formdata.get("name") == "") {
+                alert("证件名称不能为空！");
+                return;
+            }
+            if (formdata.get("issuedate") == "") {
+                alert("颁发时间不能为空！");
+                return;
+            }
+            if (formdata.get("issue") == "") {
+                alert("颁发机构不能为空！");
+                return;
+            }
+
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4 && xhr.status == 200) {
-                    alert('保存成功' + xhr.responseText);
+                    Reqdata("/rd?ls=certif&user_id=" + g_user.id, "", function (ctf) {
+                        $("#main").html(dtpl2('tpl_certiflist')(ctf.data));
+                    });
                 }
             };
 
-            var formdata = new FormData(document.getElementById("certif"));
-    //        if (g_chged.image != undefined )
-    //            formdata.append("image", $("#image").get(0).files[0]);
+            formdata.append("user_id", g_user.id);
             xhr.open('POST', '/cr?ls=certif', true);
             xhr.send(formdata);
         }
-        var g_chged = new Object();
-        $("html").on("change", function () {
-            var node = event.target;
-            if (node.tagName == "INPUT")
-                g_chged[$(node).attr("name")] = true;
-        });
+        function nextstep() {
+            ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"3"}}`.format(g_user.id));
+        }
     </script>
 </body>
 </html>

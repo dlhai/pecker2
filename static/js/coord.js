@@ -1,4 +1,5 @@
-﻿function crd_showuserselectdlg() {
+﻿// 案件界面，用于调度、专家、风场场主、驻场、队长等，当前仅含案件编辑功能的内容，后面会加入案件显示的内容。
+function crd_showuserselectdlg() {
     var us = `<div id="rolelist" class="xCombox xRndAngle" style="margin-top:5px; display:inline-block;"><span>调度人员</span><div class="xMenu">
                 <div class="selected">调度人员</div><div>风场人员</div><div>设备人员</div><div>仓库人员</div><div>专家</div><div>维修人员</div>
             </div></div>
