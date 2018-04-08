@@ -116,7 +116,10 @@ def QueryObj( sql ):
     for row in result:
         r = obj();
         for t in row.items():
-            setattr( r, t[0], t[1])
+            if t[1] == None:
+                setattr( r, t[0], "")
+            else:
+                setattr( r, t[0], t[1])
         ret.append(r)
     return ret;
 
@@ -236,7 +239,6 @@ def curuserinf():
     ret.result = "200"
     ret.data = user
     ret.fields=QueryObj(select(base.sl).where(base.c.table=="user"))
-    print(tojson(ret))
     return Response(tojson(ret), mimetype='application/json')
  
 @app.route('/chgpwd', methods=['POST'])
@@ -303,12 +305,34 @@ def upload():
 @app.route("/cr", methods=['GET', 'POST'])
 @login_required
 def cr():
-    js = json.loads(request.data)
-    ret=check(js,"cr")
-    if ret.result == "200":
+    ret=check(request, wt)
+    if ret.result != "200":
+        return Response(tojson(ret), mimetype='application/json')
+
+    if request.content_type == 'application/json':
+        js = json.loads(request.data)
         fields=",".join(map( lambda x: "'"+x+"'", js["val"].keys()))
         values=",".join(map( lambda x: "'"+x+"'", js["val"].values()))
         sql = "insert into {0}({1}) values({2})".format(js["ls"], fields,values)
+        conn.execute(sql)
+    else:
+        params = request.args.to_dict()
+        files = request.files.to_dict()
+        dic =request.form.to_dict()
+
+        # 1. 保存附件
+        max = QueryObj("select max(id) as max from "+params["ls"])[0].max
+        id = max + 1 if max != "" else 1
+        fmt = "./uploads/{ls}_{fd}/{ls}_{fd}_{id}{ext}"
+        for k,v in files.items(): 
+            fname = fmt.format(ls=params["ls"],fd=k, id=id,ext=os.path.splitext(v.filename)[1] )
+            dic[k]=fname
+            v.save("./static/"+fname)
+
+        # 2. 保存字段数据
+        fields=",".join(map( lambda x: "'"+x+"'", dic.keys()))
+        values=",".join(map( lambda x: "'"+x+"'", dic.values()))
+        sql = "insert into {0}({1}) values({2})".format(params["ls"], fields,values)
         conn.execute(sql)
     return Response(tojson(ret), mimetype='application/json')
 

@@ -291,6 +291,19 @@ function ReqdataS(url, ctx, fun) {
     xmlhttp.send();
 }
 
+function SendForm(url, form, ctx, cb) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            json = $.parseJSON(xmlhttp.responseText);
+            if (json.result != "200")
+                alert("方法：" + url + "\n应答：[" + json.result + "]" + json.msg)
+            cb(json, ctx);
+        }
+    };
+    xhr.open('POST', url, true);
+    xhr.send(fd);
+}
 
 // 自此以下将被废弃
 
