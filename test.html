@@ -8,55 +8,9 @@
     <link rel="stylesheet" href="static/css/bootstrap.css">
     <script src="static/js/jquery.js"></script>
     <script src="static/js/bootstrap.js"></script>
+    <script src="static/js/utils.js"></script>
 
-    <style>
-        /*组合框*/
-        .xCombox {
-            border-radius: 4px;
-            position: relative;
-            padding: 5px 30px 5px 10px;
-        }
-        .xCombox::after { /*组合框右侧的小三角*/
-            content: '';
-            width: 0px;
-            height: 0px;
-            position: absolute;
-            top: 14px;
-            right: 8px;
-            border-top: 6px solid #404040;
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-        }
 
-        /*菜单项，菜单窗体直接借用bootstrap的dropdown-menu*/
-        .xMenu {
-            position: absolute;
-            display: none;
-            top: 100%;
-            left: 0;
-            z-index: 1000;
-            width: 100%;
-            padding: 5px 5px;
-            background-color: #ffffff;
-            background-clip: padding-box;
-            border: 1px solid #ccc;
-            border: 1px solid rgba(0,0,0,.15);
-            border-radius: 4px;
-            box-shadow: 0 6px 12px rgba(0,0,0,.175);
-            color: #333333;
-        }
-
-        .xMenu>div{
-            color: #333333;
-        }
-        .xMenu>div:hover, .xMenu>div.selected{
-            background-color: #357ebd;
-            color: #ffffff;
-            text-decoration: none;
-        }
-
-    </style>
-    
 </head>
 <body>
 
@@ -78,57 +32,15 @@
     </div>
 
     <script type="text/javascript">
-
-
-
-        $(".xCombox").on("click", function () {
-            var aa = $("#username");
-            account = $("#username").val();
-
-            $(this).children(".xMenu").toggle(); event.cancelBubble = true;
-        });
-        $(".xMenu div").on("click", function () {
-            $(this).toggleClass("selected");
-            var sels = $(this).parent().children(".selected").map((i, x) => { return $(x).html(); });
-            $(this).parent().prev().html(sels.toArray().join(","));
-        });
-        $("html").on("click", function () { $("xMenu").hide();});
-
-
-        function drop(This) {
-            DropWindow($(This),"",
-                `<div class="x3MenuItem">a</div>
-                <div class="x3MenuItem">b</div>
-                <div class="x3MenuItem x3MenuItemSelected">c</div>
-                <div class="x3MenuItem">d</div>`
-            );
-        };
-
-        function DropWindow(parentElement, attr, content) {
-            parentElement.css("position", "relative");
-            var height = parentElement.outerHeight() + 2;
-            var wnd = `<div class="dropdown-menu" style="top:` + height + `px;width:190px;height:100px;padding:5px;">`
-                + content + `</div>`
-            parentElement.append(wnd);
-            event.cancelBubble = true;
-
-            $(".dropdown-menu div").on("click", function (ev) {
-                $(ev.target).toggleClass("x3MenuItemSelected");
-            });
-
-            // 点击自己隐藏
-            $(".dropdown-menu").on("click", function (ev) {
-                event.cancelBubble = true;
-                parentElement.children(":last-child").hide();
-            });
-            // 点击外部隐藏
-            if (typeof __dropwindowglobalvar__ == "undefined") {
-                __dropwindowglobalvar__ = 1;
-                $("html").on("click", function () {
-                    $(".dropdown-menu").hide();
-                });
-            }
+        function CreateNode(param) {
+            if (param.id == undefined) param.id = "";
+            if (param.class == undefined) param.class = "";
+            if (param.style == undefined) param.style = "";
+            if (param.body == undefined) param.body = "";
+            return '<{name} {id} {class} {style} >{body}</{name}>'.format(param);
         }
+        alert(CreateNode({ name: "asdf" }));
+
     </script>
 </body>
 </html>

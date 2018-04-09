@@ -37,14 +37,15 @@ function xrimagelive(img) {
 }
 
 //背景带十字，点击可换图(第2版)
-function xrimagelive2(img, name, clss, style) {
+function xrimagelive2(img, id, name, clss, style) {
     var image = img == "" ? "" : 'src="' + img + '"';
+    id = id ? id : rndstr(8);
     name = name ? 'name="' + name + '"' : "";
-    clss = clss ? 'class="' + clss + '"' : "";
-    style = style ? style : "";
-    var tpl = `<label {clss} style="{style}" for="{id}"><img style="width:100%;height:100%;" {image} />
+    clss = clss ? clss : "";
+    style = style ? 'style="' + style + '"': "";
+    var tpl = `<label class="imagelive {clss}" {style} for="{id}"><img style="width:100%;height:100%;" {image} />
                         <input type="file" id="{id}" {name} accept="image/*"></label>`;
-    return tpl.format({ id: rndstr(8), name:name, clss: clss, image: image, style: style });
+    return tpl.format({ id:id, name:name, clss: clss, image: image, style: style });
 }
 
 //背景带十字，点击可换图的列表
@@ -192,6 +193,16 @@ function RenderForm4(entity, fields, cb) {
     r +=RenderFormIn(entity, fields, cb);
     r += "</div>";
     return r;
+}
+
+function xCreateNode(param) {
+    var pm = Object(); 
+    pm.name = param.name == undefined ? "div" : param.name;
+    pm.id = param.id == undefined ? "" : 'id="' + param.id + '"';
+    pm.class = param.class == undefined ? "" : 'class="' + param.class + '"';
+    pm.style = param.style == undefined ? "" : 'style="' + param.style + '"';
+    pm.body = param.body == undefined ? "" : param.body;
+    return '<{name} {id} {class} {style} >{body}</{name}>'.format(pm);
 }
 
 // 渲染表格

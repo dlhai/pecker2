@@ -136,11 +136,12 @@ tbl_certif=Table('certif', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('user_id',Integer),
 	Column('name',String(64)),
-	Column('issuedate',Date),
+	Column('code',String(64)),
 	Column('issue',String(64)),
+	Column('issuedate',Date),
 	Column('image',Integer))
 def dict_certif():
-    return dict(user_id="",name="",issuedate="",issue="",image="")
+    return dict(user_id="",name="",code="",issue="",issuedate="",image="")
 
 tbl_edu=Table('edu', metadata,
 	Column('id',Integer,primary_key=True),
