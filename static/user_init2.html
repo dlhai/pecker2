@@ -16,6 +16,7 @@
     <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
+    <script src="js/user.js"></script>
 
     <style>
         /*为了解决BootStrap中css和layDate的css样式冲突*/
@@ -31,106 +32,23 @@
             <header>证件列表</header>
             <div id="certif_show" class="xScroll" style="padding: 5px;height:240px;flex-grow: 1;"></div>
         </section>
-        <footer><div style="float:right"><button onclick="nextstep()">下一步</button></div></footer>
+        <footer><div style="float:right"><button onclick="onnextstep()">下一步</button></div></footer>
     </div>
-
-    <script id="tpl_certiflist" type="text/template">
-        {% it.forEach((x,i)=>{ %}
-        <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-            <div class="xRndAngle" style="width: 126px; height: 84px; float: left; margin-right: 5px; ">
-                <img style="width: 126px; height: 84px;" src="{%=x.image%}" />
-            </div>
-            <div class="x2Form">
-                <div><label>证件名称</label><div>{%=x.name%}</div></div>
-                <div><label>颁发时间</label><div>{%=x.issuedate%}</div></div>
-                <div><label>颁发机构</label><div style="width:495px;">{%=x.issue%}</div></div>
-            </div>
-        </div>
-        {% }); %}
-    </script>
-
 
     <script type="text/javascript">
         Reqdata("/curuserinf", "", function (res) {
             g_user = res.data;
             Reqdata("/rd?ls=certif&user_id=" + g_user.id, "", function (ctf) {
-                $("#certif_live").html(xrcertiflive(Create(ctf.fields), ctf.fields));
+                g_ctf = ctf;
+                $("#certif_live").html(xrcertiflive(Create(g_ctf.fields), g_ctf.fields));
                 $("#certif_show").html(xrcertifshow(ctf.data));
             });
         });
 
-        function xrcertiflive(entity, fields) {
-            var ximg = { style: "float:left;display:inline-block;", body: xrimagelive2("", "image") };
-            var xform = { class: "x2Form", style: "display:inline-block; width:620px;", body: RenderFormIn(entity, fields) };
-            var xbtns =`<div style="display:inline-block;height:20px;">
-                <input type="button" onclick="oncertifsave(this)" value="确定" />
-                <input type="button" onclick="oncertifblank(this)" value="清除" /></div>`
-
-            var ss = xCreateNode(ximg) + xCreateNode(xform) + xbtns;
-            return xCreateNode(ximg) + xCreateNode(xform) + xbtns;
-        }
-        function xrcertifshow(data) {
-            var tpl=`{% it.forEach((x,i)=>{ %}
-            <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-                <div class="xRndAngle" style="width: 126px; height: 84px; float: left; margin-right: 5px; ">
-                    <img style="width: 126px; height: 84px;" src="{%=x.image%}" />
-                </div>
-                <div class="x2Form">
-                    <div><label>证件名称</label><div>{%=x.name%}</div></div>
-                    <div><label>颁发时间</label><div>{%=x.issuedate%}</div></div>
-                    <div><label>颁发机构</label><div style="width:495px;">{%=x.issue%}</div></div>
-                </div>
-            </div>
-            {% }); %}`
-            dtpl(tpl)(data);
-        }
-        function oncertifsave() {
-            var formdata = new FormData(document.getElementById("certif"));
-            if (formdata.get("name") == "") {
-                alert("证件名称不能为空！");
-                return;
-            }
-            if (formdata.get("issuedate") == "") {
-                alert("颁发时间不能为空！");
-                return;
-            }
-            if (formdata.get("issue") == "") {
-                alert("颁发机构不能为空！");
-                return;
-            }
-
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    Reqdata("/rd?ls=certif&user_id=" + g_user.id, "", function (ctf) {
-                        $("#main").html(xrcertifshow(ctf.data));
-                    });
-                }
-            };
-
-            formdata.append("user_id", g_user.id);
-            xhr.open('POST', '/cr?ls=certif', true);
-            xhr.send(formdata);
-        }
-        function oncertifblank() {
-            document.getElementById("certif").reset();
-            var imgs = $(".imagelive").children("img");
-            imgs.removeAttr("src");
-        }
-
         function onnextstep() {
             ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"3"}}`.format(g_user.id));
+            window.location.href = '/static/user_init3.html'
         }
     </script>
 </body>
 </html>
-
-<!--
-input：普通录入
-pwd：密码
-image：图片
-select：所在单位选择，职位选择，领域选择，籍贯（省地市）选择，
-input
-choice：性别选择，
-date：日历，
-image-->

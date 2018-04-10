@@ -32,7 +32,7 @@
     <div style="width:900px;height:600px;margin:100px;">
         <header style="height:40px;">总步骤</header>
         <form id="main" style="height:350px;"></form>
-        <footer><div style="float:right"><button onclick="save()">保存</button> <button onclick="nextstep()">下一步</button></div></footer>
+        <footer><div style="float:right"><button onclick="save()">保存</button> <button onclick="onnextstep()">下一步</button></div></footer>
     </div>
     <script type="text/javascript">
         init();
@@ -134,9 +134,9 @@
             xhr.open('POST', '/wt?ls=user&id='+g_user.id, true);
             xhr.send(fd);
         }
-        function nextstep() {
+        function onnextstep() {
             ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"2"}}`.format(g_user.id));
-            return window.location.href = '/static/user_init2.html'
+            window.location.href = '/static/user_init2.html'
         }
         var g_chged = new Object();
         $("html").on("change", function () {

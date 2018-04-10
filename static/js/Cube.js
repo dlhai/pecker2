@@ -40,7 +40,7 @@ function xrimagelive(img) {
 function xrimagelive2(img, id, name, clss, style) {
     var image = img == "" ? "" : 'src="' + img + '"';
     id = id ? id : rndstr(8);
-    name = name ? 'name="' + name + '"' : "";
+    name = name ? 'name="' + name + '"' : '';
     clss = clss ? clss : "";
     style = style ? 'style="' + style + '"': "";
     var tpl = `<label class="imagelive {clss}" {style} for="{id}"><img style="width:100%;height:100%;" {image} />
@@ -154,15 +154,15 @@ function RenderFormItem(type, attr, val )
     else if (type == "div_long")
         r += "<div " + attr + ' style="width: 490px;">' + val + "</div>";
     else if (type == "input")
-        r += '<input ' + attr + '" value="' + val + '"/>';
+        r += '<input ' + attr + ' value="' + val + '"/>';
     else if (type == "input_long")
         r += '<input ' + attr + ' style="width:490px;" value="' + val + '" />';
     else if (type == "textarea")
         r += '<textarea ' + attr + ' style="resize:none;width:490px;max-height:45px;">' + val + '</textarea>';
     else if (type == "select")
-        r += '<select ' + attr + '">' + val + '</select>';
+        r += '<select ' + attr + '>' + val + '</select>';
     else if (type == "date")
-        r += '<input ' + attr + '" value="' + val + '" onClick="laydate()" />';
+        r += '<input ' + attr + ' value="' + val + '" onClick="laydate()" />';
     else if (type == "multiselect")
         r += RenderMultiSelect(field, user);
     return r;

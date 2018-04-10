@@ -1,7 +1,6 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <!--user2与user3的区别：将inplace编辑模式改成弹出6编辑窗口式-->
     <meta charset="utf-8">
     <title>啄木鸟风电维保系统</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -16,6 +15,7 @@
     <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
+    <script src="js/user.js"></script>
 
     <style>
         /*为了解决BootStrap中css和layDate的css样式冲突*/
@@ -26,102 +26,28 @@
 <body>
     <div class="xFCscol" style="width:900px;margin:100px;">
         <header style="height:40px;">总步骤</header>
-        <form id="x" class="xRndAngle" style="margin:5px;padding:5px;">
-            <div style="float:left;display:inline-block;">
-                <label class="imagelive" style="width:126px;height:84px;" for="image1">
-                    <img style="width:100%;height:100%;">
-                    <input type="file" id="image1" name="image1" accept="image/*">
-                </label>
-                <label class="imagelive" style="width:126px;height:84px;" for="image2">
-                    <img style="width:100%;height:100%;">
-                    <input type="file" id="image2" name="image2" accept="image/*">
-                </label>
-            </div>
-            <div class="x2Form" style="display:inline-block; width:620px;">
-                <div><label>开始时间</label><input name="startdate" value="" onclick="laydate()"></div>
-                <div><label>截止时间</label><input name="enddate" value="" onclick="laydate()"></div>
-                <div><label>学历</label><input name="degree" value=""></div>
-                <div><label>教育机构</label><input name="issue" value=""></div>
-            </div>
-            <div style="display:inline-block;height:20px;"><input type="button" onclick="newx(this)" value="确定" /> <button type="reset">清除</button></div>
-        </form>
+        <form id="edu_live" class="xRndAngle" style="margin:5px;padding:5px;"></form>
         <section class="xPanel2" style="display:inline-block;">
-            <header>受教育情况</header>
-            <div id="main" class="xScroll" style="padding: 5px;height:240px;flex-grow: 1;"></div>
+            <header>教育经历</header>
+            <div id="edu_show" class="xScroll" style="padding: 5px;height:240px;flex-grow: 1;"></div>
         </section>
-        <footer><div style="float:right"><button onclick="nextstep()">下一步</button></div></footer>
+        <footer><div style="float:right"><button onclick="onnextstep()">下一步</button></div></footer>
     </div>
-
-    <script id="tpl_xlist" type="text/template">
-        {% it.forEach((x,i)=>{ %}
-        <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-            <div class="xRndAngle" style="width: 126px; height: 84px; float: left; margin-right: 5px; ">
-                <img style="width: 126px; height: 84px;" src="{%=x.image1%}" />
-                <img style="width: 126px; height: 84px;" src="{%=x.image2%}" />
-            </div>
-            <div class="x2Form">
-                <div><label>开始时间</label><div>{%=x.startdate%}</div></div>
-                <div><label>截止时间</label><div>{%=x.enddate%}</div></div>
-                <div><label>学历</label><div>{%=x.degree%}</div></div>
-                <div><label>教育机构</label><div>{%=x.issue%}</div></div>
-            </div>
-        </div>
-        {% }); %}
-    </script>
-
 
     <script type="text/javascript">
         Reqdata("/curuserinf", "", function (res) {
             g_user = res.data;
-            Reqdata("/rd?ls=x&user_id=" + g_user.id, "", function (ctf) {
-                $("#main").html(dtpl2('tpl_xlist')(ctf.data));
+            Reqdata("/rd?ls=edu&user_id=" + g_user.id, "", function (ctf) {
+                g_ctf = ctf;
+                $("#edu_live").html(xredulive(Create(g_ctf.fields), g_ctf.fields));
+                $("#edu_show").html(xredushow(ctf.data));
             });
         });
-        function newx() {
-            var formdata = new FormData(document.getElementById("x"));
-            if (formdata.get("degree") == "") {
-                alert("学历不能为空！");
-                return;
-            }
-            if (formdata.get("startdate") == "") {
-                alert("开始时间不能为空！");
-                return;
-            }
-            if (formdata.get("enddate") == "") {
-                alert("截止时间不能为空！");
-                return;
-            }
-            if (formdata.get("issue") == "") {
-                alert("教育机构不能为空！");
-                return;
-            }
 
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    Reqdata("/rd?ls=x&user_id=" + g_user.id, "", function (ctf) {
-                        $("#main").html(dtpl2('tpl_xlist')(ctf.data));
-                    });
-                }
-            };
-
-            formdata.append("user_id", g_user.id);
-            xhr.open('POST', '/cr?ls=x', true);
-            xhr.send(formdata);
-        }
-        function nextstep() {
+        function onnextstep() {
             ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"4"}}`.format(g_user.id));
+            window.location.href = '/static/user_init4.html'
         }
     </script>
 </body>
 </html>
-
-<!--
-input：普通录入
-pwd：密码
-image：图片
-select：所在单位选择，职位选择，领域选择，籍贯（省地市）选择，
-input
-choice：性别选择，
-date：日历，
-image-->

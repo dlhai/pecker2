@@ -211,7 +211,7 @@ def login():
     if user is not None and user.pwd == param["pwd"]:
         login_user(User(user))
         fmt = '{"login":"%s","result":"200","nexturl":"%s"}'
-        if 0<user.status<5:
+        if 0<user.status<6:
             return fmt%(param['account'], '/static/user_init'+str(user.status)+'.html')
         else:
             return fmt%(param['account'], '/static/frame.html')
@@ -257,14 +257,13 @@ def chgpwd():
         conn.execute(sql)
     return Response(tojson(ret), mimetype='application/json')
  
-#############################################################
-
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
     return "logout page"
 
+#############################################################
 
 #frame用来填用户角色组合框
 @app.route("/roleuserall") 
@@ -385,7 +384,7 @@ def rd():
     sql = "select * from "+ls
     if len(d) > 0:
         sql += " where "+" and ".join([ To(k,v) for k,v in d.items()])
-    return query4(ls,fields=select(base.sl).where(base.c.table==ls),data = sql)
+    return query5(ls,fields=select(base.sl).where(base.c.table==ls),data = sql)
 
 #查询用户
 #测试链接 http://127.0.0.1:5000/rduser?type=winder&key1=val1&key2=val2....

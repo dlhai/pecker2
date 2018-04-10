@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <script type="text/javascript" src="js/doTe.js"></script>
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="laydate/laydate.js"></script>
+    <script src="js/utils.js"></script>
+    <link rel="stylesheet" href="css/cube.css" />
+    <script src="js/Cube.js"></script>
+    <script src="js/db.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/xpecker.js"></script>
+    <script src="js/user.js"></script>
+
+    <style>
+        /*为了解决BootStrap中css和layDate的css样式冲突*/
+        .laydate_box, .laydate_box * {box-sizing: content-box;}
+        .laydate_box th {text-align: center;}
+    </style>
+</head>
+<body>
+    <div class="xFCscol" style="width:900px;margin:100px;">
+        <header style="height:40px;">总步骤</header>
+        <form id="employ_live" class="xRndAngle" style="margin:5px;padding:5px;">
+        </form>
+        <footer><div style="float:right"><button onclick="onnextstep()">完成</button></div></footer>
+    </div>
+
+    <script type="text/javascript">
+        Reqdata("/curuserinf", "", function (res) {
+            g_user = res.data;
+            var jobs = [
+                { "id": "3", "name": "驻场", "require": "驻场 人员必须完成以下内容：1 身份证 2 联系电话 3 高空作业证 " },
+                { "id": "6", "name": "设备司机", "require": "设备司机 人员必须完成以下内容：1 身份证 2 联系电话 3驾驶证" },
+                { "id": "9", "name": "仓库管理员", "require": "仓库管理员 人员必须完成以下内容：1 身份证 2 联系电话 3 会计证" },
+                { "id": "12", "name": "调度", "require": "调度 人员必须完成以下内容：1 身份证 2 联系电话 3 普通话证 " },
+                { "id": "14", "name": "专家", "require": "专家 人员必须完成以下内容：1 身份证 2 联系电话  3 专家资格证 " },
+                { "id": "16", "name": "维修队长", "require": "维修队长 人员必须完成以下内容：1 身份证 2 联系电话 3 电工证 4 高空作业证 5 健康证" },
+                { "id": "17", "name": "技工", "require": "技工 人员必须完成以下内容：1 身份证 2 联系电话  3 电工证 4 高空作业证" },
+                { "id": "18", "name": "以上都不是" },
+            ];
+            var cnt = `尊敬的{0},你好：欢迎加入我们，请选择您将要从事的职业：{1}`;
+            cnt.format(g_user.name, ''.join(jobs.map(x => xrRadio("job", x.id, x.name)));
+        });
+
+
+
+            function xrRadio(name, id,caption) {
+
+        }
+
+        Reqdata("/curuserinf", "", function (res) {
+            g_user = res.data;
+            Reqdata("/rd?ls=employ&user_id=" + g_user.id, "", function (ctf) {
+                g_ctf = ctf;
+                $("#employ_live").html(xremploylive(Create(g_ctf.fields), g_ctf.fields));
+                $("#employ_show").html(xremployshow(ctf.data));
+            });
+        });
+
+        function onnextstep() {
+            ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"5"}}`.format(g_user.id));
+            window.location.href = '/static/user_init5.html'
+        }
+    </script>
+</body>
+</html>
