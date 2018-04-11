@@ -26,11 +26,11 @@
 <body>
     <div class="xFCscol" style="width:900px;margin:100px;">
         <header style="height:40px;">总步骤</header>
-        <form id="employ_live" class="xRndAngle" style="margin:5px;padding:5px;">
+        <form id="joblist" class="xRndAngle" style="margin:5px;padding:5px;">
         </form>
         <footer><div style="float:right"><button onclick="onnextstep()">完成</button></div></footer>
     </div>
-
+    
     <script type="text/javascript">
         Reqdata("/curuserinf", "", function (res) {
             g_user = res.data;
@@ -44,24 +44,16 @@
                 { "id": "17", "name": "技工", "require": "技工 人员必须完成以下内容：1 身份证 2 联系电话  3 电工证 4 高空作业证" },
                 { "id": "18", "name": "以上都不是" },
             ];
-            var cnt = `尊敬的{0},你好：欢迎加入我们，请选择您将要从事的职业：{1}`;
-            cnt.format(g_user.name, ''.join(jobs.map(x => xrRadio("job", x.id, x.name)));
+            var tpl = `<div>尊敬的{0}，你好：</div><div>　　欢迎加入我们，请选择您将要从事的职业：</div><div><div>{1}</div><div></div></div>`;
+            var tt = jobs.map(x => xrRadio("job", x.id, x.name)).join('');
+            var cnt = tpl.format(g_user.name, jobs.map(x => xrRadio("job", x.id, x.name)).join(''));
+            $("#joblist").html(cnt);
         });
 
-
-
-            function xrRadio(name, id,caption) {
-
+        function xrRadio(name, value,caption){
+            var tpl = `<label for="{id}"><input id="{id}" type="radio" name="{name}" onclick="onClickRadio(this.value)" value="{value}">{caption}</label>`;
+            return tpl.format({id:rndstr(8),name:name,value:value,caption:caption});
         }
-
-        Reqdata("/curuserinf", "", function (res) {
-            g_user = res.data;
-            Reqdata("/rd?ls=employ&user_id=" + g_user.id, "", function (ctf) {
-                g_ctf = ctf;
-                $("#employ_live").html(xremploylive(Create(g_ctf.fields), g_ctf.fields));
-                $("#employ_show").html(xremployshow(ctf.data));
-            });
-        });
 
         function onnextstep() {
             ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"5"}}`.format(g_user.id));
