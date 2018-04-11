@@ -89,6 +89,7 @@ function oncertifsave() {
         if (xhr.readyState == 4 && xhr.status == 200) {
             Reqdata("/rd?ls=certif&user_id=" + g_user.id, "", function (ctf) {
                 $("#certif_show").html(xrcertifshow(ctf.data));
+                $("#certif_live").html(xrcertiflive(Create(g_ctf.fields), g_ctf.fields));
             });
         }
     };
@@ -115,12 +116,12 @@ function xredulive(entity, fields) {
 }
 function xredushow(data) {
     var tpl = `{% it.forEach((x,i)=>{ %}
-            <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-                <div class="xRndAngle" style="width: 126px; height: 84px; float: left; margin-right: 5px; ">
-                    <img style="width: 126px; height: 84px;" src="{%=x.image1%}" />
-                    <img style="width: 126px; height: 84px;" src="{%=x.image2%}" />
+            <div style="width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
+                <div style="display:inline-block; margin-right: 5px; width:250px;">
+                    <img style="width: 120px; height: 80px;" src="{%=x.image1%}" />
+                    <img style="width: 120px; height: 80px;" src="{%=x.image2%}" />
                 </div>
-                <div class="x2Form">
+                <div class="x2Form" style="display:inline-block">
                     <div><label>开始时间</label><div>{%=x.startdate%}</div></div>
                     <div><label>截止时间</label><div>{%=x.enddate%}</div></div>
                     <div><label>学历</label><div>{%=x.degree%}</div></div>
@@ -150,6 +151,7 @@ function onedusave() {
         if (xhr.readyState == 4 && xhr.status == 200) {
             Reqdata("/rd?ls=edu&user_id=" + g_user.id, "", function (ctf) {
                 $("#edu_show").html(xredushow(ctf.data));
+                $("#edu_live").html(xredulive(Create(g_ctf.fields), g_ctf.fields));
             });
         }
     };
@@ -210,6 +212,7 @@ function onemploysave() {
         if (xhr.readyState == 4 && xhr.status == 200) {
             Reqdata("/rd?ls=employ&user_id=" + g_user.id, "", function (ctf) {
                 $("#employ_show").html(xremployshow(ctf.data));
+                $("#employ_live").html(xremploylive(Create(g_ctf.fields), g_ctf.fields));
             });
         }
     };

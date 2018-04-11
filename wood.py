@@ -526,7 +526,8 @@ def newdir(path):
             os.mkdir(p)
 
 if __name__ == "__main__":
-    newdir(["./static/uploads","./static/uploads/user_face","./static/uploads/user_idimg","./static/uploads/certif_image"]);
+    newdir(["./static/uploads","./static/uploads/user_face","./static/uploads/user_idimg","./static/uploads/certif_image",
+            "./static/uploads/employ_image", "./static/uploads/edu_image1", "./static/uploads/edu_image2"]);
     app.config['JSON_AS_ASCII'] = False
     app.run( host="0.0.0.0")
 

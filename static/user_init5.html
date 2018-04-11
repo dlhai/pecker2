@@ -21,6 +21,9 @@
         /*为了解决BootStrap中css和layDate的css样式冲突*/
         .laydate_box, .laydate_box * {box-sizing: content-box;}
         .laydate_box th {text-align: center;}
+        #joblist > div > div {display: table-cell;}
+        #joblist label {display: block;font-weight: normal;}
+        #joblist > div > div:first-child {width: 150px;}
     </style>
 </head>
 <body>
@@ -28,26 +31,25 @@
         <header style="height:40px;">总步骤</header>
         <form id="joblist" class="xRndAngle" style="margin:5px;padding:5px;">
         </form>
-        <footer><div style="float:right"><button onclick="onnextstep()">完成</button></div></footer>
+        <footer><div style="float:right"><button onclick="onnextstep()">跳过</button> <button onclick="onnextstep()">完成</button></div></footer>
     </div>
     
     <script type="text/javascript">
+        var g_jobs = [
+            {"id": "3", "name": "驻场", "require": "驻场 人员必须完成以下内容：1 身份证 2 联系电话 3 高空作业证 木兰花晏殊燕鸿过后莺归去，细算浮生千万绪。长于春梦几多时，散似秋云无觅处。闻琴解佩神仙侣，挽断罗衣留不住。劝君莫作独醒人，烂醉花间应有数。" },
+            {"id": "6", "name": "设备司机", "require": "设备司机 人员必须完成以下内容：1 身份证 2 联系电话 3驾驶证 诉衷情欧阳修清晨帘幕卷轻霜，呵手试梅妆。都缘自有离恨，故画作远山长。思往事，惜流芳，易成伤。拟歌先敛，欲笑还颦，最断人肠。" },
+            {"id": "9", "name": "仓库管理员", "require": "仓库管理员 人员必须完成以下内容：1 身份证 2 联系电话 3 会计证 曲玉管柳永陇首云飞，江边日晚，烟波满目凭阑久。一望关河萧索，千里清秋，忍凝眸。杳杳神京，盈盈仙子，别来锦字终难偶。断雁无凭，冉冉飞下汀洲、思悠悠。暗想当初，有多少、幽欢佳会；岂知聚散难期，翻成雨恨云愁。阻追游，每登山临水，惹起平生心事，一场消黯，永日无言，却下层楼。" },
+            {"id": "12", "name": "调度", "require": "调度 人员必须完成以下内容：1 身份证 2 联系电话 3 普通话证 苏幕遮范仲淹碧云天，黄叶地，秋色连波，波上寒烟翠。山映斜阳天接水，芳草无情，更在斜阳外。黯乡魂，追旅思。夜夜除非，好梦留人睡。明月楼高休独倚，酒入愁肠，化作相思泪。" },
+            {"id": "14", "name": "专家", "require": "专家 人员必须完成以下内容：1 身份证 2 联系电话  3 专家资格证 少年游柳永长安古道马迟迟，高柳乱蝉嘶。夕阳岛外，秋风原上，目断四天垂。归云一去无踪迹，何处是前期？狎兴生疏，酒徒萧索，不似去年时。" },
+            {"id": "16", "name": "维修队长", "require": "维修队长 人员必须完成以下内容：1 身份证 2 联系电话 3 电工证 4 高空作业证 5 健康证 临江仙晏几道梦后楼台高锁，酒醒帘暮低垂。去年春恨却来时，落花人独立，微雨燕双飞。记得小蘋初见，两重心字罗衣。琵琶弦上说相思，当时明月在，曾照彩云归。" },
+            {"id": "17", "name": "技工", "require": "技工 人员必须完成以下内容：1 身份证 2 联系电话  3 电工证 4 高空作业证 卜算子苏轼黄州定惠院寓居作缺月挂疏桐，漏断人初静。谁见幽人独住来，飘渺孤鸿影。惊起却回头，有恨无人省。拣尽寒枝不肯栖，寂寞沙洲冷。" },
+            {"id": "18", "name": "以上都不是", "require": "贺新郎苏轼乳燕飞华屋。悄无人、桐阴转午，晚凉新浴。手弄生绡白团扇，扇手一时似玉。渐困倚、孤眠清熟。帘外谁来推绣户？枉教人梦断瑶台曲。又却是，风敲竹。石榴半吐红巾蹙。待浮花浪蕊都尽，伴君幽独。秾艳一枝细看取，芳心千重似束。又恐被、秋风惊绿。若待得君来向此，花前对酒不忍触。共粉泪，两簌簌。" },
+        ];
+
         Reqdata("/curuserinf", "", function (res) {
             g_user = res.data;
-            var jobs = [
-                { "id": "3", "name": "驻场", "require": "驻场 人员必须完成以下内容：1 身份证 2 联系电话 3 高空作业证 " },
-                { "id": "6", "name": "设备司机", "require": "设备司机 人员必须完成以下内容：1 身份证 2 联系电话 3驾驶证" },
-                { "id": "9", "name": "仓库管理员", "require": "仓库管理员 人员必须完成以下内容：1 身份证 2 联系电话 3 会计证" },
-                { "id": "12", "name": "调度", "require": "调度 人员必须完成以下内容：1 身份证 2 联系电话 3 普通话证 " },
-                { "id": "14", "name": "专家", "require": "专家 人员必须完成以下内容：1 身份证 2 联系电话  3 专家资格证 " },
-                { "id": "16", "name": "维修队长", "require": "维修队长 人员必须完成以下内容：1 身份证 2 联系电话 3 电工证 4 高空作业证 5 健康证" },
-                { "id": "17", "name": "技工", "require": "技工 人员必须完成以下内容：1 身份证 2 联系电话  3 电工证 4 高空作业证" },
-                { "id": "18", "name": "以上都不是" },
-            ];
-            var tpl = `<div>尊敬的{0}，你好：</div><div>　　欢迎加入我们，请选择您将要从事的职业：</div><div><div>{1}</div><div></div></div>`;
-            var tt = jobs.map(x => xrRadio("job", x.id, x.name)).join('');
-            var cnt = tpl.format(g_user.name, jobs.map(x => xrRadio("job", x.id, x.name)).join(''));
-            $("#joblist").html(cnt);
+            var tpl = `<div>尊敬的{0}，你好：</div><div>　　欢迎加入我们，请选择您将要从事的职业：</div><div><div>{1}</div><div id="detail"></div></div>`;
+            $("#joblist").html(tpl.format(g_user.name, g_jobs.map(x => xrRadio("job", x.id, x.name)).join('')));
         });
 
         function xrRadio(name, value,caption){
@@ -55,8 +57,10 @@
             return tpl.format({id:rndstr(8),name:name,value:value,caption:caption});
         }
 
+        function onClickRadio(id) { $("#detail").html(GetSub(g_jobs, "id", id).require);}
+
         function onnextstep() {
-            ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"5"}}`.format(g_user.id));
+            ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"6"}}`.format(g_user.id));
             window.location.href = '/static/user_init5.html'
         }
     </script>
