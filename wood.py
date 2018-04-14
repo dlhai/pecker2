@@ -265,6 +265,20 @@ def logout():
 
 #############################################################
 
+from Flask_Sockets import Sockets
+sockets = Sockets(app)
+@sockets.route(‘/echo’)
+def echo_socket(ws):
+    gLog.debug("ws=%s", ws)
+    while not ws.closed:
+        message = ws.receive()
+        ws.send(message)
+@app.route(‘/’)
+def hello():
+    return ‘Hello World!’
+
+#############################################################
+
 #frame用来填用户角色组合框
 @app.route("/roleuserall") 
 def roleuserall():

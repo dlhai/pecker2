@@ -60,6 +60,10 @@
         function onClickRadio(id) { $("#detail").html(GetSub(g_jobs, "id", id).require);}
 
         function onnextstep() {
+            var formdata = new FormData(document.getElementById("main"));
+            var job = formdata.get("job");
+
+            ReqdataP("/cr", `{"ls":"msg","val":{"type":"changejob","from":"{0}","to":"{1}","jsn":"newjob={2}"}}`.format(g_user.id, GetRoleUser(job).id, job ));
             ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"6"}}`.format(g_user.id));
             window.location.href = '/static/user_init5.html'
         }

@@ -347,4 +347,3 @@ $("html").on("click", function () {
         }
     }
 });
-

@@ -1,6 +1,6 @@
 ﻿//用户信息界面，用于用户内容显示和编辑，在初始化12345步，和用户详细信息处均有用到。
 
-function xruserform(user, fields) {
+function xruserlive(user, fields) {
     var ui2 = `
                 <div style="float:left;display:block;height:240px;width:280px;margin-top:5px;">
                     <div style="float:left;display:block;">
@@ -41,6 +41,65 @@ function xruserform(user, fields) {
         else return user[name];
     });
 }
+
+function hidechgpwd(This) {
+    if ($(This).attr("value") != "确定") {
+        $(This).parent().parent().css("display", "none");
+        return;
+    }
+
+    var formdata = new FormData(document.getElementById("main"));
+    var pwd = formdata.get("pwd");
+    var password1 = formdata.get("newpwd1");
+    var password2 = formdata.get("newpwd2");
+    if (password1 != password2) {
+        alert("两次输入的密码不一致！");
+        return;
+    }
+
+    var val = `{"id":"{id}","pwd":"{pwd}","newpwd":"{newpwd}"}`.format({
+        "id": g_user.id, "pwd": pwd, "newpwd": password1
+    });
+    ReqdataP("/chgpwd", val, "修改密码", function (jsn) {
+        if (jsn.result != 200) {
+            alert(jsn.msg);
+            return;
+        }
+        alert("修改成功！");
+        $(This).parent().parent().css("display", "none");
+    });
+}
+
+function onusersave() {
+    delete g_chged.pwd;
+    delete g_chged.newpwd1;
+    delete g_chged.newpwd2;
+
+    var formdata = new FormData(document.getElementById("main"));
+    var fd = new FormData();
+    for (var x in g_chged) {
+        if (x == "face" || x == "idimg")
+            fd.append(x, $("#" + x).get(0).files[0]);
+        else
+            fd.append(x, formdata.get(x));
+    }
+
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            alert('保存成功' + xhr.responseText);
+        }
+    };
+    xhr.open('POST', '/wt?ls=user&id=' + g_user.id, true);
+    xhr.send(fd);
+}
+
+var g_chged = new Object();
+$("html").on("change", function () {
+    var node = event.target;
+    if (node.tagName == "INPUT")
+        g_chged[$(node).attr("name")] = true;
+});
 
 // 证件部分----------------------------------------begin----------------------
 function xrcertiflive(entity, fields) {

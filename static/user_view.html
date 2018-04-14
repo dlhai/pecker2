@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.css"/>
+    <script type="text/javascript" src="js/doTe.js"></script>
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/db.js"></script>
+
+</head>
+<body style="display: flex; flex-direction: row; align-items: stretch; padding:5px;">
+
+    <div style="overflow-y: scroll; overflow-x: scroll; width: 100px; margin: 10px; flex-shrink: 2; flex-grow: 1; ">
+        <section id="d_baseinf" class="d_panel d_detail" style="min-height: 200px; ">
+            <header class="heading">基本信息<div style="float: right;"><a href="#">编辑</a></div></header>
+        </section>
+        <section id="d_certiflist" class="d_panel d_detail">
+            <header class="heading">证件信息<div style="float: right;"><a href="#">编辑</a></div></header>
+        </section>
+        <section id="d_edulist" class="d_panel d_detail">
+            <header class="heading">受教育经历<div style="float: right;"><a href="#">编辑</a></div></header>
+        </section>
+        <section id="d_employlist" class="d_panel d_detail">
+            <header class="heading">就业经历<div style="float: right;"><a href="#">编辑</a></div></header>
+        </section>
+        <section id="d_opuslist" class="d_panel d_detail">
+            <header class="heading">发表作品<div style="float: right;"><a href="#">编辑</a></div></header>
+        </section>
+    </div>
+
+    <script id="tpl_baseinf" type="text/template">
+        <header class="heading">基本信息<div style="float: right;"><a href="#">编辑</a></div></header>
+        <div class="d_rAngle d_dImage" style="width: 216px; height: 140px; float: left;">
+            <img style="width: 216px; height: 140px;" src="{%=it.idimg%}" />
+        </div>
+        <div class="d_data_item"><label>帐号</label><div>{%=it.account%}</div></div>
+        <div class="d_data_item"><label>密码</label><div style="text-align:right;"><a>点击重置密码</a></div></div>
+        <div class="d_data_item"><label>姓名</label><div>{%=it.name%}</div></div>
+        <div class="d_data_item"><label>性别</label><div>{%=it.sex%}</div></div>
+        <div class="d_data_item"><label>民族</label><div>{%=it.ethnic%}</div></div>
+        <div class="d_data_item"><label>出生年月</label><div>{%=it.birth%}</div></div>
+        <div class="d_data_item"><label>住址</label><div style="width:404px;">{%=it.origo%}</div></div>
+        <div class="d_data_item"><label>身份证号</label><div>{%=it.id%}</div></div>
+        <div class="d_data_item"><label>联系电话</label><div>{%=it.phone%}</div></div>
+        <div class="d_data_item"><label>邮箱</label><div>{%=it.mail%}</div></div>
+        <div class="d_data_item"><label>QQ号码</label><div>{%=it.qq%}</div></div>
+        <div class="d_data_item"><label>微信号</label><div>{%=it.wechat%}</div></div>
+        <div class="d_data_item"><label>居住地址</label><div style="width:404px;">{%=it.addr%}</div></div>
+        <div class="d_data_item"><label>角色</label><div>{%=it.prof%}</div></div>
+        {% if (it.prof=="专家") { %}
+        <div class="d_data_item"><label>领域</label><div>{%=it.skill%}</div></div>
+        {% } %}
+    </script>
+
+    <script id="tpl_certiflist" type="text/template">
+        <header class="heading">证件信息<div style="float: right;"><a href="#">编辑</a></div></header>
+        {% for (var i in it) { %}
+        <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
+            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
+                <img style="width: 120px; height: 74px;" src="{%=it[i].img%}" />
+            </div>
+            <div class="d_data_item"><label>证件名称</label><div>{%=it[i].name%}</div></div>
+            <div class="d_data_item"><label>颁发时间</label><div>{%=it[i].issuedate%}</div></div>
+            <div class="d_data_item"><label>颁发机构</label><div style="width:404px;">{%=it[i].office%}</div></div>
+        </div>
+        {% } %}
+    </script>
+
+    <script id="tpl_edulist" type="text/template">
+        <header class="heading">受教育经历<div style="float: right;"><a href="#">编辑</a></div></header>
+        {% for (var i in it) { %}
+        <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
+            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
+                <img style="width: 120px; height: 74px;" src="{%=it[i].img1%}" />
+            </div>
+            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
+                <img style="width: 120px; height: 74px;" src="{%=it[i].img2%}" />
+            </div>
+            <div class="d_data_item"><label>开始时间</label><div>{%=it[i].tmstart%}</div></div>
+            <div class="d_data_item"><label>截止时间</label><div>{%=it[i].tmend%}</div></div>
+            <div class="d_data_item"><label>学历</label><div>{%=it[i].qualif%}</div></div>
+            <div class="d_data_item"><label>教育机构</label><div>{%=it[i].edu%}</div></div>
+        </div>
+        {% } %}
+    </script>
+
+    <script id="tpl_employlist" type="text/template">
+        <header class="heading">就业经历<div style="float: right;"><a href="#">编辑</a></div></header>
+        {% for (var i in it) { %}
+        <div style="min-height: 85px; width: 100%;{% if (i%2==0){ %}background: #f5f5f5; {% } %}">
+            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
+                <img style="width: 120px; height: 74px;" src="{%=it[i].img%}" />
+            </div>
+            <div class="d_data_item"><label>工作单位</label><div>{%=it[i].workin%}</div></div>
+            <div class="d_data_item"><label>岗位</label><div>{%=it[i].pos%}</div></div>
+            <div class="d_data_item"><label>开始时间</label><div>{%=it[i].tmstart%}</div></div>
+            <div class="d_data_item"><label>结束时间</label><div>{%=it[i].tmend%}</div></div>
+        </div>
+        {% } %}
+    </script>
+
+    <script id="tpl_opuslist" type="text/template">
+        <header class="heading">发表作品<div style="float: right;"><a href="#">编辑</a></div></header>
+        {% for (var i in it) { %}
+        <div style="min-height: 85px; width: 100%;{% if (i%2==0){ %}background: #f5f5f5; {% } %}">
+            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
+                <a href="{%=it[i].link%}"><img style="width: 120px; height: 74px;" src="{%=it[i].img%}" /></a>
+            </div>
+            <div class="d_data_item"><label>发表媒体</label><div>{%=it[i].journal%}</div></div>
+            <div class="d_data_item"><label>发表时间</label><div>{%=it[i].date%}</div></div>
+            <div class="d_data_item"><label>标题</label><div style="width:404px;">{%=it[i].title%}</div></div>
+        </div>
+        {% } %}
+    </script>
+    <script type="text/javascript">
+        var url = window.location.search;
+        var act = url.substring(url.lastIndexOf('=') + 1, url.length);
+        var item = GetArItem(db_userlist.data, "account", act);
+        var i = rndrange(0, db_addition.length);
+
+        var tpl_baseinf = doT.template(document.getElementById('tpl_baseinf').innerHTML);
+        $("#d_baseinf").html(tpl_baseinf(item));
+
+        var tpl_certiflist = doT.template(document.getElementById('tpl_certiflist').innerHTML);
+        $("#d_certiflist").html(tpl_certiflist(db_addition[i].certif));
+
+        var tpl_edulist = doT.template(document.getElementById('tpl_edulist').innerHTML);
+        $("#d_edulist").html(tpl_edulist(db_addition[i].edu));
+
+        var tpl_employlist = doT.template(document.getElementById('tpl_employlist').innerHTML);
+        $("#d_employlist").html(tpl_employlist(db_addition[i].employ));
+
+        var tpl_opuslist = doT.template(document.getElementById('tpl_opuslist').innerHTML);
+        $("#d_opuslist").html(tpl_opuslist(db_addition[i].opus));
+    </script>
+</body>
+</html>
