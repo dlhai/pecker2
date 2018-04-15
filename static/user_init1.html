@@ -39,10 +39,7 @@
         init();
         function init() {
             Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
-            Reqdata("/curuserinf", "", function (res) {
-                g_user = res.data;
-                $("#main").html(xruserlive(g_user,res.fields));
-            });
+            Reqdata("/curuserinf", "", function (res) { g_user = res.data; $("#main").html(xruserlive(g_user,res.fields)); });
         }
 
         function onnextstep() {

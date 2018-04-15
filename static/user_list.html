@@ -5,225 +5,157 @@
     <meta charset="utf-8">
     <title>啄木鸟风电维保系统</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link rel="stylesheet" href="css/bootstrap.css"/>
+    <link rel="stylesheet" href="css/bootstrap.css" />
     <script type="text/javascript" src="js/doTe.js"></script>
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
     <script src="laydate/laydate.js"></script>
     <script src="js/utils.js"></script>
+    <link rel="stylesheet" href="css/cube.css" />
+    <script src="js/Cube.js"></script>
     <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
-    <script src="js/Cube.js"></script>
- 
+    <script src="js/user.js"></script>
+    <style>
+        .live{background:#808080;}
+    </style>
 </head>
 <body class="xFCsrow" >
     <section class="xPanel2" style="width:100px"><!--两个子项都固定宽度100，使它们获得相同的增量-->
         <header class="heading">列表<div style="float: right;"><a onClick="onAddUser()">添加</a></div></header>
-        <div id="d_table_item" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;">
+        <div id="userlist" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;">
         </div>
     </section>
 
     <div class="xPanel2 xScroll" style="width:100px;border:0px;">
-        <section class="d_panel d_detail">
-            <header class="heading">基本信息<div style="float: right;"><a onClick="onAddUser()">添加</a> <a onClick="onEditUser(this)">编辑</a></div></header>
-            <div id="d_baseinf" class="x2Form" style="padding:5px 0px 5px 0px;"></div>
-        </section>
-        <section id="d_certiflist" class="d_panel d_detail">
-            <header class="heading">证件信息<div style="float: right;"><a href="#">编辑</a></div></header>
-        </section>
-        <section id="d_edulist" class="d_panel d_detail">
-            <header class="heading">受教育经历<div style="float: right;"><a href="#">编辑</a></div></header>
-        </section>
-        <section id="d_employlist" class="d_panel d_detail">
-            <header class="heading">就业经历<div style="float: right;"><a href="#">编辑</a></div></header>
-        </section>
-        <section id="d_opuslist" class="d_panel d_detail">
-            <header class="heading">发表作品<div style="float: right;"><a href="#">编辑</a></div></header>
-        </section>
+        <header class="heading"><div class="live" onClick="onclickpane(this)">信息</div> <div onClick="onclickpane(this)">动态</div></header>
+        <div id="pane" style="padding:5px 0px 5px 0px;">
+            <section class="xPanel2">
+                <header class="heading">基本信息<div style="float: right;"><a onClick="onclick('useradd')">添加</a> <a onClick="onclick('useredit')">编辑</a></div></header>
+                <div id="d_baseinf" class="x2Form" style="padding:5px 0px 5px 0px;"></div>
+            </section>
+            <section id="d_certiflist" class="xPanel2">
+                <header class="heading">证件信息<div style="float: right;"><a onClick="onclick('certifadd')">添加</a> <a onClick="onclick('certifedit')">编辑</a></div></header>
+                <div id="d_baseinf" class="x2Form" style="padding:5px 0px 5px 0px;"></div>
+            </section>
+            <section id="d_edulist" class="xPanel2">
+                <header class="heading">受教育经历<div style="float: right;"><a onClick="onclick('eduadd')">添加</a> <a onClick="onclick('eduedit')">编辑</a></div></header>
+                <div id="d_baseinf" class="x2Form" style="padding:5px 0px 5px 0px;"></div>
+            </section>
+            <section id="d_employlist" class="xPanel2">
+                <header class="heading">就业经历<div style="float: right;"><a onClick="onclick('employadd')">添加</a> <a onClick="onclick('employedit')">编辑</a></div></header>
+                <div id="d_baseinf" class="x2Form" style="padding:5px 0px 5px 0px;"></div>
+            </section>
+        </div>
     </div>
-
-    <div class="modal fade" id="ModalDlg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">
-        <div class="modal-dialog" style="width:900px">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" id="ModalDlgTitle">模态框（Modal）标题</h4>
-                </div>
-                <div id="ModalDlgContent" class="modal-body" style="padding:5px 0px">
-                    <div><label>标识</label><input name="id" value="1234"></div>
-                    <div><label>所属风场</label><input value="69" /></div>
-                    <div><label>名称</label><input value="达尔罕茂明安联合旗风区" /></div>
-                    <div><label>备注</label><textarea name="a" style="resize:none;width:500px;max-height:45px;">小重山章良能柳暗花明春事深,小阑红芍药,已抽簪。雨馀风软碎鸣禽,迟迟日,犹带一分阴。往事莫沉吟，身闲时序好、且凳临。旧游无处不堪寻，无寻处、惟有少年心。</textarea></div>
-                    <div><label>位置</label><textarea name="a" style="resize:none;width:500px;max-height:45px;">109.790407 40.523169,109.857074 40.523169,109.857074 40.613169,109.790407 40.613169</textarea></div>
-                </div>
-                <div class="modal-footer">
-                    <div style="float:left;"><button type="button" class="btn btn-default" style="color:#aaaaaa">删除</button></div>
-                    <button type="button" class="btn btn-primary">提交</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal -->
-    </div>
-
-    <script id="tpl_user_pane" type="text/template">
-        <div style="height:240px;width:280px;float: left; display:block;">
-            <div class="pane_image" style="width: 100%; height: 80px; margin: 0px; padding:0px; display:block;border:0px;">
-                <div style="float: left; margin:0px;"><img style="width: 78px; height: 78px;" src="{%=it.face%}" /></div>
-                <div style="margin-top:0px;"><label>帐号</label><div style="display:inline-block;">{%=it.account%}</div></div>
-                <div><label>密码</label><div>***</div></div>
-            </div>
-            <img style="width: 280px; height: 160px;" src="{%=it.idimg%}" />
-        </div>
-    </script>
-
-    <script id="tpl_user_new" type="text/template">
-        <div class="x2Form" style="padding: 0px 0px 0px 30px;">
-            <div style="float: left; margin:0px;"><img style="width: 100px;height: 180px;" src="img/bird.jpg" /></div>
-            <div><label>帐号</label><input id="username"/></div>
-            <div><label>密码</label><input /></div>
-            <div><label>密码</label><input /></div>
-        </div>
-    </script>
-
-    <script id="tpl_user_form" type="text/template">
-        <div style="height:240px;width:280px;float: left; display:block;">
-            <div class="pane_image" style="width: 100%; height: 80px; margin: 0px; padding:0px; display:block;border:0px;">
-                <div style="float: left; margin:0px;">
-                    <label class="ImgBlank" style="display:inline-block;width:78px;margin:0px;" for="SelectFace"> <img id="viewface" style="width: 78px; height: 78px;;z-index: 999;" src="{%=it.face%}"/> </label>
-                    <input type="file" id="SelectFace" accept="image/*" style="display:none;" onchange="imgPreview(this,'viewface')">
-                </div>
-                <div style="margin-top:0px;"><label>帐号</label><div style="display:inline-block;">{%=it.account%}</div></div>
-                <div style="position:relative;"><label>密码</label><div class="drop" style="border: 1px solid #95b7ff;"><label style="color:royalblue;margin:0px;">点击修改</label></div>
-                <div class="dropwnd" style="left:-6px;width:190px;height:100px;padding:5px;display:none;">
-                    <label style="margin-right:5px;">旧密码</label><input style="width:140px;height:20px;">
-                    <label style="margin-right:5px;">新密码</label><input style="width:140px;height:20px;">
-                    <label style="margin-right:5px;">新密码</label><input style="width:140px;height:20px;">
-                    <div style="float:right"><button onclick="HideWnd(this)">确定</button> <button onclick="HideWnd(this)">取消</button></div>
-                </div></div>
-            </div>
-            <label class="ImgBlank" style="display:inline-block;" for="selectidimg"> <img id="viewidimg" style="width: 280px; height: 160px;z-index: 999;" src="{%=it.idimg%}" /> </label>
-            <input type="file" id="selectidimg" accept="image/*" style="display:none;" onchange="imgPreview(this,'viewidimg')">
-        </div>
-    </script>
-
-    <script id="tpl_certiflist" type="text/template">
-        <header class="heading">证件信息<div style="float: right;"><a href="#">编辑</a></div></header>
-        {% it.forEach((x,i)=>{ %}
-        <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <img style="width: 120px; height: 74px;" src="{%=x.img%}" />
-            </div>
-            <div class="d_data_item"><label>证件名称</label><div>{%=x.name%}</div></div>
-            <div class="d_data_item"><label>颁发时间</label><div>{%=x.issuedate%}</div></div>
-            <div class="d_data_item"><label>颁发机构</label><div style="width:404px;">{%=x.office%}</div></div>
-        </div>
-        {% }); %}
-    </script>
-
-    <script id="tpl_edulist" type="text/template">
-        <header class="heading">受教育经历<div style="float: right;"><a href="#">编辑</a></div></header>
-        {% it.forEach((x,i)=>{ %}
-        <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <img style="width: 120px; height: 74px;" src="{%=x.img1%}" />
-            </div>
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <img style="width: 120px; height: 74px;" src="{%=x.img2%}" />
-            </div>
-            <div class="d_data_item"><label>开始时间</label><div>{%=x.tmstart%}</div></div>
-            <div class="d_data_item"><label>截止时间</label><div>{%=x.tmend%}</div></div>
-            <div class="d_data_item"><label>学历</label><div>{%=x.qualif%}</div></div>
-            <div class="d_data_item"><label>教育机构</label><div>{%=x.edu%}</div></div>
-        </div>
-        {% }); %}
-    </script>
-
-    <script id="tpl_employlist" type="text/template">
-        <header class="heading">就业经历<div style="float: right;"><a href="#">编辑</a></div></header>
-        {% it.forEach((x,i)=>{ %}
-        <div style="width: 100%;{% if (i%2==0){ %}background: #f5f5f5; {% } %}">
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <img style="width: 120px; height: 74px;" src="{%=x.img%}" />
-            </div>
-            <div class="d_data_item"><label>工作单位</label><div>{%=x.workin%}</div></div>
-            <div class="d_data_item"><label>岗位</label><div>{%=x.pos%}</div></div>
-            <div class="d_data_item"><label>开始时间</label><div>{%=x.tmstart%}</div></div>
-            <div class="d_data_item"><label>结束时间</label><div>{%=x.tmend%}</div></div>
-        </div>
-        {% }); %}
-    </script>
-
-    <script id="tpl_opuslist" type="text/template">
-        <header class="heading">发表作品<div style="float: right;"><a href="#">编辑</a></div></header>
-        {% it.forEach((x,i)=>{ %}
-        <div style="width: 100%;{% if (i%2==0){ %}background: #f5f5f5; {% } %}">
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <a href="{%=x.link%}"><img style="width: 120px; height: 74px;" src="{%=x.img%}" /></a>
-            </div>
-            <div class="d_data_item"><label>发表媒体</label><div>{%=x.journal%}</div></div>
-            <div class="d_data_item"><label>发表时间</label><div>{%=x.date%}</div></div>
-            <div class="d_data_item"><label>标题</label><div style="width:404px;">{%=x.title%}</div></div>
-        </div>
-        {% }); %}
-    </script>
 
     <script type="text/javascript">
-        var tpl_certiflist = doT.template(document.getElementById('tpl_certiflist').innerHTML);
-        var tpl_edulist = doT.template(document.getElementById('tpl_edulist').innerHTML);
-        var tpl_employlist = doT.template(document.getElementById('tpl_employlist').innerHTML);
-        var tpl_opuslist = doT.template(document.getElementById('tpl_opuslist').innerHTML);
-        var tpl_user_pane = doT.template(document.getElementById('tpl_user_pane').innerHTML);
+        var g_curuser, g_users, g_ethnic, g_departs, g_user = parent.g_user, g_pane;
+        Reqdata("/curuserinf", "", function (res) {
+            g_user = res.data;
 
-        var g_cur, g_fields = new Array(), g_ethnic, g_departs, g_user = parent.g_user;
-        if (g_user == undefined)
-            g_user = GetRoleUser("叶片超级帐号");
+            Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
+            if (isInArray(["1", "4", "7"], g_user.job))
+                Reqdata("/rd?ls=" + { "1": "winder", "4": "devwh", "7": "matwh" }[g_user.job], "", function (res) { g_departs = res; });
+            Reqdata(GetUrl(), "", function (res) {
+                g_users = res;
+                if (!isInArray(["1", "4", "7"], g_user.job)) { // 除此三类超级用户外不显示所在单位(风场、仓库、驻地)
+                    var idx = GetIdx(g_users.fields, "name", "depart_id");
+                    g_users.fields[idx].twidth = 0;
+                    g_users.fields[idx].ftype = "none";
+                    if (g_user.job == 13) {// 专家超级帐号
+                        var idx = GetIdx(g_users.fields, "name", "skill");
+                        g_users.fields[idx].twidth = "100px";
+                        g_users.fields[idx].ftype = "select";
+                    }
+                }
+                else {
+                    var idx = GetIdx(g_users.fields, "name", "depart_id");
+                    g_users.fields[idx].twidth = "100px";
+                    g_users.fields[idx].ftype = "multiselect";
+                }
 
-        if( isInArray(["1", "4", "7"], g_user.job ))
-            Reqdata("/rd?ls=" + { "1": "winder", "4": "devwh", "7": "matwh" }[g_user.job], "", function (res) { g_departs = res; });
-
-        Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
-
-        param = (g_user.depart_id == "0") ? "" : ("&depart_id=" + g_user.depart_id);
-        var url = "/rduser?job=" + GetsubJob(g_user.job, "string") + param
-        if (g_user.job == "16") // 维修队长
-            url = "/rdteam?user_id=" + g_user.id;
-        Reqdata(url, "", function (res) {
-            g_users = res;
-            if (!isInArray(["1", "4", "7"], g_user.job)) { // 除此三类超级用户外不显示所在单位
-                var idx = GetIdx(g_users.fields, "name", "depart_id");
-                g_users.fields.splice(idx,1); 
-            }
-            $("#d_table_item").html(RenderTable2(g_users, undefined, ValToView));
-
-            g_users.fields.forEach(field => {
-                if (field.name == "account" || field.name == "pwd"
-                    || field.name == "face" || field.name == "idimg")
-                    return;
-                if (field.name == "skill" && g_user.job != "13") // 专家su
-                    return;
-                g_fields.push(field);
-            });
-            TableBindClick3(g_users.ls, function (data_id) {
-                g_cur = GetSub(g_users.data, "id", data_id);
-                var pane = tpl_user_pane(g_cur);
-                pane += RenderPane2(g_cur, g_fields, ValToView);
-                $("#d_baseinf").html(pane);
-
-                // 以下为虚拟数据
-                var idx = rndrange(0, db_addition.length);
-                $("#d_certiflist").html(tpl_certiflist(db_addition[idx].certif));
-                $("#d_edulist").html(tpl_edulist(db_addition[idx].edu));
-                $("#d_employlist").html(tpl_employlist(db_addition[idx].employ));
-                $("#d_opuslist").html(tpl_opuslist(db_addition[idx].opus));
+                $("#userlist").html(RenderTable2(g_users, undefined, ValToView));
             });
         });
-        function ValToView(user, field) {
-            var name = field.name ? field.name :field;
-            if (name == "sex") return GetSub(db_sex, "id", user.sex).name;
-            else if (name == "job") return GetSub(db_job, "id", user.job).name;
-            else if (name == "depart_id") return GetSub(g_departs.data, "id", user.depart_id).name;
-            else return user[name];
+        function GetUrl() {
+            var param = (g_user.depart_id == "0") ? "" : ("&depart_id=" + g_user.depart_id);
+            var url = "/rduser?job=" + GetsubJob(g_user.job, "string") + param
+            if (g_user.job == "16") // 维修队长
+                url = "/rdteam?user_id=" + g_user.id;
+
+            return url;
+        }
+
+        //点击表格行
+        $("html").on("click", function () {
+            var td = $(event.target);
+            if (td[0].localName == "td" && td.parents(".xTable").length > 0) {
+                var tr = td.parent();
+                showdetail(tr.attr("data_id"));
+            }
+        });
+
+        function onclickpane(This) {
+            if ($(This).html() == "信息"){
+                var tpl = `<section class="xPanel2">
+                    <header class="heading">{name}<div style="float: right;"><a onClick="onclick('{code}add')">添加</a> <a onClick="onclick('{code}edit')">编辑</a></div></header>
+                    <div id="{code}" class="x2Form" style="padding:5px 0px 5px 0px;"></div>
+                </section>`;
+
+                var modules = [{ code: "user", name: "基本信息" }, { code: "certif", name: "证件信息" },
+                    { code: "edu", name: "受教育经历" }, { code: "employ", name: "就业经历" }];
+                $("#pane").html(modules.map(x => tpl.format(x)).join("")));
+            }
+            else {
+                var tpl = `<section class="xPanel2">
+                    <header class="heading">{name}</header>
+                    <div id="{code}" class="x2Form" style="padding:5px 0px 5px 0px;"></div>
+                </section>`;
+                var modules = [{ code: "article", name: "文章" }, { code: "discuss", name: "评论" }];
+                $("#pane").html(modules.map(x => tpl.format(x)).join("")));
+            }
+        }
+
+        function showdetail(userid) {
+            var user = GetSub(g_users.data, "id", userid);
+            if (g_pane == "信息") {
+                $("#user").html(xrusershow(user, g_users.fields));
+                Reqdata("rd?ls=certif&user_id=" + user.id, "", function (res) { $("#certif").html(xrcertifshow(res.data)); });
+                Reqdata("rd?ls=edu&user_id=" + user.id, "", function (res) { $("#edu").html(xredushow(res.data)); });
+                Reqdata("rd?ls=employ&user_id=" + user.id, "", function (res) { $("#employ").html(xremployshow(res.data)); });
+            }
+            else {
+
+            }
+        }
+
+        function xrusershow(user, fields) {
+            var ui2 = `
+                <div style="float:left;display:block;height:240px;width:280px;margin-top:5px;">
+                    <div style="float:left;display:block;height:78px;width:78px;">
+                        <img style="width:100%;height:100%;" {face}>
+                    </div>
+                    <div class="x2Form narrow">
+                        <div style="margin-top:0px;"><label>帐号</label><div style="display:inline-block;">{account}</div></div>
+                        <div><label>密码</label><div></div>
+                    </div>
+                    <div style="width:280px;height:160px;margin-top:5px">
+                        <img style="width:100%;height:100%;" {idimg} >
+                    </div>
+                </div>`;
+
+            return ui2.format({
+                "account": user.account, face: (user.face == "" ? "" : 'src="' + user.face + '"'),
+                idimg: (user.idimg == "" ? "" : 'src="' + user.idimg + '"')
+            }) + RenderPane2(g_user, fields, function(user, field) {
+                var name = field.name ? field.name : field;
+                if (name == "sex") return GetSub(db_sex, "id", user.sex).name;
+                else if (name == "job") return GetSub(db_job, "id", user.job).name;
+                else if (name == "depart_id") return GetSub(g_departs.data, "id", user.depart_id).name;
+                else return user[name];
+            });
         }
 
         function onAddUser() {
@@ -267,170 +199,6 @@
             rebindevent();
         }
 
-        function Userform() {
-            // 默认停靠位置和偏移量
-            this.defaultAnchor = 0
-            this.defaultOffset = 0;
-        }
-
-        function imgPreview(fileDom, idimg) {
-            var file = fileDom.files[0];
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                $("#" + idimg).attr("src", e.target.result);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // 通过JavaScript的prototype属性继承于BMap.Control
-        Userform.prototype = new Object();
-        Userform.prototype.render = function (user, fields) {
-            var tpl_user_form = doT.template(document.getElementById('tpl_user_form').innerHTML);
-            var r = '<div class="x2Form">';
-            r += tpl_user_form(user);
-            fields.forEach(field => {
-                var val = user[field.name];
-                if (field.forder == -1 || field.ftype == "none")
-                    return;
-
-                var attr = "";
-                if (field.name.indexOf("_") != -1)
-                    attr = 'id="' + field.name + "_" + val + '"';
-
-                r += '<div style="position:relative;" ><label>' + field.title + "</label>";
-                if (field.ftype == "div") {
-                    if (field.name == "depart_id") {
-                        attr += ' class="drop" + style="border: 1px solid #95b7ff;"';
-                        r += "<div " + attr + ">" + user.depart_name + "</div>" + RenderDepart();
-                    }
-                    else {
-                        r += "<div " + attr + ">" + val + "</div>";
-                    }
-                }
-                else if (field.ftype == "multiselect")
-                    r += RenderMultiSelect(field, user);
-                else if (field.ftype == "input")
-                    r += '<input ' + attr + ' name="' + field.name + '" value="' + val + '"/>';
-                else if (field.ftype == "date")
-                    r += '<input name="' + field.name + '" value="' + val + '" onClick="laydate()" />';
-                else if (field.ftype == "input_long")
-                    r += '<input ' + attr + ' style="width:490px;" name="' + field.name + '" value="' + val + '" />';
-                else if (field.ftype == "textarea")
-                    r += '<textarea ' + attr + ' style="resize:none;width:490px;max-height:45px;" name="' + field.name + '">' + val + '</textarea>';
-                else if (field.ftype == "select") {
-                    var render = "";
-                    if (field.name == "sex")
-                        render = RenderSelect(db_sex, val);
-                    else if (field.name == "job")
-                        render = RenderSelect(GetsubJob(g_user.job, "array"), val);
-                    else if (field.name == "ethnic")
-                        render = RenderSelect(g_ethnic, val);
-                    r += '<select ' + attr + ' name="' + field.name + '">' + render + '</select>';
-                }
-                r += "</div>";
-            });
-            r += "</div>";
-            return r;
-        }
-
-        function rebindevent()
-        {
-            $(".xCombox").on("click", function () {
-                $(this).children(".xMenu").toggle();
-                event.cancelBubble = true;
-            });
-            $(".xMenu div").on("click", function () {
-                $(this).toggleClass("selected");
-                var sels = $(this).parent().children(".selected");
-                if (sels.length == 0){ // 至少要选一个
-                    $(this).toggleClass("selected");
-                    return;
-                }
-                $(this).parent().prev().html(sels.map((i, x) => { return $(x).html(); }).toArray().join(","));
-            });
-
-            // 点击外部隐藏
-            if (typeof __dropwindowglobalvar__ == "undefined") {
-                __dropwindowglobalvar__ = 1;
-                $("html").on("click", function () { $("xMenu").hide(); });
-            }
-        }
-
-        function RenderDepart() {
-            if (g_user.job == "1") {// 风场su
-                return '<div class="xTree dropwnd" id="root" />'
-            }
-            else if (g_user.job == "2" || g_user.job == "3") {// 风场主管、驻场
-                return '<div class="xTree dropwnd" style="width:190px;padding:5px;font-size: 12px;"><div id="' + g_user.depart_table + "_" + g_user.depart_id + "\"><span><img src=\""
-                    + branch[g_user.depart_table].image + "\">" + g_user.depart.name + "</span></div></div>"
-            }
-            else
-                return "";
-        }
-
-        function TreeAddChildren(id) {  // id格式: 表名_{id}
-            var at = id.split("_");
-            var type = branch.sub(at[0]).type;
-            Reqdata("/rd?ls=" + type + (at[1] ? "&" + at[0] + "_id=" + at[1] : ""), "", function (res) {
-                var html = "";
-                for (var i in res.data) {
-                    if (type == "winder") { // 叶节点，少了左边的加号，为缩进对齐加了一层div
-                        html += "<div><div id=\"" + type + "_" + data[i].id + "\"><span><img src=\""
-                            + branch[type].image + "\">" + data[i].name + "</span></div></div>\n"
-                    }
-                    else { // 
-                        html += "<div id=\"" + type + "_" + data[i].id + "\">"
-                            + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
-                            + branch[type].image + "\">" + data[i].name + "</span></div>\n"
-                    }
-                }
-
-                $("#" + id).append(html);
-                $("#" + id).children("img").attr("src", "img/nolines_minus.gif"); // 把加号改成减号
-                $(".xTree div>img").unbind("click", TreeItemExpand);
-                $(".xTree div>span").unbind("click", TreeItemClick);
-                $(".xTree div>img").bind("click", TreeItemExpand);
-                $(".xTree div>span").bind("click", TreeItemClick);
-            });
-        }
-
-        function TreeItemExpand() {
-            var siblings = $(this).siblings("div");
-            if (siblings.length == 0) {
-                var id = $(this).parent().attr("id");
-                TreeAddChildren(id);
-            }
-            else if (siblings.css("display") == "none") {
-                $(event.srcElement).attr("src", "img/nolines_minus.gif");
-                siblings.css("display", "block");
-            }
-            else {
-                $(event.srcElement).attr("src", "img/nolines_plus.gif");
-                siblings.css("display", "none");
-            }
-        }
-
-        function HideWnd(This) {
-            $(This).parent().parent().css("display", "none");
-        }
-
-        //点击树节点
-        function TreeItemClick() {
-            //var at = $(this).parent().attr("id").split("_");
-
-            $(this).parent().parent().css("display", "none");
-        }
-
     </script>
 </body>
 </html>
-
-<!--
-input：普通录入
-pwd：密码
-image：图片
-select：所在单位选择，职位选择，领域选择，籍贯（省地市）选择，
-input
-choice：性别选择，
-date：日历，
-image-->

@@ -144,6 +144,46 @@ function showDlg() {
     dlg.Show();
 }
 
+function RenderPane(ar, idx, fun) {
+    var r = "";
+    ar.fields.sort(function (a, b) { return parseInt(a.forder) - parseInt(b.forder); });
+    for (var i = 0; i < ar.fields.length; i++) {
+        var field = ar.fields[i];
+        if (field.name == "id")
+            continue;
+        var val = ar.data[idx][field.name];
+        var attr = "";
+        if (field.name.indexOf("_") != -1)
+            attr = 'id="' + field.name + "_" + val + '" ';
+
+        if (field.ftype == "input_long")
+            attr += 'style="width:490px;"';
+        else if (field.ftype == "textarea")
+            attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
+
+        r += "<div><label>" + field.title + "</label><div " + attr + ">" + (fun ? fun(ar.data[idx], field) : val) + "</div></div>";
+    }
+    return r;
+}
+
+function RenderPane2(entity, fields, fun) {
+    var r = "";
+    for (var i = 0; i < fields.length; i++) {
+        var field = fields[i];
+        if (field.forder == -1 || field.ftype == "none")
+            continue;
+        var attr = "";
+        if (field.ftype == "input_long")
+            attr += 'style="width:490px;"';
+        else if (field.ftype == "textarea")
+            attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
+        r += "<div><label>" + field.title + "</label><div " + attr + ">" +
+            (fun != undefined ? fun(entity, field) : entity[field.name]) + "</div></div>";
+    }
+    return r;
+}
+
+
 // 渲染表单,三步
 //1.仅渲染控件，（在表格中，不需要前面的标签）
 function RenderFormItem(type, attr, val )
@@ -205,8 +245,9 @@ function xCreateNode(param) {
     return '<{name} {id} {class} {style} >{body}</{name}>'.format(pm);
 }
 
-// 渲染表格
+// 渲染表格--------------begin------------
 // twidth:0不显示，无此属性或为-1表示默认宽度
+g_TableCurRow = new Object();
 function RenderTable2(res, style, fun) {
     var r = "<table id=\"" + res.ls + "\" class=\"xTable\"><thead><tr>";
     if (style)
@@ -243,8 +284,34 @@ function RenderTable2(res, style, fun) {
         r += "</tr>";
     });
     r += "</tbody></table>";
+
+    g_TableCurRow[res.ls] = -1;
     return r;
 }
+//点击反色
+$("html").on("click", function () {
+    var node = $(event.target);
+    if (node[0].localName == "td" && node.parents(".xTable").length > 0) {
+        node = node.parent();
+        var tbody = node.parent();
+        var tag = tbody[0].localName;
+        if (tag.toLowerCase() == "thead")
+            return;
+        var tableid = tbody.parent().attr("id");
+        var currow = g_TableCurRow[tableid];
+        if (currow != -1) {
+            currow++;
+            if (currow % 2 == 0)
+                tbody.children(":nth-child(" + currow + ")").children().css("background-color", "#f5f5f5");
+            else
+                tbody.children(":nth-child(" + currow + ")").children().css("background-color", "#ffffff");
+        }
+        node.children().css("background-color", "#00f0f5");
+        g_TableCurRow[tableid] = node.index();
+    }
+});
+
+// 可以去掉了
 function TableBindClick3(tableid, callback) {
     var currow = -1;
     $("#" + tableid + " tr").click(function () {
@@ -267,6 +334,8 @@ function TableBindClick3(tableid, callback) {
             callback($(this).attr("data_id"));
     });
 }
+//---------table end------------------
+
 
 //按钮下拉窗口，css:  .xCombox .xPopWnd
 $("html").on("click", function () {

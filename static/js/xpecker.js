@@ -40,46 +40,6 @@ $(function () {
     }
 });
 
-
-function RenderPane(ar, idx, fun){
-    var r = "";
-    ar.fields.sort(function (a, b) { return parseInt(a.forder) - parseInt(b.forder); });
-    for (var i = 0; i < ar.fields.length; i++) {
-        var field = ar.fields[i];
-        if (field.name == "id")
-            continue;
-        var val = ar.data[idx][field.name];
-        var attr = "";
-        if (field.name.indexOf("_") != -1)
-            attr = 'id="' + field.name + "_" + val + '" ';
-
-        if (field.ftype == "input_long")
-            attr += 'style="width:490px;"';
-        else if (field.ftype == "textarea")
-            attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
-
-        r += "<div><label>" + field.title + "</label><div " + attr + ">" + (fun? fun(ar.data[idx],field):val) + "</div></div>";
-    }
-    return r;
-}
-
-function RenderPane2(entity, fields, fun) {
-    var r = "";
-    for (var i = 0; i < fields.length; i++) {
-        var field = fields[i];
-        if (field.forder == -1 || field.ftype == "none")
-            continue;
-        var attr = "";
-        if (field.ftype == "input_long")
-            attr += 'style="width:490px;"';
-        else if (field.ftype == "textarea")
-            attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
-        r += "<div><label>" + field.title + "</label><div " + attr + ">" +
-            (fun != undefined ? fun(entity, field) : entity[field.name]) + "</div></div>";
-    }
-    return r;
-}
-
 // 直接为数组用这一版
 function RenderSelect(ar, selid, type) {
     var r = "";

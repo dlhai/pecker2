@@ -24,6 +24,14 @@ class obj:
         for k,v in kw.items():
             setattr( self, k, v)
 
+def atoi(s):
+    if s == "":
+        return 0
+    else:
+       return int(s)
+
+    return 0 if s == "" else int(s)
+
 # user models
 class User(UserMixin):
     def __init__(self,user ):
@@ -158,7 +166,7 @@ def loaduser(where):
         return
     #找到用户的所在单位，若所在单位是风场，则需要读取风区列表
     user = ret[0]
-    if user.depart_table != "": 
+    if atoi(user.depart_table) != 0: 
         tbl = gettbl(user.depart_table)
         user.depart = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0]
         if tbl["name"] == "winder":
@@ -229,7 +237,7 @@ def curuserinf():
     del user.pwd
 
     #找到用户的所在单位，若所在单位是风场，则需要读取风区列表
-    if user.depart_table != "": 
+    if atoi(user.depart_table) != 0: 
         tbl = gettbl(user.depart_table)
         user.depart = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0]
         if tbl["name"] == "winder":
@@ -265,17 +273,17 @@ def logout():
 
 #############################################################
 
-from Flask_Sockets import Sockets
-sockets = Sockets(app)
-@sockets.route(‘/echo’)
-def echo_socket(ws):
-    gLog.debug("ws=%s", ws)
-    while not ws.closed:
-        message = ws.receive()
-        ws.send(message)
-@app.route(‘/’)
-def hello():
-    return ‘Hello World!’
+from flask_sockets import Sockets
+#sockets = Sockets(app)
+#@sockets.route(‘/echo’)
+#def echo_socket(ws):
+#    gLog.debug("ws=%s", ws)
+#    while not ws.closed:
+#        message = ws.receive()
+#        ws.send(message)
+#@app.route(‘/’)
+#def hello():
+#    return ‘Hello World!’
 
 #############################################################
 
@@ -283,7 +291,7 @@ def hello():
 @app.route("/roleuserall") 
 def roleuserall():
     user = QueryObj( "select min(id) as id, account, name, job, depart_id, depart_table, face from user group by job")
-    for u in [x for x in user if x.depart_table != 0]:
+    for u in [x for x in user if atoi(x.depart_table) != 0]:
         tbl = gettbl(u.depart_table)
         u.depart = QueryObj( "select * from "+tbl["name"]+" where id="+str(u.depart_id))[0]
         if tbl["name"] == "winder":
