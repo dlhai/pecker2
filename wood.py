@@ -1,6 +1,7 @@
 #encoding:utf8
 from sqlalchemy import *
 from flask import Flask,request, Response, jsonify
+from flask_sockets import Sockets
 from werkzeug.utils import secure_filename
 from flask_login import (LoginManager, login_required, login_user,
                              logout_user, UserMixin,current_user)
@@ -9,6 +10,7 @@ import json
 import pdb
 
 app = Flask(__name__)
+sockets = Sockets(app)
 app.secret_key = '1The2quick3brown4fox5jumps6over7the8lazy9dog0'
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
@@ -172,7 +174,7 @@ def loaduser(where):
 def check(js,th):
     return obj(result="200")
 
-#############################################################
+#######登录功能######################################################
 @login_manager.user_loader
 def load_user(user_id):
     user = loaduser("id='%d'"%user_id)
@@ -266,19 +268,13 @@ def logout():
     logout_user()
     return "logout page"
 
-#############################################################
+############## websocket功能 ###############################################
 
-from flask_sockets import Sockets
-#sockets = Sockets(app)
-#@sockets.route(‘/echo’)
-#def echo_socket(ws):
-#    gLog.debug("ws=%s", ws)
-#    while not ws.closed:
-#        message = ws.receive()
-#        ws.send(message)
-#@app.route(‘/’)
-#def hello():
-#    return ‘Hello World!’
+@sockets.route('/echo')
+def echo_socket(ws):
+    while not ws.closed:
+        message = ws.receive()
+        ws.send("replay:"+message+"!")
 
 #############################################################
 
@@ -546,7 +542,11 @@ if __name__ == "__main__":
     newdir(["./static/uploads","./static/uploads/user_face","./static/uploads/user_idimg","./static/uploads/certif_image",
             "./static/uploads/employ_image", "./static/uploads/edu_image1", "./static/uploads/edu_image2"]);
     app.config['JSON_AS_ASCII'] = False
-    app.run( host="0.0.0.0")
+    #app.run( host="0.0.0.0")
+    from gevent import pywsgi
+    from geventwebsocket.handler import WebSocketHandler
+    server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
+    server.serve_forever()
 
 #查询代表用户的sql
 #select depart_id as c1, "" as c2, * from user where depart_table== "__sys__" union
