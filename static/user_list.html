@@ -18,7 +18,19 @@
     <script src="js/xpecker.js"></script>
     <script src="js/user.js"></script>
     <style>
-        .live{background:#808080;}
+        .narrow>div>div:first-of-type {width: 140px;}
+        .narrow>div>label:first-of-type {width: 40px;}
+        .narrow>div,.narrow>div>div:first-of-type {margin-right: 0px;}
+        .live {
+            background: #808080;
+            border: 0px;
+        }
+        .title {
+            display: inline-block;
+            border-radius: 4px;
+            padding: 4px 15px;
+            border: 1px solid #dddddd;
+        }
     </style>
 </head>
 <body class="xFCsrow" >
@@ -28,30 +40,13 @@
         </div>
     </section>
 
-    <div class="xPanel2 xScroll" style="width:100px;border:0px;">
-        <header class="heading"><div class="live" onClick="onclickpane(this)">信息</div> <div onClick="onclickpane(this)">动态</div></header>
-        <div id="pane" style="padding:5px 0px 5px 0px;">
-            <section class="xPanel2">
-                <header class="heading">基本信息<div style="float: right;"><a onClick="onclick('useradd')">添加</a> <a onClick="onclick('useredit')">编辑</a></div></header>
-                <div id="d_baseinf" class="x2Form" style="padding:5px 0px 5px 0px;"></div>
-            </section>
-            <section id="d_certiflist" class="xPanel2">
-                <header class="heading">证件信息<div style="float: right;"><a onClick="onclick('certifadd')">添加</a> <a onClick="onclick('certifedit')">编辑</a></div></header>
-                <div id="d_baseinf" class="x2Form" style="padding:5px 0px 5px 0px;"></div>
-            </section>
-            <section id="d_edulist" class="xPanel2">
-                <header class="heading">受教育经历<div style="float: right;"><a onClick="onclick('eduadd')">添加</a> <a onClick="onclick('eduedit')">编辑</a></div></header>
-                <div id="d_baseinf" class="x2Form" style="padding:5px 0px 5px 0px;"></div>
-            </section>
-            <section id="d_employlist" class="xPanel2">
-                <header class="heading">就业经历<div style="float: right;"><a onClick="onclick('employadd')">添加</a> <a onClick="onclick('employedit')">编辑</a></div></header>
-                <div id="d_baseinf" class="x2Form" style="padding:5px 0px 5px 0px;"></div>
-            </section>
-        </div>
-    </div>
+    <section class="xPanel2" style="width:100px;">
+        <header class="heading" style="padding:5px;"><div class="title live" onClick="onclickpane(this)">信息</div> <div class="title" onClick="onclickpane(this)">动态</div></header>
+        <div id="pane" style="padding:5px 0px 5px 0px;"></div>
+    </section>
 
     <script type="text/javascript">
-        var g_curuser, g_users, g_ethnic, g_departs, g_user = parent.g_user, g_pane;
+        var g_curuser, g_users, g_ethnic, g_departs, g_user = parent.g_user, g_pane ="信息";
         Reqdata("/curuserinf", "", function (res) {
             g_user = res.data;
 
@@ -77,6 +72,7 @@
                 }
 
                 $("#userlist").html(RenderTable2(g_users, undefined, ValToView));
+                onclickpane($(".live")[0]);
             });
         });
         function GetUrl() {
@@ -93,20 +89,23 @@
             var td = $(event.target);
             if (td[0].localName == "td" && td.parents(".xTable").length > 0) {
                 var tr = td.parent();
-                showdetail(tr.attr("data_id"));
+                g_user = GetSub(g_users.data, "id", tr.attr("data_id"));
+                showdetail(g_user);
             }
         });
 
         function onclickpane(This) {
+            $(This).siblings().removeClass("live");
+            $(This).addClass("live");
             if ($(This).html() == "信息"){
                 var tpl = `<section class="xPanel2">
                     <header class="heading">{name}<div style="float: right;"><a onClick="onclick('{code}add')">添加</a> <a onClick="onclick('{code}edit')">编辑</a></div></header>
-                    <div id="{code}" class="x2Form" style="padding:5px 0px 5px 0px;"></div>
+                    <div id="{code}" style="padding:5px 0px 5px 0px;"></div>
                 </section>`;
 
                 var modules = [{ code: "user", name: "基本信息" }, { code: "certif", name: "证件信息" },
                     { code: "edu", name: "受教育经历" }, { code: "employ", name: "就业经历" }];
-                $("#pane").html(modules.map(x => tpl.format(x)).join("")));
+                $("#pane").html(modules.map(x => tpl.format(x)).join(""));
             }
             else {
                 var tpl = `<section class="xPanel2">
@@ -114,17 +113,16 @@
                     <div id="{code}" class="x2Form" style="padding:5px 0px 5px 0px;"></div>
                 </section>`;
                 var modules = [{ code: "article", name: "文章" }, { code: "discuss", name: "评论" }];
-                $("#pane").html(modules.map(x => tpl.format(x)).join("")));
+                $("#pane").html(modules.map(x => tpl.format(x)).join(""));
             }
         }
 
-        function showdetail(userid) {
-            var user = GetSub(g_users.data, "id", userid);
+        function showdetail(user) {
             if (g_pane == "信息") {
                 $("#user").html(xrusershow(user, g_users.fields));
-                Reqdata("rd?ls=certif&user_id=" + user.id, "", function (res) { $("#certif").html(xrcertifshow(res.data)); });
-                Reqdata("rd?ls=edu&user_id=" + user.id, "", function (res) { $("#edu").html(xredushow(res.data)); });
-                Reqdata("rd?ls=employ&user_id=" + user.id, "", function (res) { $("#employ").html(xremployshow(res.data)); });
+                Reqdata("/rd?ls=certif&user_id=" + user.id, "", function (res) { $("#certif").html(xrcertifshow(res.data)); });
+                Reqdata("/rd?ls=edu&user_id=" + user.id, "", function (res) { $("#edu").html(xredushow(res.data)); });
+                Reqdata("/rd?ls=employ&user_id=" + user.id, "", function (res) { $("#employ").html(xremployshow(res.data)); });
             }
             else {
 
@@ -149,13 +147,15 @@
             return ui2.format({
                 "account": user.account, face: (user.face == "" ? "" : 'src="' + user.face + '"'),
                 idimg: (user.idimg == "" ? "" : 'src="' + user.idimg + '"')
-            }) + RenderPane2(g_user, fields, function(user, field) {
-                var name = field.name ? field.name : field;
-                if (name == "sex") return GetSub(db_sex, "id", user.sex).name;
-                else if (name == "job") return GetSub(db_job, "id", user.job).name;
-                else if (name == "depart_id") return GetSub(g_departs.data, "id", user.depart_id).name;
-                else return user[name];
-            });
+            }) + RenderPane3(g_user, fields, ValToView);
+        }
+
+        function ValToView(user, field) {
+            var name = field.name ? field.name : field;
+            if (name == "sex") return GetSub(db_sex, "id", user.sex).name;
+            else if (name == "job") return GetSub(db_job, "id", user.job).name;
+            else if (name == "depart_id") return GetSub(g_departs.data, "id", user.depart_id).name;
+            else return user[name];
         }
 
         function onAddUser() {
