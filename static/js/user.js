@@ -1,8 +1,28 @@
 ﻿//用户信息界面，用于用户内容显示和编辑，在初始化12345步，和用户详细信息处均有用到。
+function xrusershow(user, fields) {
+    var ui2 = `
+                <div style="float:left;display:block;height:240px;width:280px;margin-top:5px;margin-left:10px;">
+                    <div style="float:left;display:block;height:78px;width:78px;">
+                        <img style="width:100%;height:100%;" {face}>
+                    </div>
+                    <div class="x2Form narrow">
+                        <div style="margin-top:0px;"><label>帐号</label><div style="display:inline-block;">{account}</div></div>
+                        <div><label>密码</label><div>******</div></div>
+                    </div>
+                    <div style="width:280px;height:160px;margin-top:5px">
+                        <img style="width:100%;height:100%;" {idimg} >
+                    </div>
+                </div>`;
+
+    return ui2.format({
+        "account": user.account, face: (user.face == "" ? "" : 'src="' + user.face + '"'),
+        idimg: (user.idimg == "" ? "" : 'src="' + user.idimg + '"')
+    }) + RenderPane3(user, fields, ValToView);
+}
 
 function xruserlive(user, fields) {
     var ui2 = `
-                <div style="float:left;display:block;height:240px;width:280px;margin-top:5px;">
+                <div style="float:left;display:block;height:240px;width:280px;margin-top:5px;margin-left:10px;">
                     <div style="float:left;display:block;">
                         <label class="imagelive" style="height:78px;width:78px;" for="face">
                             <img style="width:100%;height:100%;"  {face} >
@@ -32,7 +52,7 @@ function xruserlive(user, fields) {
     return ui2.format({
         "account": user.account, face: (user.face == "" ? "" : 'src="' + user.face + '"'),
         idimg: (user.idimg == "" ? "" : 'src="' + user.idimg + '"')
-    }) + RenderForm4(g_user, fields, function (user, field) {
+    }) + RenderForm4(user, fields, function (user, field) {
         var name = field.name ? field.name : field;
         var val = user[name];
         if (field.name == "sex") return RenderSelect(db_sex, val);
@@ -70,7 +90,7 @@ function hidechgpwd(This) {
     });
 }
 
-function onusersave() {
+function onusersave(user) {
     delete g_chged.pwd;
     delete g_chged.newpwd1;
     delete g_chged.newpwd2;
@@ -90,7 +110,7 @@ function onusersave() {
             alert('保存成功' + xhr.responseText);
         }
     };
-    xhr.open('POST', '/wt?ls=user&id=' + g_user.id, true);
+    xhr.open('POST', '/wt?ls=user&id=' + user.id, true);
     xhr.send(fd);
 }
 

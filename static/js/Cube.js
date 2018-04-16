@@ -12,8 +12,7 @@
     }
 });
 
-function RenderMultiSelect(field, data) {
-    var val = data[field.name];
+function RenderSelectSkill(val) {
     if (val == "") val = "　";
     var cnt = db_skill.map(x => { return val.indexOf(x.name) == -1 ? ("<div>" + x.name + "</div>") : ('<div class="selected">' + x.name + "</div>") });
     return `<div class="xCombox"><span>` + val + `</span><div class="xMenu">` + cnt.join("") + `</div></div>`;
@@ -135,14 +134,20 @@ cbDlg.prototype.Show = function () {
     btn.on("click", '', { id: this.id, closedlg: this.closedlg, submit: this.submit }, function (ev) {
         if (ev.target.innerText == "提交") ev.data.submit();
         else if (ev.target.innerText == "关闭") ev.data.closedlg();
-        $('#' + ev.data.id).remove();
     });
+
+    $('#' + this.id).on('hide.bs.modal', "", { This: this }, function (ev) {ev.data.This.closedlg(); });
     $('#' + this.id).modal('show');
 }
+cbDlg.prototype.closedlg = function () {
+    $('#' + this.id).remove();
+}
+
 function showDlg() {
     var dlg = new cbDlg();
     dlg.Show();
 }
+
 
 function RenderPane(ar, idx, fun) {
     var r = "";
@@ -223,7 +228,7 @@ function RenderFormItem(type, attr, val )
     else if (type == "date")
         r += '<input ' + attr + ' value="' + val + '" onClick="laydate()" />';
     else if (type == "multiselect")
-        r += RenderMultiSelect(field, user);
+        r += RenderSelectSkill(val);
     return r;
 }
 //2.控件加标签

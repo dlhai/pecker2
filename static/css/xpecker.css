@@ -162,7 +162,7 @@ body {
     padding: 5px 10px;
     margin: 0px 5px;
     width: 200px;
-    height: 32px;
+    min-height: 32px;
 }
 .x2Form>div>div:first-of-type{border: 1px solid #dddddd;}
 

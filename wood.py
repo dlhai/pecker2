@@ -25,11 +25,6 @@ class obj:
             setattr( self, k, v)
 
 def atoi(s):
-    if s == "":
-        return 0
-    else:
-       return int(s)
-
     return 0 if s == "" else int(s)
 
 # user models
@@ -343,7 +338,7 @@ def cr():
 
         # 1. 保存附件
         max = QueryObj("select max(id) as max from "+params["ls"])[0].max
-        id = max + 1 if max != "" else 1
+        ret.id = max + 1 if max != "" else 1
         fmt = "./uploads/{ls}_{fd}/{ls}_{fd}_{id}{ext}"
         for k,v in files.items(): 
             fname = fmt.format(ls=params["ls"],fd=k, id=id,ext=os.path.splitext(v.filename)[1] )
