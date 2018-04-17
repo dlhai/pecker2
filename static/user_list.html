@@ -85,13 +85,29 @@
             return url;
         }
 
-        //点击表格行
+        //点击表格行或列表行
+        g_curitems = new Array();
         $("html").on("click", function () {
             var td = $(event.target);
             if (td[0].localName == "td" && td.parents(".xTable").length > 0) {
                 var tr = td.parent();
                 g_focus = GetSub(g_users.data, "id", tr.attr("data_id"));
                 showdetail(g_focus);
+            }
+            else if (td.parents(".listdata").length > 0) {
+                var node = $(td.parents(".listdata")[0]);
+                var table = $(node).parent();
+
+                var currow = g_curitems[table.attr("id")];
+                if (currow != undefined) {
+                    currow++;
+                    if (currow % 2 == 0)
+                        table.children(":nth-child(" + currow + ")").children().css("background-color", "#ffffff");
+                    else
+                        table.children(":nth-child(" + currow + ")").children().css("background-color", "#f5f5f5");
+                }
+                node.children().css("background-color", "#00f0f5");
+                g_curitems[table.attr("id")] = node.index();
             }
         });
 
@@ -166,10 +182,41 @@
                 dlg.submit = onusersave(g_focus);
             }
             else if (fun == "certifadd") {
-
+                var dlg = new cbDlg("新建 证件", "width:600px");
+                dlg.Add(`<form id="certif_live">` + xrcertiflive(Create(g_certifs.fields), g_certifs.fields) + `</form>`);
+                dlg.Show();
+                dlg.submit = function (thisdlg) {
+                    var fd = certifcheck();
+                    if (fd == undefined)
+                        return;
+                    Sendform('/cr?ls=certif', fd, "", function () {
+                        Reqdata("/rd?ls=certif&user_id=" + g_focus.id, "", function (res) {
+                            g_certifs = res;
+                            $("#certif").html(xrcertifshow(res.data));
+                        });
+                    });
+                    thisdlg.closedlg();
+                };
             }
             else if (fun == "certifedit") {
+                var data_id = $("#certif").children(":nth-child(" + (int(g_curitems["certif"])+1) + ")").attr("data_id");
+                var certif = GetSub(g_certifs.data, "id", data_id);
 
+                var dlg = new cbDlg("编辑 证件", "width:600px");
+                dlg.Add(xrcertiflive(certif, g_certifs.fields));
+                dlg.Show();
+                dlg.submit = function (thisdlg) {
+                    var fd = certifcheck();
+                    if (fd == undefined)
+                        return;
+                    Sendform('/wt?ls=certif', fd, "", function () {
+                        Reqdata("/rd?ls=certif&user_id=" + g_focus.id, "", function (res) {
+                            g_certifs = res;
+                            $("#certif").html(xrcertifshow(res.data));
+                        });
+                    });
+                    thisdlg.closedlg();
+                };
             }
             else if (fun == "eduadd") {
 
@@ -185,12 +232,47 @@
             }
         }
 
+        function certifcheck() {
+            var formdata = new FormData(document.getElementById("certif_live"));
+            if (formdata.get("name") == "") {
+                $("#msg").html("证件名称不能为空！");
+                return;
+            }
+            if (formdata.get("code") == "") {
+                $("#msg").html("证件编号不能为空！");
+                return;
+            }
+            if (formdata.get("issue") == "") {
+                $("#msg").html("颁发机构不能为空！");
+                return;
+            }
+            if (formdata.get("issuedate") == "") {
+                $("#msg").html("颁发时间不能为空！");
+                return;
+            }
+            formdata.append("user_id", g_focus.id);
+            return formdata;
+        }
+
+
+        function oncertifsave(thisdlg) {
+            certifsave(function () {
+                Reqdata("/rd?ls=certif&user_id=" + g_focus.id, "", function (ctfs) {
+                    $("#certif_show").html(xrcertifshow(ctfs.data));
+                });
+            });
+            thisdlg.closedlg();
+        }
+
         function showdetail(user) {
             if (g_pane == "信息") {
                 $("#user").html(xrusershow(user, g_users.fields));
-                Reqdata("/rd?ls=certif&user_id=" + user.id, "", function (res) { $("#certif").html(xrcertifshow(res.data)); });
-                Reqdata("/rd?ls=edu&user_id=" + user.id, "", function (res) { $("#edu").html(xredushow(res.data)); });
-                Reqdata("/rd?ls=employ&user_id=" + user.id, "", function (res) { $("#employ").html(xremployshow(res.data)); });
+                Reqdata("/rd?ls=certif&user_id=" + user.id, "", function (res) {
+                    g_certifs = res;
+                    $("#certif").html(xrcertifshow(res.data));
+                });
+                Reqdata("/rd?ls=edu&user_id=" + user.id, "", function (res) { g_edus = res;$("#edu").html(xredushow(res.data)); });
+                Reqdata("/rd?ls=employ&user_id=" + user.id, "", function (res) { g_employs = res;$("#employ").html(xremployshow(res.data)); });
             }
             else {
 

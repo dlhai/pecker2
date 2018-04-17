@@ -122,18 +122,21 @@ cbDlg.prototype.Show = function () {
         + '    <div id="ModalDlgContent" class="modal-body" style="padding:5px">';
     this.subs.forEach(x => { html += x.toString() });
     html += '    </div>'
-        + '    <div class="modal-footer">';
-    if (this.btndel) html += '        <div style="float:left;"><button type="button" class="btn btn-default" style="color:#aaaaaa">删除</button></div>';
-    html += '        <button type="button" class="btn btn-primary">提交</button>'
-        + '        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>'
-        + '    </div>'
-        + '</div><!-- /.modal-content -->'
-        + '</div><!-- /.modal -->';
+        + ` <div class="modal-footer">
+                <div style="float:left;">`+
+                    (this.btndel ? `<button type="button" class="btn btn-default" style="color:#aaaaaa">删除</button>` : "") +
+                    `<div id="msg" style="display:inline-block;"></div>
+                </div>
+                <button type="button" class="btn btn-primary">提交</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+        </div><!-- /.modal -->`;
     $("body").append(html);
     var btn = $('#' + this.id).find("button");
-    btn.on("click", '', { id: this.id, closedlg: this.closedlg, submit: this.submit }, function (ev) {
-        if (ev.target.innerText == "提交") ev.data.submit();
-        else if (ev.target.innerText == "关闭") ev.data.closedlg();
+    btn.on("click", '', { This: this }, function (ev) {
+        if (ev.target.innerText == "提交") ev.data.This.submit(ev.data.This);
+        else if (ev.target.innerText == "关闭") ev.data.This.closedlg();
     });
 
     $('#' + this.id).on('hide.bs.modal', "", { This: this }, function (ev) {ev.data.This.closedlg(); });

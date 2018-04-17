@@ -337,7 +337,7 @@ def cr():
         ret.id = max + 1 if max != "" else 1
         fmt = "./uploads/{ls}_{fd}/{ls}_{fd}_{id}{ext}"
         for k,v in files.items(): 
-            fname = fmt.format(ls=params["ls"],fd=k, id=id,ext=os.path.splitext(v.filename)[1] )
+            fname = fmt.format(ls=params["ls"],fd=k, id=ret.id,ext=os.path.splitext(v.filename)[1] )
             dic[k]=fname
             v.save("./static/"+fname)
 

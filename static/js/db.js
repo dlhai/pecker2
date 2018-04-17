@@ -276,6 +276,17 @@ function ReqdataP(url, data, ctx, cb) {
     xmlhttp.send(data);
 }
 
+function Sendform(url, fd, ctx, cb) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) { cb() }
+    };
+
+    xhr.open('POST', url, true);
+    xhr.send(fd);
+}
+
+
 // 同步方式
 function ReqdataS(url, ctx, fun) {
     var xmlhttp = new XMLHttpRequest();

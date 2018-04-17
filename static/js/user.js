@@ -125,16 +125,11 @@ $("html").on("change", function () {
 function xrcertiflive(entity, fields) {
     var ximg = { style: "float:left;display:inline-block;", body: xrimagelive2("", "image", "image") };
     var xform = { class: "x2Form", style: "display:inline-block; width:620px;", body: RenderFormIn(entity, fields) };
-    var xbtns = `<div style="display:inline-block;height:20px;">
-                <input type="button" onclick="oncertifsave(this)" value="确定" />
-                <input type="button" onclick="oncertifblank(this)" value="清除" /></div>`
-
-    var ss = xCreateNode(ximg) + xCreateNode(xform) + xbtns;
-    return xCreateNode(ximg) + xCreateNode(xform) + xbtns;
+    return xCreateNode(ximg) + xCreateNode(xform);
 }
 function xrcertifshow(data) {
     var tpl = `{% it.forEach((x,i)=>{ %}
-            <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
+            <div class="listdata" data_id="{%=x.id%}" style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
                 <div class="xRndAngle" style="width: 126px; height: 84px; float: left; margin-right: 5px; ">
                     <img style="width: 126px; height: 84px;" src="{%=x.image%}" />
                 </div>
@@ -148,37 +143,29 @@ function xrcertifshow(data) {
             {% }); %}`
     return dtpl(tpl)(data);
 }
-function oncertifsave() {
+function certifsave(cb) {
     var formdata = new FormData(document.getElementById("certif_live"));
     if (formdata.get("name") == "") {
         alert("证件名称不能为空！");
+        return;
+    }
+    if (formdata.get("code") == "") {
+        alert("证件编号不能为空！");
         return;
     }
     if (formdata.get("issuedate") == "") {
         alert("颁发时间不能为空！");
         return;
     }
-    if (formdata.get("issue") == "") {
-        alert("颁发机构不能为空！");
-        return;
-    }
 
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            Reqdata("/rd?ls=certif&user_id=" + g_user.id, "", function (ctf) {
-                $("#certif_show").html(xrcertifshow(ctf.data));
-                $("#certif_live").html(xrcertiflive(Create(g_ctf.fields), g_ctf.fields));
-            });
-        }
+        if (xhr.readyState == 4 && xhr.status == 200) {cb()}
     };
 
     formdata.append("user_id", g_user.id);
     xhr.open('POST', '/cr?ls=certif', true);
     xhr.send(formdata);
-}
-function oncertifblank() {
-    $("#certif_live").html(xrcertiflive(Create(g_ctf.fields), g_ctf.fields));
 }
 // 证件部分----------------------------------------end----------------------
 
