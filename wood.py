@@ -538,15 +538,24 @@ def newdir(path):
         if not os.path.exists(p):
             os.mkdir(p)
 
+class CLog:
+    def write(data):
+        print(data)
+    def writelines(data):
+        print(data)
+    def flush():
+        pass
+
 if __name__ == "__main__":
     newdir(["./static/uploads","./static/uploads/user_face","./static/uploads/user_idimg","./static/uploads/certif_image",
             "./static/uploads/employ_image", "./static/uploads/edu_image1", "./static/uploads/edu_image2"]);
     app.config['JSON_AS_ASCII'] = False
-    #app.run( host="0.0.0.0")
-    from gevent import pywsgi
-    from geventwebsocket.handler import WebSocketHandler
-    server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
-    server.serve_forever()
+    app.run( host="0.0.0.0")
+    #from gevent import pywsgi
+    #from geventwebsocket.handler import WebSocketHandler
+    #log = CLog();
+    #server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler, log=log,error_log=log)
+    #server.serve_forever()
 
 #查询代表用户的sql
 #select depart_id as c1, "" as c2, * from user where depart_table== "__sys__" union

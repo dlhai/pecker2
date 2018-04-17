@@ -68,7 +68,7 @@ function hidechgpwd(This) {
         return;
     }
 
-    var formdata = new FormData(document.getElementById("main"));
+    var formdata = new FormData(document.getElementById("form_useredit"));
     var pwd = formdata.get("pwd");
     var password1 = formdata.get("newpwd1");
     var password2 = formdata.get("newpwd2");
@@ -95,7 +95,7 @@ function onusersave(user) {
     delete g_chged.newpwd1;
     delete g_chged.newpwd2;
 
-    var formdata = new FormData(document.getElementById("main"));
+    var formdata = new FormData(document.getElementById("form_useredit"));
     var fd = new FormData();
     for (var x in g_chged) {
         if (x == "face" || x == "idimg")
