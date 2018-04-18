@@ -173,7 +173,7 @@
                     dlg2.submit = onusersave(newuser);
                 }
                 dlg.Show();
-
+                
             }
             else if (fun == "useredit") {
                 var dlg = new cbDlg("编辑 用户", "width:900px");
@@ -199,13 +199,16 @@
                 };
             }
             else if (fun == "certifedit") {
-                var data_id = $("#certif").children(":nth-child(" + (int(g_curitems["certif"])+1) + ")").attr("data_id");
+                var idx = g_curitems["certif"];
+                if (idx == undefined)
+                    return;
+                var data_id = $("#certif").children(":nth-child(" + (int(idx)+1) + ")").attr("data_id");
                 var certif = GetSub(g_certifs.data, "id", data_id);
 
                 var dlg = new cbDlg("编辑 证件", "width:600px");
                 dlg.Add(xrcertiflive(certif, g_certifs.fields));
                 dlg.Show();
-                dlg.submit = function (thisdlg) {
+                dlg.submit = function (thisdlg){
                     var fd = certifcheck();
                     if (fd == undefined)
                         return;
@@ -219,10 +222,44 @@
                 };
             }
             else if (fun == "eduadd") {
-
+                var dlg = new cbDlg("新建 教育经历", "width:600px");
+                dlg.Add(`<form id="edu_live">` + xredulive(Create(g_edus.fields), g_edus.fields) + `</form>`);
+                dlg.Show();
+                dlg.submit = function (thisdlg) {
+                    var fd = educheck();
+                    if (fd == undefined)
+                        return;
+                    Sendform('/cr?ls=edu', fd, "", function () {
+                        Reqdata("/rd?ls=edu&user_id=" + g_focus.id, "", function (res) {
+                            g_edus = res;
+                            $("#edu").html(xredushow(res.data));
+                        });
+                    });
+                    thisdlg.closedlg();
+                };
             }
             else if (fun == "eduedit") {
+                var idx = g_curitems["edu"];
+                if (idx == undefined)
+                    return;
+                var data_id = $("#edu").children(":nth-child(" + (int(idx) + 1) + ")").attr("data_id");
+                var edu = GetSub(g_edus.data, "id", data_id);
 
+                var dlg = new cbDlg("编辑 教育经历", "width:600px");
+                dlg.Add(xredulive(edu, g_edus.fields));
+                dlg.Show();
+                dlg.submit = function (thisdlg) {
+                    var fd = educheck();
+                    if (fd == undefined)
+                        return;
+                    Sendform('/wt?ls=edu', fd, "", function () {
+                        Reqdata("/rd?ls=edu&user_id=" + g_focus.id, "", function (res) {
+                            g_edus = res;
+                            $("#edu").html(xredushow(res.data));
+                        });
+                    });
+                    thisdlg.closedlg();
+                };
             }
             else if (fun == "employadd") {
 
@@ -230,38 +267,6 @@
             else if (fun == "employedit") {
 
             }
-        }
-
-        function certifcheck() {
-            var formdata = new FormData(document.getElementById("certif_live"));
-            if (formdata.get("name") == "") {
-                $("#msg").html("证件名称不能为空！");
-                return;
-            }
-            if (formdata.get("code") == "") {
-                $("#msg").html("证件编号不能为空！");
-                return;
-            }
-            if (formdata.get("issue") == "") {
-                $("#msg").html("颁发机构不能为空！");
-                return;
-            }
-            if (formdata.get("issuedate") == "") {
-                $("#msg").html("颁发时间不能为空！");
-                return;
-            }
-            formdata.append("user_id", g_focus.id);
-            return formdata;
-        }
-
-
-        function oncertifsave(thisdlg) {
-            certifsave(function () {
-                Reqdata("/rd?ls=certif&user_id=" + g_focus.id, "", function (ctfs) {
-                    $("#certif_show").html(xrcertifshow(ctfs.data));
-                });
-            });
-            thisdlg.closedlg();
         }
 
         function showdetail(user) {

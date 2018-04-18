@@ -123,7 +123,7 @@ $("html").on("change", function () {
 
 // 证件部分----------------------------------------begin----------------------
 function xrcertiflive(entity, fields) {
-    var ximg = { style: "float:left;display:inline-block;", body: xrimagelive2("", "image", "image") };
+    var ximg = { style: "float:left;display:inline-block;", body: xrimagelive2(entity.image, "image", "image") };
     var xform = { class: "x2Form", style: "display:inline-block; width:620px;", body: RenderFormIn(entity, fields) };
     return xCreateNode(ximg) + xCreateNode(xform);
 }
@@ -143,46 +143,39 @@ function xrcertifshow(data) {
             {% }); %}`
     return dtpl(tpl)(data);
 }
-function certifsave(cb) {
+
+function certifcheck() {
     var formdata = new FormData(document.getElementById("certif_live"));
     if (formdata.get("name") == "") {
-        alert("证件名称不能为空！");
+        $("#msg").html("证件名称不能为空！");
         return;
     }
     if (formdata.get("code") == "") {
-        alert("证件编号不能为空！");
+        $("#msg").html("证件编号不能为空！");
+        return;
+    }
+    if (formdata.get("issue") == "") {
+        $("#msg").html("颁发机构不能为空！");
         return;
     }
     if (formdata.get("issuedate") == "") {
-        alert("颁发时间不能为空！");
+        $("#msg").html("颁发时间不能为空！");
         return;
     }
-
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4 && xhr.status == 200) {cb()}
-    };
-
-    formdata.append("user_id", g_user.id);
-    xhr.open('POST', '/cr?ls=certif', true);
-    xhr.send(formdata);
+    formdata.append("user_id", g_focus.id);
+    return formdata;
 }
 // 证件部分----------------------------------------end----------------------
 
 // 教育经历----------------------------------------begin----------------------
 function xredulive(entity, fields) {
-    var ximg = { style: "float:left;display:inline-block;", body: xrimagelive2("", "image1", "image1") + xrimagelive2("", "image2", "image2") };
+    var ximg = { style: "float:left;display:inline-block;", body: xrimagelive2(entity.image1, "image1", "image1") + xrimagelive2(entity.image2, "image2", "image2") };
     var xform = { class: "x2Form", style: "display:inline-block; width:620px;", body: RenderFormIn(entity, fields) };
-    var xbtns = `<div style="display:inline-block;height:20px;">
-                <input type="button" onclick="onedusave(this)" value="确定" />
-                <input type="button" onclick="onedublank(this)" value="清除" /></div>`
-
-    var ss = xCreateNode(ximg) + xCreateNode(xform) + xbtns;
-    return xCreateNode(ximg) + xCreateNode(xform) + xbtns;
+    return xCreateNode(ximg) + xCreateNode(xform);
 }
 function xredushow(data) {
     var tpl = `{% it.forEach((x,i)=>{ %}
-            <div style="width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
+            <div class="listdata" style="width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
                 <div style="display:inline-block; margin-right: 5px; width:250px;">
                     <img style="width: 120px; height: 80px;" src="{%=x.image1%}" />
                     <img style="width: 120px; height: 80px;" src="{%=x.image2%}" />
@@ -197,37 +190,27 @@ function xredushow(data) {
             {% }); %}`
     return dtpl(tpl)(data);
 }
-function onedusave() {
+function educheck() {
     var formdata = new FormData(document.getElementById("edu_live"));
-    if (formdata.get("name") == "") {
-        alert("证件名称不能为空！");
+    if (formdata.get("startdate") == "") {
+        $("#msg").html("开始时间不能为空！");
         return;
     }
-    if (formdata.get("issuedate") == "") {
-        alert("颁发时间不能为空！");
+    if (formdata.get("enddate") == "") {
+        $("#msg").html("截止时间不能为空！");
+        return;
+    }
+    if (formdata.get("degree") == "") {
+        $("#msg").html("学历不能为空！");
         return;
     }
     if (formdata.get("issue") == "") {
-        alert("颁发机构不能为空！");
+        $("#msg").html("颁发机构不能为空！");
         return;
     }
 
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            Reqdata("/rd?ls=edu&user_id=" + g_user.id, "", function (ctf) {
-                $("#edu_show").html(xredushow(ctf.data));
-                $("#edu_live").html(xredulive(Create(g_ctf.fields), g_ctf.fields));
-            });
-        }
-    };
-
-    formdata.append("user_id", g_user.id);
-    xhr.open('POST', '/cr?ls=edu', true);
-    xhr.send(formdata);
-}
-function onedublank() {
-    $("#edu_live").html(xredulive(Create(g_ctf.fields), g_ctf.fields));
+    formdata.append("user_id", g_focus.id);
+    return formdata;
 }
 // 教育经历----------------------------------------end----------------------
 

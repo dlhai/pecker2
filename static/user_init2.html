@@ -38,29 +38,25 @@
     <script type="text/javascript">
         Reqdata("/curuserinf", "", function (res) {
             g_user = res.data;
-            Reqdata("/rd?ls=certif&user_id=" + g_user.id, "", function (ctf) {
-                g_ctf = ctf;
-
-                var xbtns = `<div style="display:inline-block;height:20px;">
-                <input type="button" onclick="oncertifsave()" value="确定" />
-                <input type="button" onclick="oncertifblank()" value="清除" /></div>`
-
-                $("#certif_live").html(xrcertiflive(Create(g_ctf.fields), g_ctf.fields) + xbtns);
-                $("#certif_show").html(xrcertifshow(ctf.data));
-            });
+            onrefresh();
         });
 
         function oncertifsave() {
-            certifsave(function () {
-                Reqdata("/rd?ls=certif&user_id=" + g_user.id, "", function (ctf) {
-                    $("#certif_show").html(xrcertifshow(ctf.data));
-                    $("#certif_live").html(xrcertiflive(Create(g_ctf.fields), g_ctf.fields));
-                });
-            });
+            var fd = certifcheck();
+            if (fd != undefined)
+                Sendform('/cr?ls=certif', fd, "", onrefresh );
         }
 
-        function oncertifblank() {
-            $("#certif_live").html(xrcertiflive(Create(g_ctf.fields), g_ctf.fields));
+        function onrefresh() {
+            var xbtns = `<div style="display:inline-block;height:20px;">
+                <input type="button" onclick="oncertifsave()" value="确定" />
+                <input type="button" onclick="onrefresh()" value="清除" /></div>`
+            $("#certif_live").html(xrcertiflive(Create(g_ctf.fields), g_ctf.fields) + xbtns);
+
+            Reqdata("/rd?ls=certif&user_id=" + g_user.id, "", function (ctf) {
+                g_ctf = ctf;
+                $("#certif_show").html(xrcertifshow(ctf.data));
+            });
         }
 
         function onnextstep() {

@@ -37,12 +37,26 @@
     <script type="text/javascript">
         Reqdata("/curuserinf", "", function (res) {
             g_user = res.data;
+            onrefresh();
+        });
+
+        function onrefresh() {
+            var xbtns = `<div style="display:inline-block;height:20px;">
+                <input type="button" onclick="onedusave()" value="确定" />
+                <input type="button" onclick="onrefresh()" value="清除" /></div>`
+            $("#edu_live").html(xredulive(Create(g_ctf.fields), g_ctf.fields) + xbtns);
+
             Reqdata("/rd?ls=edu&user_id=" + g_user.id, "", function (ctf) {
                 g_ctf = ctf;
-                $("#edu_live").html(xredulive(Create(g_ctf.fields), g_ctf.fields));
                 $("#edu_show").html(xredushow(ctf.data));
             });
-        });
+        }
+
+        function onedusave() {
+            var fd = educheck();
+            if (fd != undefined)
+                Sendform('/cr?ls=edu', fd, "", onrefresh);
+        }
 
         function onnextstep() {
             ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"4"}}`.format(g_user.id));
