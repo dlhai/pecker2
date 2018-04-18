@@ -117,8 +117,7 @@
             if ($(This).html() == "信息"){
                 var tpl = `<section class="xPanel2">
                         <header class="heading">{name}<div style="float: right;">
-                            <a onClick="onclickfun('{code}add')">添加</a>
-                            <a onClick="onclickfun('{code}edit')">编辑</a></div>
+                            <a onClick="on{code}add()">添加</a> <a onClick="on{code}edit()">编辑</a></div>
                         </header>
                         <div id="{code}" style="padding:5px 0px 5px 0px;"></div>
                     </section>`;
@@ -137,145 +136,10 @@
             }
         }
 
-        function onclickfun(fun) {
-            if (fun == "useradd") {
-                var tpl =
-                    `<div class="x2Form" style="padding: 0px 0px 0px 30px;">
-                        <div style="float: left; margin:0px;"><img style="width: 100px;height: 180px;" src="img/bird.jpg" /></div>
-                        <div><label>帐号</label><input id="username" /></div>
-                        <div><label>密码</label><input id="pwd1" type="password"/></div>
-                        <div><label>密码</label><input id="pwd2" type="password"/></div>
-                    </div>`;
-
-                var dlg = new cbDlg("新建 用户", "", tpl);
-                dlg.submit = function () {
-                    var newuser = Create(g_users.fields);
-                    newuser.account = $("#username").val();
-                    newuser.pwd = $("#pwd1").val();
-                    var pwd2 = $("#pwd2").val();
-                    if (newuser.account == ""){alert("帐号不能为空");return;}
-                    if (newuser.pwd != pwd2) {alert("两次输入的密码不一致");return;}
-                    if (newuser.pwd == "") {alert("密码不能为空");return;}
-
-                    var val = `{"ls":"user","val":{"account":"{account}","pwd":"{pwd}"}}`.format({
-                        "account": newuser.account, "pwd": newuser.pwd });
-                    ReqdataP('/cr', val, "", function (res) {
-                        if (res.result != 200){alert("新建失败！");return;}
-                        newuser.id = res.id;
-                        dlg.closedlg();
-                    });
-
-                    newuser.depart_id = g_user.depart_id;
-                    newuser.depart_table = g_user.depart_table;
-                    var dlg2 = new cbDlg("新建 用户", "width:900px");
-                    dlg2.Add(`<form id="form_useredit" style="height:350px;">` + xruserlive(newuser, g_users.fields)+`</form>`);
-                    dlg2.Show();
-                    dlg2.submit = onusersave(newuser);
-                }
-                dlg.Show();
-                
-            }
-            else if (fun == "useredit") {
-                var dlg = new cbDlg("编辑 用户", "width:900px");
-                dlg.Add(xruserlive(g_focus, g_users.fields));
-                dlg.Show();
-                dlg.submit = onusersave(g_focus);
-            }
-            else if (fun == "certifadd") {
-                var dlg = new cbDlg("新建 证件", "width:600px");
-                dlg.Add(`<form id="certif_live">` + xrcertiflive(Create(g_certifs.fields), g_certifs.fields) + `</form>`);
-                dlg.Show();
-                dlg.submit = function (thisdlg) {
-                    var fd = certifcheck();
-                    if (fd == undefined)
-                        return;
-                    Sendform('/cr?ls=certif', fd, "", function () {
-                        Reqdata("/rd?ls=certif&user_id=" + g_focus.id, "", function (res) {
-                            g_certifs = res;
-                            $("#certif").html(xrcertifshow(res.data));
-                        });
-                    });
-                    thisdlg.closedlg();
-                };
-            }
-            else if (fun == "certifedit") {
-                var idx = g_curitems["certif"];
-                if (idx == undefined)
-                    return;
-                var data_id = $("#certif").children(":nth-child(" + (int(idx)+1) + ")").attr("data_id");
-                var certif = GetSub(g_certifs.data, "id", data_id);
-
-                var dlg = new cbDlg("编辑 证件", "width:600px");
-                dlg.Add(xrcertiflive(certif, g_certifs.fields));
-                dlg.Show();
-                dlg.submit = function (thisdlg){
-                    var fd = certifcheck();
-                    if (fd == undefined)
-                        return;
-                    Sendform('/wt?ls=certif', fd, "", function () {
-                        Reqdata("/rd?ls=certif&user_id=" + g_focus.id, "", function (res) {
-                            g_certifs = res;
-                            $("#certif").html(xrcertifshow(res.data));
-                        });
-                    });
-                    thisdlg.closedlg();
-                };
-            }
-            else if (fun == "eduadd") {
-                var dlg = new cbDlg("新建 教育经历", "width:600px");
-                dlg.Add(`<form id="edu_live">` + xredulive(Create(g_edus.fields), g_edus.fields) + `</form>`);
-                dlg.Show();
-                dlg.submit = function (thisdlg) {
-                    var fd = educheck();
-                    if (fd == undefined)
-                        return;
-                    Sendform('/cr?ls=edu', fd, "", function () {
-                        Reqdata("/rd?ls=edu&user_id=" + g_focus.id, "", function (res) {
-                            g_edus = res;
-                            $("#edu").html(xredushow(res.data));
-                        });
-                    });
-                    thisdlg.closedlg();
-                };
-            }
-            else if (fun == "eduedit") {
-                var idx = g_curitems["edu"];
-                if (idx == undefined)
-                    return;
-                var data_id = $("#edu").children(":nth-child(" + (int(idx) + 1) + ")").attr("data_id");
-                var edu = GetSub(g_edus.data, "id", data_id);
-
-                var dlg = new cbDlg("编辑 教育经历", "width:600px");
-                dlg.Add(xredulive(edu, g_edus.fields));
-                dlg.Show();
-                dlg.submit = function (thisdlg) {
-                    var fd = educheck();
-                    if (fd == undefined)
-                        return;
-                    Sendform('/wt?ls=edu', fd, "", function () {
-                        Reqdata("/rd?ls=edu&user_id=" + g_focus.id, "", function (res) {
-                            g_edus = res;
-                            $("#edu").html(xredushow(res.data));
-                        });
-                    });
-                    thisdlg.closedlg();
-                };
-            }
-            else if (fun == "employadd") {
-
-            }
-            else if (fun == "employedit") {
-
-            }
-        }
-
         function showdetail(user) {
             if (g_pane == "信息") {
                 $("#user").html(xrusershow(user, g_users.fields));
-                Reqdata("/rd?ls=certif&user_id=" + user.id, "", function (res) {
-                    g_certifs = res;
-                    $("#certif").html(xrcertifshow(res.data));
-                });
+                Reqdata("/rd?ls=certif&user_id=" + user.id, "", function (res) { g_certifs = res; $("#certif").html(xrcertifshow(res.data));});
                 Reqdata("/rd?ls=edu&user_id=" + user.id, "", function (res) { g_edus = res;$("#edu").html(xredushow(res.data)); });
                 Reqdata("/rd?ls=employ&user_id=" + user.id, "", function (res) { g_employs = res;$("#employ").html(xremployshow(res.data)); });
             }
@@ -284,13 +148,6 @@
             }
         }
 
-        function ValToView(user, field) {
-            var name = field.name ? field.name : field;
-            if (name == "sex") return GetSub(db_sex, "id", user.sex).name;
-            else if (name == "job") return GetSub(db_job, "id", user.job).name;
-            else if (name == "depart_id") return GetSub(g_departs.data, "id", user.depart_id).name;
-            else return user[name];
-        }
     </script>
 </body>
 </html>

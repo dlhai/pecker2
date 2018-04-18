@@ -1,140 +1,109 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
+    <!--user2与user3的区别：将inplace编辑模式改成弹出6编辑窗口式-->
     <meta charset="utf-8">
     <title>啄木鸟风电维保系统</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link rel="stylesheet" href="css/bootstrap.css"/>
+    <link rel="stylesheet" href="css/bootstrap.css" />
     <script type="text/javascript" src="js/doTe.js"></script>
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
+    <script src="laydate/laydate.js"></script>
+    <script src="js/utils.js"></script>
+    <link rel="stylesheet" href="css/cube.css" />
+    <script src="js/Cube.js"></script>
     <script src="js/db.js"></script>
-
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/xpecker.js"></script>
+    <script src="js/user.js"></script>
+    <style>
+        .narrow>div>div:first-of-type {width: 140px;}
+        .narrow>div>label:first-of-type {width: 40px;}
+        .narrow>div,.narrow>div>div:first-of-type {margin-right: 0px;}
+        .live {
+            background: #808080;
+            border: 0px;
+        }
+        .title {
+            display: inline-block;
+            border-radius: 4px;
+            padding: 4px 15px;
+            border: 1px solid #dddddd;
+        }
+    </style>
 </head>
-<body style="display: flex; flex-direction: row; align-items: stretch; padding:5px;">
-
-    <div style="overflow-y: scroll; overflow-x: scroll; width: 100px; margin: 10px; flex-shrink: 2; flex-grow: 1; ">
-        <section id="d_baseinf" class="d_panel d_detail" style="min-height: 200px; ">
-            <header class="heading">基本信息<div style="float: right;"><a href="#">编辑</a></div></header>
-        </section>
-        <section id="d_certiflist" class="d_panel d_detail">
-            <header class="heading">证件信息<div style="float: right;"><a href="#">编辑</a></div></header>
-        </section>
-        <section id="d_edulist" class="d_panel d_detail">
-            <header class="heading">受教育经历<div style="float: right;"><a href="#">编辑</a></div></header>
-        </section>
-        <section id="d_employlist" class="d_panel d_detail">
-            <header class="heading">就业经历<div style="float: right;"><a href="#">编辑</a></div></header>
-        </section>
-        <section id="d_opuslist" class="d_panel d_detail">
-            <header class="heading">发表作品<div style="float: right;"><a href="#">编辑</a></div></header>
-        </section>
+<body class="xFCsrow" >
+    <div id="userinf" class="xScroll" style="width:100px"><!--两个子项都固定宽度100，使它们获得相同的增量-->
+    </div>
+    <div id="userlive" style="width:100px"><!--两个子项都固定宽度100，使它们获得相同的增量-->
     </div>
 
-    <script id="tpl_baseinf" type="text/template">
-        <header class="heading">基本信息<div style="float: right;"><a href="#">编辑</a></div></header>
-        <div class="d_rAngle d_dImage" style="width: 216px; height: 140px; float: left;">
-            <img style="width: 216px; height: 140px;" src="{%=it.idimg%}" />
-        </div>
-        <div class="d_data_item"><label>帐号</label><div>{%=it.account%}</div></div>
-        <div class="d_data_item"><label>密码</label><div style="text-align:right;"><a>点击重置密码</a></div></div>
-        <div class="d_data_item"><label>姓名</label><div>{%=it.name%}</div></div>
-        <div class="d_data_item"><label>性别</label><div>{%=it.sex%}</div></div>
-        <div class="d_data_item"><label>民族</label><div>{%=it.ethnic%}</div></div>
-        <div class="d_data_item"><label>出生年月</label><div>{%=it.birth%}</div></div>
-        <div class="d_data_item"><label>住址</label><div style="width:404px;">{%=it.origo%}</div></div>
-        <div class="d_data_item"><label>身份证号</label><div>{%=it.id%}</div></div>
-        <div class="d_data_item"><label>联系电话</label><div>{%=it.phone%}</div></div>
-        <div class="d_data_item"><label>邮箱</label><div>{%=it.mail%}</div></div>
-        <div class="d_data_item"><label>QQ号码</label><div>{%=it.qq%}</div></div>
-        <div class="d_data_item"><label>微信号</label><div>{%=it.wechat%}</div></div>
-        <div class="d_data_item"><label>居住地址</label><div style="width:404px;">{%=it.addr%}</div></div>
-        <div class="d_data_item"><label>角色</label><div>{%=it.prof%}</div></div>
-        {% if (it.prof=="专家") { %}
-        <div class="d_data_item"><label>领域</label><div>{%=it.skill%}</div></div>
-        {% } %}
-    </script>
+    <section class="xPanel2" style="width:100px;">
+        <header class="heading" style="padding:5px;"><div class="title live" onClick="onclickpane(this)">信息</div> <div class="title" onClick="onclickpane(this)">动态</div></header>
+        <div id="pane" style="padding:5px 0px 5px 0px;"></div>
+    </section>
 
-    <script id="tpl_certiflist" type="text/template">
-        <header class="heading">证件信息<div style="float: right;"><a href="#">编辑</a></div></header>
-        {% for (var i in it) { %}
-        <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <img style="width: 120px; height: 74px;" src="{%=it[i].img%}" />
-            </div>
-            <div class="d_data_item"><label>证件名称</label><div>{%=it[i].name%}</div></div>
-            <div class="d_data_item"><label>颁发时间</label><div>{%=it[i].issuedate%}</div></div>
-            <div class="d_data_item"><label>颁发机构</label><div style="width:404px;">{%=it[i].office%}</div></div>
-        </div>
-        {% } %}
-    </script>
-
-    <script id="tpl_edulist" type="text/template">
-        <header class="heading">受教育经历<div style="float: right;"><a href="#">编辑</a></div></header>
-        {% for (var i in it) { %}
-        <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <img style="width: 120px; height: 74px;" src="{%=it[i].img1%}" />
-            </div>
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <img style="width: 120px; height: 74px;" src="{%=it[i].img2%}" />
-            </div>
-            <div class="d_data_item"><label>开始时间</label><div>{%=it[i].tmstart%}</div></div>
-            <div class="d_data_item"><label>截止时间</label><div>{%=it[i].tmend%}</div></div>
-            <div class="d_data_item"><label>学历</label><div>{%=it[i].qualif%}</div></div>
-            <div class="d_data_item"><label>教育机构</label><div>{%=it[i].edu%}</div></div>
-        </div>
-        {% } %}
-    </script>
-
-    <script id="tpl_employlist" type="text/template">
-        <header class="heading">就业经历<div style="float: right;"><a href="#">编辑</a></div></header>
-        {% for (var i in it) { %}
-        <div style="min-height: 85px; width: 100%;{% if (i%2==0){ %}background: #f5f5f5; {% } %}">
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <img style="width: 120px; height: 74px;" src="{%=it[i].img%}" />
-            </div>
-            <div class="d_data_item"><label>工作单位</label><div>{%=it[i].workin%}</div></div>
-            <div class="d_data_item"><label>岗位</label><div>{%=it[i].pos%}</div></div>
-            <div class="d_data_item"><label>开始时间</label><div>{%=it[i].tmstart%}</div></div>
-            <div class="d_data_item"><label>结束时间</label><div>{%=it[i].tmend%}</div></div>
-        </div>
-        {% } %}
-    </script>
-
-    <script id="tpl_opuslist" type="text/template">
-        <header class="heading">发表作品<div style="float: right;"><a href="#">编辑</a></div></header>
-        {% for (var i in it) { %}
-        <div style="min-height: 85px; width: 100%;{% if (i%2==0){ %}background: #f5f5f5; {% } %}">
-            <div class="d_rAngle d_dImage" style="width: 120px; height: 74px; float: left; margin-right: 5px; ">
-                <a href="{%=it[i].link%}"><img style="width: 120px; height: 74px;" src="{%=it[i].img%}" /></a>
-            </div>
-            <div class="d_data_item"><label>发表媒体</label><div>{%=it[i].journal%}</div></div>
-            <div class="d_data_item"><label>发表时间</label><div>{%=it[i].date%}</div></div>
-            <div class="d_data_item"><label>标题</label><div style="width:404px;">{%=it[i].title%}</div></div>
-        </div>
-        {% } %}
-    </script>
     <script type="text/javascript">
-        var url = window.location.search;
-        var act = url.substring(url.lastIndexOf('=') + 1, url.length);
-        var item = GetArItem(db_userlist.data, "account", act);
-        var i = rndrange(0, db_addition.length);
+        var g_focus, g_users, g_ethnic, g_departs, g_user = parent.g_user;
+        Reqdata("/curuserinf", "", function (res) {
+            g_user = res.data;
+            g_focus = g_user;
 
-        var tpl_baseinf = doT.template(document.getElementById('tpl_baseinf').innerHTML);
-        $("#d_baseinf").html(tpl_baseinf(item));
+            Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
 
-        var tpl_certiflist = doT.template(document.getElementById('tpl_certiflist').innerHTML);
-        $("#d_certiflist").html(tpl_certiflist(db_addition[i].certif));
+            var tpl1 = `<section class="xPanel2">
+                <header class="heading">{name}<div style="float: right;">
+                    <a onClick="on{code}add()">添加</a> <a onClick="on{code}edit()">编辑</a></div>
+                </header>
+                <div id="{code}" style="padding:5px 0px 5px 0px;"></div>
+            </section>`;
+            var tpl2 = `<section class="xPanel2">
+                    <header class="heading">{name}</header>
+                    <div id="{code}" class="x2Form" style="padding:5px 0px 5px 0px;"></div>
+                </section>`;
 
-        var tpl_edulist = doT.template(document.getElementById('tpl_edulist').innerHTML);
-        $("#d_edulist").html(tpl_edulist(db_addition[i].edu));
+            var modules1 = [{ code: "user", name: "基本信息" }, { code: "certif", name: "证件信息" },
+            { code: "edu", name: "受教育经历" }, { code: "employ", name: "就业经历" }];
+            var modules2 = [{ code: "article", name: "文章" }, { code: "discuss", name: "评论" }];
+            $("#userinf").html(modules1.map(x => tpl1.format(x)).join(""));
+            $("#userlive").html(modules2.map(x => tpl2.format(x)).join(""));
+        });
 
-        var tpl_employlist = doT.template(document.getElementById('tpl_employlist').innerHTML);
-        $("#d_employlist").html(tpl_employlist(db_addition[i].employ));
+        function showdetail(user) {
+            if (g_pane == "信息") {
+                $("#user").html(xrusershow(user, g_users.fields));
+                Reqdata("/rd?ls=certif&user_id=" + user.id, "", function (res) { g_certifs = res; $("#certif").html(xrcertifshow(res.data));});
+                Reqdata("/rd?ls=edu&user_id=" + user.id, "", function (res) { g_edus = res;$("#edu").html(xredushow(res.data)); });
+                Reqdata("/rd?ls=employ&user_id=" + user.id, "", function (res) { g_employs = res;$("#employ").html(xremployshow(res.data)); });
+            }
+            else {
 
-        var tpl_opuslist = doT.template(document.getElementById('tpl_opuslist').innerHTML);
-        $("#d_opuslist").html(tpl_opuslist(db_addition[i].opus));
+            }
+        }
+
+        //点击列表行
+        g_curitems = new Array();
+        $("html").on("click", function () {
+            var td = $(event.target);
+            if (td.parents(".listdata").length > 0) {
+                var node = $(td.parents(".listdata")[0]);
+                var table = $(node).parent();
+
+                var currow = g_curitems[table.attr("id")];
+                if (currow != undefined) {
+                    currow++;
+                    if (currow % 2 == 0)
+                        table.children(":nth-child(" + currow + ")").children().css("background-color", "#ffffff");
+                    else
+                        table.children(":nth-child(" + currow + ")").children().css("background-color", "#f5f5f5");
+                }
+                node.children().css("background-color", "#00f0f5");
+                g_curitems[table.attr("id")] = node.index();
+            }
+        });
+
+
     </script>
 </body>
 </html>

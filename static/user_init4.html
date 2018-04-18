@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
+    <!--user2与user3的区别：将inplace编辑模式改成弹出6编辑窗口式-->
     <meta charset="utf-8">
     <title>啄木鸟风电维保系统</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -19,8 +20,13 @@
 
     <style>
         /*为了解决BootStrap中css和layDate的css样式冲突*/
-        .laydate_box, .laydate_box * {box-sizing: content-box;}
-        .laydate_box th {text-align: center;}
+        .laydate_box, .laydate_box * {
+            box-sizing: content-box;
+        }
+
+            .laydate_box th {
+                text-align: center;
+            }
     </style>
 </head>
 <body>
@@ -28,7 +34,7 @@
         <header style="height:40px;">总步骤</header>
         <form id="employ_live" class="xRndAngle" style="margin:5px;padding:5px;"></form>
         <section class="xPanel2" style="display:inline-block;">
-            <header>教育经历</header>
+            <header>就业经历</header>
             <div id="employ_show" class="xScroll" style="padding: 5px;height:240px;flex-grow: 1;"></div>
         </section>
         <footer><div style="float:right"><button onclick="onnextstep()">下一步</button></div></footer>
@@ -36,17 +42,31 @@
 
     <script type="text/javascript">
         Reqdata("/curuserinf", "", function (res) {
-            g_user = res.data;
-            Reqdata("/rd?ls=employ&user_id=" + g_user.id, "", function (ctf) {
-                g_ctf = ctf;
-                $("#employ_live").html(xremploylive(Create(g_ctf.fields), g_ctf.fields));
-                $("#employ_show").html(xremployshow(ctf.data));
-            });
+            g_focus = res.data;
+            onrefresh();
         });
 
+        function onemploysave() {
+            var fd = employcheck();
+            if (fd != undefined)
+                Sendform('/cr?ls=employ', fd, "", onrefresh);
+        }
+
+        function onrefresh() {
+            Reqdata("/rd?ls=employ&user_id=" + g_focus.id, "", function (ctf) {
+                g_ctf = ctf;
+                $("#employ_show").html(xremployshow(ctf.data));
+
+                var xbtns = `<div style="display:inline-block;height:20px;">
+                <input type="button" onclick="onemploysave()" value="确定" />
+                <input type="button" onclick="onrefresh()" value="清除" /></div>`
+                $("#employ_live").html(xremploylive(Create(g_ctf.fields), g_ctf.fields) + xbtns);
+            });
+        }
+
         function onnextstep() {
-            ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"4"}}`.format(g_user.id));
-            window.location.href = '/static/user_init4.html'
+            ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"5"}}`.format(g_focus.id));
+            window.location.href = '/static/user_init5.html'
         }
     </script>
 </body>

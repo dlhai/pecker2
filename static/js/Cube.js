@@ -133,10 +133,10 @@ cbDlg.prototype.Show = function () {
         </div><!-- /.modal-content -->
         </div><!-- /.modal -->`;
     $("body").append(html);
-    var btn = $('#' + this.id).find("button");
-    btn.on("click", '', { This: this }, function (ev) {
+    $('#' + this.id).find("button").on("click", '', { This: this }, function (ev) {
         if (ev.target.innerText == "提交") ev.data.This.submit(ev.data.This);
-        else if (ev.target.innerText == "关闭") ev.data.This.closedlg();
+        else if (ev.target.innerText == "关闭") ev.data.This.closedlg(ev.data.This);
+        else if (ev.target.innerText == "删除") ev.data.This.remove(ev.data.This);
     });
 
     $('#' + this.id).on('hide.bs.modal', "", { This: this }, function (ev) {ev.data.This.closedlg(); });

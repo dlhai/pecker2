@@ -37,7 +37,7 @@
 
     <script type="text/javascript">
         Reqdata("/curuserinf", "", function (res) {
-            g_user = res.data;
+            g_focus = res.data;
             onrefresh();
         });
 
@@ -48,19 +48,19 @@
         }
 
         function onrefresh() {
-            var xbtns = `<div style="display:inline-block;height:20px;">
-                <input type="button" onclick="oncertifsave()" value="确定" />
-                <input type="button" onclick="onrefresh()" value="清除" /></div>`
-            $("#certif_live").html(xrcertiflive(Create(g_ctf.fields), g_ctf.fields) + xbtns);
-
-            Reqdata("/rd?ls=certif&user_id=" + g_user.id, "", function (ctf) {
+            Reqdata("/rd?ls=certif&user_id=" + g_focus.id, "", function (ctf) {
                 g_ctf = ctf;
                 $("#certif_show").html(xrcertifshow(ctf.data));
+
+                var xbtns = `<div style="display:inline-block;height:20px;">
+                <input type="button" onclick="oncertifsave()" value="确定" />
+                <input type="button" onclick="onrefresh()" value="清除" /></div>`
+                $("#certif_live").html(xrcertiflive(Create(g_ctf.fields), g_ctf.fields) + xbtns);
             });
         }
 
         function onnextstep() {
-            ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"3"}}`.format(g_user.id));
+            ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"3"}}`.format(g_focus.id));
             window.location.href = '/static/user_init3.html'
         }
     </script>

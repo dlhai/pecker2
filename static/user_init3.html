@@ -36,19 +36,19 @@
 
     <script type="text/javascript">
         Reqdata("/curuserinf", "", function (res) {
-            g_user = res.data;
+            g_focus = res.data;
             onrefresh();
         });
 
         function onrefresh() {
-            var xbtns = `<div style="display:inline-block;height:20px;">
-                <input type="button" onclick="onedusave()" value="确定" />
-                <input type="button" onclick="onrefresh()" value="清除" /></div>`
-            $("#edu_live").html(xredulive(Create(g_ctf.fields), g_ctf.fields) + xbtns);
-
-            Reqdata("/rd?ls=edu&user_id=" + g_user.id, "", function (ctf) {
+            Reqdata("/rd?ls=edu&user_id=" + g_focus.id, "", function (ctf) {
                 g_ctf = ctf;
                 $("#edu_show").html(xredushow(ctf.data));
+
+                var xbtns = `<div style="float:right;height:20px;margin:5px;">
+                <input type="button" onclick="onedusave()" value="确定" />
+                <input type="button" onclick="onrefresh()" value="清除" /></div>`
+                $("#edu_live").html(xredulive(Create(g_ctf.fields), g_ctf.fields) + xbtns);
             });
         }
 
@@ -59,7 +59,7 @@
         }
 
         function onnextstep() {
-            ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"4"}}`.format(g_user.id));
+            ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"4"}}`.format(g_focus.id));
             window.location.href = '/static/user_init4.html'
         }
     </script>

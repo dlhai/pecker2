@@ -348,6 +348,24 @@ def cr():
         conn.execute(sql)
     return Response(tojson(ret), mimetype='application/json')
 
+#新建
+#测试链接 http://127.0.0.1:5000/rm
+@app.route("/rm", methods=['GET', 'POST'])
+@login_required
+def rm():
+    param = request.args.to_dict()
+    if "ls" not in param:
+        return '{result:404,msg:"缺少参数 ls"}'
+    if "id" not in param:
+        return '{result:404,msg:"缺少参数 id"}'
+    ret=check(request, "rm")
+    if ret.result != "200":
+        return Response(tojson(ret), mimetype='application/json')
+
+    sql = "delete from {0} where id='{1}'".format(param["ls"], param["id"])
+    conn.execute(sql)
+    return Response(tojson(ret), mimetype='application/json')
+
 #更新，使用formdata时，url必须携带ls和id参数
 #测试链接 http://127.0.0.1:5000/wt
 @app.route("/wt", methods=['POST'])

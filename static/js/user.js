@@ -1,4 +1,4 @@
-﻿//用户信息界面，用于用户内容显示和编辑，在初始化12345步，和用户详细信息处均有用到。
+﻿//共用函数
 function xrusershow(user, fields) {
     var ui2 = `
                 <div style="float:left;display:block;height:240px;width:280px;margin-top:5px;margin-left:10px;">
@@ -14,10 +14,15 @@ function xrusershow(user, fields) {
                     </div>
                 </div>`;
 
-    return ui2.format({
-        "account": user.account, face: (user.face == "" ? "" : 'src="' + user.face + '"'),
-        idimg: (user.idimg == "" ? "" : 'src="' + user.idimg + '"')
-    }) + RenderPane3(user, fields, ValToView);
+    return ui2.format({"account": user.account, face: (user.face == "" ? "" : 'src="' + user.face + '"'),
+            idimg: (user.idimg == "" ? "" : 'src="' + user.idimg + '"')})
+        +RenderPane3(user, fields, function (user, field) {
+            var name = field.name ? field.name : field;
+            if (name == "sex") return GetSub(db_sex, "id", user.sex).name;
+            else if (name == "job") return GetSub(db_job, "id", user.job).name;
+            else if (name == "depart_id") return GetSub(g_departs.data, "id", user.depart_id).name;
+            else return user[name];
+        });
 }
 
 function xruserlive(user, fields) {
@@ -121,156 +126,49 @@ $("html").on("change", function () {
         g_chged[$(node).attr("name")] = true;
 });
 
-// 证件部分----------------------------------------begin----------------------
-function xrcertiflive(entity, fields) {
-    var ximg = { style: "float:left;display:inline-block;", body: xrimagelive2(entity.image, "image", "image") };
-    var xform = { class: "x2Form", style: "display:inline-block; width:620px;", body: RenderFormIn(entity, fields) };
-    return xCreateNode(ximg) + xCreateNode(xform);
+//专用函数
+function onuseradd() {
+    var tpl =
+        `<div class="x2Form" style="padding: 0px 0px 0px 30px;">
+                        <div style="float: left; margin:0px;"><img style="width: 100px;height: 180px;" src="img/bird.jpg" /></div>
+                        <div><label>帐号</label><input id="username" /></div>
+                        <div><label>密码</label><input id="pwd1" type="password"/></div>
+                        <div><label>密码</label><input id="pwd2" type="password"/></div>
+                    </div>`;
+
+    var dlg = new cbDlg("新建 用户", "", tpl);
+    dlg.submit = function () {
+        var newuser = Create(g_users.fields);
+        newuser.account = $("#username").val();
+        newuser.pwd = $("#pwd1").val();
+        var pwd2 = $("#pwd2").val();
+        if (newuser.account == "") { alert("帐号不能为空"); return; }
+        if (newuser.pwd != pwd2) { alert("两次输入的密码不一致"); return; }
+        if (newuser.pwd == "") { alert("密码不能为空"); return; }
+
+        var val = `{"ls":"user","val":{"account":"{account}","pwd":"{pwd}"}}`.format({
+            "account": newuser.account, "pwd": newuser.pwd
+        });
+        ReqdataP('/cr', val, "", function (res) {
+            if (res.result != 200) { alert("新建失败！"); return; }
+            newuser.id = res.id;
+            dlg.closedlg();
+        });
+
+        newuser.depart_id = g_user.depart_id;
+        newuser.depart_table = g_user.depart_table;
+        var dlg2 = new cbDlg("新建 用户", "width:900px");
+        dlg2.Add(`<form id="form_useredit" style="height:350px;">` + xruserlive(newuser, g_users.fields) + `</form>`);
+        dlg2.Show();
+        dlg2.submit = onusersave(newuser);
+    }
+    dlg.Show();
 }
-function xrcertifshow(data) {
-    var tpl = `{% it.forEach((x,i)=>{ %}
-            <div class="listdata" data_id="{%=x.id%}" style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-                <div class="xRndAngle" style="width: 126px; height: 84px; float: left; margin-right: 5px; ">
-                    <img style="width: 126px; height: 84px;" src="{%=x.image%}" />
-                </div>
-                <div class="x2Form">
-                    <div><label>证件名称</label><div>{%=x.name%}</div></div>
-                    <div><label>证件编号</label><div>{%=x.code%}</div></div>
-                    <div><label>颁发机构</label><div>{%=x.issue%}</div></div>
-                    <div><label>颁发时间</label><div>{%=x.issuedate%}</div></div>
-                </div>
-            </div>
-            {% }); %}`
-    return dtpl(tpl)(data);
+function onuseredit() {
+    var dlg = new cbDlg("编辑 用户", "width:900px");
+    dlg.btndel = true;
+    dlg.Add(xruserlive(g_focus, g_users.fields));
+    dlg.Show();
+    dlg.submit = onusersave(g_focus);
 }
 
-function certifcheck() {
-    var formdata = new FormData(document.getElementById("certif_live"));
-    if (formdata.get("name") == "") {
-        $("#msg").html("证件名称不能为空！");
-        return;
-    }
-    if (formdata.get("code") == "") {
-        $("#msg").html("证件编号不能为空！");
-        return;
-    }
-    if (formdata.get("issue") == "") {
-        $("#msg").html("颁发机构不能为空！");
-        return;
-    }
-    if (formdata.get("issuedate") == "") {
-        $("#msg").html("颁发时间不能为空！");
-        return;
-    }
-    formdata.append("user_id", g_focus.id);
-    return formdata;
-}
-// 证件部分----------------------------------------end----------------------
-
-// 教育经历----------------------------------------begin----------------------
-function xredulive(entity, fields) {
-    var ximg = { style: "float:left;display:inline-block;", body: xrimagelive2(entity.image1, "image1", "image1") + xrimagelive2(entity.image2, "image2", "image2") };
-    var xform = { class: "x2Form", style: "display:inline-block; width:620px;", body: RenderFormIn(entity, fields) };
-    return xCreateNode(ximg) + xCreateNode(xform);
-}
-function xredushow(data) {
-    var tpl = `{% it.forEach((x,i)=>{ %}
-            <div class="listdata" style="width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-                <div style="display:inline-block; margin-right: 5px; width:250px;">
-                    <img style="width: 120px; height: 80px;" src="{%=x.image1%}" />
-                    <img style="width: 120px; height: 80px;" src="{%=x.image2%}" />
-                </div>
-                <div class="x2Form" style="display:inline-block">
-                    <div><label>开始时间</label><div>{%=x.startdate%}</div></div>
-                    <div><label>截止时间</label><div>{%=x.enddate%}</div></div>
-                    <div><label>学历</label><div>{%=x.degree%}</div></div>
-                    <div><label>教育机构</label><div>{%=x.issue%}</div></div>
-                </div>
-            </div>
-            {% }); %}`
-    return dtpl(tpl)(data);
-}
-function educheck() {
-    var formdata = new FormData(document.getElementById("edu_live"));
-    if (formdata.get("startdate") == "") {
-        $("#msg").html("开始时间不能为空！");
-        return;
-    }
-    if (formdata.get("enddate") == "") {
-        $("#msg").html("截止时间不能为空！");
-        return;
-    }
-    if (formdata.get("degree") == "") {
-        $("#msg").html("学历不能为空！");
-        return;
-    }
-    if (formdata.get("issue") == "") {
-        $("#msg").html("颁发机构不能为空！");
-        return;
-    }
-
-    formdata.append("user_id", g_focus.id);
-    return formdata;
-}
-// 教育经历----------------------------------------end----------------------
-
-// 就业经历----------------------------------------begin----------------------
-function xremploylive(entity, fields) {
-    var ximg = { style: "float:left;display:inline-block;", body: xrimagelive2("", "image", "image") };
-    var xform = { class: "x2Form", style: "display:inline-block; width:620px;", body: RenderFormIn(entity, fields) };
-    var xbtns = `<div style="display:inline-block;height:20px;">
-                <input type="button" onclick="onemploysave(this)" value="确定" />
-                <input type="button" onclick="onemployblank(this)" value="清除" /></div>`
-
-    var ss = xCreateNode(ximg) + xCreateNode(xform) + xbtns;
-    return xCreateNode(ximg) + xCreateNode(xform) + xbtns;
-}
-function xremployshow(data) {
-    var tpl = `{% it.forEach((x,i)=>{ %}
-            <div style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-                <div class="xRndAngle" style="width: 126px; height: 84px; float: left; margin-right: 5px; ">
-                    <img style="width: 126px; height: 84px;" src="{%=x.image%}" />
-                </div>
-                <div class="x2Form">
-                    <div><label>开始时间</label><div>{%=x.startdate%}</div></div>
-                    <div><label>截止时间</label><div>{%=x.enddate%}</div></div>
-                    <div><label>工作单位</label><div>{%=x.Organization%}</div></div>
-                    <div><label>岗位</label><div>{%=x.position%}</div></div>
-                </div>
-            </div>
-            {% }); %}`
-    return dtpl(tpl)(data);
-}
-function onemploysave() {
-    var formdata = new FormData(document.getElementById("employ_live"));
-    if (formdata.get("name") == "") {
-        alert("证件名称不能为空！");
-        return;
-    }
-    if (formdata.get("issuedate") == "") {
-        alert("颁发时间不能为空！");
-        return;
-    }
-    if (formdata.get("issue") == "") {
-        alert("颁发机构不能为空！");
-        return;
-    }
-
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            Reqdata("/rd?ls=employ&user_id=" + g_user.id, "", function (ctf) {
-                $("#employ_show").html(xremployshow(ctf.data));
-                $("#employ_live").html(xremploylive(Create(g_ctf.fields), g_ctf.fields));
-            });
-        }
-    };
-
-    formdata.append("user_id", g_user.id);
-    xhr.open('POST', '/cr?ls=employ', true);
-    xhr.send(formdata);
-}
-function onemployblank() {
-    $("#employ_live").html(xremploylive(Create(g_ctf.fields), g_ctf.fields));
-}
-// 就业经历----------------------------------------end----------------------
