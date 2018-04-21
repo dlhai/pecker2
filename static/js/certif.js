@@ -6,10 +6,8 @@ function xrcertiflive(entity, fields) {
 }
 function xrcertifshow(data) {
     var tpl = `{% it.forEach((x,i)=>{ %}
-            <div class="listdata" data_id="{%=x.id%}" style="min-height: 85px;width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-                <div class="xRndAngle" style="width: 126px; height: 84px; float: left; margin-right: 5px; ">
-                    <img style="width: 126px; height: 84px;" src="{%=x.image%}" />
-                </div>
+            <div class="listdata" data_id="{%=x.id%}">
+                <div><img src="{%=x.image%}" /></div>
                 <div class="x2Form">
                     <div><label>证件名称</label><div>{%=x.name%}</div></div>
                     <div><label>证件编号</label><div>{%=x.code%}</div></div>

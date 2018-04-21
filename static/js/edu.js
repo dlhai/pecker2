@@ -6,12 +6,9 @@ function xredulive(entity, fields) {
 }
 function xredushow(data) {
     var tpl = `{% it.forEach((x,i)=>{ %}
-            <div class="listdata" data_id="{%=x.id%}" style="width: 100%; {% if (i%2==0) { %}background: #f5f5f5; {% } %}">
-                <div style="display:inline-block; margin-right: 5px; width:260px;float:left;">
-                    <img style="width: 126px; height: 84px;" src="{%=x.image1%}" />
-                    <img style="width: 126px; height: 84px;" src="{%=x.image2%}" />
-                </div>
-                <div class="x2Form" style="display:inline-block;width:590px;">
+            <div class="listdata" data_id="{%=x.id%}">
+                <div><img src="{%=x.image1%}" /><img src="{%=x.image2%}" /></div>
+                <div class="x2Form">
                     <div><label>开始时间</label><div>{%=x.startdate%}</div></div>
                     <div><label>截止时间</label><div>{%=x.enddate%}</div></div>
                     <div><label>学历</label><div>{%=x.degree%}</div></div>

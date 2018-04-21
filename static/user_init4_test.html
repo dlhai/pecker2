@@ -1,0 +1,26 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <!--user2与user3的区别：将inplace编辑模式改成弹出6编辑窗口式-->
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <script src="laydate/laydate.js"></script>
+    <style>
+        /*为了解决BootStrap中css和layDate的css样式冲突*/
+        .laydate_box, .laydate_box * {
+            box-sizing: content-box;
+        }
+
+            .laydate_box th {
+                text-align: center;
+            }
+    </style>
+</head>
+<body>
+                <div><label>工作单位</label><input name="Organization" value=""></div>
+                    <div><label>开始时间</label><input name="startdate" value="" onclick="laydate()" id="aaa"></div>
+                <div><label>岗位</label><input name="position" value=""></div>
+                <div><label>结束时间</label><input name="enddate" value="" onclick="laydate()" id="bbb"></div>
+</body>
+</html>

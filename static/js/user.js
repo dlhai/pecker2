@@ -16,13 +16,15 @@ function xrusershow(user, fields) {
 
     return ui2.format({"account": user.account, face: (user.face == "" ? "" : 'src="' + user.face + '"'),
             idimg: (user.idimg == "" ? "" : 'src="' + user.idimg + '"')})
-        +RenderPane3(user, fields, function (user, field) {
-            var name = field.name ? field.name : field;
-            if (name == "sex") return GetSub(db_sex, "id", user.sex).name;
-            else if (name == "job") return GetSub(db_job, "id", user.job).name;
-            else if (name == "depart_id") return GetSub(g_departs.data, "id", user.depart_id).name;
-            else return user[name];
-        });
+        + RenderPane3(user, fields, ValToView);
+}
+
+function ValToView(user, field) {
+    var name = field.name ? field.name : field;
+    if (name == "sex") return GetSub(db_sex, "id", user.sex).name;
+    else if (name == "job") return GetSub(db_job, "id", user.job).name;
+    else if (name == "depart_id") return GetSub(g_departs.data, "id", user.depart_id).name;
+    else return user[name];
 }
 
 function xruserlive(user, fields) {

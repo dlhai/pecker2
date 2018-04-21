@@ -419,3 +419,24 @@ $("html").on("click", function () {
     }
 });
 
+
+//点击图文表格列表（学历、证件、维修记录等,xpecker.css）
+g_curitems = new Array();
+$("html").on("click", function () {
+    var td = $(event.target);
+    if (td.parents(".listdata").length > 0) {
+        var node = $(td.parents(".listdata")[0]);
+        var table = $(node).parent();
+
+        var currow = g_curitems[table.attr("id")];
+        if (currow != undefined) {
+            currow++;
+            if (currow % 2 == 0)
+                table.children(":nth-child(" + currow + ")").children().css("background-color", "#ffffff");
+            else
+                table.children(":nth-child(" + currow + ")").children().css("background-color", "#f5f5f5");
+        }
+        node.children().css("background-color", "#00f0f5");
+        g_curitems[table.attr("id")] = node.index();
+    }
+});
