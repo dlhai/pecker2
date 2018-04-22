@@ -21,6 +21,9 @@ engine = create_engine('sqlite:///./db/pecker.db')
 metadata = MetaData(engine)
 conn = engine.connect()
 
+def rndstr(len):
+    return ''.join(random.sample("abcdefghijklmnopqrstuvwxyz0123456789", len))
+
 class obj:
     def __init__(self,  **kw ):
         for k,v in kw.items():
@@ -267,6 +270,28 @@ def chgpwd():
 def logout():
     logout_user()
     return "logout page"
+
+############## kindedit功能 ###############################################
+@app.route("/kedit", methods=['GET', 'POST'])
+def kedit():
+    params = request.args.to_dict()
+    files = request.files.to_dict()
+    dic =request.form.to_dict()
+
+    if "m" not in param:
+        return '{"error" : 1,"message" : "缺少参数m"}'
+
+    ret =obj();
+    for k,v in files.items(): 
+        fname = "./uploads/{m}/{id}{ext}".format(params["m"],id=rndstr(),ext=os.path.splitext(v.filename)[1] )
+        dic[k]=fname
+        v.save("./static/"+fname)
+        ret.error = 0
+        ret.url = fname
+
+    r = '{"error" : 0,"url" : "'+fname+'"}'
+    return r
+
 
 ############## websocket功能 ###############################################
 

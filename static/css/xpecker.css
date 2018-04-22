@@ -306,7 +306,7 @@ $("html").on("click", function () { $("xMenu").hide();});
 .listdata{
     width:100%;
 }
-.listdata > div:nth-child(2n) {/*偶数行颜色加深*/
+.listdata:nth-child(2n) > div {/*偶数行颜色加深*/
     background-color: #f5f5f5;
 }
 .listdata > div:first-child {/*第一个子项左侧浮动，用来显示图片*/

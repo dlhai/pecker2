@@ -229,7 +229,7 @@ function RenderFormItem(type, attr, val )
     else if (type == "select")
         r += '<select ' + attr + '>' + val + '</select>';
     else if (type == "date")
-        r += '<input ' + attr + ' value="' + val + '" onClick="laydate()" />';
+        r += '<input ' + attr + ' value="' + val + '" onClick="xrlaydate(this)" />';
     else if (type == "multiselect")
         r += RenderSelectSkill(val);
     return r;
@@ -432,9 +432,9 @@ $("html").on("click", function () {
         if (currow != undefined) {
             currow++;
             if (currow % 2 == 0)
-                table.children(":nth-child(" + currow + ")").children().css("background-color", "#ffffff");
-            else
                 table.children(":nth-child(" + currow + ")").children().css("background-color", "#f5f5f5");
+            else
+                table.children(":nth-child(" + currow + ")").children().css("background-color", "#ffffff");
         }
         node.children().css("background-color", "#00f0f5");
         g_curitems[table.attr("id")] = node.index();

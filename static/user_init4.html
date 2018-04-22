@@ -18,17 +18,6 @@
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
     <script src="js/employ.js"></script>
-
-    <style>
-        /*为了解决BootStrap中css和layDate的css样式冲突*/
-        .laydate_box, .laydate_box * {
-            box-sizing: content-box;
-        }
-
-            .laydate_box th {
-                text-align: center;
-            }
-    </style>
 </head>
 <body>
     <div class="xFCscol" style="width:900px;margin:100px;">
@@ -58,7 +47,7 @@
                 g_ctf = ctf;
                 $("#employ_show").html(xremployshow(ctf.data));
 
-                var xbtns = `<div style="display:inline-block;height:20px;">
+                var xbtns = `<br/><div id="msg" style="display:inline-block;"></div><div style="float:right;height:20px;margin:5px;">
                 <input type="button" onclick="onemploysave()" value="确定" />
                 <input type="button" onclick="onrefresh()" value="清除" /></div>`
                 $("#employ_live").html(xremploylive(Create(g_ctf.fields), g_ctf.fields) + xbtns);

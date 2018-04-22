@@ -101,8 +101,8 @@
                     <tr>
                         <td><input form="form_leaf{%=it.leafs[i]%}" name="code" value="{%=it.leafs[i].code%}" /></td>
                         <td><input form="form_leaf{%=it.leafs[i]%}" name="mat" value="{%=it.leafs[i].mat%}" /></td>
-                        <td><input form="form_leaf{%=it.leafs[i]%}" name="producedate" value="{%=it.leafs[i].producedate%}" onClick="laydate()"/></td>
-                        <td><input form="form_leaf{%=it.leafs[i]%}" name="putondate" value="{%=it.leafs[i].putondate%}" onClick="laydate()"/></td>
+                        <td><input form="form_leaf{%=it.leafs[i]%}" name="producedate" value="{%=it.leafs[i].producedate%}" onClick="xrlaydate(this)"/></td>
+                        <td><input form="form_leaf{%=it.leafs[i]%}" name="putondate" value="{%=it.leafs[i].putondate%}" onClick="xrlaydate(this)"/></td>
                         <td><select form="form_leaf{%=it.leafs[i]%}" class="leafvender_id" name="leafvender_id" data-id="{%=it.leafs[i].leafvender_id%}" ></select></td>
                     </tr>
                     {% } %}
