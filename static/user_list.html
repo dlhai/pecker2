@@ -51,9 +51,10 @@
     </section>
 
     <script type="text/javascript">
-        var g_focus, g_users, g_ethnic, g_departs, g_user = parent.g_user, g_pane ="信息";
+        var g_focus, g_users, g_ethnic, g_departs, g_user = parent.g_user, g_userfields, g_pane ="信息";
         Reqdata("/curuserinf", "", function (res) {
             g_user = res.data;
+            g_userfields = res.fields;
 
             Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
             if (isInArray(["1", "4", "7"], g_user.job))

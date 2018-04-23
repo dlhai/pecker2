@@ -140,7 +140,7 @@ function onuseradd() {
 
     var dlg = new cbDlg("新建 用户", "", tpl);
     dlg.submit = function () {
-        var newuser = Create(g_users.fields);
+        var newuser = Create(g_userfields);
         newuser.account = $("#username").val();
         newuser.pwd = $("#pwd1").val();
         var pwd2 = $("#pwd2").val();
@@ -160,7 +160,7 @@ function onuseradd() {
         newuser.depart_id = g_user.depart_id;
         newuser.depart_table = g_user.depart_table;
         var dlg2 = new cbDlg("新建 用户", "width:900px");
-        dlg2.Add(`<form id="form_useredit" style="height:350px;">` + xruserlive(newuser, g_users.fields) + `</form>`);
+        dlg2.Add(`<form id="form_useredit" style="height:350px;">` + xruserlive(newuser, g_userfields) + `</form>`);
         dlg2.Show();
         dlg2.submit = onusersave(newuser);
     }
