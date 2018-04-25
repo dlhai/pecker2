@@ -154,6 +154,9 @@
                 $('#modulelist').html(tpl_module(g_role.modules));
                 UpdateSubmode(0);
             });
+            Reqdata("/rdmsg", "", function (res) {
+                //... 还需要根据消息内容不同，展示不同界面。                                                                   
+            });
         }
         ReadCurUser();
 

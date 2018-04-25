@@ -316,6 +316,11 @@ function SendForm(url, form, ctx, cb) {
     xhr.send(fd);
 }
 
+function msgto(args) {
+    ReqdataP("/cr", `{"ls":"msg","val":{"type":"changejob","to":"{to}","jsn":"{jsn}"}}`.format(args));
+
+}
+
 // 自此以下将被废弃
 
 function tmfmt(tm, fmt) {

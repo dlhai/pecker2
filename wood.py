@@ -295,16 +295,16 @@ def kedit():
 
 ############## websocket功能 ###############################################
 
-@sockets.route('/echo')
-def echo_socket(ws):
-    while not ws.closed:
-        message = ws.receive()
-        ws.send("replay:"+message+"!")
+#@sockets.route('/echo')
+#def echo_socket(ws):
+#    while not ws.closed:
+#        message = ws.receive()             
+#        ws.send("replay:"+message+"!")
 
 #############################################################
 
 #frame用来填用户角色组合框
-@app.route("/roleuserall") 
+@app.route("/roleuserall")
 def roleuserall():
     user = QueryObj( "select min(id) as id, account, name, job, depart_id, depart_table, face from user group by job")
     for u in [x for x in user if atoi(x.depart_table) != 0]:

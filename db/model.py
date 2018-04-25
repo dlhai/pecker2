@@ -100,20 +100,24 @@ tbl_msg=Table('msg', metadata,
 	Column('when',Integer),
 	Column('frm',Integer),
 	Column('to',Integer),
+	Column('table_id',Integer),
+	Column('row_id',Integer),
+	Column('jsn',String(2048)),
+	Column('say',String(2048)),
 	Column('readtime',Date),
-	Column('result',String(128)))
+	Column('result',Integer))
 def dict_msg(x):
-    return dict(type="",when="",frm="",to="",readtime="",result="")
+    return dict(type="",when="",frm="",to="",table_id="",row_id="",jsn="",say="",readtime="",result="")
 
 tbl_user=Table('user', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('account',String(32),unique=True),
 	Column('pwd',String(32)),
-	Column('status',Integer),
+	Column('status',Integer,default=8),
 	Column('face',String(32)),
 	Column('depart_id',Integer),
 	Column('depart_table',Integer),
-	Column('job',Integer),
+	Column('job',Integer,default=18),
 	Column('skill',String(64)),
 	Column('name',String(32)),
 	Column('code',String(32)),
@@ -126,11 +130,15 @@ tbl_user=Table('user', metadata,
 	Column('qq',String(32)),
 	Column('mail',String(32)),
 	Column('wechat',String(32)),
-	Column('addr',String(64)))
+	Column('addr',String(64)),
+	Column('yellow',Integer),
+	Column('purple',Integer),
+	Column('blue',Integer),
+	Column('green',Integer))
 def dict_user(depart_id,depart_table,job,skill):
     person=rnditem("_person")
     mail=rndmail(person)
-    return dict(account=person.pinyin,pwd=person.pinyin,status=8.0,face=rnditem("_faceimage"),depart_id=depart_id,depart_table=intstr(getitembyname("_tbl",depart_table).id),job=job,skill=skill,name=person.name,code=person.id,sex=id2sex(person.id),ethnic=rnditem("_ethnic"),birth=id2birth(person.id),origin=person.origin,idimg=rndaddition("身份证"),phone=intstr(person.phone),qq=intstr(person.qq),mail=mail,wechat=rndwechat(person,mail),addr=rnditem("_麦当劳门店").门店地址)
+    return dict(account=person.pinyin,pwd=person.pinyin,status=8.0,face=rnditem("_faceimage"),depart_id=depart_id,depart_table=intstr(getitembyname("_tbl",depart_table).id),job=job,skill=skill,name=person.name,code=person.id,sex=id2sex(person.id),ethnic=rnditem("_ethnic"),birth=id2birth(person.id),origin=person.origin,idimg=rndaddition("身份证"),phone=intstr(person.phone),qq=intstr(person.qq),mail=mail,wechat=rndwechat(person,mail),addr=rnditem("_麦当劳门店").门店地址,yellow=0.0,purple=0.0,blue=0.0,green=0.0)
 
 tbl_certif=Table('certif', metadata,
 	Column('id',Integer,primary_key=True),
@@ -169,22 +177,23 @@ def dict_employ():
 tbl_opus=Table('opus', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('opus_id',Integer),
+	Column('board',String(32)),
+	Column('section',String(32)),
 	Column('keyword',String(64)),
-	Column('clss',String(64)),
 	Column('user_id',Integer),
 	Column('date',Date),
 	Column('title',String(64)),
 	Column('body',String(4096)))
 def dict_opus():
-    return dict(opus_id="",keyword="",clss="",user_id="",date="",title="",body="")
+    return dict(opus_id="",board="",section="",keyword="",user_id="",date="",title="",body="")
 
 tbl_follow=Table('follow', metadata,
 	Column('id',Integer,primary_key=True),
-	Column('user_id',Integer),
-	Column('user2_id',Integer),
+	Column('fans_id',Integer),
+	Column('idol_id',Integer),
 	Column('date',Date))
 def dict_follow():
-    return dict(user_id="",user2_id="",date="")
+    return dict(fans_id="",idol_id="",date="")
 
 tbl_winderco=Table('winderco', metadata,
 	Column('id',Integer,primary_key=True),
