@@ -105,9 +105,8 @@
             <li class="active"><a>区域1</a></li><li><a>区域2</a></li><li><a>区域3</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-avatar pull-right">
-            <li style="margin-right:30px;">切换为：<select id="roleselect" style="margin-top:10px;width:130px;" onchange="OnRoleChange();"></select></li>
             <li ><input class="d_rAngle" type="text" placeholder="搜索" /></li>
-            <li><a href="#" style="padding: 10px 15px;"><span class="badge bg-danger pull-right">3</span><img src="img/mail.jpg" style="height:32px;width:32px;"></a></li>
+            <li><a href="#" style="padding: 10px 15px;"><span class="badge bg-danger pull-right">0</span><img src="img/mail.jpg" style="height:30px;width:30px;"></a></li>
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding: 7px 15px;">
                     <span id="usr_name" class="hidden-sm-only">曹操</span>
@@ -115,10 +114,12 @@
                     <b class="caret hidden-sm-only"></b>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a id="usr_self" href="#">个人信息</a></li>
-                    <li><a href="#">我的博客</a></li>
-                    <li><a href="#">我的圈子</a></li>
-                    <li><a href="#">我的消息</a></li>
+                    <li><a href="javascript:navto('user_blog.html')">我的博客</a></li>
+                    <li><a href="javascript:navto('user_msg.html')">我的消息</a></li>
+                    <li><a href="javascript:navto('user_friends.html')">朋友圈</a></li>
+                    <li class="divider"></li>
+                    <li><a href="javascript:navto('user_self.html')">个人信息</a></li>
+                    <li><a href="javascript:navto('user_self.html')">单位信息</a></li>
                     <li class="divider"></li>
                     <li><a href="javascript:navto('system.html')">切换用户</a></li>
                     <li><a href="javascript:navto('signout.html')">退出</a></li>
