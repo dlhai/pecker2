@@ -74,7 +74,7 @@
             { name: "人员", url: "user3.html" }]
     },
     { "id": "17", "type": "repair", "name": "技工", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
-    { "id": "18", "type": "repair", "name": "公众", },
+    { "id": "19", "type": "repair", "name": "公众", },
 ];
 
 var branch = {
@@ -109,7 +109,7 @@ var db_job = [
     { "id": "15", "type": "su", "name": "技工超级帐号" },
     { "id": "16", "type": "", "name": "维修队长" },
     { "id": "17", "type": "", "name": "技工" },
-    { "id": "18", "type": "", "name": "公众" },
+    { "id": "19", "type": "", "name": "公众" },
 ]
 
 function GetRoleUser(name) {
@@ -318,7 +318,12 @@ function SendForm(url, form, ctx, cb) {
 
 function msgto(args) {
     ReqdataP("/cr", `{"ls":"msg","val":{"type":"changejob","to":"{to}","jsn":"{jsn}"}}`.format(args));
-
+}
+function msgrd(args) {
+    ReqdataP("/rd", `{"ls":"msg","val":{"type":"changejob","to":"{to}","jsn":"{jsn}"}}`.format(args));
+}
+function msgsign(args) {
+    ReqdataP("/cr", `{"ls":"msg","val":{"type":"changejob","to":"{to}","jsn":"{jsn}"}}`.format(args));
 }
 
 // 自此以下将被废弃

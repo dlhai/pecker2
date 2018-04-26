@@ -75,6 +75,15 @@ def QueryData(name,tbl,field,value):
     data=conn.execute(q).fetchall()
     adddata(name,data)
 
+conn.execute(tbl_user.insert(),[
+            {"id":"1","account":"su_win","pwd":"su_win","name":"叶片超级帐号","job":"1"},
+            {"id":"4","account":"su_dev","pwd":"su_dev","name":"设备超级帐号","job":"4"},
+            {"id":"7","account":"su_mat","pwd":"su_mat","name":"仓库超级帐号","job":"7"},
+            {"id":"10","account":"su_eng","pwd":"su_eng","name":"调度超级帐号","job":"10"},
+            {"id":"13","account":"su_exp","pwd":"su_exp","name":"专家超级帐号","job":"13"},
+            {"id":"15","account":"su_rep","pwd":"su_rep","name":"技工超级帐号","job":"15"},
+            {"id":"18","account":"su_blg","pwd":"su_blg","name":"博客超级帐号","job":"18"},
+            {"id":"100","account":"angel","pwd":"angel","name":"天使","job":"19"}])
 '''
     for t in [ x for x in tbls if x.type == "view"]:
         iname = GetIndex(t.field, "name")
