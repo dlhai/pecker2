@@ -328,37 +328,6 @@ function msgsign(args) {
 
 // 自此以下将被废弃
 
-function tmfmt(tm, fmt) {
-     var o = { 
-        "M+" : tm.getMonth()+1,                 //月份 
-        "d+" : tm.getDate(),                    //日 
-        "h+" : tm.getHours(),                   //小时 
-        "m+" : tm.getMinutes(),                 //分 
-        "s+" : tm.getSeconds(),                 //秒 
-        "q+" : Math.floor((tm.getMonth()+3)/3), //季度 
-        "S"  : tm.getMilliseconds()             //毫秒 
-    }; 
-    if(/(y+)/.test(fmt)) {
-            fmt=fmt.replace(RegExp.$1, (tm.getFullYear()+"").substr(4 - RegExp.$1.length)); 
-    }
-     for(var k in o) {
-        if(new RegExp("("+ k +")").test(fmt)){
-             fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
-         }
-     }
-    return fmt; 
-}
-
-//生成一个随机字符串
-function rndstr(len) {
-    var chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    var maxPos = chars.length + 1;
-    var pwd = '';
-    for (i = 0; i < len; i++)
-        pwd += chars.charAt(Math.floor(Math.random() * maxPos));
-    return pwd;
-}
-
 //生成[min-max)之间的一个数
 function rndrange(min, max) { return parseInt(Math.random() * (max - min)) + min; }
 //生成长度为len一个数字字符串
@@ -602,73 +571,6 @@ var db_userlist = {
         { "account": "pingyong", "pwd": "pingyong", "face": "17", "name": "平勇", "sex": "男", "ethnic": "汉族", "birth": "1980-01-15", "origo": "四川省凉山彝族自治州木里藏族自治县", "id": "513422198001159451", "idimg": "img/person/sfz2.jpg", "phone": "15122391000", "mail": "pingyong@21cn.com", "qq": "5134221980", "wechat": "15122391000", "addr": "福田区景田东路景田市场二楼", "prof": "仓管", "skill": "避雷" },
     ]
 };
-
-var db_addition = [
-    {
-        certif: [{ img: "img/person/jkz1.jpg", name: "健康证", office: "福建省宁德地区疾病控制中心", issuedate: "2008.06.16" },
-        { img: "img/person/gkzy1.jpg", name: "高空作业证", office: "福建省宁德安监局", issuedate: "2008.06.16" },
-        { img: "img/person/dgzy1.jpg", name: "电工证", office: "福建省宁德安监局", issuedate: "2008.06.16" },
-        { img: "img/person/jjz1.jpg", name: "急救证", office: "福建省红十字会", issuedate: "2008.06.16" },
-        { img: "img/person/bxpz1.jpg", name: "保险凭证", office: "人保财险福建省宁德地区支公司", issuedate: "2008.06.16" }],
-        edu: [{ img1: "img/person/byz1.jpg", img2: "img/person/xwz1.jpg", tmstart: "2008.06.16", qualif: "博士", tmend: "2009.07.16", edu: "清华大学" },
-        { img1: "img/person/byz2.jpg", img2: "img/person/xwz2.jpg", tmstart: "2007.06.16", qualif: "硕士", tmend: "2008.06.16", edu: "北京航空航天大学" },
-        { img1: "img/person/byz3.jpg", img2: "img/person/xwz3.jpg", tmstart: "2006.06.16", qualif: "学士", tmend: "2007.06.16", edu: "河南科技大学" }],
-        employ: [{ img: "img/person/lzzm1.jpg", tmstart: "2008.06.16", tmend: "2009.07.16", workin: "广州联创通信技术有限公司", pos: "前台" },
-        { img: "img/person/lzzm2.jpg", tmstart: "2007.06.16", tmend: "2008.06.16", workin: "惠州华特斯智能科技有限公司", pos: "检验员" },
-        { img: "img/person/lzzm3.jpg", tmstart: "2006.06.16", tmend: "2007.06.16", workin: "西安晟威通信技术有限公司", pos: "研发工程师" }],
-        opus: [{ img: "img/person/zp1.jpg", title: "金风科技为“中国智造”注入新动能", journal: "中国风电新闻网", date: "2015.12.31", link: "http://www.chinawindnews.com/" },
-        { img: "img/person/zp2.jpg", title: "中国风电塔筒高度新纪录诞生", journal: "北极星电力新闻网", date: "2010.10.30", link: "http://www.chinawindnews.com/" },
-        { img: "img/person/zp3.jpg", title: "金风科技天津首个兆瓦级分布式风电项目获批", journal: "新能源网", date: "2016.02.03", link: "http://www.chinawindnews.com/" }]
-    },
-    {
-        certif: [{ img: "img/person/jkz2.jpg", name: "健康证", office: "江西省抚州地区疾病控制中心", issuedate: "2008.06.16" },
-        { img: "img/person/gkzy2.jpg", name: "高空作业证", office: "江西省抚州地区安监局", issuedate: "2008.06.16" },
-        { img: "img/person/dgzy2.jpg", name: "电工证", office: "江西省抚州地区安监局", issuedate: "2008.06.16" },
-        { img: "img/person/jjz2.jpg", name: "急救证", office: "江西省抚州地区红十字会", issuedate: "2008.06.16" },
-        { img: "img/person/bxpz2.jpg", name: "保险凭证", office: "江西省抚州地区人保财险", issuedate: "2008.06.16" }],
-        edu: [{ img1: "img/person/byz1.jpg", img2: "img/person/xwz1.jpg", tmstart: "2008.06.16", tmend: "2009.07.16", qualif: "博士", edu: "上海交通大学" },
-        { img1: "img/person/byz2.jpg", img2: "img/person/xwz2.jpg", tmstart: "2007.06.16", tmend: "2008.06.16", qualif: "硕士", edu: "南开大学" },
-        { img1: "img/person/byz3.jpg", img2: "img/person/xwz3.jpg", tmstart: "2006.06.16", tmend: "2007.06.16", qualif: "学士", edu: "中国人民大学" }],
-        employ: [{ img: "img/person/lzzm4.jpg", tmstart: "2008.06.16", tmend: "2009.07.16", workin: "广州联创通信技术有限公司", pos: "前台" },
-        { img: "img/person/lzzm5.jpg", tmstart: "2007.06.16", tmend: "2008.06.16", workin: "惠州华特斯智能科技有限公司", pos: "检验员" },
-        { img: "img/person/lzzm6.jpg", tmstart: "2006.06.16", tmend: "2007.06.16", workin: "西安晟威通信技术有限公司", pos: "研发工程师" }],
-        opus: [{ img: "img/person/zp1.jpg", title: "金风科技为“中国智造”注入新动能", journal: "中国风电新闻网", date: "2015.12.31", link: "http://www.chinawindnews.com/" },
-        { img: "img/person/zp2.jpg", title: "中国风电塔筒高度新纪录诞生", journal: "北极星电力新闻网", date: "2010.10.30", link: "http://www.chinawindnews.com/" },
-        { img: "img/person/zp3.jpg", title: "金风科技天津首个兆瓦级分布式风电项目获批", journal: "新能源网", date: "2016.02.03", link: "http://www.chinawindnews.com/" }]
-    },
-    {
-        certif: [{ img: "img/person/jkz3.jpg", name: "健康证", office: "陕西省西安市病控制中心", issuedate: "2008.06.16" },
-        { img: "img/person/gkzy3.jpg", name: "高空作业证", office: "陕西省西安市安监局", issuedate: "2008.06.16" },
-        { img: "img/person/dgzy3.jpg", name: "电工证", office: "陕西省西安市安监局", issuedate: "2008.06.16" },
-        { img: "img/person/jjz3.jpg", name: "急救证", office: "陕西省西安市红十字会", issuedate: "2008.06.16" },
-        { img: "img/person/bxpz3.jpg", name: "保险凭证", office: "人保财险陕西省西安市支公司", issuedate: "2008.06.16" }],
-        edu: [{ img1: "img/person/byz1.jpg", img2: "img/person/xwz1.jpg", tmstart: "2008.06.16", tmend: "2009.07.16", qualif: "博士", edu: "西安交通大学" },
-        { img1: "img/person/byz2.jpg", img2: "img/person/xwz2.jpg", tmstart: "2007.06.16", tmend: "2008.06.16", qualif: "硕士", edu: "武汉大学" },
-        { img1: "img/person/byz3.jpg", img2: "img/person/xwz3.jpg", tmstart: "2006.06.16", tmend: "2007.06.16", qualif: "学士", edu: "厦门大学" }],
-        employ: [{ img: "img/person/lzzm1.jpg", tmstart: "2008.06.16", tmend: "2009.07.16", workin: "曲阜利特莱通信器材有限公司", pos: "前台" },
-        { img: "img/person/lzzm2.jpg", tmstart: "2007.06.16", tmend: "2008.06.16", workin: "山东百谷信息技术有限公司", pos: "检验员" },
-        { img: "img/person/lzzm3.jpg", tmstart: "2006.06.16", tmend: "2007.06.16", workin: "昆山亿溪电子材料有限公司", pos: "研发工程师" }],
-        opus: [{ img: "img/person/zp1.jpg", title: "金风科技为“中国智造”注入新动能", journal: "中国风电新闻网", date: "2015.12.31", link: "http://www.chinawindnews.com/" },
-        { img: "img/person/zp2.jpg", title: "中国风电塔筒高度新纪录诞生", journal: "北极星电力新闻网", date: "2010.10.30", link: "http://www.chinawindnews.com/" },
-        { img: "img/person/zp3.jpg", title: "金风科技天津首个兆瓦级分布式风电项目获批", journal: "新能源网", date: "2016.02.03", link: "http://www.chinawindnews.com/" }]
-    },
-    {
-        certif: [{ img: "img/person/jkz4.jpg", name: "健康证", office: "辽宁省抚顺市疾病控制中心", issuedate: "2008.06.16" },
-        { img: "img/person/gkzy4.jpg", name: "高空作业证", office: "辽宁省抚顺市安监局", issuedate: "2008.06.16" },
-        { img: "img/person/dgzy4.jpg", name: "电工证", office: "辽宁省抚顺市安监局", issuedate: "2008.06.16" },
-        { img: "img/person/jjz4.jpg", name: "急救证", office: "辽宁省抚顺市红十字会", issuedate: "2008.06.16" },
-        { img: "img/person/bxpz4.jpg", name: "保险凭证", office: "人保财险辽宁省抚顺市支公司", issuedate: "2008.06.16" }],
-        edu: [{ img1: "img/person/byz1.jpg", img2: "img/person/xwz1.jpg", tmstart: "2008.06.16", tmend: "2009.07.16", qualif: "博士", edu: "中南财经政法大学" },
-        { img1: "img/person/byz2.jpg", img2: "img/person/xwz2.jpg", tmstart: "2007.06.16", tmend: "2008.06.16", qualif: "硕士", edu: "内蒙古大学" },
-        { img1: "img/person/byz3.jpg", img2: "img/person/xwz3.jpg", tmstart: "2006.06.16", tmend: "2007.06.16", qualif: "学士", edu: "北京工商大学" }],
-        employ: [{ img: "img/person/lzzm4.jpg", tmstart: "2008.06.16", tmend: "2009.07.16", workin: "天津盈禾利物流有限公司", pos: "前台" },
-        { img: "img/person/lzzm5.jpg", tmstart: "2007.06.16", tmend: "2008.06.16", workin: "上海华夏物流有限公司", pos: "检验员" },
-        { img: "img/person/lzzm6.jpg", tmstart: "2006.06.16", tmend: "2007.06.16", workin: "深圳戎马广告有限公司", pos: "研发工程师" }],
-        opus: [{ img: "img/person/zp1.jpg", title: "金风科技为“中国智造”注入新动能", journal: "中国风电新闻网", date: "2015.12.31", link: "http://www.chinawindnews.com/" },
-        { img: "img/person/zp2.jpg", title: "中国风电塔筒高度新纪录诞生", journal: "北极星电力新闻网", date: "2010.10.30", link: "http://www.chinawindnews.com/" },
-        { img: "img/person/zp3.jpg", title: "金风科技天津首个兆瓦级分布式风电项目获批", journal: "新能源网", date: "2016.02.03", link: "http://www.chinawindnews.com/" }]
-    }
-];
 
 var db_speech =["事常与人违，事总在人为。",
 "骏马是跑出来的，强兵是打出来的。",

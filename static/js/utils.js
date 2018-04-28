@@ -56,7 +56,7 @@ Date.prototype.format = function (fmt) { //author: meizz
 // 对Array的扩展，相当于将Array的filter和map的功能合并
 Array.prototype.fmap = function (cb) {
     return this.map(cb).filter(x => x != undefined);
-}  
+}
 
 function isInArray(arr, value) {
     for (var i = 0; i < arr.length; i++) {
@@ -65,6 +65,16 @@ function isInArray(arr, value) {
         }
     }
     return false;
+}
+
+//生成一个随机字符串
+function rndstr(len) {
+    var chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    var maxPos = chars.length + 1;
+    var pwd = '';
+    for (i = 0; i < len; i++)
+        pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+    return pwd;
 }
 
 // 取url中的参数

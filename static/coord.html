@@ -690,7 +690,7 @@
             x.name = name;
             x.auther = rnditem(auther);
             x.time = new Date(start + (c - j) * 86400000);
-            x.stime = tmfmt(x.time,"yy-MM-dd");
+            x.stime = x.time.format("yy-MM-dd");
             r.push(x);
         }
 
