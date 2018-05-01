@@ -1,7 +1,6 @@
 #encoding:utf8
 from sqlalchemy import *
 from flask import Flask,request, Response, jsonify
-from flask_sockets import Sockets
 from werkzeug.utils import secure_filename
 from flask_login import (LoginManager, login_required, login_user,
                              logout_user, UserMixin,current_user)
@@ -10,7 +9,6 @@ import json
 import pdb
 
 app = Flask(__name__)
-sockets = Sockets(app)
 app.secret_key = '1The2quick3brown4fox5jumps6over7the8lazy9dog0'
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
@@ -20,9 +18,6 @@ engine = create_engine('sqlite:///./db/pecker.db')
 #engine.echo = True
 metadata = MetaData(engine)
 conn = engine.connect()
-
-def rndstr(len):
-    return ''.join(random.sample("abcdefghijklmnopqrstuvwxyz0123456789", len))
 
 class obj:
     def __init__(self,  **kw ):
@@ -177,7 +172,7 @@ def loaduser(where):
 def check(js,th):
     return obj(result="200")
 
-#######登录功能######################################################
+#############################################################
 @login_manager.user_loader
 def load_user(user_id):
     user = loaduser("id='%d'"%user_id)
@@ -271,40 +266,24 @@ def logout():
     logout_user()
     return "logout page"
 
-############## kindedit功能 ###############################################
-@app.route("/kedit", methods=['GET', 'POST'])
-def kedit():
-    params = request.args.to_dict()
-    files = request.files.to_dict()
-    dic =request.form.to_dict()
+#############################################################
 
-    if "m" not in param:
-        return '{"error" : 1,"message" : "缺少参数m"}'
-
-    ret =obj();
-    for k,v in files.items(): 
-        fname = "./uploads/{m}/{id}{ext}".format(params["m"],id=rndstr(),ext=os.path.splitext(v.filename)[1] )
-        dic[k]=fname
-        v.save("./static/"+fname)
-        ret.error = 0
-        ret.url = fname
-
-    r = '{"error" : 0,"url" : "'+fname+'"}'
-    return r
-
-
-############## websocket功能 ###############################################
-
-#@sockets.route('/echo')
+from flask_sockets import Sockets
+#sockets = Sockets(app)
+#@sockets.route(‘/echo’)
 #def echo_socket(ws):
+#    gLog.debug("ws=%s", ws)
 #    while not ws.closed:
-#        message = ws.receive()             
-#        ws.send("replay:"+message+"!")
+#        message = ws.receive()
+#        ws.send(message)
+#@app.route(‘/’)
+#def hello():
+#    return ‘Hello World!’
 
 #############################################################
 
 #frame用来填用户角色组合框
-@app.route("/roleuserall")
+@app.route("/roleuserall") 
 def roleuserall():
     user = QueryObj( "select min(id) as id, account, name, job, depart_id, depart_table, face from user group by job")
     for u in [x for x in user if atoi(x.depart_table) != 0]:
@@ -362,7 +341,7 @@ def cr():
         ret.id = max + 1 if max != "" else 1
         fmt = "./uploads/{ls}_{fd}/{ls}_{fd}_{id}{ext}"
         for k,v in files.items(): 
-            fname = fmt.format(ls=params["ls"],fd=k, id=ret.id,ext=os.path.splitext(v.filename)[1] )
+            fname = fmt.format(ls=params["ls"],fd=k, id=id,ext=os.path.splitext(v.filename)[1] )
             dic[k]=fname
             v.save("./static/"+fname)
 
@@ -371,24 +350,6 @@ def cr():
         values=",".join(map( lambda x: "'"+x+"'", dic.values()))
         sql = "insert into {0}({1}) values({2})".format(params["ls"], fields,values)
         conn.execute(sql)
-    return Response(tojson(ret), mimetype='application/json')
-
-#新建
-#测试链接 http://127.0.0.1:5000/rm
-@app.route("/rm", methods=['GET', 'POST'])
-@login_required
-def rm():
-    param = request.args.to_dict()
-    if "ls" not in param:
-        return '{result:404,msg:"缺少参数 ls"}'
-    if "id" not in param:
-        return '{result:404,msg:"缺少参数 id"}'
-    ret=check(request, "rm")
-    if ret.result != "200":
-        return Response(tojson(ret), mimetype='application/json')
-
-    sql = "delete from {0} where id='{1}'".format(param["ls"], param["id"])
-    conn.execute(sql)
     return Response(tojson(ret), mimetype='application/json')
 
 #更新，使用formdata时，url必须携带ls和id参数
@@ -581,26 +542,16 @@ def newdir(path):
         if not os.path.exists(p):
             os.mkdir(p)
 
-class CLog:
-    def write(data):
-        print(data)
-    def writelines(data):
-        print(data)
-    def flush():
-        pass
-
 if __name__ == "__main__":
     newdir(["./static/uploads","./static/uploads/user_face","./static/uploads/user_idimg","./static/uploads/certif_image",
             "./static/uploads/employ_image", "./static/uploads/edu_image1", "./static/uploads/edu_image2"]);
     app.config['JSON_AS_ASCII'] = False
     app.run( host="0.0.0.0")
-    #from gevent import pywsgi
-    #from geventwebsocket.handler import WebSocketHandler
-    #log = CLog();
-    #server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler, log=log,error_log=log)
-    #server.serve_forever()
+
+#查询代表用户的sql
+#select depart_id as c1, "" as c2, * from user where depart_table== "__sys__" union
+#select min(depart_id) as c1, winder.name as c2, user.* from user,winder where depart_table== "winder" and depart_id == winder.id group by job
 
 #暂未限制Query对User的查询
 #添加QueryUser接口，密码处理，所在单位处理
 #风场面板中还没有相关人员显示。
-
