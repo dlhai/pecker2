@@ -187,7 +187,7 @@ def load_user(user_id):
 #首页
 @app.route("/")
 def index():
-    return app.send_static_file('index.html')
+    return app.send_static_file('frame.html')
 
 #注册
 #测试链接 http://127.0.0.1:5000/cr
