@@ -11,7 +11,7 @@ def atoi(s):
     return 0 if s == "" else int(s)
 
 #把python对象转成json
-def json(o):
+def tojson(o):
     if type(o) == type([]):
         return "["+",".join([tojson(t) for t in o ])+"]\n";
     elif type(o) == type({}):
