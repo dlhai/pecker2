@@ -1,8 +1,8 @@
 #encoding:utf8
+from tools import *
 from sqlalchemy import *
 engine = create_engine('sqlite:///./db/pecker.db')
 #engine.echo = True
-#app.config['DEBUG'] = True
 metadata = MetaData(engine)
 conn = engine.connect()
 
@@ -90,5 +90,19 @@ def query(ls,**kw):
     r=obj(result=200,ls=ls)
     for k,v in kw.items():
         setattr(r,k,QueryObj(v))
-    return Response(json(r), mimetype='application/json')
+    return r
+
+def loaduser(where):
+    ret = QueryObj( "select * from user where "+where)
+    if len(ret) <= 0:
+        return
+    #找到用户的所在单位，若所在单位是风场，则需要读取风区列表
+    user = ret[0]
+    if atoi(user.depart_table) != 0: 
+        tbl = gettbl(user.depart_table)
+        user.depart = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0]
+        if tbl["name"] == "winder":
+            user.sub = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
+    return user
+
 

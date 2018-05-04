@@ -8,6 +8,13 @@ if __name__ == "__main__":
     app = Flask(__name__)
     #app.secret_key = '1The2quick3brown4fox5jumps6over7the8lazy9dog0'
     #app.config['JSON_AS_ASCII'] = False        
+    #app.config['DEBUG'] = True
+
+    app.secret_key = '1The2quick3brown4fox5jumps6over7the8lazy9dog0'
+    login_manager = LoginManager()
+    login_manager.session_protection = 'strong'
+    login_manager.login_view = '/static/login.json'
+    login_manager.init_app(app)
 
     from views import main as main_bp
     app.register_blueprint(main_bp)
