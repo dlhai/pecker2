@@ -103,6 +103,9 @@ def rnditem2(tblname):
     else:
         return tbl.data[idx][0]
 
+def xsample(tblname, min,max):
+    return ",".join([x[0] for x in random.sample(dat_all[tblname].data,random.randint(3,5))])
+
 def rndaddition(type):
     return random.choice([x.file for x in dat_all["_addition"] if x.type==type])
 
@@ -117,6 +120,7 @@ def getitembyname( tblname, name ):
             return x
     return ""
 
+#生成随机数n: min <= n <= max
 def rndnum(min,max):
     return random.randint(min,max)
 

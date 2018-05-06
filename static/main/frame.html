@@ -1,0 +1,226 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟</title>
+    <link rel="stylesheet" href="static/css/bootstrap.css">
+    <script type="text/javascript" src="static/js/doTe.js"></script>
+    <script src="static/js/jquery.js"></script>
+    <script src="static/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="static/css/xpecker.css" />
+    <script src="static/js/utils.js"></script>
+    <script src="static/js/db.js"></script>
+    <script src="static/js/xpecker.js"></script>
+    <script type="text/javascript">
+        function navto(url) {
+            $('#modulelist').children().removeClass("active");
+            $('#submodulelist').children().removeClass("active");
+            $('#mainframe').attr('src', url);
+        }
+    </script>
+    <style>
+        /*begin 抠出来的style*/
+        .xNavbar {
+            border-bottom: 1px solid #d1d4d7;
+            box-shadow: 0 0 5px rgba(0,0,0,.1);
+            background-color: #fff;
+            height: 50px;
+        }
+
+        .xNavbar-Brand {
+            border-right: 1px solid #d1d5d9;
+            color: #22baa0;
+            font-size: 28px;
+            width: 90px;
+            font-family: "Times New Roman", Georgia, serif;
+            font-style: italic;
+            font-weight: 700;
+            padding: 8px 0 14px 0;
+            float: left;
+            display: block;
+            height: 100%;
+        }
+        .xNavbar-Brand:hover, .xNavbar-Brand:focus {
+            color: #22baa0;
+            text-decoration: none;
+            background-color: transparent;
+        }
+        .navbar-nav {
+            cursor: pointer;
+            float: left;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        .navbar-nav > .active > a, .navbar-nav > .active > a:hover, .navbar-nav > .active > a:focus {
+            color: #555555;
+            background-color: #d5d5d5;
+        }
+        .navbar-nav > li > a {
+            padding-top: 15px;
+            padding-bottom: 15px;
+            line-height: 20px;
+            color: #777777;
+        }
+        .nav {
+            padding-left: 0;
+            margin-bottom: 0;
+            list-style: none;
+        }
+        .nav > li > a {
+            position: relative;
+            display: block;
+        }
+        .thumb img, .thumb-mini img, .thumb-small img, .thumb-large img {
+            height: 36px;
+            width: 36px;
+            vertical-align: middle;
+        }
+        /*end 抠出来的style*/
+
+        #submodulelist > li > a {
+            position: relative;
+            display: block;
+            padding: 5px 15px;
+            font-size: 14px;
+        }
+        .d_rAngle {
+            border-radius: 4px;
+            border: 1px solid #dddddd;
+            border-color: #e0e4e8;
+            padding: 4px 10px;
+            margin: 10px 30px 5px;
+        }
+    </style>
+</head>
+<body class="xFCscol" style="padding:0px;">
+    <header class="xFIfixed xNavbar" >
+        <a class="xNavbar-Brand" href="javascript:navto('system.html')">啄木鸟</a>
+        <ul class="nav navbar-nav" style="margin-left: 10px; font-size: 16px; ">
+            <li><div style="width:100px"><div id="depart_name">aaa</div><div id="job">bbb</div></div></li>
+        </ul>
+        <ul id="modulelist" class="nav navbar-nav" style="margin-left: 10px; font-size: 16px; ">
+            <li class="active"><a>功能1</a></li><li><a>功能2</a></li><li><a>功能3</a></li>
+        </ul>
+        <ul id="submodulelist" class="nav navbar-nav" style="margin-top: 20px; margin-left: 20px; font-size: 16px; ">
+            <li class="active"><a>区域1</a></li><li><a>区域2</a></li><li><a>区域3</a></li>
+        </ul>
+        <ul id ="userinf" class="nav navbar-nav navbar-avatar pull-right">
+            <li ><input class="d_rAngle" type="text" placeholder="搜索" /></li>
+            <li><a href="#" style="padding: 10px 15px;"><span class="badge bg-danger pull-right">0</span><img src="img/mail.jpg" style="height:30px;width:30px;"></a></li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding: 7px 15px;">
+                    <span id="usr_name" class="hidden-sm-only">曹操</span>
+                    <span class="thumb-small avatar inline"><img id="usr_face" src="img/face/face0.jpg" alt="用户头像" class="img-circle"></span>
+                    <b class="caret hidden-sm-only"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="javascript:navto('user_blog.html')">我的博客</a></li>
+                    <li><a href="javascript:navto('user_msg.html')">我的消息</a></li>
+                    <li><a href="javascript:navto('user_friends.html')">朋友圈</a></li>
+                    <li class="divider"></li>
+                    <li><a href="javascript:navto('user_self.html')">个人信息</a></li>
+                    <li><a href="javascript:navto('user_self.html')">单位信息</a></li>
+                    <li class="divider"></li>
+                    <li><a href="javascript:navto('system.html')">切换用户</a></li>
+                    <li><a href="javascript:navto('signout.html')">退出</a></li>
+                </ul>
+            </li>
+        </ul>
+    </header>
+    <div style="height:100px; background:#22baa0;">
+        <iframe id="mainframe" style="border:0px; width:100%;height:100%;" src="system.html"></iframe>
+    </div>
+
+<script id="tpl_module" type="text/template">
+    {% for (var i = 0; i < it.length; i++) { %}
+        <li {% if (i==0) { %} class="active" {% } %}>
+            <a onclick="ClickModule(this,'{%=it[i].url%}')">{%=it[i].name %}</a>
+        </li>
+    {% } %}
+</script>
+
+    <script type="text/javascript">
+        var tpl_module = doT.template(document.getElementById('tpl_module').innerHTML);
+        var g_user, g_role; // 当前用户、当前角色
+
+        function ReadCurUser() {
+            Reqdata("/curuserinf", "", function (res) {
+                g_user = res.data;
+                g_role = GetSub(db_roles, "id", g_user.job);
+                $('#usr_name').html(g_user.name);
+                $('#usr_face').attr("src", g_user.face);
+                if (g_user.depart != undefined)
+                    $('#depart_name').html(g_user.depart.name);
+                else
+                    $('#depart_name').html("");
+                $('#job').html(g_role.name);
+                $('#modulelist').html(tpl_module(g_role.modules));
+                UpdateSubmode(0);
+            });
+            Reqdata("/rdmsg", "", function (res) {
+                //... 还需要根据消息内容不同，展示不同界面。                                                                   
+            });
+        }
+        ReadCurUser();
+
+        // {{发布版要删掉这部分代码！
+        document.getElementById("roleselect").innerHTML = RenderSelect(db_job);
+        function OnRoleChange() {
+            var role = GetSub(db_job, "id", $("#roleselect").val());
+            var account = GetRoleUser(role.name).account;
+            Reqdata('/login?account=' + account + "&pwd=" + account, "", function (res) {
+                if (res.result == 200) {
+                    ReadCurUser();
+                }
+                else {
+                    alert("用户名或密码错");
+                }
+            });
+        }
+        //}}
+
+        function ClickModule(This, url) {
+            $(This).parent().parent().children().removeClass("active");
+            $(This).parent().addClass("active");
+            if ("modulelist" == $(This).parent().parent().attr("id") )
+            {
+                var idx = $(This).parent().index();
+                UpdateSubmode(idx);
+            }
+            else {
+                $('#mainframe').attr("src", url);
+            }
+        }
+        function UpdateSubmode(idx) {
+            if (g_role.modules[idx].usesub) {
+                var submodule = new Array();
+                if (g_role.modules[idx].subs != undefined)
+                    submodule = submodule.concat(g_role.modules[idx].subs);
+                if (g_user.sub != undefined)
+                    g_user.sub.forEach(x => { submodule.push({ "name": x.name, "url": g_role.modules[idx].url + "?id=" + x.id }); });
+                $('#submodulelist').html(tpl_module(submodule));
+                $('#mainframe').attr("src", submodule[0].url);
+            }
+            else {
+                $('#submodulelist').html("");
+                $('#mainframe').attr("src", g_role.modules[idx].url);
+            }
+        }
+
+        var ws = new WebSocket("ws://echo.websocket.org");
+        ws.onopen = function (evt) {
+            console.log("Connection open ...");
+            ws.send("Hello WebSockets!");
+        };
+
+        ws.onmessage = function (evt) {
+            console.log("Received Message: " + evt.data);
+            ws.close();
+        };
+
+        ws.onclose = function (evt) {
+            console.log("Connection closed.");
+        };      
+    </script>
+</body>
+</html>

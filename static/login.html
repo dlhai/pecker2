@@ -23,6 +23,7 @@
             Reqdata('/login?account=' + formdata.get("username") + "&pwd=" + formdata.get("password"), "", function (res) {
                 if (res.result == 200){
                     window.location.href = res.nexturl
+					parent.InitUser();
                 }
                 else {
                     alert("用户名或密码错");
@@ -53,8 +54,10 @@
             var val = `{"val":{"account":"{account}","pwd":"{pwd}"}}`.format({
                 "account": account, "pwd": password1});
             ReqdataP('/reg', val, "", function (res) {
-                if (res.result == 200)
+                if (res.result == 200){
 					window.location.href = '/static/user_init1.html'
+					parent.InitUser();
+				}
                 else
                     alert("注册失败！");
             });

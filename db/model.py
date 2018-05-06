@@ -1,5 +1,6 @@
 #encoding:utf8
 from sqlalchemy import *
+from random import *
 from vdgt import *
 from buildarea import dobj,rndarea
 import time,os
@@ -177,23 +178,23 @@ def dict_employ():
 tbl_opus=Table('opus', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('opus_id',Integer),
-	Column('board',String(32)),
+	Column('board',Integer),
 	Column('section',String(32)),
 	Column('keyword',String(64)),
 	Column('user_id',Integer),
 	Column('date',Date),
 	Column('title',String(64)),
-	Column('body',String(4096)))
-def dict_opus():
-    return dict(opus_id="",board="",section="",keyword="",user_id="",date="",title="",body="")
+	Column('body',String(10240)))
+def dict_opus(x):
+    return dict(opus_id=choice([0,randint(1,x) if x>1 else 0 ]),board=rndnum(1,3),section="",keyword=xsample("_keyword",3,5),user_id=rndnum(50,59),date=rnddate(0,2*365),title=rnditem("_quiz"),body=choice(data("_songci").data)[0])
 
 tbl_follow=Table('follow', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('fans_id',Integer),
 	Column('idol_id',Integer),
 	Column('date',Date))
-def dict_follow():
-    return dict(fans_id="",idol_id="",date="")
+def dict_follow(x,y):
+    return dict(fans_id=x+50,idol_id=y+50,date=rnddate(0,2*365))
 
 tbl_winderco=Table('winderco', metadata,
 	Column('id',Integer,primary_key=True),
@@ -432,6 +433,25 @@ def QueryData(name,tbl,field,value):
     data=conn.execute(q).fetchall()
     adddata(name,data)
 
+conn.execute(tbl_user.insert(),[
+            {"id":"1","account":"su_win","pwd":"su_win","name":"叶片超级帐号","job":"1","face":"img/face/face10.jpg"},
+            {"id":"4","account":"su_dev","pwd":"su_dev","name":"设备超级帐号","job":"4","face":"img/face/face11.jpg"},
+            {"id":"7","account":"su_mat","pwd":"su_mat","name":"仓库超级帐号","job":"7","face":"img/face/face12.jpg"},
+            {"id":"10","account":"su_eng","pwd":"su_eng","name":"调度超级帐号","job":"10","face":"img/face/face13.jpg"},
+            {"id":"13","account":"su_exp","pwd":"su_exp","name":"专家超级帐号","job":"13","face":"img/face/face14.jpg"},
+            {"id":"15","account":"su_rep","pwd":"su_rep","name":"技工超级帐号","job":"15","face":"img/face/face15.jpg"},
+            {"id":"18","account":"su_blg","pwd":"su_blg","name":"博客超级帐号","job":"18","face":"img/face/face16.jpg"},
+            {"id":"50","account":"test50","pwd":"test50","name":"测试50","job":"19","face":"img/face/face0.jpg"},
+            {"id":"51","account":"test51","pwd":"test51","name":"测试51","job":"19","face":"img/face/face1.jpg"},
+            {"id":"52","account":"test52","pwd":"test52","name":"测试52","job":"19","face":"img/face/face2.jpg"},
+            {"id":"53","account":"test53","pwd":"test53","name":"测试53","job":"19","face":"img/face/face3.jpg"},
+            {"id":"54","account":"test54","pwd":"test54","name":"测试54","job":"19","face":"img/face/face4.jpg"},
+            {"id":"55","account":"test55","pwd":"test55","name":"测试55","job":"19","face":"img/face/face5.jpg"},
+            {"id":"56","account":"test56","pwd":"test56","name":"测试56","job":"19","face":"img/face/face6.jpg"},
+            {"id":"57","account":"test57","pwd":"test57","name":"测试57","job":"19","face":"img/face/face7.jpg"},
+            {"id":"58","account":"test58","pwd":"test58","name":"测试58","job":"19","face":"img/face/face8.jpg"},
+            {"id":"59","account":"test59","pwd":"test59","name":"测试59","job":"19","face":"img/face/face9.jpg"},
+            {"id":"100","account":"angel","pwd":"angel","name":"天使","job":"19"}])
 conn.execute("CREATE VIEW matoutview AS select matout.id,fault_id,fault_code,matwh_id,matout.status,code,usage,matout.remark,img,creater.user_id as creater_id,creater.date as createdate,stocker.user_id as stocker_id,stocker.date as stockdate from matout LEFT JOIN flow AS creater ON (creater.table_id = 28 AND creater.record_id = matout.id AND creater.status = 0) LEFT JOIN flow AS stocker ON (stocker.table_id = 28 AND stocker.record_id = matout.id AND stocker.status = 2)")
 
 conn.execute("CREATE VIEW matoutrecview AS select matoutrec.id,matout.matwh_id,matoutrec.matout_id,matout.code as matout_code,matout.status as matout_status,mat.id as mat_id,mat.code,mat.name,mat.type,matoutrec.num,mat.unit,matinrec.specs,matinrec.matin_id,matin.code as matin_code,matin.status as matin_status,matinrec.id as matinrec_id,matinrec.vender_id,matinrec.producedt,matinrec.expiredt,matinrec.remark as matinrec_remark,matoutrec.remark from matoutrec,matinrec,mat,matin,matout where matoutrec.matinrec_id = matinrec.id and matinrec.mat_id=mat.id and matoutrec.matout_id=matout.id and matinrec.matin_id=matin.id")
@@ -454,7 +474,9 @@ conn.execute(tbl_admarea.insert(),[dict_admarea(x) for x in data("_全国行政�
 
 
 
+conn.execute(tbl_opus.insert(),[dict_opus(x) for x in range(500)])
 
+conn.execute(tbl_follow.insert(),[dict_follow(x,y) for x in range(10) for y in sample([z for z in range(10) if z!=x],randint(0,9))])
 
 conn.execute(tbl_vender.insert(),[dict_vender(x,17) for x in data("_efan_vender")])
 conn.execute(tbl_vender.insert(),[dict_vender(x,18) for x in data("_leaf_vender")])
@@ -521,10 +543,10 @@ conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","10","")])
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","11","")])
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","12","") for x in range(rndnum(5,10))])
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","13","")])
-conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","14",rndskill()) for x in range(rndnum(20,30))])
+conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","14",rndskill()) for x in range(rndnum(10,20))])
 conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","15","")])
-conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","16","") for x in range(rndnum(20,30))])
-conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","17","") for x in range(rndnum(100,150))])
+conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","16","") for x in range(rndnum(10,20))])
+conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","17","") for x in range(rndnum(50,100))])
 
 
 #为每个设备设置司机

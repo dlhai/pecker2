@@ -25,6 +25,8 @@ def T(s):
     elif len(ar)>2:
         if ar[0] == "rnditem" or ar[0] == "rnditem2":
             return ar[0] + "(\"" + ar[1]+"\")."+ar[2]
+        elif ar[0] == "xsample":
+            return ar[0] + "(\"" +ar[1] +"\","+ ",".join(ar[2:])+")"
         else:
             return ar[0] + "[\"" + ",".join(ar[1:])+"\"]"
     raise Exception;
@@ -32,6 +34,7 @@ def T(s):
 def xBuildModel(tbls):
     model = '''#encoding:utf8
 from sqlalchemy import *
+from random import *
 from vdgt import *
 from buildarea import dobj,rndarea
 import time,os
@@ -83,6 +86,16 @@ conn.execute(tbl_user.insert(),[
             {"id":"13","account":"su_exp","pwd":"su_exp","name":"专家超级帐号","job":"13"},
             {"id":"15","account":"su_rep","pwd":"su_rep","name":"技工超级帐号","job":"15"},
             {"id":"18","account":"su_blg","pwd":"su_blg","name":"博客超级帐号","job":"18"},
+            {"id":"50","account":"test50","pwd":"test50","name":"测试50","job":"19","face":"img/face/face0.jpg"},
+            {"id":"51","account":"test51","pwd":"test51","name":"测试51","job":"19","face":"img/face/face1.jpg"},
+            {"id":"52","account":"test52","pwd":"test52","name":"测试52","job":"19","face":"img/face/face2.jpg"},
+            {"id":"53","account":"test53","pwd":"test53","name":"测试53","job":"19","face":"img/face/face3.jpg"},
+            {"id":"54","account":"test54","pwd":"test54","name":"测试54","job":"19","face":"img/face/face4.jpg"},
+            {"id":"55","account":"test55","pwd":"test55","name":"测试55","job":"19","face":"img/face/face5.jpg"},
+            {"id":"56","account":"test56","pwd":"test56","name":"测试56","job":"19","face":"img/face/face6.jpg"},
+            {"id":"57","account":"test57","pwd":"test57","name":"测试57","job":"19","face":"img/face/face7.jpg"},
+            {"id":"58","account":"test58","pwd":"test58","name":"测试58","job":"19","face":"img/face/face8.jpg"},
+            {"id":"59","account":"test59","pwd":"test59","name":"测试59","job":"19","face":"img/face/face9.jpg"},
             {"id":"100","account":"angel","pwd":"angel","name":"天使","job":"19"}])
 '''
     for t in [ x for x in tbls if x.type == "view"]:

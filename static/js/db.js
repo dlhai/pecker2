@@ -120,6 +120,20 @@ function GetRoleUser(name) {
     return user;
 }
 
+function curuserinf( cb ){
+	g_user = parent.g_user;
+	if ( g_user != undefined){
+		 cb();
+	}
+	else{
+        Reqdata("/curuserinf", "", function (res) {
+            g_user = res.data;
+            g_user.fields = res.fields;
+			cb();
+		});
+	}
+}
+
 function GetsubJob(parentjobid, type) {
     var jobbranch = {
         "1": ["2", "3"], "2": ["2", "3"], "3": ["3"],//风场
@@ -154,6 +168,7 @@ var db_skill = [
 ]
 
 var db_sex = [
+    { "id": "", "name": "空" },
     { "id": "0", "name": "女" },
     { "id": "1", "name": "男" },
 ]

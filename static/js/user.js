@@ -97,7 +97,8 @@ function hidechgpwd(This) {
     });
 }
 
-function onusersave(user) {
+function onusersave(dlg) {
+	var user = dlg.user;
     delete g_chged.pwd;
     delete g_chged.newpwd1;
     delete g_chged.newpwd2;
@@ -110,6 +111,10 @@ function onusersave(user) {
         else
             fd.append(x, formdata.get(x));
     }
+    for (var x in g_datechged)
+		fd.append(x, formdata.get(x));
+	g_chged = new Object();
+	g_datechged = new Object();
 
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
@@ -124,8 +129,10 @@ function onusersave(user) {
 var g_chged = new Object();
 $("html").on("change", function () {
     var node = event.target;
-    if (node.tagName == "INPUT")
-        g_chged[$(node).attr("name")] = true;
+    if (node.tagName == "INPUT"){
+		var name=$(node).attr("name");
+        g_chged[name] = true;
+	}
 });
 
 //专用函数
@@ -140,7 +147,7 @@ function onuseradd() {
 
     var dlg = new cbDlg("新建 用户", "", tpl);
     dlg.submit = function () {
-        var newuser = Create(g_userfields);
+        var newuser = Create(g_user.fields);
         newuser.account = $("#username").val();
         newuser.pwd = $("#pwd1").val();
         var pwd2 = $("#pwd2").val();
@@ -160,17 +167,19 @@ function onuseradd() {
         newuser.depart_id = g_user.depart_id;
         newuser.depart_table = g_user.depart_table;
         var dlg2 = new cbDlg("新建 用户", "width:900px");
-        dlg2.Add(`<form id="form_useredit" style="height:350px;">` + xruserlive(newuser, g_userfields) + `</form>`);
+        dlg2.Add(`<form id="form_useredit" style="height:350px;">` + xruserlive(newuser, g_user.fields) + `</form>`);
         dlg2.Show();
-        dlg2.submit = onusersave(newuser);
+		dlg2.user = newuser;
+        dlg2.submit = onusersave;
     }
     dlg.Show();
 }
 function onuseredit() {
     var dlg = new cbDlg("编辑 用户", "width:900px");
     dlg.btndel = true;
-    dlg.Add(xruserlive(g_focus, g_users.fields));
+	dlg.Add(`<form id="form_useredit" style="height:350px;">` + xruserlive(g_focus, g_user.fields) + `</form>`);
     dlg.Show();
-    dlg.submit = onusersave(g_focus);
+	dlg.user = g_focus;
+    dlg.submit = onusersave;
 }
 

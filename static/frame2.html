@@ -1,0 +1,170 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟</title>
+    <link rel="stylesheet" href="static/css/bootstrap.css">
+    <script type="text/javascript" src="static/js/doTe.js"></script>
+    <script src="static/js/jquery.js"></script>
+    <script src="static/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="static/css/xpecker.css" />
+    <script src="static/js/utils.js"></script>
+    <script src="static/js/db.js"></script>
+    <script src="static/js/xpecker.js"></script>
+    <style>
+        header {
+            border-bottom: 1px solid #d1d4d7;
+            box-shadow: 0 0 5px rgba(0,0,0,.1);
+            background-color: #fff;
+            height: 50px;
+        }
+		.group{
+            display: inline-block;
+			margin:0 0 0 10px;
+			vertical-align: top;
+		}
+		.group>div, .group>form{
+            padding: 15px 10px;
+            line-height: 20px;
+            color: #777777;
+            position: relative;
+            display: inline-block;
+			margin:0 1px;
+		}
+        .group>.active, .group>div:hover, .group>div:focus {
+            color: #555555;
+            background-color: #d5d5d5;
+        }
+
+        .xSystem {
+            border-right: 1px solid #d1d5d9;
+            color: #22baa0 !important;
+            font-size: 28px;
+            font-family: "Times New Roman", Georgia, serif;
+            font-style: italic;
+            font-weight: 700;
+            padding-left: 0 !important;
+			margin-right:10px;
+            float: left;
+            display: block;
+            height: 100%;
+        }
+
+		.little{
+			padding-top: 20px;
+		}
+		.little>div{
+            padding: 5px 10px 5px 10px;
+			font-size: 14px;
+		}
+
+        .thumb img, .thumb-mini img, .thumb-small img, .thumb-large img {
+            height: 36px;
+            width: 36px;
+            vertical-align: middle;
+        }
+        .search{
+            border-radius: 4px;
+            border: 1px solid #dddddd;
+            border-color: #e0e4e8;
+            padding: 4px 10px;
+        }
+    </style>
+</head>
+<body class="xFCscol" style="padding:0px;">
+    <header class="xFIfixed" >
+        <div id="system" class="group" style="font-size: 16px; ">
+	        <div class="xSystem" data_url="static/system.html">啄木鸟</div>
+            <div id="id_portal" class="active" data_url="static/portal.html">资讯</div>
+        </div>
+        <div id="modulelist1" class="group" style="font-size: 16px;display:none "></div>
+        <div id="modulelist2" class="group little" style="font-size: 14px; " data_pid="id_portal"><div data_url="/blog/news" >新闻</div><div data_url="/blog/writings">博客</div><div data_url="/blog/docs">文库</div></div>
+        <div class="pull-right">
+			<div class="group"><form style="padding:10px;" ><input class="search" type="text" placeholder="搜索" /></form></div>
+			<div id ="user" class="group"><div data_url="static/login.html">登录</div><div data_url="static/login.html">注册</div></div>
+        </div>
+    </header>
+    <div style="height:100px;">
+        <iframe id="mainframe" style="border:0px; width:100%;height:100%;" src="static/portal.html"></iframe>
+    </div>
+
+    <script type="text/javascript">
+        var g_user, g_role; // 当前用户、当前角色
+
+		InitUser();
+		function InitUser(){
+			Reqdata("/curuserinf", "", function (res) {
+				if ( res.is_anonymous == "True"){
+					$("#user").html(`<div data_url="static/login.html">登录</div><div data_url="static/login.html">注册</div>`);
+				}
+				else{
+					g_user = res.data;
+					g_user.fields = res.fields;
+					$("#user").html(renderuser());
+				}
+			});
+		}
+
+		$("html").on("click", function () {
+			var node = $(event.target);
+
+			var text = node.html();
+			var id = node.attr( "id" );
+			var url = node.attr( "data_url" );
+			var pid = node.parent().attr( "data_pid" );
+			if ( text == "退出" ){
+				Reqdata( "/logout", "", function(res){
+					InitUser();
+					$('#mainframe').attr('src', "static/portal.html");
+				});
+			}
+			else if ( url != "" ){
+				$('#mainframe').attr('src', url);
+			}
+			else return;
+
+			$('.active').removeClass("active");
+			node.addClass("active");
+			$('#'+pid).addClass("active");
+		});
+
+		function renderuser(){
+			return	`<div style="padding:10px;" ><img src="static/img/mail.jpg" style="height:30px;width:30px;" data_url="static/user_msg.html"></div>
+				<div class="dropdown" style="padding:7px;" >
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding: 7px 15px;">
+						<span id="usr_name" class="hidden-sm-only">{name}</span>
+						<span class="thumb-small avatar inline"><img id="usr_face" src="static/{face}" alt="用户头像" class="img-circle"></span>
+						<b class="caret hidden-sm-only"></b>
+					</a>
+					<ul class="dropdown-menu">
+						<li><a data_url="static/user_blog.html">我的博客</a></li>
+						<li><a data_url="static/user_msg.html">我的消息</a></li>
+						<li><a data_url="static/user_friends.html">朋友圈</a></li>
+						<li class="divider"></li>
+						<li><a data_url="static/user_self.html">个人信息</a></li>
+						<li><a data_url="static/user_depart.html">单位信息</a></li>
+						<li class="divider"></li>
+						<li><a data_url="static/login.html">切换用户</a></li>
+						<li><a>退出</a></li>
+					</ul>
+				</div>`.format(g_user);
+		}
+
+/*
+        var ws = new WebSocket("ws://echo.websocket.org");
+        ws.onopen = function (evt) {
+            console.log("Connection open ...");
+            ws.send("Hello WebSockets!");
+        };
+
+        ws.onmessage = function (evt) {
+            console.log("Received Message: " + evt.data);
+            ws.close();
+        };
+
+        ws.onclose = function (evt) {
+            console.log("Connection closed.");
+        };      */
+    </script>
+</body>
+</html>

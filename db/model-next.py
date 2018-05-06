@@ -29,7 +29,7 @@ def QueryObj( sql ):
 
 #先把各角色代表用户及其单位找出来
 roleusers = QueryObj( "select min(id) as id, account, name, job, depart_id, depart_table, face from user group by job")
-for u in [x for x in roleusers if x.depart_table != 0]:
+for u in [x for x in roleusers if x.depart_table != 0 and x.depart_table != None ]:
     tbl = gettbl(u.depart_table)
     u.depart = QueryObj( "select * from "+tbl.name+" where id="+str(u.depart_id))[0]
     if tbl.name == "winder":
