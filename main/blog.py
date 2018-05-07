@@ -15,6 +15,11 @@ def blog(type):
 def bfile(bdir,bfile):
     return app.send_static_file(bdir+"/"+bfile)
 
+@app.route('/blog/writting')
+def writting(bdir,bfile):
+    return app.send_static_file(bdir+"/"+bfile)
+
+
 
 #发表文章、评论/回复、发消息
 @app.route("/publish")
