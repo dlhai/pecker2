@@ -13,50 +13,25 @@
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
     <script src="js/Cube.js"></script>
+	<style>
+		.list>div{display:table-row}
+		.list>div>div{display:table-cell;vertical-align: top;border-bottom:1px solid black;padding:5px;}
+		.list>div>div>img{border-radius: 4px;}
+	</style>
 </head>
 <body>
-    <div style="display:table-cell">这只是个测试页面。
-        {% for writting in writtings %}
-        <div style="display:table-row">
-            <div style="display:table-cell"><img src="{{user.face}}"/></div>
-            <div style="display:table-cell">
-                <div><a href="/blog/writting_view?id={{writting.id}}">{{writting.title}}</a></div>
-                <div>{{writting.body}}</div>
-                <div style="float:right">{{user.name}}发布于{{writting.date}}  </div>
+    <div style="display:table-cell;width:200px;">这只是个{{type}}测试页面。</div>
+    <div class="list" style="display:table-cell">
+        {% for x in writtings %}
+        <div><div style="height:200px;"><img width="42px" height="42px" src="{{x.face}}"/></div>
+            <div style="height:200px;">
+                <div><a href="/blog/writting_view?id={{x.id}}">{{x.title}}</a></div>
+                <div>{{x.body}}</div>
+                <div style="float:right"><a href="/blog/user_view?id={{x.user_id}}">{{x.name}}</a>发布于{{x.date}}  </div>
             </div>
         </div>
         {% endfor %}
-        <div style="display:table-row">
-            <div style="display:table-cell">测试页面</div>
-            <div style="display:table-cell">
-                <div><a href="">url url url url url</a></div>
-                <div>content content content content content content content content content</div>
-                <div style="float:right">right right right right</div>
-            </div>
-        </div>
-        <div style="display:table-row">
-            <div style="display:table-cell">测试页面</div>
-            <div style="display:table-cell">
-                <div><a href="">url url url url url</a></div>
-                <div>content content content content content content content content content</div>
-                <div style="float:right">right right right right</div>
-            </div>
-        </div>
-        <div style="display:table-row">
-            <div style="display:table-cell">测试页面</div>
-            <div style="display:table-cell">
-                <div><a href="">url url url url url</a></div>
-                <div>content content content content content content content content content</div>
-                <div style="float:right">right right right right</div>
-            </div>
-        </div>
     </div>
-    <div style="display:table-cell">
-            {% for user in users %}
-            <div><a href="{{ user.url
-}}">{{user.name}}</a></div>
-            {% endfor %}
-    </div>
-    <div style="display:table-cell">这只是个{{type}}测试页面。</div>
+    <div style="display:table-cell;width:200px;">这只是个{{type}}测试页面。</div>
 </body>
 </html>

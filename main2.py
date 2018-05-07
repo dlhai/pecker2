@@ -76,7 +76,7 @@ if __name__ == "__main__":
     newdir(["./static/uploads","./static/uploads/user_face","./static/uploads/user_idimg","./static/uploads/certif_image",
             "./static/uploads/employ_image", "./static/uploads/edu_image1", "./static/uploads/edu_image2"]);
     app.config['JSON_AS_ASCII'] = False
-    app.config['DEBUG'] = True
+    #app.config['DEBUG'] = True
     print( app.url_map )
     app.run( host="0.0.0.0" )
     #from gevent import pywsgi

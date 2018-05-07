@@ -6,20 +6,25 @@ from main.tools import *
 
 
 #各博客页面
-@app.route('/blog/<type>')
-def blog(type):
-    users = [obj(name="name111",url="url111"),obj(name="name222", url="url22234")]
-    return render_template("blogbase.html",type=type,users=users)
+@app.route('/blog/<ls>')
+def blog(ls):
+    ar = {"news":"1", "writtings":"2", "docs":"3" }
+    if ls not in ar:
+        return 404
+    sql="select opus.*,user.face, user.name from opus,user where opus.user_id==user.id and board=%s"%(ar[ls])
+    return render_template("blogbase.html",writtings=QueryObj(sql))
 
 @app.route('/blog/<bdir>/<bfile>')
 def bfile(bdir,bfile):
     return app.send_static_file(bdir+"/"+bfile)
 
+@app.route('/blog/<bdir1>/<bdir2>/<bfile>')
+def bfile2(bdir1,bdir2,bfile):
+    return app.send_static_file(bdir1+"/"+bdir2+"/"+bfile)
+
 @app.route('/blog/writting')
 def writting(bdir,bfile):
     return app.send_static_file(bdir+"/"+bfile)
-
-
 
 #发表文章、评论/回复、发消息
 @app.route("/publish")
