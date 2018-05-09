@@ -1,18 +1,9 @@
+#encoding:utf8
 from flask import Flask,request, Response,jsonify,render_template
 from flask_login import login_required,current_user
 from main2 import app,login_manager,check
 from main.model import *
 from main.tools import *
-
-
-#各博客页面
-@app.route('/blog/<ls>')
-def blog(ls):
-    ar = {"news":"1", "writtings":"2", "docs":"3" }
-    if ls not in ar:
-        return 404
-    sql="select opus.*,user.face, user.name from opus,user where opus.user_id==user.id and board=%s"%(ar[ls])
-    return render_template("blogbase.html",writtings=QueryObj(sql))
 
 @app.route('/blog/<bdir>/<bfile>')
 def bfile(bdir,bfile):
@@ -22,9 +13,42 @@ def bfile(bdir,bfile):
 def bfile2(bdir1,bdir2,bfile):
     return app.send_static_file(bdir1+"/"+bdir2+"/"+bfile)
 
-@app.route('/blog/writting')
-def writting(bdir,bfile):
-    return app.send_static_file(bdir+"/"+bfile)
+#各博客页面
+@app.route('/blog/<ls>')
+def blog(ls):
+    ar = {"news":obj(id="1",ls="list_news.html"), "writings":obj(id="2",ls="list_writings.html"), "docs":obj(id="3",ls="list_docs.html") }
+    if ls not in ar:
+        return 404
+    sql="select opus.*,user.face, user.name from opus,user where opus.user_id==user.id and board=%s"
+    return render_template(ar[ls].ls,writtings=QueryObj(sql%ar[ls].id))
+
+@app.route('/blog/view_new')
+def view_new():
+    param = request.args.to_dict()
+    if "id" not in param:
+        return '{result:404,msg:"缺少参数 ls"}'
+    writting=QueryObj("select * from opus where opus.id=%s"%param["id"])
+    replays=QueryObj("select opus.*,user.face, user.name from opus,user where opus.user_id==user.id and opus.opus_id=%s"%param["id"])
+    return render_template("view_new.html",writting=writting, user=user,replays=replays)
+
+@app.route('/blog/view_writing')
+def view_writing():
+    param = request.args.to_dict()
+    if "id" not in param:
+        return '{result:404,msg:"缺少参数 ls"}'
+    writting=QueryObj("select * from opus where opus.id=%s"%param["id"])
+    user = QueryObj("select * from user where id=%s"%writting.user_id)
+    replays=QueryObj("select opus.*,user.face, user.name from opus,user where opus.user_id==user.id and opus.opus_id=%s"%param["id"])
+    return render_template("view_writing.html",writting=writting, user=user,replays=replays)
+
+@app.route('/blog/view_doc')
+def view_doc():
+    param = request.args.to_dict()
+    if "id" not in param:
+        return '{result:404,msg:"缺少参数 ls"}'
+    sql="select opus.*,user.face, user.name from opus,user where opus.user_id==user.id and board=%s"
+    return render_template("view_doc.html",writtings=QueryObj(sql%param[ls]))
+
 
 #发表文章、评论/回复、发消息
 @app.route("/publish")
@@ -36,7 +60,7 @@ def publish():
     user = ret[0]
     del user.pwd
 
-    #找到用户的所在单位，若所在单位是风场，则需要读取风区列表
+    #鎵惧埌鐢ㄦ埛鐨勬墍鍦ㄥ崟浣嶏紝鑻ユ墍鍦ㄥ崟浣嶆槸椋庡満锛屽垯闇��璇诲彇椋庡尯鍒楄〃
     if atoi(user.depart_table) != 0: 
         tbl = gettbl(user.depart_table)
         user.depart = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0]
@@ -49,7 +73,7 @@ def publish():
     ret.fields=QueryObj(select(base.sl).where(base.c.table=="user"))
     return Response(tojson(ret), mimetype='application/json')
 
-#推荐、关注 
+#鎺ㄨ崘銆佸叧娉�
 @app.route('/recom', methods=['POST'])
 @login_required
 def recom():
@@ -57,10 +81,10 @@ def recom():
     ret=obj(fun="chgpwd", result="200")
     if current_user.id != int(jsn["id"]):
         ret.result = "1002"
-        ret.msg = "你不能修改别人的密码"
+        ret.msg = "浣犱笉鑳戒慨鏀瑰埆浜虹殑瀵嗙爜"
     if current_user.pwd != jsn["pwd"]:
         ret.result = "1002"
-        ret.msg = "旧密码不正确"
+        ret.msg = "鏃у瘑鐮佷笉姝ｇ‘"
     if ret.result == "200":
         sql = "update user set pwd='{0}' where id={1}".format(jsn["newpwd"], jsn["id"])
         conn.execute(sql)

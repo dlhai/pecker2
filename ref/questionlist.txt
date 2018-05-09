@@ -1,0 +1,26 @@
+关于jinjia2对模板文件缓冲机制。
+在开发时，需要反复修改模板文件查看显示效果，由于缓冲机
+制的存在，模板文件只会加载一次，在后面使用时直接采用缓冲的数据，这样开发时，每次对模
+板文件的修改都需要重启服务来加载，太不方便了，经过一番调试，发现在以下有cache_size，设
+为0得以解决，原默认为400。
+D:\2018\pecker2\venv\Lib\site-packages\jinja2\environment.py
+    def __init__(self,
+                 block_start_string=BLOCK_START_STRING,
+                 block_end_string=BLOCK_END_STRING,
+                 variable_start_string=VARIABLE_START_STRING,
+                 variable_end_string=VARIABLE_END_STRING,
+                 comment_start_string=COMMENT_START_STRING,
+                 comment_end_string=COMMENT_END_STRING,
+                 line_statement_prefix=LINE_STATEMENT_PREFIX,
+                 line_comment_prefix=LINE_COMMENT_PREFIX,
+                 trim_blocks=TRIM_BLOCKS,
+                 lstrip_blocks=LSTRIP_BLOCKS,
+                 newline_sequence=NEWLINE_SEQUENCE,
+                 keep_trailing_newline=KEEP_TRAILING_NEWLINE,
+                 extensions=(),
+                 optimized=True,
+                 undefined=Undefined,
+                 finalize=None,
+                 autoescape=False,
+                 loader=None,
+                 cache_size=0,
