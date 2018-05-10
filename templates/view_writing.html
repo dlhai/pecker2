@@ -13,26 +13,46 @@
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
     <script src="js/Cube.js"></script>
-	<style>
-		.list>div{display:table-row}
-		.list>div>div{display:table-cell;vertical-align: top;border-bottom:1px solid black;padding:5px;}
-		.list>div>div>img{border-radius: 4px;}
-	</style>
 </head>
-<body>
-    <div style="display:table-cell;width:300px;">
+<body class="xFCsrow xScroll">
+    <div class="xFIfixed" style="width:300px;">
         <section class="xPanel2">
             <header>个人资料</header>
             <div id="item_detail" class="x2Form" style="padding:5px;"></div>
         </section>
         <section class="xPanel2">
-            <header>博主最新文章<div style="float: right;"> <a href="javascript:ImportData()">导入</a> <a href="javascript:AddChild()">新建</a> <a href="javascript:EditChild()">编辑</a></div></header>
-            <div class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"><div id="subitem_list"></div></div>
+            <header>最新<div style="float: right;"><a href="javascript:EditChild()">更多</a></div></header>
+            <div style="padding: 5px;height:100px;flex-grow: 1;"></div>
         </section>
     </div>
-    <section style="display:table-cell;">
+    <section class="xPanel2">
         <header>正文</header>
-        <div id="xTree" class="xTree xScroll" style="padding: 5px;height:100px;flex-grow: 1;"></div>
+		<div>
+			<div>
+				<h2>{{writting.title}}</h2>
+				<div>标签：{{writting.label}}</div>
+				<div>居左{{writting.date}} 居右阅读({{writting.readingcount}}) 评论({{writting.replaycount}})</div>
+				<div>{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}</div>
+				<div>{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}</div>
+				<div>{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}</div>
+				<div>
+					<ins class="kandyDiggLog"><span class="diggUp">顶: <ins data-digg="10273">0</ins></span><span class="diggDn">踩: <ins data-digg="10273">0</ins></span></ins>
+				</div>
+			</div>
+			<div>
+				评论专区
+			</div>
+			<div>参照
+				{% for x in replays %}
+				<div><div style="display:table-cell"><img width="42px" height="42px" src="{{x.face}}"/></div>
+					<div style="display:table-cell">
+						<div>{{x.name}}<div style="float:right">{{x.date}}</div></div>
+						<div>{{x.body}}<a href="/blog/view_writing?id={{x.id}}">回复</a></div>
+					</div>
+				</div>
+				{% endfor %}
+			</div>
+		<div>
     </section>
 </body>
 </html>

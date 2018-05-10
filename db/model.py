@@ -132,6 +132,7 @@ tbl_user=Table('user', metadata,
 	Column('mail',String(32)),
 	Column('wechat',String(32)),
 	Column('addr',String(64)),
+	Column('profile',String(256)),
 	Column('yellow',Integer),
 	Column('purple',Integer),
 	Column('blue',Integer),
@@ -139,7 +140,7 @@ tbl_user=Table('user', metadata,
 def dict_user(depart_id,depart_table,job,skill):
     person=rnditem("_person")
     mail=rndmail(person)
-    return dict(account=person.pinyin,pwd=person.pinyin,status=8.0,face=rnditem("_faceimage"),depart_id=depart_id,depart_table=intstr(getitembyname("_tbl",depart_table).id),job=job,skill=skill,name=person.name,code=person.id,sex=id2sex(person.id),ethnic=rnditem("_ethnic"),birth=id2birth(person.id),origin=person.origin,idimg=rndaddition("身份证"),phone=intstr(person.phone),qq=intstr(person.qq),mail=mail,wechat=rndwechat(person,mail),addr=rnditem("_麦当劳门店").门店地址,yellow=0.0,purple=0.0,blue=0.0,green=0.0)
+    return dict(account=person.pinyin,pwd=person.pinyin,status=8.0,face=rnditem("_faceimage"),depart_id=depart_id,depart_table=intstr(getitembyname("_tbl",depart_table).id),job=job,skill=skill,name=person.name,code=person.id,sex=id2sex(person.id),ethnic=rnditem("_ethnic"),birth=id2birth(person.id),origin=person.origin,idimg=rndaddition("身份证"),phone=intstr(person.phone),qq=intstr(person.qq),mail=mail,wechat=rndwechat(person,mail),addr=rnditem("_麦当劳门店").门店地址,profile=choice(data("_songci").data)[0],yellow=0.0,purple=0.0,blue=0.0,green=0.0)
 
 tbl_certif=Table('certif', metadata,
 	Column('id',Integer,primary_key=True),
@@ -175,18 +176,22 @@ tbl_employ=Table('employ', metadata,
 def dict_employ():
     return dict(user_id="",Organization="",position="",startdate="",enddate="",image="")
 
-tbl_opus=Table('opus', metadata,
+tbl_writing=Table('writing', metadata,
 	Column('id',Integer,primary_key=True),
-	Column('opus_id',Integer),
+	Column('writting_id',Integer),
 	Column('board',Integer),
 	Column('section',String(32)),
-	Column('keyword',String(64)),
+	Column('label',String(64)),
 	Column('user_id',Integer),
 	Column('date',Date),
 	Column('title',String(64)),
-	Column('body',String(10240)))
-def dict_opus(x):
-    return dict(opus_id=choice([0,randint(1,x) if x>1 else 0 ]),board=rndnum(1,3),section="",keyword=xsample("_keyword",3,5),user_id=rndnum(50,59),date=rnddate(0,2*365),title=rnditem("_quiz"),body=choice(data("_songci").data)[0])
+	Column('body',String(10240)),
+	Column('readingcount',Integer),
+	Column('praisecount',Integer),
+	Column('opposecount',Integer),
+	Column('replaycount',Integer))
+def dict_writing(x):
+    return dict(writting_id=choice([0,randint(1,x) if x>1 else 0 ]),board=rndnum(1,3),section="",label=xsample("_keyword",3,5),user_id=rndnum(50,59),date=rnddate(0,2*365),title=rnditem("_quiz"),body=choice(data("_songci").data)[0],readingcount=0.0,praisecount=0.0,opposecount=0.0,replaycount=0.0)
 
 tbl_follow=Table('follow', metadata,
 	Column('id',Integer,primary_key=True),
@@ -195,6 +200,15 @@ tbl_follow=Table('follow', metadata,
 	Column('date',Date))
 def dict_follow(x,y):
     return dict(fans_id=x+50,idol_id=y+50,date=rnddate(0,2*365))
+
+tbl_footmark=Table('footmark', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('user_id',Integer),
+	Column('writing_id',Integer),
+	Column('type',Integer),
+	Column('date',Date))
+def dict_footmark(x,y):
+    return dict(user_id="",writing_id="",type="",date="")
 
 tbl_winderco=Table('winderco', metadata,
 	Column('id',Integer,primary_key=True),
@@ -434,13 +448,13 @@ def QueryData(name,tbl,field,value):
     adddata(name,data)
 
 conn.execute(tbl_user.insert(),[
-            {"id":"1","account":"su_win","pwd":"su_win","name":"叶片超级帐号","job":"1","face":"img/face/face10.jpg"},
-            {"id":"4","account":"su_dev","pwd":"su_dev","name":"设备超级帐号","job":"4","face":"img/face/face11.jpg"},
-            {"id":"7","account":"su_mat","pwd":"su_mat","name":"仓库超级帐号","job":"7","face":"img/face/face12.jpg"},
-            {"id":"10","account":"su_eng","pwd":"su_eng","name":"调度超级帐号","job":"10","face":"img/face/face13.jpg"},
-            {"id":"13","account":"su_exp","pwd":"su_exp","name":"专家超级帐号","job":"13","face":"img/face/face14.jpg"},
-            {"id":"15","account":"su_rep","pwd":"su_rep","name":"技工超级帐号","job":"15","face":"img/face/face15.jpg"},
-            {"id":"18","account":"su_blg","pwd":"su_blg","name":"博客超级帐号","job":"18","face":"img/face/face16.jpg"},
+            {"id":"1","account":"su_win","pwd":"su_win","name":"叶片超级帐号","job":"1"},
+            {"id":"4","account":"su_dev","pwd":"su_dev","name":"设备超级帐号","job":"4"},
+            {"id":"7","account":"su_mat","pwd":"su_mat","name":"仓库超级帐号","job":"7"},
+            {"id":"10","account":"su_eng","pwd":"su_eng","name":"调度超级帐号","job":"10"},
+            {"id":"13","account":"su_exp","pwd":"su_exp","name":"专家超级帐号","job":"13"},
+            {"id":"15","account":"su_rep","pwd":"su_rep","name":"技工超级帐号","job":"15"},
+            {"id":"18","account":"su_blg","pwd":"su_blg","name":"博客超级帐号","job":"18"},
             {"id":"50","account":"test50","pwd":"test50","name":"测试50","job":"19","face":"img/face/face0.jpg"},
             {"id":"51","account":"test51","pwd":"test51","name":"测试51","job":"19","face":"img/face/face1.jpg"},
             {"id":"52","account":"test52","pwd":"test52","name":"测试52","job":"19","face":"img/face/face2.jpg"},
@@ -474,9 +488,10 @@ conn.execute(tbl_admarea.insert(),[dict_admarea(x) for x in data("_全国行政�
 
 
 
-conn.execute(tbl_opus.insert(),[dict_opus(x) for x in range(500)])
+conn.execute(tbl_writing.insert(),[dict_writing(x) for x in range(500)])
 
 conn.execute(tbl_follow.insert(),[dict_follow(x,y) for x in range(10) for y in sample([z for z in range(10) if z!=x],randint(0,9))])
+
 
 conn.execute(tbl_vender.insert(),[dict_vender(x,17) for x in data("_efan_vender")])
 conn.execute(tbl_vender.insert(),[dict_vender(x,18) for x in data("_leaf_vender")])

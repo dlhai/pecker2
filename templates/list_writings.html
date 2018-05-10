@@ -19,13 +19,13 @@
 		.list>div>div>img{border-radius: 4px;}
 	</style>
 </head>
-<body>
+<body class="xScroll">
     <div style="display:table-cell;width:200px;">贴子列表，可赞可踩可评论，阅读量、评论量、推荐量（赞）</div>
     <div class="list" style="display:table-cell">
         {% for x in writtings %}
         <div><div><img width="42px" height="42px" src="{{x.face}}"/></div>
             <div>
-                <div><a href="/blog/view_writting?id={{x.id}}">{{x.title}}</a></div>
+                <div><a href="/blog/view_writing?id={{x.id}}">{{x.title}}</a></div>
                 <div>{{x.body}}</div>
                 <div style="float:right"><a href="/blog/view_user?id={{x.user_id}}">{{x.name}}</a>发布于{{x.date}}  </div>
             </div>

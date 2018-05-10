@@ -36,8 +36,8 @@ def view_writing():
     param = request.args.to_dict()
     if "id" not in param:
         return '{result:404,msg:"缺少参数 ls"}'
-    writting=QueryObj("select * from opus where opus.id=%s"%param["id"])
-    user = QueryObj("select * from user where id=%s"%writting.user_id)
+    writting=QueryObj("select * from opus where opus.id=%s"%param["id"])[0]
+    user = QueryObj("select * from user where id=%s"%writting.user_id)[0]
     replays=QueryObj("select opus.*,user.face, user.name from opus,user where opus.user_id==user.id and opus.opus_id=%s"%param["id"])
     return render_template("view_writing.html",writting=writting, user=user,replays=replays)
 
