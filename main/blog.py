@@ -19,7 +19,7 @@ def blog(ls):
     ar = {"news":obj(id="1",ls="list_news.html"), "writings":obj(id="2",ls="list_writings.html"), "docs":obj(id="3",ls="list_docs.html") }
     if ls not in ar:
         return 404
-    sql="select opus.*,user.face, user.name from opus,user where opus.user_id==user.id and board=%s"
+    sql="select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and board=%s"
     return render_template(ar[ls].ls,writtings=QueryObj(sql%ar[ls].id))
 
 @app.route('/blog/view_new')
@@ -27,8 +27,8 @@ def view_new():
     param = request.args.to_dict()
     if "id" not in param:
         return '{result:404,msg:"缺少参数 ls"}'
-    writting=QueryObj("select * from opus where opus.id=%s"%param["id"])
-    replays=QueryObj("select opus.*,user.face, user.name from opus,user where opus.user_id==user.id and opus.opus_id=%s"%param["id"])
+    writting=QueryObj("select * from writing where writing.id=%s"%param["id"])
+    replays=QueryObj("select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and writing.writing_id=%s"%param["id"])
     return render_template("view_new.html",writting=writting, user=user,replays=replays)
 
 @app.route('/blog/view_writing')
@@ -36,9 +36,10 @@ def view_writing():
     param = request.args.to_dict()
     if "id" not in param:
         return '{result:404,msg:"缺少参数 ls"}'
-    writting=QueryObj("select * from opus where opus.id=%s"%param["id"])[0]
+    writting=QueryObj("select * from writing where writing.id=%s"%param["id"])[0]
     user = QueryObj("select * from user where id=%s"%writting.user_id)[0]
-    replays=QueryObj("select opus.*,user.face, user.name from opus,user where opus.user_id==user.id and opus.opus_id=%s"%param["id"])
+    recents=QueryObj("select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and writing.writing_id=%s"%param["id"])
+    replays=QueryObj("select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and writing.writing_id=%s"%param["id"])
     return render_template("view_writing.html",writting=writting, user=user,replays=replays)
 
 @app.route('/blog/view_doc')
@@ -46,7 +47,7 @@ def view_doc():
     param = request.args.to_dict()
     if "id" not in param:
         return '{result:404,msg:"缺少参数 ls"}'
-    sql="select opus.*,user.face, user.name from opus,user where opus.user_id==user.id and board=%s"
+    sql="select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and board=%s"
     return render_template("view_doc.html",writtings=QueryObj(sql%param[ls]))
 
 
