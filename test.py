@@ -1,44 +1,26 @@
 #encoding:utf8
 from flask import Flask,request, Response, jsonify
-from flask_sockets import Sockets
-from werkzeug.utils import secure_filename
-from flask_login import (LoginManager, login_required, login_user,
-                             logout_user, UserMixin,current_user)
-#flask_sqlalchemy方式的使用
-#from flask_sqlalchemy import SQLAlchemy
-#app = Flask(__name__)
-#app.config["SQLALCHEMY_DATABASE_URI"]='sqlite:///./db/pecker.db'
-#app.config["SQLALCHEMY_COMMIT_ON_TEARDOWN"]=True
-#app.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=True
-#db = SQLAlchemy(app)
-#@app.route("/aa")
-#def index():
-#    result = db.get_engine().execute("select * from user where id<100").paginate()
-#    return app.send_static_file('frame2.html')
-
-
-import os.path
-import json
-import pdb
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-sockets = Sockets(app)
-app.secret_key = '1The2quick3brown4fox5jumps6over7the8lazy9dog0'
-login_manager = LoginManager()
-login_manager.session_protection = 'strong'
-login_manager.login_view = '/static/login.json'
-login_manager.init_app(app)
+app.config["SQLALCHEMY_DATABASE_URI"]='sqlite:///./db/pecker.db'
+app.config["SQLALCHEMY_COMMIT_ON_TEARDOWN"]=True
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=True
+
+db = SQLAlchemy(app)
 
 from main.tools import *
-from main.model import *
 
 #权限检查
 def check(js,th):
     return obj(result="200")
 
+
+
 #首页
-@app.route("/")
+@app.route("/aa")
 def index():
+    result = db.get_engine().execute("select * from user where id<100").paginate()
     return app.send_static_file('frame2.html')
 
 ############## kindedit功能 ###############################################
@@ -73,9 +55,6 @@ def kedit():
 
 #############################################################
 
-from main.auth import *
-from main.views import *
-from main.blog import *
 
 class CLog:
     def write(data):

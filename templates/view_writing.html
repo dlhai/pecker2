@@ -21,11 +21,17 @@
             <div>
                 <img src="{{user.face}}" />
                 <div>{{user.name}}</div>
+				<div><input type="button" value="关注"><input type="button" value="留言"></div>
+				<div>个人描述：{{user.profile}}</div>
             </div>
         </section>
         <section class="xPanel2">
             <header>最新<div style="float: right;"><a href="javascript:EditChild()">更多</a></div></header>
-            <div style="padding: 5px;height:100px;flex-grow: 1;"></div>
+            <div>
+				{% for x in recents %}
+				<a href="/blog/view_writing?id={{x.id}}">{{x.title}}</a><br>
+				{% endfor %}
+			</div>
         </section>
     </div>
     <section class="xPanel2">

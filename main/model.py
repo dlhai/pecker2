@@ -107,4 +107,9 @@ def loaduser(where):
             user.sub = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
     return user
 
+class pagnition:
+    def __init__( table,where, curpage ):
+        sql= "select count(*) from "+ table + " " + where
+        self.curpage = curpage
+
 

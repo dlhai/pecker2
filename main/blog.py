@@ -38,9 +38,9 @@ def view_writing():
         return '{result:404,msg:"缺少参数 ls"}'
     writting=QueryObj("select * from writing where writing.id=%s"%param["id"])[0]
     user = QueryObj("select * from user where id=%s"%writting.user_id)[0]
-    recents=QueryObj("select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and writing.writing_id=%s"%param["id"])
+    recents=QueryObj("select id,title from writing where writing.user_id=%s order by date desc limit 0,20"%writting.user_id)
     replays=QueryObj("select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and writing.writing_id=%s"%param["id"])
-    return render_template("view_writing.html",writting=writting, user=user,replays=replays)
+    return render_template("view_writing.html",user=user,recents=recents,writting=writting, replays=replays)
 
 @app.route('/blog/view_doc')
 def view_doc():

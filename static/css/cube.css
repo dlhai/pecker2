@@ -12,3 +12,8 @@
 .imagelistlive>label>input,.imagelive>input {
     display: none;
 }
+
+/* -----------------------------网站分页样式----------------------------- */
+.pagenavi{width: 100%;clear: both;margin-top: 10px;margin-bottom: 10px;text-align:center;}
+.pagenavi a,.pagenavi .now-page{padding:4px 10px 4px 10px;color: #000;display:inline-block;clear: both;border: 1px solid #bebdbe;margin:0 3px 3px 0;border-radius: 2px;}
+.pagenavi a:hover,.pagenavi .now-page{color: #BA0001;background-color: #bebdbe;border: 1px solid #666;}

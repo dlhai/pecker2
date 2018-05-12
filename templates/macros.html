@@ -1,0 +1,15 @@
+﻿{% macro render_pagnition(pgn) %}
+<div class="pagenavi"> 
+	<a href="{{pgn.url}}?page=0"><span class="page">‹‹</span></a> 
+	<a href="{{pgn.url}}?page={{pgn.curpage-1 if pgn.curpage-1 > 0 else 0 }}"><span class="page">‹</span></a> 
+	{% for x in pgn.pages() %}
+	{% if x == pgn.curpage %}
+	<span class="page now-page">{{x}}</span> 
+	{% else %}
+	<a href="{{pgn.url}}?page={{x}}"><span class="page">{{x}}</span></a>
+	{% endif %}
+	{% endfor %}
+	<a href="http://lusongsong.com/default_3.html"><span class="page">›</span></a> 
+	<a href="http://lusongsong.com/default_630.html"><span class="page">››</span></a>
+</div>
+{% endmacro %}

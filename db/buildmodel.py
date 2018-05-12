@@ -56,7 +56,7 @@ metadata = MetaData(engine)
         model += "),\n\tColumn('".join(map( lambda f : f[iname]+"',"+f[irule],t.data))
         model += "))\n"
         model += "def dict_"+t.name+t.param+":\n    "
-        if t.define !="":
+        if t.define !="":puser
             model += t.define.replace("\n", "\n    ")+"\n    "
         iname = GetIndex(t.field, "name")
         irule = GetIndex(t.field,"drule")
@@ -77,27 +77,22 @@ def QueryData(name,tbl,field,value):
     q = select([tbl]).where(tbl.c[field]==value)
     data=conn.execute(q).fetchall()
     adddata(name,data)
+def puser(id,account,name,job):
+    duser=dict_user(0,"",job,"")
+    duser.id=id
+    duser.account=account
+    duser.pwd=account
+    duser.name=name
+    return duser
 
-conn.execute(tbl_user.insert(),[
-            {"id":"1","account":"su_win","pwd":"su_win","name":"叶片超级帐号","job":"1","face":"img/face/face0.jpg"},
-            {"id":"4","account":"su_dev","pwd":"su_dev","name":"设备超级帐号","job":"4","face":"img/face/face1.jpg"},
-            {"id":"7","account":"su_mat","pwd":"su_mat","name":"仓库超级帐号","job":"7","face":"img/face/face2.jpg"},
-            {"id":"10","account":"su_eng","pwd":"su_eng","name":"调度超级帐号","job":"10","face":"img/face/face3.jpg"},
-            {"id":"13","account":"su_exp","pwd":"su_exp","name":"专家超级帐号","job":"13","face":"img/face/face4.jpg"},
-            {"id":"15","account":"su_rep","pwd":"su_rep","name":"技工超级帐号","job":"15","face":"img/face/face5.jpg"},
-            {"id":"18","account":"su_blg","pwd":"su_blg","name":"博客超级帐号","job":"18","face":"img/face/face6.jpg"},
-            {"id":"50","account":"test50","pwd":"test50","name":"测试50","job":"19","face":"img/face/face7.jpg"},
-            {"id":"51","account":"test51","pwd":"test51","name":"测试51","job":"19","face":"img/face/face8.jpg"},
-            {"id":"52","account":"test52","pwd":"test52","name":"测试52","job":"19","face":"img/face/face9.jpg"},
-            {"id":"53","account":"test53","pwd":"test53","name":"测试53","job":"19","face":"img/face/face10.jpg"},
-            {"id":"54","account":"test54","pwd":"test54","name":"测试54","job":"19","face":"img/face/face11.jpg"},
-            {"id":"55","account":"test55","pwd":"test55","name":"测试55","job":"19","face":"img/face/face12.jpg"},
-            {"id":"56","account":"test56","pwd":"test56","name":"测试56","job":"19","face":"img/face/face13.jpg"},
-            {"id":"57","account":"test57","pwd":"test57","name":"测试57","job":"19","face":"img/face/face14.jpg"},
-            {"id":"58","account":"test58","pwd":"test58","name":"测试58","job":"19","face":"img/face/face15.jpg"},
-            {"id":"59","account":"test59","pwd":"test59","name":"测试59","job":"19","face":"img/face/face16.jpg"},
-            {"id":"100","account":"angel","pwd":"angel","name":"天使","job":"19","face":"img/face/face17.jpg"}
-            ])
+conn.execute(tbl_user.insert(),[puser("1","su_win","叶片超级帐号","1"),puser("4", "su_dev","设备超级帐号","4"),
+          puser("7", "su_mat","仓库超级帐号","7"),puser("10","su_eng","调度超级帐号","10"),
+          puser("13","su_exp","专家超级帐号","13"),puser("15","su_rep","技工超级帐号","15"),
+          puser("18","su_blg","博客超级帐号","18"),puser("50","test50","测试50","19"),
+          puser("51","test51","测试51","19"),puser("52","test52","测试52","19"),puser("53","test53","测试53","19"),
+          puser("54","test54","测试54","19"),puser("55","test55","测试55","19"),puser("56","test56","测试56","19"),
+          puser("57","test57","测试57","19"),puser("58","test58","测试58","19"),puser("59","test59","测试59","19"),
+          puser("100","angel","天使","19"),])
 '''
     for t in [ x for x in tbls if x.type == "view"]:
         iname = GetIndex(t.field, "name")
