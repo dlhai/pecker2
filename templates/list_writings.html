@@ -6,12 +6,11 @@
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
     <link rel="stylesheet" href="css/bootstrap.css" />
-    <link rel="stylesheet" href="css/xpecker.css" />
-    <script src="js/xpecker.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
+	<link rel="stylesheet" href="css/cube.css" />
     <script src="js/Cube.js"></script>
 	<style>
 		.list>div{display:table-row}
@@ -20,17 +19,21 @@
 	</style>
 </head>
 <body class="xScroll">
-    <div style="display:table-cell;width:200px;">贴子列表，可赞可踩可评论，阅读量、评论量、推荐量（赞）</div>
-    <div class="list" style="display:table-cell">
-        {% for x in writtings %}
-        <div><div><img width="42px" height="42px" src="{{x.face}}"/></div>
-            <div>
-                <div><a href="/blog/view_writing?id={{x.id}}">{{x.title}}</a></div>
-                <div>{{x.body}}</div>
-                <div style="float:right"><a href="/blog/view_user?id={{x.user_id}}">{{x.name}}</a>发布于{{x.date}}  </div>
-            </div>
-        </div>
-        {% endfor %}
+	{% import 'macros.html' as macros %}
+    <div style="display:table-cell;width:200px;"></div>
+    <div style="display:table-cell">
+		<div class="list">
+			{% for x in writtings %}
+			<div><div><img width="42px" height="42px" src="{{x.face}}"/></div>
+				<div>
+					<div><a href="/blog/view_writing?id={{x.id}}">{{x.title}}</a></div>
+					<div>{{x.body}}</div>
+					<div style="float:right"><a href="/blog/view_user?id={{x.user_id}}">{{x.name}}</a>发布于{{x.date}}  </div>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+		<div>{{macros.render_pagnition(pgn)}}</div>
     </div>
     <div style="display:table-cell;width:200px;"></div>
 </body>

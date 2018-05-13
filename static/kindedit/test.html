@@ -3,21 +3,25 @@
 <head>
     <meta charset="utf-8">
     <title>test</title>
-    <script src="jquery.js"></script>
+    <script src="../js/jquery.js"></script>
     <script charset="utf-8" src="kindeditor-all.js"></script>
     <script charset="utf-8" src="lang/zh-CN.js"></script>
 </head>
 <body>
     <textarea id="kindEditor_demo" style="width:1000px;height:500px;"></textarea>
-    <input type="button" onclick="syn()" value="发表"/>
+    <input type="button" onclick="syn()" value="发表"/><a href="http://kindeditor.net/demo.php">访问kindeditor官网</a>
     <div id="cc"></div>
     <script type="text/javascript">
     //KindEditor脚本
     var editor;
     KindEditor.ready(function (K) {
         editor = K.create('#kindEditor_demo', {
-            uploadJson: '/cr'
-        });
+            uploadJson: '/cr',
+			items:[
+					'selectall', 'cut', 'copy', 'paste','undo', 'redo', '|','formatblock', 'fontname', 'fontsize', 'forecolor', 'hilitecolor', 'bold',
+					'italic', 'underline', 'strikethrough', 'lineheight', 'removeformat', '|',  'justifyleft', 'justifycenter', 'justifyright',
+					'justifyfull', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', '|', 'link', 'unlink', '|', 'fullscreen',
+			]});
         });
 
 

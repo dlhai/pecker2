@@ -6,27 +6,30 @@
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
     <link rel="stylesheet" href="css/bootstrap.css" />
-    <link rel="stylesheet" href="css/xpecker.css" />
-    <script src="js/xpecker.js"></script>
+    <script charset="utf-8" src="kindedit/kindeditor-all.js"></script>
+    <script charset="utf-8" src="kindedit/lang/zh-CN.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
+    <link rel="stylesheet" href="css/cube.css" />
     <script src="js/Cube.js"></script>
+	<style>
+		.user>*{text-align:center;margin:5px;}
+		.praise{text-align:center;margin:15px;}
+		.praise>div{display:inline-block;margin:15px;}
+		.list>div{display:table-row}
+		.list>div>div{display:table-cell;vertical-align: top;padding:5px;}
+		.list>div>div>img{border-radius: 4px;}
+	</style>
+
 </head>
-<body class="xFCsrow xScroll">
-    <div class="xFIfixed" style="width:300px;">
+<body class="xScroll">
+	{% import 'macros.html' as macros %}
+    <div style="width:300px;display:table-cell">
+		{{macros.render_user(user)}}
         <section class="xPanel2">
-            <header>个人资料</header>
-            <div>
-                <img src="{{user.face}}" />
-                <div>{{user.name}}</div>
-				<div><input type="button" value="关注"><input type="button" value="留言"></div>
-				<div>个人描述：{{user.profile}}</div>
-            </div>
-        </section>
-        <section class="xPanel2">
-            <header>最新<div style="float: right;"><a href="javascript:EditChild()">更多</a></div></header>
+            <header>最新<div style="float: right;"><a href="view_user?id={{user.id}}">更多</a></div></header>
             <div>
 				{% for x in recents %}
 				<a href="/blog/view_writing?id={{x.id}}">{{x.title}}</a><br>
@@ -34,34 +37,59 @@
 			</div>
         </section>
     </div>
-    <section class="xPanel2">
+    <section class="xPanel2" style="display:table-cell">
         <header>正文</header>
 		<div>
 			<div>
+				<div>发表于：{{writting.date}} </div>
 				<h2>{{writting.title}}</h2>
-				<div>标签：{{writting.label}}</div>
-				<div>居左{{writting.date}} 居右阅读({{writting.readingcount}}) 评论({{writting.replaycount}})</div>
+				<div style="margin:10px 0">标签：{{writting.label}} <div style="float:right">阅读({{writting.readingcount}}) 评论({{writting.replaycount}})</div></div>
 				<div>{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}</div>
 				<div>{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}</div>
 				<div>{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}</div>
 				<div>
-					<ins class="kandyDiggLog"><span class="diggUp">顶: <ins data-digg="10273">0</ins></span><span class="diggDn">踩: <ins data-digg="10273">0</ins></span></ins>
+					<div class="praise"><div><img src="kindedit\plugins\emoticons\images\79.gif"> 0</div><div><img src="kindedit\plugins\emoticons\images\80.gif"> 0</div></div>
 				</div>
 			</div>
-			<div>
-				评论专区
+			<div>发表评论：
+				{% if current_user.is_anonymous == False %}
+				<textarea id="replay" style="width:100%"></textarea>
+				{% else %}
+				<div style="text-align:center;margin-bottom:15px;"><a href="login.html">登录</a>或<a href="login.html">注册</a>以发表评论</div>
+				{% endif %}
 			</div>
-			<div>参照
+			<div class="list" style="border-bottom:0">
 				{% for x in replays %}
 				<div><div style="display:table-cell"><img width="42px" height="42px" src="{{x.face}}"/></div>
 					<div style="display:table-cell">
-						<div>{{x.name}}<div style="float:right">{{x.date}}</div></div>
-						<div>{{x.body}}<a href="/blog/view_writing?id={{x.id}}">回复</a></div>
+						<div><a href="view_user?id={{x.user_id}}">{{x.name}}</a><div style="float:right">{{x.date}}</div></div>
+						<div>{{x.body}}</div>
 					</div>
 				</div>
 				{% endfor %}
 			</div>
-		<div>
+			<div>{{macros.render_pagnition(pgn)}}</div>
+		</div>
     </section>
+
+    <script type="text/javascript">
+		//KindEditor脚本
+		var editor;
+		KindEditor.ready(function (K) {
+			editor = K.create('#replay', { uploadJson: '/cr', items:[ 'selectall', 'cut', 'copy', 'paste','undo', 'redo', '|',
+				'formatblock', 'fontname', 'fontsize', 'forecolor', 'hilitecolor', 'bold','italic', 'underline', 'strikethrough',
+				'lineheight', 'removeformat', '|',  'justifyleft', 'justifycenter', 'justifyright','justifyfull', 'insertorderedlist', 
+				'insertunorderedlist', 'indent', 'outdent', '|', 'link', 'unlink', '|', 'fullscreen',]});
+		});
+
+        function syn()
+        {
+            editor.sync();//将KindEditor的数据同步到textarea标签。
+            var value_content = $("#kindEditor_demo").val();
+            $("#cc").html(value_content);
+        }
+
+    </script>
+
 </body>
 </html>

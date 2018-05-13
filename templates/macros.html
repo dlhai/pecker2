@@ -1,15 +1,38 @@
 ﻿{% macro render_pagnition(pgn) %}
 <div class="pagenavi"> 
-	<a href="{{pgn.url}}?page=0"><span class="page">‹‹</span></a> 
-	<a href="{{pgn.url}}?page={{pgn.curpage-1 if pgn.curpage-1 > 0 else 0 }}"><span class="page">‹</span></a> 
+	<a href="{{pgn.pageurl(0)}}"><span class="page">‹‹</span></a> 
+	<a href="{{pgn.pageurl('cur-1')}}"><span class="page">‹</span></a> 
 	{% for x in pgn.pages() %}
 	{% if x == pgn.curpage %}
-	<span class="page now-page">{{x}}</span> 
+	<span class="page now-page">{{x+1}}</span> 
 	{% else %}
-	<a href="{{pgn.url}}?page={{x}}"><span class="page">{{x}}</span></a>
+	<a href="{{pgn.pageurl(x)}}"><span class="page">{{x+1}}</span></a>
 	{% endif %}
 	{% endfor %}
-	<a href="http://lusongsong.com/default_3.html"><span class="page">›</span></a> 
-	<a href="http://lusongsong.com/default_630.html"><span class="page">››</span></a>
+	<a href="{{pgn.pageurl('cur+1')}}"><span class="page">›</span></a> 
+	<a href="{{pgn.pageurl(-1)}}"><span class="page">››</span></a>
 </div>
+{% endmacro %}
+
+{% macro render_user(user) %}
+<section class="xPanel2">
+	<header>个人资料</header>
+    <div class="user">
+        <div><img width="256px" height="256px" src="{{user.face}}" /></div>
+        <div>{{user.name}}</div>
+		<div>
+			{% if user.id != current_user.id %}
+				{% if user.id in current_user.idols %}
+				<input type="button" value="取消关注">
+				{% else %}
+				<input type="button" value="关注他">
+				{% endif %}
+			<input type="button" value="给他留言">
+			{% else %}
+			<input type="button" value="发表文章">
+			{% endif %}
+		</div>
+    </div>
+	<div>个人描述：{{user.profile}}</div>
+</section>
 {% endmacro %}

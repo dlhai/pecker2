@@ -105,11 +105,42 @@ def loaduser(where):
         user.depart = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0]
         if tbl["name"] == "winder":
             user.sub = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
+        user.idols = map( QueryObj( "select idols_id from follow where fans_id="+str(user.id)), lambda x:x.idols_id) 
     return user
 
+from math import ceil
 class pagnition:
-    def __init__( table,where, curpage ):
-        sql= "select count(*) from "+ table + " " + where
-        self.curpage = curpage
+    #sql必须是select count(*) from ....
+    def __init__( self,url,pos,sql, pagesize=20 ):
+        self.curpage = pos//pagesize
+        self.pagesize = pagesize
+        self.url=url
+        self.pagecount=ceil(QueryObj(sql)[0].count/self.pagesize)
+        self.pagecount = self.pagecount if self.pagecount != 0 else 1
+
+    def pageurl(self,page):
+        if page=='cur':
+            return self.url%(self.curpage*self.pagesize)
+        elif page=='cur-1':
+            p=self.curpage-1
+            p=p if p >= 0 else 0 
+            return self.url%(p*self.pagesize)
+        elif page=='cur+1':
+            p=self.curpage+1
+            p=p if p < self.pagecount else self.pagecount-1 
+            return self.url%(p*self.pagesize)
+        elif page==-1:
+            return self.url%((self.pagecount-1)*self.pagesize)
+        else:
+            return self.url%(page*self.pagesize)
+
+    def pages(self):
+        ar = [x+self.curpage -2 for x in range(5)]
+        while ar[0] < 0: #位于开头时，后移
+            ar = [ x+1 for x in ar]
+        while ar[4] >= self.pagecount:#位于结尾时，前移
+            ar = [ x-1 for x in ar]
+        ar = [ x for x in ar if x >=0 ] #少于5页时
+        return ar
 
 

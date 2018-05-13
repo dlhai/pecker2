@@ -12,27 +12,34 @@
     <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
+	<link rel="stylesheet" href="css/cube.css" />
     <script src="js/Cube.js"></script>
 	<style>
+		.user>*{text-align:center;margin:5px;}
 		.list>div{display:table-row}
 		.list>div>div{display:table-cell;vertical-align: top;border-bottom:1px solid black;padding:5px;}
 		.list>div>div>img{border-radius: 4px;}
 	</style>
 </head>
-<body>
+<body class="xScroll" >
+	{% import 'macros.html' as macros %}
     <div style="display:table-cell;width:300px;">
-        <section class="xPanel2">
-            <header>个人资料</header>
-            <div id="item_detail" class="x2Form" style="padding:5px;"></div>
-        </section>
-        <section class="xPanel2">
-            <header>博主最新文章<div style="float: right;"> <a href="javascript:ImportData()">导入</a> <a href="javascript:AddChild()">新建</a> <a href="javascript:EditChild()">编辑</a></div></header>
-            <div class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"><div id="subitem_list"></div></div>
-        </section>
+        {{macros.render_user(user)}}
     </div>
-    <section style="display:table-cell;">
-        <header>正文</header>
-        <div id="xTree" class="xTree xScroll" style="padding: 5px;height:100px;flex-grow: 1;"></div>
+    <section class="xPanel2" style="display:table-cell;">
+        <header>文章列表</header>
+		<div class="list">
+			{% for x in writtings %}
+			<div><div><img width="42px" height="42px" src="{{user.face}}"/></div>
+				<div>
+					<div><a href="/blog/view_writing?id={{x.id}}">{{x.title}}</a></div>
+					<div>{{x.body}}</div>
+					<div style="float:right"><a href="/blog/view_user?id={{x.user_id}}">{{x.name}}</a>发布于{{x.date}}  </div>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+		<div>{{macros.render_pagnition(pgn)}}</div>
     </section>
 </body>
 </html>

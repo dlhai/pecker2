@@ -8,48 +8,57 @@ from main.tools import *
 @app.route('/blog/<bdir>/<bfile>')
 def bfile(bdir,bfile):
     return app.send_static_file(bdir+"/"+bfile)
-
 @app.route('/blog/<bdir1>/<bdir2>/<bfile>')
 def bfile2(bdir1,bdir2,bfile):
     return app.send_static_file(bdir1+"/"+bdir2+"/"+bfile)
+@app.route('/blog/<bdir1>/<bdir2>/<bdir3>/<bfile>')
+def bfile3(bdir1,bdir2,bdir3,bfile):
+    return app.send_static_file(bdir1+"/"+bdir2+"/"+bdir3+"/"+bfile)
+@app.route('/blog/<bdir1>/<bdir2>/<bdir3>/<bdir4>/<bfile>')
+def bfile4(bdir1,bdir2,bdir3,bdir4,bfile):
+    return app.send_static_file(bdir1+"/"+bdir2+"/"+bdir3+"/"+bdir4+"/"+bfile)
 
 #各博客页面
 @app.route('/blog/<ls>')
 def blog(ls):
-    ar = {"news":obj(id="1",ls="list_news.html"), "writings":obj(id="2",ls="list_writings.html"), "docs":obj(id="3",ls="list_docs.html") }
+    param = request.args.to_dict()
+    ar = {"news":"1", "writings":"2", "docs":"3" }
     if ls not in ar:
         return 404
-    sql="select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and board=%s"
-    return render_template(ar[ls].ls,writtings=QueryObj(sql%ar[ls].id))
-
-@app.route('/blog/view_new')
-def view_new():
-    param = request.args.to_dict()
-    if "id" not in param:
-        return '{result:404,msg:"缺少参数 ls"}'
-    writting=QueryObj("select * from writing where writing.id=%s"%param["id"])
-    replays=QueryObj("select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and writing.writing_id=%s"%param["id"])
-    return render_template("view_new.html",writting=writting, user=user,replays=replays)
+    pos=0
+    if "pos" in param:
+        pos=atoi(param["pos"])
+    writtings=QueryObj("select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and board=%s order by date desc limit %d,10"%(ar[ls],pos))
+    pgn=pagnition("/blog/%s"%ls+"?pos=%d",pos,"select count(*) as count from writing where board=%s"%ar[ls],10)
+    return render_template("list_writings.html",writtings=writtings,pgn=pgn)
 
 @app.route('/blog/view_writing')
 def view_writing():
     param = request.args.to_dict()
     if "id" not in param:
         return '{result:404,msg:"缺少参数 ls"}'
+    pos=0
+    if "pos" in param:
+        pos=atoi(param["pos"])
     writting=QueryObj("select * from writing where writing.id=%s"%param["id"])[0]
     user = QueryObj("select * from user where id=%s"%writting.user_id)[0]
-    recents=QueryObj("select id,title from writing where writing.user_id=%s order by date desc limit 0,20"%writting.user_id)
-    replays=QueryObj("select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and writing.writing_id=%s"%param["id"])
-    return render_template("view_writing.html",user=user,recents=recents,writting=writting, replays=replays)
+    recents=QueryObj("select id,title from writing where writing.user_id=%s order by date desc limit 0,30"%writting.user_id)
+    replays=QueryObj("select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and writing.writing_id=%s order by date desc limit %d,20"%(param["id"],pos))
+    pgn=pagnition("/blog/view_writing?id=%s"%param["id"]+"&pos=%d",pos,"select count(*) as count from writing where writing.writing_id=%s"%param["id"])
+    return render_template("view_writing.html",user=user,recents=recents,writting=writting, replays=replays, pgn=pgn)
 
-@app.route('/blog/view_doc')
-def view_doc():
+@app.route('/blog/view_user')
+def view_user():
     param = request.args.to_dict()
     if "id" not in param:
         return '{result:404,msg:"缺少参数 ls"}'
-    sql="select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and board=%s"
-    return render_template("view_doc.html",writtings=QueryObj(sql%param[ls]))
-
+    pos=0
+    if "pos" in param:
+        pos=atoi(param["pos"])
+    user = QueryObj("select * from user where id=%s"%param["id"])[0]
+    writtings=QueryObj("select * from writing where user_id=%s order by date desc limit 0,10"%param["id"])
+    pgn=pagnition("/blog/view_writing?id=%s"%param["id"]+"&pos=%d",pos,"select count(*) as count from writing where writing.user_id=%s"%param["id"],10)
+    return render_template("view_user.html",user=user,writtings=writtings,pgn=pgn)
 
 #发表文章、评论/回复、发消息
 @app.route("/publish")
