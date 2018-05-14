@@ -37,3 +37,13 @@ def newdir(path):
         if not os.path.exists(p):
             os.mkdir(p)
 
+import pdb
+if __name__ == "__main__":
+    ls = [1,2,3]
+    rs = map(str, ls)
+    for k in rs:
+        print(k)
+    aa=map(lambda x:x.name, [obj(name="a",id=1),obj(name="b",id=2),obj(name="c",id=3)])
+    print(type(aa))
+    pdb.set_trace()
+    b=0

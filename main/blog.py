@@ -6,6 +6,19 @@ from main2 import app,login_manager,check
 from main.model import *
 from main.tools import *
 
+def addup(user_id,writing_id):
+    ret=obj()
+    ret.read=QueryObj("select count(*) as count from footmark where writing_id="+str(writing_id))[0].count
+    ret.replay=QueryObj("select count(*) as count from writing where writing_id="+str(writing_id))[0].count
+    ret.praise=QueryObj("select count(*) as count from footmark where type=1 and writing_id="+str(writing_id))[0].count
+    ret.blame=QueryObj("select count(*) as count from footmark where type=-1 and writing_id="+str(writing_id))[0].count
+    r=QueryObj("select type from footmark where user_id={0} and writing_id={1}".format(user_id, writing_id))
+    if len(r)>0:
+        ret.me= r[0].type
+    else:
+        ret.me=None
+    return ret
+
 @app.route('/blog/<bdir>/<bfile>')
 def bfile(bdir,bfile):
     return app.send_static_file(bdir+"/"+bfile)
@@ -19,7 +32,7 @@ def bfile3(bdir1,bdir2,bdir3,bfile):
 def bfile4(bdir1,bdir2,bdir3,bdir4,bfile):
     return app.send_static_file(bdir1+"/"+bdir2+"/"+bdir3+"/"+bdir4+"/"+bfile)
 
-#各博客页面
+#各板块页面
 @app.route('/blog/<ls>')
 def blog(ls):
     param = request.args.to_dict()
@@ -33,6 +46,7 @@ def blog(ls):
     pgn=pagnition("/blog/%s"%ls+"?pos=%d",pos,"select count(*) as count from writing where board=%s"%ar[ls],10)
     return render_template("list_writings.html",writings=writings,pgn=pgn)
 
+#博文页面
 @app.route('/blog/view_writing')
 def view_writing():
     param = request.args.to_dict()
@@ -41,13 +55,19 @@ def view_writing():
     pos=0
     if "pos" in param:
         pos=atoi(param["pos"])
+    writing_id=param["id"]
     writing=QueryObj("select * from writing where writing.id=%s"%param["id"])[0]
     user = QueryObj("select * from user where id=%s"%writing.user_id)[0]
     recents=QueryObj("select id,title from writing where writing.user_id=%s order by date desc limit 0,30"%writing.user_id)
     replays=QueryObj("select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and writing.writing_id=%s order by date desc limit %d,20"%(param["id"],pos))
     pgn=pagnition("/blog/view_writing?id=%s"%param["id"]+"&pos=%d",pos,"select count(*) as count from writing where writing.writing_id=%s"%param["id"])
-    return render_template("view_writing.html",user=user,recents=recents,writing=writing, replays=replays, pgn=pgn, me=current_user)
+    au=addup(current_user.id, writing_id)
+    if au.me == None:
+        sql = "insert into footmark(user_id,writing_id,type,date) values({0},{1},0,'{2}')".format(current_user.id, writing_id,datetime.datetime.now())
+        conn.execute(sql)
+    return render_template("view_writing.html",user=user,recents=recents,writing=writing, au=au,replays=replays, pgn=pgn, me=current_user)
 
+#用户博文列表
 @app.route('/blog/view_user')
 def view_user():
     param = request.args.to_dict()
@@ -75,20 +95,37 @@ def follow():
     ret = obj(result="200",fun="follow")
     return Response(tojson(ret), mimetype='application/json')
 
-#鎺ㄨ崘銆佸叧娉�
-@app.route('/recom', methods=['POST'])
+#取消关注某人
+@app.route("/leave")
 @login_required
-def recom():
-    jsn = json.loads(request.data)
-    ret=obj(fun="chgpwd", result="200")
-    if current_user.id != int(jsn["id"]):
-        ret.result = "1002"
-        ret.msg = "浣犱笉鑳戒慨鏀瑰埆浜虹殑瀵嗙爜"
-    if current_user.pwd != jsn["pwd"]:
-        ret.result = "1002"
-        ret.msg = "鏃у瘑鐮佷笉姝ｇ‘"
-    if ret.result == "200":
-        sql = "update user set pwd='{0}' where id={1}".format(jsn["newpwd"], jsn["id"])
-        conn.execute(sql)
+def leave():
+    param = request.args.to_dict()
+    if "user_id" not in param:
+        return '{result:404,msg:"缺少参数 user_id"}'
+
+    user_id=atoi(param["user_id"])
+    sql = "delete from follow where fans_id={0} and idol_id={1}".format(current_user.id, user_id)
+    conn.execute(sql)
+    current_user.idols = [x for x in current_user.idols if x != user_id]
+    ret = obj(result="200",fun="leave")
     return Response(tojson(ret), mimetype='application/json')
- 
+
+#支持或反对文章
+@app.route("/praise")
+@login_required
+def praise():
+    param = request.args.to_dict()
+    if "writing_id" not in param:
+        return '{result:404,msg:"缺少参数 writing_id"}'
+    if "type" not in param:
+        return '{result:404,msg:"缺少参数 type"}'
+
+    sql = "update footmark set type={0},date='{1}' where writing_id={2} and user_id={3}".format(param["type"], datetime.datetime.now(),param["writing_id"],current_user.id)
+    conn.execute(sql)
+    rs = QueryObj("select type,count(*) as count where writing_id={0}".format(param["writing_id"]))
+    ret = obj(result="200",fun="praise")
+    ret.praise=
+    ret.blame=
+    ret.read=
+    return Response(tojson(ret), mimetype='application/json')
+
