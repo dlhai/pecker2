@@ -14,22 +14,22 @@
 </div>
 {% endmacro %}
 
-{% macro render_user(user) %}
+{% macro render_user(user,me) %}
 <section class="xPanel2">
 	<header>个人资料</header>
     <div class="user">
         <div><img width="256px" height="256px" src="{{user.face}}" /></div>
         <div>{{user.name}}</div>
 		<div>
-			{% if user.id != current_user.id %}
-				{% if user.id in current_user.idols %}
-				<input type="button" value="取消关注">
+			{% if user.id != me.id %}
+				{% if user.id in me.idols %}
+				<input onclick="f_leave(this,{{user.id}})" type="button" value="取消关注">
 				{% else %}
-				<input type="button" value="关注他">
+				<input onclick="f_follow(this,{{user.id}})" type="button" value="关注他">
 				{% endif %}
-			<input type="button" value="给他留言">
+			<input onclick="f_message(this,{{user.id}})" type="button" value="给他留言">
 			{% else %}
-			<input type="button" value="发表文章">
+			<input onclick="f_writing()" type="button" value="发表文章">
 			{% endif %}
 		</div>
     </div>

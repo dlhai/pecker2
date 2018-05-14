@@ -1,6 +1,7 @@
 #encoding:utf8
 from flask import Flask,request, Response,jsonify,render_template
 from flask_login import login_required,current_user
+import datetime
 from main2 import app,login_manager,check
 from main.model import *
 from main.tools import *
@@ -28,9 +29,9 @@ def blog(ls):
     pos=0
     if "pos" in param:
         pos=atoi(param["pos"])
-    writtings=QueryObj("select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and board=%s order by date desc limit %d,10"%(ar[ls],pos))
+    writings=QueryObj("select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and board=%s order by date desc limit %d,10"%(ar[ls],pos))
     pgn=pagnition("/blog/%s"%ls+"?pos=%d",pos,"select count(*) as count from writing where board=%s"%ar[ls],10)
-    return render_template("list_writings.html",writtings=writtings,pgn=pgn)
+    return render_template("list_writings.html",writings=writings,pgn=pgn)
 
 @app.route('/blog/view_writing')
 def view_writing():
@@ -40,12 +41,12 @@ def view_writing():
     pos=0
     if "pos" in param:
         pos=atoi(param["pos"])
-    writting=QueryObj("select * from writing where writing.id=%s"%param["id"])[0]
-    user = QueryObj("select * from user where id=%s"%writting.user_id)[0]
-    recents=QueryObj("select id,title from writing where writing.user_id=%s order by date desc limit 0,30"%writting.user_id)
+    writing=QueryObj("select * from writing where writing.id=%s"%param["id"])[0]
+    user = QueryObj("select * from user where id=%s"%writing.user_id)[0]
+    recents=QueryObj("select id,title from writing where writing.user_id=%s order by date desc limit 0,30"%writing.user_id)
     replays=QueryObj("select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and writing.writing_id=%s order by date desc limit %d,20"%(param["id"],pos))
     pgn=pagnition("/blog/view_writing?id=%s"%param["id"]+"&pos=%d",pos,"select count(*) as count from writing where writing.writing_id=%s"%param["id"])
-    return render_template("view_writing.html",user=user,recents=recents,writting=writting, replays=replays, pgn=pgn)
+    return render_template("view_writing.html",user=user,recents=recents,writing=writing, replays=replays, pgn=pgn, me=current_user)
 
 @app.route('/blog/view_user')
 def view_user():
@@ -56,31 +57,22 @@ def view_user():
     if "pos" in param:
         pos=atoi(param["pos"])
     user = QueryObj("select * from user where id=%s"%param["id"])[0]
-    writtings=QueryObj("select * from writing where user_id=%s order by date desc limit 0,10"%param["id"])
+    writings=QueryObj("select * from writing where user_id=%s order by date desc limit 0,10"%param["id"])
     pgn=pagnition("/blog/view_writing?id=%s"%param["id"]+"&pos=%d",pos,"select count(*) as count from writing where writing.user_id=%s"%param["id"],10)
-    return render_template("view_user.html",user=user,writtings=writtings,pgn=pgn)
+    return render_template("view_user.html",user=user,writings=writings,pgn=pgn)
 
-#发表文章、评论/回复、发消息
-@app.route("/publish")
+#关注某人
+@app.route("/follow")
 @login_required
-def publish():
-    ret = QueryObj( "select * from user where id="+str(current_user.id))
-    if len(ret) <= 0:
-        return '{"roleuser":"'+param['account']+'","result":404}\n'
-    user = ret[0]
-    del user.pwd
+def follow():
+    param = request.args.to_dict()
+    if "user_id" not in param:
+        return '{result:404,msg:"缺少参数 user_id"}'
 
-    #鎵惧埌鐢ㄦ埛鐨勬墍鍦ㄥ崟浣嶏紝鑻ユ墍鍦ㄥ崟浣嶆槸椋庡満锛屽垯闇��璇诲彇椋庡尯鍒楄〃
-    if atoi(user.depart_table) != 0: 
-        tbl = gettbl(user.depart_table)
-        user.depart = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0]
-        if tbl["name"] == "winder":
-            user.sub = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
-    ret=obj()
-    ret.fun="curuserinf"
-    ret.result = "200"
-    ret.data = user
-    ret.fields=QueryObj(select(base.sl).where(base.c.table=="user"))
+    sql = "insert into follow(fans_id,idol_id,date) values({0},{1},'{2}')".format(current_user.id, param["user_id"],datetime.datetime.now())
+    conn.execute(sql)
+    current_user.idols += [param["user_id"]]
+    ret = obj(result="200",fun="follow")
     return Response(tojson(ret), mimetype='application/json')
 
 #鎺ㄨ崘銆佸叧娉�

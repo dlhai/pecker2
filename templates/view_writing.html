@@ -14,6 +14,7 @@
     <script src="js/xpecker.js"></script>
     <link rel="stylesheet" href="css/cube.css" />
     <script src="js/Cube.js"></script>
+    <script src="js/blog.js"></script>
 	<style>
 		.user>*{text-align:center;margin:5px;}
 		.praise{text-align:center;margin:15px;}
@@ -27,7 +28,7 @@
 <body class="xScroll">
 	{% import 'macros.html' as macros %}
     <div style="width:300px;display:table-cell">
-		{{macros.render_user(user)}}
+		{{macros.render_user(user,me)}}
         <section class="xPanel2">
             <header>最新<div style="float: right;"><a href="view_user?id={{user.id}}">更多</a></div></header>
             <div>
@@ -41,18 +42,19 @@
         <header>正文</header>
 		<div>
 			<div>
-				<div>发表于：{{writting.date}} </div>
-				<h2>{{writting.title}}</h2>
-				<div style="margin:10px 0">标签：{{writting.label}} <div style="float:right">阅读({{writting.readingcount}}) 评论({{writting.replaycount}})</div></div>
-				<div>{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}</div>
-				<div>{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}</div>
-				<div>{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}{{writting.body}}</div>
+				<div>发表于：{{writing.date}} </div>
+				<h2>{{writing.title}}</h2>
+				<div style="margin:10px 0">标签：{{writing.label}} <div style="float:right">阅读({{writing.readingcount}}) 评论({{writing.replaycount}})</div></div>
+				<div>{{writing.body}}{{writing.body}}{{writing.body}}{{writing.body}}{{writing.body}}</div>
+				<div>{{writing.body}}{{writing.body}}{{writing.body}}{{writing.body}}{{writing.body}}</div>
+				<div>{{writing.body}}{{writing.body}}{{writing.body}}{{writing.body}}{{writing.body}}</div>
 				<div>
-					<div class="praise"><div><img src="kindedit\plugins\emoticons\images\79.gif"> 0</div><div><img src="kindedit\plugins\emoticons\images\80.gif"> 0</div></div>
+					<div class="praise"><div onclick="f_praise({{writing.id}})"><img src="kindedit\plugins\emoticons\images\79.gif"> <div>0</div></div>
+                    <div id="f_blame({{writing.id}})"><img src="kindedit\plugins\emoticons\images\80.gif"> 0</div></div>
 				</div>
 			</div>
 			<div>发表评论：
-				{% if current_user.is_anonymous == False %}
+				{% if me.is_anonymous == False %}
 				<textarea id="replay" style="width:100%"></textarea>
 				{% else %}
 				<div style="text-align:center;margin-bottom:15px;"><a href="login.html">登录</a>或<a href="login.html">注册</a>以发表评论</div>
