@@ -18,7 +18,7 @@
 	<style>
 		.user>*{text-align:center;margin:5px;}
 		.praise{text-align:center;margin:15px;}
-		.praise>div{display:inline-block;margin:15px;border:1px solid #e0e4e8;border-radius: 2px;}
+		.praise>div{display:inline-block;margin:15px;border:1px solid #e0e4e8;border-radius: 2px;padding:10px 20px;}
 		.list>div{display:table-row}
 		.list>div>div{display:table-cell;vertical-align: top;padding:5px;}
 		.list>div>div>img{border-radius: 4px;}
@@ -50,8 +50,8 @@
 				<div>{{writing.body}}{{writing.body}}{{writing.body}}{{writing.body}}{{writing.body}}</div>
 				<div>
 					<div class="praise">
-						<div {{ if au.me == 1 }} class="me" {% endif %} onclick="f_praise({{writing.id}},1)"><img src="kindedit\plugins\emoticons\images\79.gif">{{au.praise}}</div>
-						<div {{ if au.me == -1 }} class="me" {% endif %} onclick="f_praise({{writing.id}},-1)"><img src="kindedit\plugins\emoticons\images\80.gif"> {{au.blame}}</div>
+						<div {% if au.me == 1 %} class="me" {% endif %} onclick="f_praise({{writing.id}},1)"><img src="kindedit\plugins\emoticons\images\79.gif"><div>{{au.praise}}</div></div>
+						<div {% if au.me == -1 %} class="me" {% endif %} onclick="f_praise({{writing.id}},-1)"><img src="kindedit\plugins\emoticons\images\80.gif"><div>{{au.blame}}</div></div>
 					</div>
 				</div>
 			</div>

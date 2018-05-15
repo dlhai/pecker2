@@ -120,12 +120,19 @@ def praise():
     if "type" not in param:
         return '{result:404,msg:"缺少参数 type"}'
 
+    def GetItem(ar, key, val ):
+        sub = list(filter(lambda x: getattr(x,key)==val, ar))
+        if len(sub)==0:
+            return 0
+        tt = getattr(sub[0],"count")
+        return getattr(sub[0],"count")
+
     sql = "update footmark set type={0},date='{1}' where writing_id={2} and user_id={3}".format(param["type"], datetime.datetime.now(),param["writing_id"],current_user.id)
     conn.execute(sql)
-    rs = QueryObj("select type,count(*) as count where writing_id={0}".format(param["writing_id"]))
+    rs = QueryObj("select type,count(*) as count from footmark where writing_id={0} group by type".format(param["writing_id"]))
     ret = obj(result="200",fun="praise")
-    ret.praise=
-    ret.blame=
-    ret.read=
+    ret.praise= GetItem(rs,"type",1)
+    ret.blame= GetItem(rs,"type",-1)
+    ret.read= GetItem(rs,"type",0)
     return Response(tojson(ret), mimetype='application/json')
 

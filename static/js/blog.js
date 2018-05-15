@@ -19,11 +19,13 @@
 
 function f_praise(writing_id,type ) {
 	Reqdata("/praise?writing_id=" + writing_id +"&type="+type, "", function (res) {
-		if (res.result=="200"){
-			html=`<div {classpraise} onclick="f_praise(this,{writing_id},1)"><img src="kindedit\plugins\emoticons\images\79.gif"> <div>{praise}</div></div>
-			<div {classblame} onclick="f_praise(this,{writing_id},-1)"><img src="kindedit\plugins\emoticons\images\80.gif"> {blame}</div>`;
-			$(".praise").html(html.format({classpraise=(type==1?'class="me"':""),
-				classblame=(type==-1?'class="me"':""),writing_id=writing_id,praise=res.praise,blame=res.blame}));
+        if (res.result == "200") {
+            classpraise = (type == 1 ? 'class="me"' : "");
+            classblame = (type == -1 ? 'class="me"' : "");
+			html=`<div {classpraise} onclick="f_praise({writing_id},1)"><img src="kindedit/plugins/emoticons/images/79.gif"><div>{praise}</div></div>
+			<div {classblame} onclick="f_praise({writing_id},-1)"><img src="kindedit/plugins/emoticons/images/80.gif"><div>{blame}</div></div>`;
+            $(".praise").html(html.format({classpraise:classpraise,classblame:classblame,
+                writing_id:writing_id,praise:res.praise,blame:res.blame}));
 		}
 		else
 			alert(res.msg);
