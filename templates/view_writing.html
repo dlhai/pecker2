@@ -41,7 +41,7 @@
     <section class="xPanel2" style="display:table-cell">
         <header>正文</header>
 		<div>
-			<div>
+			<div id="writing" data_id="{{writing.id}}">
 				<div>发表于：{{writing.date}} </div>
 				<h2>{{writing.title}}</h2>
 				<div style="margin:10px 0">标签：{{writing.label}} <div style="float:right">阅读({{au.read}}) 评论({{au.replay}})</div></div>
@@ -57,15 +57,16 @@
 			</div>
 			<div>发表评论：
 				{% if me.is_anonymous == False %}
-				<textarea id="replay" style="width:100%"></textarea>
+				<div style="float:right;padding:5px;"><input onclick="f_replay({{writing.id}})" type="button" value="发表"></div>
+				<textarea id="kereplay" style="width:100%"></textarea>
 				{% else %}
 				<div style="text-align:center;margin-bottom:15px;"><a href="login.html">登录</a>或<a href="login.html">注册</a>以发表评论</div>
 				{% endif %}
 			</div>
 			<div class="list" style="border-bottom:0">
 				{% for x in replays %}
-				<div><div style="display:table-cell"><img width="42px" height="42px" src="{{x.face}}"/></div>
-					<div style="display:table-cell">
+				<div><div><img width="42px" height="42px" src="{{x.face}}"/></div>
+					<div>
 						<div><a href="view_user?id={{x.user_id}}">{{x.name}}</a><div style="float:right">{{x.date}}</div></div>
 						<div>{{x.body}}</div>
 					</div>
@@ -78,20 +79,13 @@
 
     <script type="text/javascript">
 		//KindEditor脚本
-		var editor;
+		var kereplay;
 		KindEditor.ready(function (K) {
-			editor = K.create('#replay', { uploadJson: '/cr', items:[ 'selectall', 'cut', 'copy', 'paste','undo', 'redo', '|',
+			kereplay = K.create('#kereplay', { uploadJson: '/cr', items:[ 'selectall', 'cut', 'copy', 'paste','undo', 'redo', '|',
 				'formatblock', 'fontname', 'fontsize', 'forecolor', 'hilitecolor', 'bold','italic', 'underline', 'strikethrough',
 				'lineheight', 'removeformat', '|',  'justifyleft', 'justifycenter', 'justifyright','justifyfull', 'insertorderedlist', 
 				'insertunorderedlist', 'indent', 'outdent', '|', 'link', 'unlink', '|', 'fullscreen',]});
 		});
-
-        function syn()
-        {
-            editor.sync();//将KindEditor的数据同步到textarea标签。
-            var value_content = $("#kindEditor_demo").val();
-            $("#cc").html(value_content);
-        }
 
     </script>
 

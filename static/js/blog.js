@@ -38,7 +38,11 @@ function f_message(user_id) {
 
 
 function f_replay(writing_id) {
-
+    kereplay.sync();//将KindEditor的数据同步到textarea标签。
+    var value_content = $("#kereplay").val();
+	ReqdataP("/publish?board=4&writing_id=" + writing_id, value_content, "", function (res) {
+		location.reload();
+	});
 }
 
 function f_writing() {

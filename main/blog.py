@@ -65,6 +65,7 @@ def view_writing():
     if au.me == None:
         sql = "insert into footmark(user_id,writing_id,type,date) values({0},{1},0,'{2}')".format(current_user.id, writing_id,datetime.datetime.now())
         conn.execute(sql)
+        au.read += 1
     return render_template("view_writing.html",user=user,recents=recents,writing=writing, au=au,replays=replays, pgn=pgn, me=current_user)
 
 #用户博文列表
@@ -136,3 +137,23 @@ def praise():
     ret.read= GetItem(rs,"type",0)
     return Response(tojson(ret), mimetype='application/json')
 
+#回复、发表文章
+@app.route("/publish", methods=['POST'])
+@login_required
+def publish():
+    params = request.args.to_dict()
+    if "board" not in params:
+        return '{result:404,msg:"缺少参数 board"}'
+    htm = request.data.decode()
+
+    rec = obj()
+    rec.writing_id = params["writing_id"] if "writing_id" in params else ""
+    rec.board = params["board"]
+    rec.section = ""
+    rec.label = params["label"] if "label" in params else ""
+    rec.user_id = current_user.id
+    rec.date = datetime.datetime.now()
+    rec.title = params["title"] if "title" in params else ""
+    rec.body = htm.replace("'", "''") #sql字符串边界转义
+    conn.execute(tosql("writing",rec))
+    return Response(tojson(obj(result="200",fun="publish")), mimetype='application/json')

@@ -40,11 +40,6 @@ def newdir(path):
 
 import pdb
 if __name__ == "__main__":
-    ls = [1,2,3]
-    rs = map(str, ls)
-    for k in rs:
-        print(k)
-    aa=map(lambda x:x.name, [obj(name="a",id=1),obj(name="b",id=2),obj(name="c",id=3)])
-    print(type(aa))
-    pdb.set_trace()
-    b=0
+    o = obj(a=1,b=2,c="as")
+    txt=tosql("dsd",o)
+    a=0
