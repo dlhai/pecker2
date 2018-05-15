@@ -68,7 +68,7 @@
 				<div><div><img width="42px" height="42px" src="{{x.face}}"/></div>
 					<div>
 						<div><a href="view_user?id={{x.user_id}}">{{x.name}}</a><div style="float:right">{{x.date}}</div></div>
-						<div>{{x.body}}</div>
+						<div>{{x.body|safe}}</div>
 					</div>
 				</div>
 				{% endfor %}
