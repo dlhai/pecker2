@@ -19,7 +19,7 @@
 	<header>个人资料</header>
     <div class="user">
         <div><img width="256px" height="256px" src="{{user.face}}" /></div>
-        <div>{{user.name}}</div>
+        <div id="user_name">{{user.name}}</div>
 		<div>
 			{% if user.id != me.id %}
 				{% if user.id in me.idols %}

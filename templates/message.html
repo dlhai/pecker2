@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>test</title>
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/xpecker.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/xpecker.js"></script>
+	<link rel="stylesheet" href="css/cube.css" />
+    <script src="js/Cube.js"></script>
+	<style>
+		.user>*{text-align:center;margin:5px;}
+		.list>div{display:table-row}
+		.list>div>div{display:table-cell;vertical-align: top;border-bottom:1px solid black;padding:5px;}
+		.list>div>div>img{border-radius: 4px;}
+	</style>
+</head>
+<body class="xScroll" >
+    <section class="xPanel2" style="display:table-cell;">
+        <header><div>我的偶像</div><div>我的粉丝</div><div>系统消息</div></header>
+		<div class="list">
+			{% for x in writtings %}
+			<div><div><img width="42px" height="42px" src="{{user.face}}"/></div>
+				<div>
+					<div><a href="/blog/view_writing?id={{x.id}}">{{x.title}}</a></div>
+					<div>{{x.body}}</div>
+					<div style="float:right"><a href="/blog/view_user?id={{x.user_id}}">{{x.name}}</a>发布于{{x.date}}  </div>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+		<div class="list">
+			{% for x in writtings %}
+			<div><div><img width="42px" height="42px" src="{{user.face}}"/></div>
+				<div>
+					<div><a href="/blog/view_writing?id={{x.id}}">{{x.title}}</a></div>
+					<div>{{x.body}}</div>
+					<div style="float:right"><a href="/blog/view_user?id={{x.user_id}}">{{x.name}}</a>发布于{{x.date}}  </div>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+		<div class="list">
+			{% for x in writtings %}
+			<div><div><img width="42px" height="42px" src="{{user.face}}"/></div>
+				<div>
+					<div><a href="/blog/view_writing?id={{x.id}}">{{x.title}}</a></div>
+					<div>{{x.body}}</div>
+					<div style="float:right"><a href="/blog/view_user?id={{x.user_id}}">{{x.name}}</a>发布于{{x.date}}  </div>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+    </section>
+    <section class="xPanel2" style="display:table-cell;">
+        <header>消息记录</header>
+		<div class="list">
+			{% for x in writtings %}
+			<div><div><img width="42px" height="42px" src="{{user.face}}"/></div>
+				<div>
+					<div><a href="/blog/view_writing?id={{x.id}}">{{x.title}}</a></div>
+					<div>{{x.body}}</div>
+					<div style="float:right"><a href="/blog/view_user?id={{x.user_id}}">{{x.name}}</a>发布于{{x.date}}  </div>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+		<div>
+			<div style="float:right;padding:5px;"><input onclick="f_replay({{writing.id}})" type="button" value="发表"></div>
+			<textarea id="kereplay" style="width:100%"></textarea>
+			<div>发送按钮</div>
+		</div>
+		
+    </section>
+</body>
+</html>

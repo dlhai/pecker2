@@ -32,8 +32,19 @@ function f_praise(writing_id,type ) {
 	});
 }
 
-function f_message(user_id) {
-
+function f_message(user_id,user_name) {
+	var dlg = new cbDlg("留言给 "+$("#user_name").html(),"width:670px");
+	dlg.Add(`<textarea id="kemsg" style="width:100%;height:400px;"></textarea>`);
+	dlg.Show();
+	kemsg = KindEditor.create('#kemsg', { uploadJson: '/cr', items:[ 'selectall', 'cut', 'copy', 'paste','undo', 'redo', '|',
+		'formatblock', 'fontname', 'fontsize', 'forecolor', 'hilitecolor', 'bold','italic', 'underline', 'strikethrough',
+		'lineheight', 'removeformat', '|',  'justifyleft', 'justifycenter', 'justifyright','justifyfull', 'insertorderedlist', 
+		'insertunorderedlist', 'indent', 'outdent', '|', 'link', 'unlink', '|', 'fullscreen',]});
+    dlg.submit = function (thisdlg) {
+		kereplay.sync();
+		var value_content = $("#kereplay").val();
+        thisdlg.closedlg();
+    };
 }
 
 
@@ -46,6 +57,23 @@ function f_replay(writing_id) {
 }
 
 function f_writing() {
-
+	var dlg = new cbDlg("发表文章","width:900px");
+	var content = `<form class="tbl">
+		<div><label>分类</label><input id="courier" /></div>
+		<div><label>标题</label><input id="courier" /></div>
+		<div><label>标签</label><input id="courier" /></div>
+		<div><label>正文</label><textarea id="kewriting" style="width:100%;height:400px;"></textarea></div>
+		</form>`
+	dlg.Add(content);
+	dlg.Show();
+	kemsg = KindEditor.create('#kemsg', { uploadJson: '/cr', items:[ 'selectall', 'cut', 'copy', 'paste','undo', 'redo', '|',
+		'formatblock', 'fontname', 'fontsize', 'forecolor', 'hilitecolor', 'bold','italic', 'underline', 'strikethrough',
+		'lineheight', 'removeformat', '|',  'justifyleft', 'justifycenter', 'justifyright','justifyfull', 'insertorderedlist', 
+		'insertunorderedlist', 'indent', 'outdent', '|', 'link', 'unlink', '|', 'fullscreen',]});
+    dlg.submit = function (thisdlg) {
+		kereplay.sync();
+		var value_content = $("#kereplay").val();
+        thisdlg.closedlg();
+    };
 }
 
