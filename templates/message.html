@@ -27,18 +27,15 @@
 </head>
 <body class="xScroll">
 	{% import 'macros.html' as macros %}
-    <div style="width:300px;display:table-cell">
-		{{macros.render_user(user,me)}}
-        <section class="xPanel2">
-            <header>最新<div style="float: right;"><a href="view_user?id={{user.id}}">更多</a></div></header>
-            <div>
-				{% for x in recents %}
-				<a href="/blog/view_writing?id={{x.id}}">{{x.title}}</a><br>
-				{% endfor %}
-			</div>
-        </section>
-    </div>
-    <section class="xPanel2" style="display:table-cell">
+    <section class="xPanel2" style="width:50%;display:table-cell">
+        <header>最新<div style="float: right;"><a href="view_user?id={{user.id}}">更多</a></div></header>
+        <div>
+			{% for x in recents %}
+			<a href="/blog/view_writing?id={{x.id}}">{{x.title}}</a><br>
+			{% endfor %}
+		</div>
+    </section>
+    <section class="xPanel2" style="width:50%;display:table-cell">
         <header>正文</header>
 		<div>
 			<div id="writing" data_id="{{writing.id}}">
