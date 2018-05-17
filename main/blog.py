@@ -142,18 +142,40 @@ def praise():
 @login_required
 def publish():
     params = request.args.to_dict()
+    form =request.form.to_dict()
+    rec = obj()
+
     if "board" not in params:
         return '{result:404,msg:"缺少参数 board"}'
-    htm = request.data.decode()
-
-    rec = obj()
-    rec.writing_id = params["writing_id"] if "writing_id" in params else ""
     rec.board = params["board"]
+
+    htm = form["body"]
+    rec.body = htm.replace("'", "''") #sql字符串边界转义
+    if rec.board != "4":
+        if "title" not in form:
+            return '{result:404,msg:"缺少参数 title"}'
+        rec.title = form["title"]
+        if rec.title == "":
+            return '{result:404,msg:"标题不能为空"}'
+
+        if "label" not in form:
+            return '{result:404,msg:"缺少参数 label"}'
+        rec.label = form["label"]
+        if rec.label == "":
+            return '{result:404,msg:"标签不能为空"}'
+        if len(rec.body) < 50:
+            return '{result:404,msg:"内容不能少于50字节"}'
+    else:
+        if "writing_id" not in form:
+            return '{result:404,msg:"缺少参数 writing_id"}'
+        rec.writing_id = form["writing_id"]
+        if rec.writing_id == "":
+            return '{result:404,msg:"writing_id不能为空"}'
+        if len(rec.body) < 20:
+            return '{result:404,msg:"内容不能少于20字节"}'
+
     rec.section = ""
-    rec.label = params["label"] if "label" in params else ""
     rec.user_id = current_user.id
     rec.date = datetime.datetime.now()
-    rec.title = params["title"] if "title" in params else ""
-    rec.body = htm.replace("'", "''") #sql字符串边界转义
     conn.execute(tosql("writing",rec))
     return Response(tojson(obj(result="200",fun="publish")), mimetype='application/json')
