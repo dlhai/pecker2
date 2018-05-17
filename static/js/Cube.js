@@ -27,7 +27,7 @@ function xrimagelist(img) {
 //背景带十字，点击可换图
 function xrimagelive(img) {
     var image = img == "" ? "" : 'src="' + img + '"';
-    var clss = arguments[1] ? 'class="'+arguments[1]+'"' : "";
+    var clss = arguments[1] ? 'class="' + arguments[1] + '"' : "";
     var width = arguments[2] ? arguments[2] : "100%";
     var heigh = arguments[3] ? arguments[3] : "100%";
     var tpl = `<label {clss} for="{id}"><img style="width: {width}; height: {heigh};" {image} />

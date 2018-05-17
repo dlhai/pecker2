@@ -1,4 +1,13 @@
-﻿function f_follow(This, user_id) {
+﻿var db_board = [
+    { "id": "1", "name": "新闻" },
+    { "id": "2", "name": "博客" },
+    { "id": "3", "name": "文库" },
+]
+var db_label = ["牛仔装","牛仔裤","牛仔服","耳环","帽厂","中国印染","电熨斗",
+    "旗袍","棉纺织品","毛皮","衬衣","男女皮鞋","鸭绒枕","被褥","芭蕾舞衣",
+    "长统袜","毛纺织业","真丝服装","罗口手套","手套","裤袜","印染棉布","中国丝绸"]
+
+function f_follow(This, user_id) {
 	if ( $(This).attr("value")=="关注他"){
 		Reqdata("/follow?user_id=" + user_id, "", function (res) {
 			if (res.result=="200")
@@ -34,7 +43,7 @@ function f_praise(writing_id,type ) {
 
 function f_message(user_id,user_name) {
 	var dlg = new cbDlg("留言给 "+$("#user_name").html(),"width:670px");
-	dlg.Add(`<textarea id="kemsg" style="width:100%;height:400px;"></textarea>`);
+	dlg.Add(`<textarea id="kemsg" style="width:100%;height:300px;"></textarea>`);
 	dlg.Show();
 	kemsg = KindEditor.create('#kemsg', { uploadJson: '/cr', items:[ 'selectall', 'cut', 'copy', 'paste','undo', 'redo', '|',
 		'formatblock', 'fontname', 'fontsize', 'forecolor', 'hilitecolor', 'bold','italic', 'underline', 'strikethrough',
@@ -42,7 +51,7 @@ function f_message(user_id,user_name) {
 		'insertunorderedlist', 'indent', 'outdent', '|', 'link', 'unlink', '|', 'fullscreen',]});
     dlg.submit = function (thisdlg) {
 		kereplay.sync();
-		var value_content = $("#kereplay").val();
+        var value_content = $("#kemsg").val();
         thisdlg.closedlg();
     };
 }
@@ -57,22 +66,25 @@ function f_replay(writing_id) {
 }
 
 function f_writing() {
-	var dlg = new cbDlg("发表文章","width:900px");
-	var content = `<form class="tbl">
-		<div><label>分类</label><input id="courier" /></div>
+    var board = db_board.map(x => '<input id="'+x.id+'" type="radio" value="' + x.name + '">').join("");
+    var label = db_label.map(x => '<input type="check" value="' + x + '">').join("");
+
+    var dlg = new cbDlg("发表文章","width:900px");
+    var content = `<form class="kewriting">
 		<div><label>标题</label><input id="courier" /></div>
-		<div><label>标签</label><input id="courier" /></div>
+		<div><label>分类</label>`+ board+`</div>
+		<div><label>标签</label>`+ label+`</div>
 		<div><label>正文</label><textarea id="kewriting" style="width:100%;height:400px;"></textarea></div>
 		</form>`
 	dlg.Add(content);
 	dlg.Show();
-	kemsg = KindEditor.create('#kemsg', { uploadJson: '/cr', items:[ 'selectall', 'cut', 'copy', 'paste','undo', 'redo', '|',
+    kemsg = KindEditor.create('#kewriting', { uploadJson: '/cr', items:[ 'selectall', 'cut', 'copy', 'paste','undo', 'redo', '|',
 		'formatblock', 'fontname', 'fontsize', 'forecolor', 'hilitecolor', 'bold','italic', 'underline', 'strikethrough',
 		'lineheight', 'removeformat', '|',  'justifyleft', 'justifycenter', 'justifyright','justifyfull', 'insertorderedlist', 
 		'insertunorderedlist', 'indent', 'outdent', '|', 'link', 'unlink', '|', 'fullscreen',]});
     dlg.submit = function (thisdlg) {
 		kereplay.sync();
-		var value_content = $("#kereplay").val();
+        var value_content = $("#kewriting").val();
         thisdlg.closedlg();
     };
 }
