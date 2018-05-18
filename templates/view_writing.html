@@ -34,6 +34,8 @@
             padding: 2px;
             margin: 5px 10px;
         }
+		.list>div{display:table-row}
+		.list>div>div{display:table-cell;vertical-align: top;padding:5px;}
 	</style>
   
 </head>
@@ -50,16 +52,16 @@
 			</div>
         </section>
     </div>
-    <section class="xPanel2" style="display:table-cell">
+    <section class="xPanel2" style="display:table-cell;">
         <header>正文</header>
 		<div>
 			<div id="writing" data_id="{{writing.id}}">
 				<div>发表于：{{writing.date}} </div>
 				<h2>{{writing.title}}</h2>
 				<div style="margin:10px 0">标签：{{writing.label}} <div style="float:right">阅读({{au.read}}) 评论({{au.replay}})</div></div>
-				<div>{{writing.body}}{{writing.body}}{{writing.body}}{{writing.body}}{{writing.body}}</div>
-				<div>{{writing.body}}{{writing.body}}{{writing.body}}{{writing.body}}{{writing.body}}</div>
-				<div>{{writing.body}}{{writing.body}}{{writing.body}}{{writing.body}}{{writing.body}}</div>
+				<div>{{writing.body|safe}}</div>
+				<div>{{writing.body|safe}}</div>
+				<div>{{writing.body|safe}}</div>
 				<div>
 					<div class="praise">
 						<div {% if au.me == 1 %} class="me" {% endif %} onclick="f_praise({{writing.id}},1)"><img src="kindedit\plugins\emoticons\images\79.gif"><div>{{au.praise}}</div></div>

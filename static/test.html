@@ -17,13 +17,16 @@
 <body>
     <div style="display:table-cell;width:200px;">这只是个测试页面。</div>
     <div><label>分类</label><div id="board"><label><input name="board" id="1" type="radio">新闻</label><label><input name="board" id="2" type="radio">博客</label><label><input name="board" id="3" type="radio">文库</label></div></div>
+    <div><label>分类</label><div ><label><input name="board2" id="1" type="radio">新闻2</label><label><input name="board2" id="2" type="radio">博客2</label></div></div>
     <div style="display:table-cell;width:200px;" onclick="onview()">这只是个测试页面。</div>
     <script type="text/javascript">
         function onview(){
             var board = "";
-            $("#board").children("input").each(function () {
-                if ($(this).prop("checked") == true)
+            $("#board").find("input").each(function () {
+                if ($(this).prop("checked") == true){
                     board = $(this).attr("id");
+					alert($(this).parent().text())
+					}
             });
         }
     </script>

@@ -57,7 +57,7 @@ function f_message(user_id,user_name) {
 		fd.append( "body", value_content );
 
 		SendForm('/msgto?user_id='+user_id, fd, function(res){
-			alert('留言成功' + res.msg);
+			alert('留言成功');
 		    thisdlg.closedlg();
 		});
     };
@@ -71,8 +71,9 @@ function f_replay(writing_id) {
 	fd.append( "writing_id", writing_id );
 	fd.append( "body", value_content );
 
-	SendForm('/publish?board=4', fd, function(res){
-		alert('发表成功' + res.msg);
+	SendForm('/publish?board=4', fd, "",function(res){
+		alert('评论成功');
+		location.reload();
 	});
 }
 
@@ -103,7 +104,7 @@ function f_writing() {
 
         fd.append("title", $("#title").val());
         var board = "";
-        $("#board").children("input").each(function () {
+        $("#board").find("input").each(function () {
             if ($(this).prop("checked") == true)
                 board = $(this).attr("id");
         });
@@ -113,16 +114,16 @@ function f_writing() {
 		}
 
 		var label = new Array();
-        $("#label").children("input").each(function () {
+        $("#label").find("input").each(function () {
             if ($(this).prop("checked") == true)
-                label.push($(this).html());
+                label.push($(this).parent().text());
         });
 
 		fd.append( "label", label.join(",") );
 		fd.append( "body", value_content );
 
-		SendForm('/publish?board='+board, fd, function(res){
-			alert('发表成功' + res.msg);
+		SendForm('/publish?board='+board, fd, "",function(res){
+			alert('发表成功');
 		    thisdlg.closedlg();
 		});
     };

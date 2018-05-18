@@ -144,35 +144,45 @@ def publish():
     params = request.args.to_dict()
     form =request.form.to_dict()
     rec = obj()
+    r = obj(result="404",fun="publish")
 
     if "board" not in params:
-        return '{result:404,msg:"缺少参数 board"}'
+        r.msg="缺少参数 board"
+        return tojson(r)
     rec.board = params["board"]
 
     htm = form["body"]
     rec.body = htm.replace("'", "''") #sql字符串边界转义
     if rec.board != "4":
         if "title" not in form:
-            return '{result:404,msg:"缺少参数 title"}'
+            r.msg="缺少参数 title"
+            return tojson(r)
         rec.title = form["title"]
         if rec.title == "":
-            return '{result:404,msg:"标题不能为空"}'
+            r.msg="标题不能为空"
+            return tojson(r)
 
         if "label" not in form:
-            return '{result:404,msg:"缺少参数 label"}'
+            r.msg="缺少参数 label"
+            return tojson(r)
         rec.label = form["label"]
         if rec.label == "":
-            return '{result:404,msg:"标签不能为空"}'
+            r.msg="缺少参数 label"
+            return tojson(r)
         if len(rec.body) < 50:
-            return '{result:404,msg:"内容不能少于50字节"}'
+            r.msg="内容不能少于50字节"
+            return tojson(r)
     else:
         if "writing_id" not in form:
-            return '{result:404,msg:"缺少参数 writing_id"}'
+            r.msg="缺少参数 writing_id"
+            return tojson(r)
         rec.writing_id = form["writing_id"]
         if rec.writing_id == "":
-            return '{result:404,msg:"writing_id不能为空"}'
+            r.msg="writing_id不能为空"
+            return tojson(r)
         if len(rec.body) < 20:
-            return '{result:404,msg:"内容不能少于20字节"}'
+            r.msg="内容不能少于20字节"
+            return tojson(r)
 
     rec.section = ""
     rec.user_id = current_user.id

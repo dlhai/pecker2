@@ -27,7 +27,7 @@
 			<div><div><img width="42px" height="42px" src="{{x.face}}"/></div>
 				<div>
 					<div><a href="/blog/view_writing?id={{x.id}}">{{x.title}}</a></div>
-					<div>{{x.body}}</div>
+					<div>{{x.body|safe}}</div>
 					<div style="float:right"><a href="/blog/view_user?id={{x.user_id}}">{{x.name}}</a>发布于{{x.date}}  </div>
 				</div>
 			</div>
