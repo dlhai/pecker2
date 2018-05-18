@@ -63,7 +63,6 @@ function f_message(user_id,user_name) {
     };
 }
 
-
 function f_replay(writing_id) {
     kereplay.sync();//将KindEditor的数据同步到textarea标签。
     var value_content = $("#kereplay").val();
@@ -95,27 +94,29 @@ function f_writing() {
 		'lineheight', 'removeformat', '|',  'justifyleft', 'justifycenter', 'justifyright','justifyfull', 'insertorderedlist', 
 		'insertunorderedlist', 'indent', 'outdent', '|', 'link', 'unlink', '|', 'fullscreen',]});
     dlg.submit = function (thisdlg) {
-		kewriting.sync();
+        kewriting.sync();
         var value_content = $("#kewriting").val();
 
-		var fd = new FormData();
-		var a = $("#title").attr("value");
-		fd.append( "title",	$("#title").attr("value"));
-		var board = "";
-		$("#board").children("input").each(
-			if($(this).prop("checked") == true)
-				board = $(this).attr("id"));
-		);
+        var fd = new FormData();
+        var a = $("#title").val();
+
+
+        fd.append("title", $("#title").val());
+        var board = "";
+        $("#board").children("input").each(function () {
+            if ($(this).prop("checked") == true)
+                board = $(this).attr("id");
+        });
 		if ( board == "" ){
 			alert("请选择板块");
 			return;
 		}
 
 		var label = new Array();
-		$("#label").children("input").each(
-			if($(this).prop("checked") == true)
-				label.push($(this).html());
-		);
+        $("#label").children("input").each(function () {
+            if ($(this).prop("checked") == true)
+                label.push($(this).html());
+        });
 
 		fd.append( "label", label.join(",") );
 		fd.append( "body", value_content );
