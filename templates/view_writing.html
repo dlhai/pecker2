@@ -42,7 +42,7 @@
 <body class="xScroll">
 	{% import 'macros.html' as macros %}
     <div style="width:300px;display:table-cell">
-		{{macros.render_user(user,me)}}
+		{{macros.render_user(user,me,fans,idols)}}
         <section class="xPanel2">
             <header>最新<div style="float: right;"><a href="view_user?id={{user.id}}">更多</a></div></header>
             <div>
@@ -78,6 +78,11 @@
 				{% endif %}
 			</div>
 			<div class="list" style="border-bottom:0">
+				<div><div><div style="width:42px;height:2px;"></div></div>
+					<div>
+						<div>　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 </div>
+					</div>
+				</div>
 				{% for x in replays %}
 				<div><div><img width="42px" height="42px" src="{{x.face}}"/></div>
 					<div>

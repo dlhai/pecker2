@@ -6,14 +6,15 @@
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
     <link rel="stylesheet" href="css/bootstrap.css" />
-    <link rel="stylesheet" href="css/xpecker.css" />
-    <script src="js/xpecker.js"></script>
+    <script charset="utf-8" src="kindedit/kindeditor-all.js"></script>
+    <script charset="utf-8" src="kindedit/lang/zh-CN.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
 	<link rel="stylesheet" href="css/cube.css" />
     <script src="js/Cube.js"></script>
+	<script src="js/blog.js"></script>
 	<style>
 		.user>*{text-align:center;margin:5px;}
 		.list>div{display:table-row}
@@ -24,12 +25,12 @@
 <body class="xScroll" >
 	{% import 'macros.html' as macros %}
     <div style="display:table-cell;width:300px;">
-        {{macros.render_user(user)}}
+        {{macros.render_user(user,me,fans,idols)}}
     </div>
     <section class="xPanel2" style="display:table-cell;">
         <header>文章列表</header>
 		<div class="list">
-			{% for x in writtings %}
+			{% for x in writings %}
 			<div><div><img width="42px" height="42px" src="{{user.face}}"/></div>
 				<div>
 					<div><a href="/blog/view_writing?id={{x.id}}">{{x.title}}</a></div>

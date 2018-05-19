@@ -14,7 +14,7 @@
 </div>
 {% endmacro %}
 
-{% macro render_user(user,me) %}
+{% macro render_user(user,me,fans,idols) %}
 <section class="xPanel2">
 	<header>个人资料</header>
     <div class="user">
@@ -27,12 +27,29 @@
 				{% else %}
 				<input onclick="f_follow(this,{{user.id}})" type="button" value="关注他">
 				{% endif %}
-			<input onclick="f_message(this,{{user.id}})" type="button" value="给他留言">
+			<input onclick="f_message({{user.id}})" type="button" value="给他留言">
 			{% else %}
 			<input onclick="f_writing()" type="button" value="发表文章">
 			{% endif %}
 		</div>
     </div>
 	<div>个人描述：{{user.profile}}</div>
+</section>
+<section class="xPanel2">
+	<header>他的朋友圈</header>
+    <div>
+        <div>他关注的：</div>
+        <div>
+			{% for x in idols %}
+			<a href="/blog/view_user?id={{x.id}}">{{x.name}}</a> 
+			{% endfor %}
+		</div>
+        <div>关注他的：</div>
+        <div>
+			{% for x in fans %}
+			<a href="/blog/view_user?id={{x.id}}">{{x.name}}</a> 
+			{% endfor %}
+		</div>
+    </div>
 </section>
 {% endmacro %}

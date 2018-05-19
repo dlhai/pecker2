@@ -56,7 +56,7 @@ function f_message(user_id,user_name) {
         var value_content = $("#kemsg").val();
 		fd.append( "body", value_content );
 
-		SendForm('/msgto?user_id='+user_id, fd, function(res){
+		SendForm('/msgto?type=2&user_id='+user_id, fd, "", function(res){
 			alert('留言成功');
 		    thisdlg.closedlg();
 		});

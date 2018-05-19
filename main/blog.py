@@ -58,6 +58,8 @@ def view_writing():
     writing_id=param["id"]
     writing=QueryObj("select * from writing where writing.id=%s"%param["id"])[0]
     user = QueryObj("select * from user where id=%s"%writing.user_id)[0]
+    fans = QueryObj("select id,name from user where id in (select fans_id from follow where idol_id=%s)"%writing.user_id)
+    idols = QueryObj("select id,name from user where id in (select idol_id from follow where fans_id=%s)"%writing.user_id)
     recents=QueryObj("select id,title from writing where writing.user_id=%s order by date desc limit 0,30"%writing.user_id)
     replays=QueryObj("select writing.*,user.face, user.name from writing,user where writing.user_id==user.id and writing.writing_id=%s order by date desc limit %d,20"%(param["id"],pos))
     pgn=pagnition("/blog/view_writing?id=%s"%param["id"]+"&pos=%d",pos,"select count(*) as count from writing where writing.writing_id=%s"%param["id"])
@@ -66,7 +68,7 @@ def view_writing():
         sql = "insert into footmark(user_id,writing_id,type,date) values({0},{1},0,'{2}')".format(current_user.id, writing_id,datetime.datetime.now())
         conn.execute(sql)
         au.read += 1
-    return render_template("view_writing.html",user=user,recents=recents,writing=writing, au=au,replays=replays, pgn=pgn, me=current_user)
+    return render_template("view_writing.html",user=user,fans=fans,idols=idols,recents=recents,writing=writing, au=au,replays=replays, pgn=pgn, me=current_user)
 
 #用户博文列表
 @app.route('/blog/view_user')
@@ -77,10 +79,13 @@ def view_user():
     pos=0
     if "pos" in param:
         pos=atoi(param["pos"])
-    user = QueryObj("select * from user where id=%s"%param["id"])[0]
-    writings=QueryObj("select * from writing where user_id=%s order by date desc limit 0,10"%param["id"])
-    pgn=pagnition("/blog/view_writing?id=%s"%param["id"]+"&pos=%d",pos,"select count(*) as count from writing where writing.user_id=%s"%param["id"],10)
-    return render_template("view_user.html",user=user,writings=writings,pgn=pgn)
+    user_id = param["id"]
+    user = QueryObj("select * from user where id=%s"%user_id)[0]
+    fans = QueryObj("select id,name from user where id in (select fans_id from follow where idol_id=%s)"%user_id)
+    idols = QueryObj("select id,name from user where id in (select idol_id from follow where fans_id=%s)"%user_id)
+    writings=QueryObj("select * from writing where user_id=%s order by date desc limit %d,10"%(user_id,pos))
+    pgn=pagnition("/blog/view_user?id=%s"%user_id+"&pos=%d",pos,"select count(*) as count from writing where writing.user_id=%s"%user_id,10)
+    return render_template("view_user.html",user=user,fans=fans,idols=idols,writings=writings,pgn=pgn,me=current_user)
 
 #关注某人
 @app.route("/follow")
@@ -189,3 +194,45 @@ def publish():
     rec.date = datetime.datetime.now()
     conn.execute(tosql("writing",rec))
     return Response(tojson(obj(result="200",fun="publish")), mimetype='application/json')
+
+#给某人发消息
+@app.route("/msgto", methods=['POST'])
+@login_required
+def msgto():
+    params = request.args.to_dict()
+    form =request.form.to_dict()
+    rec = obj()
+    r = obj(result="404",fun="msgto")
+
+    #when  type       frm     to           table_id   row_id  jsn             say     readtime    result
+    #      1changejob curuser jobmanager                      {newjob:jobid}  say
+    #      2message   curuser touser                                          say
+    #      3notify    system  relationuser table_id   row_id                  say
+    
+    if "type" not in params:
+        r.msg="缺少参数 type"
+        return tojson(r)
+    rec.type = params["type"]
+
+    if "user_id" not in params:
+        r.msg="缺少参数 user_id"
+        return tojson(r)
+    rec.to = params["user_id"]
+
+    if rec.type == "1":#1changejob
+        rec.jsn=form["jsn"]
+
+    htm = form["body"]
+    rec.say = htm.replace("'", "''") #sql字符串边界转义
+    if len(rec.say) < 2:
+        r.msg="内容不能少于2字节"
+        return tojson(r)
+    if len(rec.say) > 2048:
+        r.msg="内容大于少于2048字节"
+        return tojson(r)
+
+    rec.frm = current_user.id
+    rec.when = datetime.datetime.now()
+    conn.execute(tosql("msg",rec))
+    r.result="200"
+    return Response(tojson(r), mimetype='application/json')
