@@ -76,6 +76,7 @@ def kedit():
 from main.auth import *
 from main.views import *
 from main.blog import *
+from main.user import *
 
 class CLog:
     def write(data):

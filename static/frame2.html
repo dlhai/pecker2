@@ -129,7 +129,7 @@
 		});
 
 		function renderuser(){
-			return	`<div style="padding:10px;" ><img src="static/img/mail.jpg" style="height:30px;width:30px;" data_url="static/user_msg.html"></div>
+			return	`<div style="padding:10px;" ><img src="static/img/mail.jpg" style="height:30px;width:30px;" data_url="/blog/view_msg?id={id}"></div>
 				<div class="dropdown" style="padding:7px;" >
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding: 7px 15px;">
 						<span id="usr_name" class="hidden-sm-only">{name}</span>
@@ -137,9 +137,8 @@
 						<b class="caret hidden-sm-only"></b>
 					</a>
 					<ul class="dropdown-menu">
-						<li><a data_url="static/user_blog.html">我的博客</a></li>
-						<li><a data_url="static/user_msg.html">我的消息</a></li>
-						<li><a data_url="static/user_friends.html">朋友圈</a></li>
+						<li><a data_url="/blog/view_user?id={id}">我的博客</a></li>
+						<li><a data_url="/blog/view_msg?id={id}">我的朋友圈</a></li>
 						<li class="divider"></li>
 						<li><a data_url="static/user_self.html">个人信息</a></li>
 						<li><a data_url="static/user_depart.html">单位信息</a></li>

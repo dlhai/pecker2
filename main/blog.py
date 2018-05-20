@@ -87,6 +87,14 @@ def view_user():
     pgn=pagnition("/blog/view_user?id=%s"%user_id+"&pos=%d",pos,"select count(*) as count from writing where writing.user_id=%s"%user_id,10)
     return render_template("view_user.html",user=user,fans=fans,idols=idols,writings=writings,pgn=pgn,me=current_user)
 
+#用户消息记录
+@app.route('/blog/view_msg')
+def view_msg():
+    param = request.args.to_dict()
+    fans = QueryObj("select id,name,face from user where id in (select fans_id from follow where idol_id=%s)"%current_user.id)
+    idols = QueryObj("select id,name,face from user where id in (select idol_id from follow where fans_id=%s)"%current_user.id)
+    return render_template("message.html",fans=fans,idols=idols,me=current_user)
+
 #关注某人
 @app.route("/follow")
 @login_required
