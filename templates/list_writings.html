@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>test</title>
+    <title>list_writings</title>
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
     <link rel="stylesheet" href="css/bootstrap.css" />
@@ -13,15 +13,15 @@
 	<link rel="stylesheet" href="css/cube.css" />
     <script src="js/Cube.js"></script>
 	<style>
+		.list{display: table; width: 100%; border-collapse: collapse;}
 		.list>div{display:table-row}
-		.list>div>div{display:table-cell;vertical-align: top;border-bottom:1px solid black;padding:5px;}
+		.list>div>div{display:table-cell;vertical-align: top;border-bottom:1px solid Silver;padding:3px;}
+		.list>div>div:first-child{width:48px;}
 		.list>div>div>img{border-radius: 4px;}
 	</style>
 </head>
 <body class="xScroll">
 	{% import 'macros.html' as macros %}
-    <div style="display:table-cell;width:200px;"></div>
-    <div style="display:table-cell">
 		<div class="list">
 			{% for x in writings %}
 			<div><div><img width="42px" height="42px" src="{{x.face}}"/></div>
@@ -34,7 +34,5 @@
 			{% endfor %}
 		</div>
 		<div>{{macros.render_pagnition(pgn)}}</div>
-    </div>
-    <div style="display:table-cell;width:200px;"></div>
 </body>
 </html>

@@ -91,8 +91,8 @@ def view_user():
 @app.route('/blog/view_msg')
 def view_msg():
     param = request.args.to_dict()
-    fans = QueryObj("select id,name,face from user where id in (select fans_id from follow where idol_id=%s)"%current_user.id)
-    idols = QueryObj("select id,name,face from user where id in (select idol_id from follow where fans_id=%s)"%current_user.id)
+    fans = QueryObj("select id,name,face,profile from user where id in (select fans_id from follow where idol_id=%s)"%current_user.id)
+    idols = QueryObj("select id,name,face,profile from user where id in (select idol_id from follow where fans_id=%s)"%current_user.id)
     return render_template("message.html",fans=fans,idols=idols,me=current_user)
 
 #关注某人
@@ -242,5 +242,23 @@ def msgto():
     rec.frm = current_user.id
     rec.when = datetime.datetime.now()
     conn.execute(tosql("msg",rec))
+    r.result="200"
+    return Response(tojson(r), mimetype='application/json')
+
+#读取消息
+@app.route("/rdmsg")
+@login_required
+def msgto():
+    params = request.args.to_dict()
+    form =request.form.to_dict()
+    rec = obj()
+    r = obj(result="404",fun="rdmsg")
+    if "type" not in params:
+        r.msg="缺少参数 type"
+        return tojson(r)
+    rec.type = params["type"]
+
+    if "user_id" in params:
+        r.data = QueryObj("select * from msg where (src={me} and dst={to}) or (src={to} and dst={me}) order by whn desc limit 0,200".format(me=current_user.id, to=params["user_id"]))
     r.result="200"
     return Response(tojson(r), mimetype='application/json')

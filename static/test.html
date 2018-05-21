@@ -1,34 +1,25 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>test</title>
-    <script src="js/jquery.js"></script>
-    <script src="js/bootstrap.js"></script>
-    <link rel="stylesheet" href="css/bootstrap.css" />
-    <link rel="stylesheet" href="css/xpecker.css" />
-    <script src="js/xpecker.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/db.js"></script>
-    <link rel="stylesheet" href="css/xpecker.css" />
-    <script src="js/xpecker.js"></script>
-    <script src="js/Cube.js"></script>
+<meta charset="UTF-8">
+<title>display普通表格</title>
+<style type="text/css">
+.table {display: table; width: 100%; border-collapse: collapse;}
+.table>div {display: table-row; }
+.table>div>div {display: table-cell; border: 1px solid gray; text-align: center;vertical-align: middle;}
+</style>
 </head>
 <body>
-    <div style="display:table-cell;width:200px;">这只是个测试页面。</div>
-    <div><label>分类</label><div id="board"><label><input name="board" id="1" type="radio">新闻</label><label><input name="board" id="2" type="radio">博客</label><label><input name="board" id="3" type="radio">文库</label></div></div>
-    <div><label>分类</label><div ><label><input name="board2" id="1" type="radio">新闻2</label><label><input name="board2" id="2" type="radio">博客2</label></div></div>
-    <div style="display:table-cell;width:200px;" onclick="onview()">这只是个测试页面。</div>
-    <script type="text/javascript">
-        function onview(){
-            var board = "";
-            $("#board").find("input").each(function () {
-                if ($(this).prop("checked") == true){
-                    board = $(this).attr("id");
-					alert($(this).parent().text())
-					}
-            });
-        }
-    </script>
-</body >
-</html >
+    <div class="table">
+        <div class="table-tr">
+            <div class="table-td">广东</div>
+        </div>
+        <div class="table-tr">
+            <div class="table-td">河南</div>
+        </div>
+        <div class="table-tr">
+            <div class="table-td">江苏</div>
+        </div>
+    </div>
+</body>
+</html>

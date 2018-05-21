@@ -16,8 +16,14 @@
     <script src="js/Cube.js"></script>
     <script src="js/blog.js"></script>
 	<style>
+		.table {display: table; width: 100%; border-collapse: collapse;}
+		.table>div {display: table-row; }
+		.table>div>div {display: table-cell; border: 1px solid gray; text-align: center;vertical-align: middle;}
+
+		.list{display: table; width: 100%; border-collapse: collapse;}
 		.list>div{display:table-row}
-		.list>div>div{display:table-cell;vertical-align: top;border-bottom:1px solid Silver;padding:5px;}
+		.list>div>div{display:table-cell;vertical-align: top;border-bottom:1px solid Silver;padding:3px;}
+		.list>div>div:first-child{width:48px;}
 		.list>div>div>img{border-radius: 4px;}
 
 		.group>div{
@@ -36,55 +42,88 @@
 	</style>
 </head>
 <body class="xFCsrow">
-    <section class="xPanel2 xFIfixed" style="width:300px;">
-        <header class="group" onclick="onchggroup(this)"><div class="active">我的偶像</div><div>我的粉丝</div><div>系统消息</div></header>
-		<div class="list">
-			{% for x in idols %}
-			<div onclick="onuser({{x.id}})"><div><img width="42px" height="42px" src="{{x.face}}"/></div>
-				<div>
-					<div>{{x.name}}</a></div>
-					<div>{{x.profile}}</div>
+    <section class="xPanel2 xFIfixed" style="width:350px;">
+        <header class="group" onclick="onchggroup(this)"><div class="active">我的偶像</div><div>我的粉丝</div><div>系统消息</div><div>陌生人</div></header>
+		<div id="friends">
+			<div id="idols" class="list">
+				{% for x in idols %}
+				<div onclick="onuser({{x.id}})"><div><img width="42px" height="42px" src="{{x.face}}"/></div>
+					<div>
+						<div>{{x.name}}</a></div>
+						<div>{{x.profile}}</div>
+					</div>
 				</div>
+				{% endfor %}
 			</div>
-			{% endfor %}
-		</div>
-		<div class="list">
-			{% for x in fans %}
-			<div onclick="onuser({{x.id}})"><div><img width="42px" height="42px" src="{{x.face}}"/></div>
-				<div>
-					<div>{{x.name}}</a></div>
-					<div>{{x.profile}}</div>
+			<div id="fans" class="list" style="display:none">
+				{% for x in fans %}
+				<div onclick="onuser({{x.id}})"><div><img width="42px" height="42px" src="{{x.face}}"/></div>
+					<div>
+						<div>{{x.name}}</a></div>
+						<div>{{x.profile}}</div>
+					</div>
 				</div>
+				{% endfor %}
 			</div>
-			{% endfor %}
-		</div>
-		<div class="list">
+			<div id="sysmsgs" class="list" style="display:none">
+			</div>
 		</div>
     </section>
     <section class="xPanel2">
-        <header>消息记录</header>
-		<div class="list">
-		</div>
-		<div>
-			<textarea id="kereplay" style="width:100%"></textarea>
-			<div style="float:right;padding:5px;"><input onclick="msgto()" type="button" value="发送"></div>
-		</div>
-    </section>
+        <header>对话</header>
+        <div id="speechlist" class="xScroll" style="height:100px;flex-grow: 1;"></div>
+        <footer class="xFCsrow" style="padding:10px; height: 120px; width: 100%; align-items: flex-end;">
+            <textarea class="xrAngle" style="margin-right:10px; padding:5px 10px; height:100px;width:100px;resize:none;"></textarea>
+            <div class="xFIfixed"><button>发送</button></div>
+        </footer>
+	</section>
 <script type="text/javascript">
     function onchggroup(This) {
 		var node = $(event.target);
 		$(This).children().removeClass("active");
 		node.addClass("active");
 		if (node.html() == "我的偶像" ){
-		
+			$("#friends").children().hide();
+			$("#idols").show();
 		}
 		else if (node.html() == "我的粉丝" ){
-		
+			$("#friends").children().hide();
+			$("#fans").show();
 		}
 		else if (node.html() == "系统消息" ){
-		
+			$("#friends").children().hide();
+			$("#sysmsgs").show();
 		}
     }
+	function onuser(id){
+		ReqData( "/rdmsg?user_id="+id,"" function(res){
+			
+
+		});
+	}
 </script>
+
+<script id="tpl_speech" type="text/template">
+    {% for (var i = 0,u = parseInt(Math.random() * it.length),s = parseInt(Math.random() * db_speech.length); i < 50; i++,u = parseInt(Math.random() * it.length),s = parseInt(Math.random() * db_speech.length)) { %}
+    {% if (u % 2 == 0) { %}
+    <div class="lspeech">
+        <div><img src="img/face/face{%=it[u].face%}.jpg" /></div>
+        <div>
+            <span>【{%=it[u].prof%}】{%=it[u].name%}</span>
+            <div>{%=db_speech[s]%}</div>
+        </div>
+    </div>
+    {% }else { %}
+    <div class="rspeech">
+        <div>
+            <span>【{%=it[u].prof%}】{%=it[u].name%}</span>
+            <div>{%=db_speech[s]%}</div>
+        </div>
+        <div><img src="img/face/face{%=it[u].face%}.jpg" /></div>
+    </div>
+    {% }%}
+    {% }%}
+</script>
+
 </body>
 </html>

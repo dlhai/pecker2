@@ -19,8 +19,10 @@
 		.user>*{text-align:center;margin:5px;}
 		.praise{text-align:center;margin:15px;}
 		.praise>div{display:inline-block;margin:15px;border:1px solid #e0e4e8;border-radius: 2px;padding:10px 20px;}
+		.list{display: table; width: 100%; border-collapse: collapse;}
 		.list>div{display:table-row}
-		.list>div>div{display:table-cell;vertical-align: top;padding:5px;}
+		.list>div>div{display:table-cell;vertical-align: top;border-bottom:1px solid Silver;padding:3px;}
+		.list>div>div:first-child{width:48px;}
 		.list>div>div>img{border-radius: 4px;}
         .kewriting>div {
             display:table-row;
@@ -76,11 +78,6 @@
 				{% endif %}
 			</div>
 			<div class="list" style="border-bottom:0">
-				<div><div><div style="width:42px;height:2px;"></div></div>
-					<div>
-						<div>　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 　 </div>
-					</div>
-				</div>
 				{% for x in replays %}
 				<div><div><img width="42px" height="42px" src="{{x.face}}"/></div>
 					<div>
