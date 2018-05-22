@@ -98,9 +98,9 @@ def dict_flow(x):
 tbl_msg=Table('msg', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('type',Integer),
-	Column('when',Integer),
-	Column('frm',Integer),
-	Column('to',Integer),
+	Column('whn',Integer),
+	Column('src',Integer),
+	Column('dst',Integer),
 	Column('table_id',Integer),
 	Column('row_id',Integer),
 	Column('jsn',String(2048)),
@@ -108,7 +108,15 @@ tbl_msg=Table('msg', metadata,
 	Column('readtime',Date),
 	Column('result',Integer))
 def dict_msg(x):
-    return dict(type="",when="",frm="",to="",table_id="",row_id="",jsn="",say="",readtime="",result="")
+    return dict(type="",whn="",src="",dst="",table_id="",row_id="",jsn="",say="",readtime="",result="")
+
+tbl_mark=Table('mark', metadata,
+	Column('id',Integer,primary_key=True),
+	Column('user_id',Integer),
+	Column('type',Integer),
+	Column('whn',Integer))
+def dict_mark(x):
+    return dict(user_id="",type="",whn="")
 
 tbl_user=Table('user', metadata,
 	Column('id',Integer,primary_key=True),
@@ -178,20 +186,18 @@ def dict_employ():
 
 tbl_writing=Table('writing', metadata,
 	Column('id',Integer,primary_key=True),
-	Column('writting_id',Integer),
+	Column('writing_id',Integer),
 	Column('board',Integer),
 	Column('section',String(32)),
 	Column('label',String(64)),
 	Column('user_id',Integer),
 	Column('date',Date),
 	Column('title',String(64)),
-	Column('body',String(10240)),
-	Column('readingcount',Integer),
-	Column('praisecount',Integer),
-	Column('opposecount',Integer),
-	Column('replaycount',Integer))
+	Column('body',String(10240)))
 def dict_writing(x):
-    return dict(writting_id=choice([0,randint(1,x) if x>1 else 0 ]),board=rndnum(1,3),section="",label=xsample("_keyword",3,5),user_id=rndnum(50,59),date=rnddate(0,2*365),title=rnditem("_quiz"),body=choice(data("_songci").data)[0],readingcount=0.0,praisecount=0.0,opposecount=0.0,replaycount=0.0)
+    return dict(writing_id=choice([0,randint(1,x) if x>1 else 0 ]),
+                board=rndnum(1,3),section="",label=xsample("_keyword",3,5),user_id=rndnum(50,59),date=rnddate(0,2*365),title=rnditem("_quiz"),
+                body="\r\n".join([x[0] for x in sample(data("_songci").data,10)]))
 
 tbl_follow=Table('follow', metadata,
 	Column('id',Integer,primary_key=True),
@@ -446,26 +452,22 @@ def QueryData(name,tbl,field,value):
     q = select([tbl]).where(tbl.c[field]==value)
     data=conn.execute(q).fetchall()
     adddata(name,data)
+def puser(id,account,name,job):
+    duser=dict_user(0,"__sys__",job,"")
+    duser["id"]=id
+    duser["account"]=account
+    duser["pwd"]=account
+    duser["name"]=name
+    return duser
 
-conn.execute(tbl_user.insert(),[
-            {"id":"1","account":"su_win","pwd":"su_win","name":"叶片超级帐号","job":"1"},
-            {"id":"4","account":"su_dev","pwd":"su_dev","name":"设备超级帐号","job":"4"},
-            {"id":"7","account":"su_mat","pwd":"su_mat","name":"仓库超级帐号","job":"7"},
-            {"id":"10","account":"su_eng","pwd":"su_eng","name":"调度超级帐号","job":"10"},
-            {"id":"13","account":"su_exp","pwd":"su_exp","name":"专家超级帐号","job":"13"},
-            {"id":"15","account":"su_rep","pwd":"su_rep","name":"技工超级帐号","job":"15"},
-            {"id":"18","account":"su_blg","pwd":"su_blg","name":"博客超级帐号","job":"18"},
-            {"id":"50","account":"test50","pwd":"test50","name":"测试50","job":"19","face":"img/face/face0.jpg"},
-            {"id":"51","account":"test51","pwd":"test51","name":"测试51","job":"19","face":"img/face/face1.jpg"},
-            {"id":"52","account":"test52","pwd":"test52","name":"测试52","job":"19","face":"img/face/face2.jpg"},
-            {"id":"53","account":"test53","pwd":"test53","name":"测试53","job":"19","face":"img/face/face3.jpg"},
-            {"id":"54","account":"test54","pwd":"test54","name":"测试54","job":"19","face":"img/face/face4.jpg"},
-            {"id":"55","account":"test55","pwd":"test55","name":"测试55","job":"19","face":"img/face/face5.jpg"},
-            {"id":"56","account":"test56","pwd":"test56","name":"测试56","job":"19","face":"img/face/face6.jpg"},
-            {"id":"57","account":"test57","pwd":"test57","name":"测试57","job":"19","face":"img/face/face7.jpg"},
-            {"id":"58","account":"test58","pwd":"test58","name":"测试58","job":"19","face":"img/face/face8.jpg"},
-            {"id":"59","account":"test59","pwd":"test59","name":"测试59","job":"19","face":"img/face/face9.jpg"},
-            {"id":"100","account":"angel","pwd":"angel","name":"天使","job":"19"}])
+conn.execute(tbl_user.insert(),[puser("1","su_win","叶片超级帐号","1"),puser("4", "su_dev","设备超级帐号","4"),
+          puser("7", "su_mat","仓库超级帐号","7"),puser("10","su_eng","调度超级帐号","10"),
+          puser("13","su_exp","专家超级帐号","13"),puser("15","su_rep","技工超级帐号","15"),
+          puser("18","su_blg","博客超级帐号","18"),puser("50","test50","测试50","19"),
+          puser("51","test51","测试51","19"),puser("52","test52","测试52","19"),puser("53","test53","测试53","19"),
+          puser("54","test54","测试54","19"),puser("55","test55","测试55","19"),puser("56","test56","测试56","19"),
+          puser("57","test57","测试57","19"),puser("58","test58","测试58","19"),puser("59","test59","测试59","19"),
+          puser("100","angel","天使","19"),])
 conn.execute("CREATE VIEW matoutview AS select matout.id,fault_id,fault_code,matwh_id,matout.status,code,usage,matout.remark,img,creater.user_id as creater_id,creater.date as createdate,stocker.user_id as stocker_id,stocker.date as stockdate from matout LEFT JOIN flow AS creater ON (creater.table_id = 28 AND creater.record_id = matout.id AND creater.status = 0) LEFT JOIN flow AS stocker ON (stocker.table_id = 28 AND stocker.record_id = matout.id AND stocker.status = 2)")
 
 conn.execute("CREATE VIEW matoutrecview AS select matoutrec.id,matout.matwh_id,matoutrec.matout_id,matout.code as matout_code,matout.status as matout_status,mat.id as mat_id,mat.code,mat.name,mat.type,matoutrec.num,mat.unit,matinrec.specs,matinrec.matin_id,matin.code as matin_code,matin.status as matin_status,matinrec.id as matinrec_id,matinrec.vender_id,matinrec.producedt,matinrec.expiredt,matinrec.remark as matinrec_remark,matoutrec.remark from matoutrec,matinrec,mat,matin,matout where matoutrec.matinrec_id = matinrec.id and matinrec.mat_id=mat.id and matoutrec.matout_id=matout.id and matinrec.matin_id=matin.id")
@@ -480,6 +482,7 @@ conn.execute(tbl_base.insert(),[dict_base(x) for x in data("_fields")])
 
 
 conn.execute(tbl_admarea.insert(),[dict_admarea(x) for x in data("_全国行政区编号")])
+
 
 
 

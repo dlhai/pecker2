@@ -143,7 +143,7 @@ class pagnition:
         ar = [ x for x in ar if x >=0 ] #少于5页时
         return ar
 
-def tosql(tbl,obj):
+def toinsert(tbl,obj):
     fields=",".join(map( lambda x: "'"+x+"'", obj.__dict__.keys()))
     values=",".join(map( lambda x: "'"+str(x)+"'", obj.__dict__.values()))
     sql = "insert into {0}({1}) values({2})".format(tbl, fields,values)

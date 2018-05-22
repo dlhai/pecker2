@@ -56,7 +56,7 @@ metadata = MetaData(engine)
         model += "),\n\tColumn('".join(map( lambda f : f[iname]+"',"+f[irule],t.data))
         model += "))\n"
         model += "def dict_"+t.name+t.param+":\n    "
-        if t.define !="":puser
+        if t.define !="":
             model += t.define.replace("\n", "\n    ")+"\n    "
         iname = GetIndex(t.field, "name")
         irule = GetIndex(t.field,"drule")
@@ -78,11 +78,11 @@ def QueryData(name,tbl,field,value):
     data=conn.execute(q).fetchall()
     adddata(name,data)
 def puser(id,account,name,job):
-    duser=dict_user(0,"",job,"")
-    duser.id=id
-    duser.account=account
-    duser.pwd=account
-    duser.name=name
+    duser=dict_user(0,"__sys__",job,"")
+    duser["id"]=id
+    duser["account"]=account
+    duser["pwd"]=account
+    duser["name"]=name
     return duser
 
 conn.execute(tbl_user.insert(),[puser("1","su_win","叶片超级帐号","1"),puser("4", "su_dev","设备超级帐号","4"),

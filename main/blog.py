@@ -200,7 +200,7 @@ def publish():
     rec.section = ""
     rec.user_id = current_user.id
     rec.date = datetime.datetime.now()
-    conn.execute(tosql("writing",rec))
+    conn.execute(toinsert("writing",rec))
     return Response(tojson(obj(result="200",fun="publish")), mimetype='application/json')
 
 #给某人发消息
@@ -241,11 +241,14 @@ def msgto():
 
     rec.src = current_user.id
     rec.whn = datetime.datetime.now()
-    conn.execute(tosql("msg",rec))
+    conn.execute(toinsert("msg",rec))
     r.result="200"
     return Response(tojson(r), mimetype='application/json')
 
 #读取消息
+#1.mtd=check 读取书签之后的未读消息(检测新消息)
+#2.mtd=chat&user_id= 读取与某人的最新聊天记录(打开聊天窗口时)
+#3.mtd=chatlog&user_id=&pos= 读取与某人的小于某id的一页消息(聊天窗口向前翻一页)
 @app.route("/rdmsg")
 @login_required
 def rdmsg():
@@ -253,7 +256,51 @@ def rdmsg():
     form =request.form.to_dict()
     rec = obj()
     r = obj(result="404",fun="rdmsg")
-    if "user_id" in params:
+
+    if "mtd" not in params:
+        r.msg="缺少参数 mtd"
+        return tojson(r)
+    mtd = params["params"]
+   
+    #1.mtd=check 读取书签之后的未读消息(检测新消息)
+    if mtd == "check":
+        m=QueryObj("select id,whm from mark where type=1 and user_id="+str(current_user.id))
+        if len(m)==0:
+            r.data = QueryObj("select msg.*, user.name,user.face,user.job from msg,user where msg.src=user.id and (src={me} or dst={me}) order by whn limit 0,200".format(me=current_user.id, to=params["user_id"]))
+            if ( len(r.data)>0):
+                m=obj(user_id=current_user.id, type=1,whn=r.data[0].whn)
+                conn.execute("mark",toinsert(m))
+        else:
+            m = m[0]
+            r.data = QueryObj("select msg.*, user.name,user.face,user.job from msg,user where msg.src=user.id and (src={me} or dst={me}) and whn>{whn} order by whn limit 0,200".format(me=current_user.id, to=params["user_id"],whn=m.whn))
+            r.end = (len(r.data) < 200)
+            if ( len(r.data)>0):
+                m.whn=r.data[0].whn
+                sql = "update mark set whn={whn} where id={id}".format(m)
+                conn.execute(sql)
+        r.result="200"
+        return Response(tojson(r), mimetype='application/json')
+
+    #2.mtd=chat&user_id= 读取与某人的最新聊天记录(打开聊天窗口时，从首条未读消息开始向后翻)
+    elif mtd == "chat":
+        if "user_id" not in params:
+            r.msg="缺少参数 user_id"
+            return tojson(r)
         r.data = QueryObj("select msg.*, user.name,user.face,user.job from msg,user where msg.src=user.id and (src={me} and dst={to}) or (src={to} and dst={me}) order by whn desc limit 0,200".format(me=current_user.id, to=params["user_id"]))
-    r.result="200"
-    return Response(tojson(r), mimetype='application/json')
+        r.result="200"
+        return Response(tojson(r), mimetype='application/json')
+    
+    #3.mtd=chatlog&user_id=&pos= 读取与某人的小于某id的一页消息(聊天窗口向前翻一页)
+    elif mtd == "chatlog":
+        if "user_id" not in params:
+            r.msg="缺少参数 user_id"
+            return tojson(r)
+        if "pos" not in params:
+            r.msg="缺少参数 pos"
+            return tojson(r)
+        r.data = QueryObj("select msg.*, user.name,user.face,user.job from msg,user where msg.src=user.id and (src={me} and dst={to}) or (src={to} and dst={me}) order by whn desc limit {pos},200".format(me=current_user.id, to=params["user_id"], pos=params["pos"]))
+        r.result="200"
+        return Response(tojson(r), mimetype='application/json')
+
+    r.msg="不能识别的mtd="+params["mtd"]
+    return tojson(r)
