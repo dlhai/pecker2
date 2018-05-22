@@ -47,9 +47,9 @@
 		<div id="friends">
 			<div id="idols" class="list">
 				{% for x in idols %}
-				<div onclick="onuser({{x.id}})"><div><img width="42px" height="42px" src="{{x.face}}"/></div>
+				<div onclick="onuser(this,{{x.id}})"><div><img width="42px" height="42px" src="{{x.face}}"/></div>
 					<div>
-						<div>{{x.name}}</a></div>
+						<div>{{x.name}}</div>
 						<div>{{x.profile}}</div>
 					</div>
 				</div>
@@ -57,9 +57,9 @@
 			</div>
 			<div id="fans" class="list" style="display:none">
 				{% for x in fans %}
-				<div onclick="onuser({{x.id}})"><div><img width="42px" height="42px" src="{{x.face}}"/></div>
+				<div onclick="onuser(this,{{x.id}})"><div><img width="42px" height="42px" src="{{x.face}}"/></div>
 					<div>
-						<div>{{x.name}}</a></div>
+						<div>{{x.name}}</div>
 						<div>{{x.profile}}</div>
 					</div>
 				</div>
@@ -70,14 +70,26 @@
 		</div>
     </section>
     <section class="xPanel2">
-        <header>对话</header>
+        <header id="title">对话</header>
         <div id="speechlist" class="xScroll" style="height:100px;flex-grow: 1;"></div>
-        <footer class="xFCsrow" style="padding:10px; height: 120px; width: 100%; align-items: flex-end;">
-            <textarea class="xrAngle" style="margin-right:10px; padding:5px 10px; height:100px;width:100px;resize:none;"></textarea>
-            <div class="xFIfixed"><button>发送</button></div>
+        <footer class="xFCsrow xFIfixed" style="padding:10px; height: 200px; width: 100%; align-items: flex-end;">
+            <textarea id="kereplay" class="xrAngle" style="margin-right:10px; padding:5px 10px; height:180px;width:100px;resize:none;"></textarea>
+            <div class="xFIfixed"><button onclick="onsend()">发送</button></div>
         </footer>
 	</section>
 <script type="text/javascript">
+    var g_user = parent.g_user, g_user_id;
+    if (g_user == undefined) {Reqdata("/curuserinf", "", function (res) {g_user = res.data;g_user.fields = res.fields;});}
+
+    var kereplay;
+    KindEditor.ready(function (K) {
+        kereplay = K.create('#kereplay', {
+            uploadJson: '/cr', resizeMode:0,items: ['cut', 'copy', 'paste', '|', 'formatblock', 'fontname', 'fontsize', 'forecolor', 'hilitecolor', 'bold', 'italic',
+                'underline', 'removeformat', '|', 'link', 'unlink', '|', 'fullscreen',]
+        });
+    });
+
+
     function onchggroup(This) {
 		var node = $(event.target);
 		$(This).children().removeClass("active");
@@ -95,34 +107,37 @@
 			$("#sysmsgs").show();
 		}
     }
-	function onuser(id){
-		ReqData( "/rdmsg?user_id="+id,"" function(res){
-			
-
+    function onuser(This, id) {
+        g_user_id = id;
+        $("#title").html( "与 <b>"+$(This).find("div > div:first-child").html() +"</b> 会话");
+		Reqdata( "/rdmsg?user_id="+id,"", function(res){
+            res.data.map(x => x.prof = GetSub(db_job, "id", x.job).sname);
+            $("#speechlist").html(res.data.map(x => renderspeech(x).join("")));
 		});
-	}
-</script>
+    }
 
-<script id="tpl_speech" type="text/template">
-    {% for (var i = 0,u = parseInt(Math.random() * it.length),s = parseInt(Math.random() * db_speech.length); i < 50; i++,u = parseInt(Math.random() * it.length),s = parseInt(Math.random() * db_speech.length)) { %}
-    {% if (u % 2 == 0) { %}
-    <div class="lspeech">
-        <div><img src="img/face/face{%=it[u].face%}.jpg" /></div>
-        <div>
-            <span>【{%=it[u].prof%}】{%=it[u].name%}</span>
-            <div>{%=db_speech[s]%}</div>
-        </div>
-    </div>
-    {% }else { %}
-    <div class="rspeech">
-        <div>
-            <span>【{%=it[u].prof%}】{%=it[u].name%}</span>
-            <div>{%=db_speech[s]%}</div>
-        </div>
-        <div><img src="img/face/face{%=it[u].face%}.jpg" /></div>
-    </div>
-    {% }%}
-    {% }%}
+    function onsend() {
+        kereplay.sync();//将KindEditor的数据同步到textarea标签。
+        var value_content = $("#kereplay").val();
+
+        var fd = new FormData();
+        fd.append("body", value_content);
+        SendForm('/msgto?type=2&user_id=' + g_user_id, fd, "", function (res) {});
+    }
+
+    function renderspeech(speech) {
+        if (speech.src != g_user.id) {
+            r = `<div class="lspeech"><div><img src="{face}" /></div>
+                <div><span>【{prof}】{name}</span><div>{say}</div>
+                </div></div>`.format(speech)
+        }
+        else {
+            r =`<div class="rspeech"><div><span>【{prof}】{name}</span>
+                    <div>{say}</div></div><div><img src="{face}" /></div>
+            </div>`.format(speech)
+        }
+        return r;
+    }
 </script>
 
 </body>

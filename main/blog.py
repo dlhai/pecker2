@@ -225,7 +225,7 @@ def msgto():
     if "user_id" not in params:
         r.msg="缺少参数 user_id"
         return tojson(r)
-    rec.to = params["user_id"]
+    rec.dst = params["user_id"]
 
     if rec.type == "1":#1changejob
         rec.jsn=form["jsn"]
@@ -239,8 +239,8 @@ def msgto():
         r.msg="内容大于少于2048字节"
         return tojson(r)
 
-    rec.frm = current_user.id
-    rec.when = datetime.datetime.now()
+    rec.src = current_user.id
+    rec.whn = datetime.datetime.now()
     conn.execute(tosql("msg",rec))
     r.result="200"
     return Response(tojson(r), mimetype='application/json')
@@ -248,17 +248,12 @@ def msgto():
 #读取消息
 @app.route("/rdmsg")
 @login_required
-def msgto():
+def rdmsg():
     params = request.args.to_dict()
     form =request.form.to_dict()
     rec = obj()
     r = obj(result="404",fun="rdmsg")
-    if "type" not in params:
-        r.msg="缺少参数 type"
-        return tojson(r)
-    rec.type = params["type"]
-
     if "user_id" in params:
-        r.data = QueryObj("select * from msg where (src={me} and dst={to}) or (src={to} and dst={me}) order by whn desc limit 0,200".format(me=current_user.id, to=params["user_id"]))
+        r.data = QueryObj("select msg.*, user.name,user.face,user.job from msg,user where msg.src=user.id and (src={me} and dst={to}) or (src={to} and dst={me}) order by whn desc limit 0,200".format(me=current_user.id, to=params["user_id"]))
     r.result="200"
     return Response(tojson(r), mimetype='application/json')
