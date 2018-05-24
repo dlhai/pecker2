@@ -260,19 +260,19 @@ def rdmsg():
     if "mtd" not in params:
         r.msg="缺少参数 mtd"
         return tojson(r)
-    mtd = params["params"]
+    mtd = params["mtd"]
    
     #1.mtd=check 读取书签之后的未读消息(检测新消息)
     if mtd == "check":
-        m=QueryObj("select id,whm from mark where type=1 and user_id="+str(current_user.id))
+        m=QueryObj("select id,whn from mark where type=1 and user_id="+str(current_user.id))
         if len(m)==0:
-            r.data = QueryObj("select msg.*, user.name,user.face,user.job from msg,user where msg.src=user.id and (src={me} or dst={me}) order by whn limit 0,200".format(me=current_user.id, to=params["user_id"]))
+            r.data = QueryObj("select msg.*, user.name,user.face,user.job from msg,user where msg.src=user.id and (src={me} or dst={me}) order by whn limit 0,200".format(me=current_user.id))
             if ( len(r.data)>0):
                 m=obj(user_id=current_user.id, type=1,whn=r.data[0].whn)
-                conn.execute("mark",toinsert(m))
+                conn.execute(toinsert("mark",m))
         else:
             m = m[0]
-            r.data = QueryObj("select msg.*, user.name,user.face,user.job from msg,user where msg.src=user.id and (src={me} or dst={me}) and whn>{whn} order by whn limit 0,200".format(me=current_user.id, to=params["user_id"],whn=m.whn))
+            r.data = QueryObj("select msg.*, user.name,user.face,user.job from msg,user where msg.src=user.id and (src={me} or dst={me}) and whn>{whn} order by whn limit 0,200".format(me=current_user.id,whn=m.whn))
             r.end = (len(r.data) < 200)
             if ( len(r.data)>0):
                 m.whn=r.data[0].whn
@@ -286,7 +286,7 @@ def rdmsg():
         if "user_id" not in params:
             r.msg="缺少参数 user_id"
             return tojson(r)
-        r.data = QueryObj("select msg.*, user.name,user.face,user.job from msg,user where msg.src=user.id and (src={me} and dst={to}) or (src={to} and dst={me}) order by whn desc limit 0,200".format(me=current_user.id, to=params["user_id"]))
+        r.data = QueryObj("select msg.*, user.name,user.face,user.job from msg,user where msg.src=user.id and ((src={me} and dst={to}) or (src={to} and dst={me})) order by whn desc limit 0,200".format(me=current_user.id, to=params["user_id"]))
         r.result="200"
         return Response(tojson(r), mimetype='application/json')
     
