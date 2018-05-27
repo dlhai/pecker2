@@ -77,8 +77,8 @@
 	        <div class="xSystem" data_url="static/system.html">啄木鸟</div>
             <div id="id_portal" class="active" data_url="static/portal.html">资讯</div>
         </div>
-        <div id="modulelist1" class="group" style="font-size: 16px;display:none "></div>
-        <div id="modulelist2" class="group little" style="font-size: 14px; " data_pid="id_portal"><div data_url="/blog/news" >新闻</div><div data_url="/blog/writings">博客</div><div data_url="/blog/docs">文库</div></div>
+        <div id="modulelist1" class="group" style="font-size:16px;display:none"></div>
+        <div id="modulelist2" class="group little" style="font-size:14px;" data_pid="id_portal"><div data_url="/blog/news" >新闻</div><div data_url="/blog/writings">博客</div><div data_url="/blog/docs">文库</div></div>
         <div class="pull-right">
 			<div class="group"><form style="padding:10px;" ><input class="search" type="text" placeholder="搜索" /></form></div>
 			<div id ="user" class="group"><div data_url="static/login.html">登录</div><div data_url="static/login.html">注册</div></div>
@@ -92,6 +92,12 @@
         var g_user, g_role; // 当前用户、当前角色
 
 		InitUser();
+		function msgcheck(){
+			Reqdata( "/msgcheck","", function(res){ 
+				$("#msgcheck").html(res.count!="0"? res.count:"" );
+			});
+		}
+
 		function InitUser(){
 			Reqdata("/curuserinf", "", function (res) {
 				if ( res.is_anonymous == "True"){
@@ -100,7 +106,9 @@
 				else{
 					g_user = res.data;
 					g_user.fields = res.fields;
+					var ss = renderuser();
 					$("#user").html(renderuser());
+					self.setInterval(msgcheck,10000);
 				}
 			});
 		}
@@ -129,7 +137,10 @@
 		});
 
 		function renderuser(){
-			return	`<div style="padding:10px;" ><img src="static/img/mail.jpg" style="height:30px;width:30px;" data_url="/blog/view_msg"></div>
+			var r=`<div style="padding:10px;" >
+					<img src="static/img/mail.jpg" style="height:30px;width:30px;" data_url="/blog/view_msg">
+					<span id="msgcheck" class="badge" style="background-color:#ff0000">50</span>
+				</div>
 				<div class="dropdown" style="padding:7px;" >
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding: 7px 15px;">
 						<span id="usr_name" class="hidden-sm-only">{name}</span>
@@ -147,7 +158,9 @@
 						<li><a>退出</a></li>
 					</ul>
 				</div>`.format(g_user);
+			return r;
 		}
+
 
 /*
         var ws = new WebSocket("ws://echo.websocket.org");

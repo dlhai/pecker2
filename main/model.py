@@ -8,6 +8,31 @@ engine = create_engine('sqlite:///./db/pecker.db')
 metadata = MetaData(engine)
 conn = engine.connect()
 
+db_job = [
+    {"id":"1","sname":"su叶片","name":"叶片超级帐号","su":""},
+    {"id":"2","sname":"风场长","name":"风场主管","su":"1"},
+    {"id":"3","sname":"驻场","name":"驻场","su":"1"},
+    {"id":"4","sname":"su设备","name":"设备超级帐号","su":""},
+    {"id":"5","sname":"驻地长","name":"驻地主管","su":"4"},
+    {"id":"6","sname":"司机","name":"设备司机","su":"4"},
+    {"id":"7","sname":"su仓库","name":"仓库超级帐号","su":""},
+    {"id":"8","sname":"仓库长","name":"仓库主管","su":"7"},
+    {"id":"9","sname":"仓管","name":"仓库管理员","su":"7"},
+    {"id":"10","sname":"su调度","name":"调度超级帐号","su":""},
+    {"id":"11","sname":"调度长","name":"调度主管","su":"10"},
+    {"id":"12","sname":"调度","name":"调度","su":"10"},
+    {"id":"13","sname":"su专家","name":"专家超级帐号","su":""},
+    {"id":"14","sname":"专家","name":"专家","su":"13"},
+    {"id":"15","sname":"su技工","name":"技工超级帐号","su":""},
+    {"id":"16","sname":"队长","name":"维修队长","su":"15"},
+    {"id":"17","sname":"技工","name":"技工","su":"15"},
+    {"id":"18","sname":"su博客","name":"博客超级帐号","su":""},
+    {"id":"19","sname":"公众","name":"公众","su":"18"},
+]
+
+def getjob(id):
+    return list(filter(lambda x: x.id==id, db_job))[0]
+
 db_tbl = [
     { "id": "0", "name": "none", "title": "占位" },
     { "id": "1", "name": "base", "title": "定义" },

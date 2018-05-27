@@ -60,10 +60,9 @@
         function onClickRadio(id) { $("#detail").html(GetSub(g_jobs, "id", id).require);}
 
         function onnextstep() {
-            var formdata = new FormData(document.getElementById("main"));
-            var job = formdata.get("job");
-
-            Reqdata("/reqjob?newjob="+jobid ); // 这部分未完
+            var formdata = new FormData(document.getElementById("joblist"));
+            var jobid = formdata.get("job");
+            Reqdata("/reqjob?newjob="+jobid );
             ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"6"}}`.format(g_user.id));
             window.location.href = '/static/portal.html'
         }

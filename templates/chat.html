@@ -1,0 +1,332 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>消息</title>
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <script charset="utf-8" src="kindedit/kindeditor-all.js"></script>
+    <script charset="utf-8" src="kindedit/lang/zh-CN.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/xpecker.js"></script>
+    <link rel="stylesheet" href="css/cube.css" />
+    <script src="js/Cube.js"></script>
+    <script src="js/blog.js"></script>
+	<style>
+		.table {display: table; width: 100%; border-collapse: collapse;}
+		.table>div {display: table-row; }
+		.table>div>div {display: table-cell; border: 1px solid gray; text-align: center;vertical-align: middle;}
+
+		.list{display: table; width: 100%; border-collapse: collapse;}
+		.list>div{display:table-row;padding:2px;position: relative;left:5px}
+		.list>div>span{position:absolute;left:335px;margin-top: 4px;}
+		.badge{padding: 3px 3px;}
+		.list>div>div{display:table-cell;vertical-align: top;border-bottom:1px solid Silver;padding:3px;}
+		.list>div>div:first-child{width:2px;border-bottom:0px;}
+		.list>div>div:last-of-type{width:2px;border-bottom:0px;}
+		.list .face{width:48px;}
+		.list .face>img{border-radius: 4px;}
+		.list .profile{
+			width:280px;/*要显示文字的宽度*/
+			overflow:hidden; /*超出的部分隐藏起来。*/ 
+			white-space:nowrap;/*不显示的地方用省略号...代替*/
+		}
+
+		.group>div{
+            padding: 0px 3px;
+            line-height: 20px;
+            color: #777777;
+            position: relative;
+            display: inline-block;
+			margin:0 1px;
+		}
+        .group>.active, .group>div:hover, .group>div:focus, .list>div:hover {
+            color: #555555;
+            background-color: #d5d5d5;
+        }
+		.group>div>span{margin-top: 0px;}
+
+	</style>
+
+    <style type="text/css">
+        .lspeech, .rspeech {
+            margin: 2px;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+        }
+
+        .lspeech {
+            justify-content: flex-start;
+            padding-right: 20px;
+        }
+
+        .rspeech {
+            justify-content: flex-end;
+            padding-left: 20px;
+            text-align: right;
+        }
+
+        .lspeech > div, .rspeech > div {
+            margin: 5px;
+        }
+
+        .lspeech > div > img, .rspeech > div > img {
+            border-radius: 4px;
+            border: 1px solid #d0d0d0;
+            width: 48px;
+            height: 48px;
+        }
+        .lspeech > div > span {
+            margin-right: 10px;
+        }
+
+        .lspeech > div > div, .rspeech > div > div {
+            background-color: rgb(255, 253, 247);
+            border: 1px solid rgba(252, 185, 8, 0.35);
+            border-radius: 4px;
+            position: relative;
+            padding: 5px 10px;
+        }
+
+        .lspeech > div > div:before {
+            content: '';
+            width: 0px;
+            height: 0px;
+            position: absolute;
+            top: 6px;
+            left: -6px;
+            border-left: 0px;
+            border-top: 6px solid transparent;
+            border-right: 6px solid rgba(252, 185, 8, 0.35);
+            border-bottom: 6px solid transparent;
+        }
+
+        .lspeech > div > div:after {
+            content: '';
+            width: 0px;
+            height: 0px;
+            position: absolute;
+            top: 7px;
+            left: -5px;
+            border-left: 0px;
+            border-top: 5px solid transparent;
+            border-right: 5px solid rgb(255, 253, 247);
+            border-bottom: 5px solid transparent;
+        }
+
+        .rspeech > div > div:before {
+            content: '';
+            width: 0px;
+            height: 0px;
+            position: absolute;
+            top: 6px;
+            right: -6px;
+            border-left: 6px solid rgba(252, 185, 8, 0.35);
+            border-top: 6px solid transparent;
+            border-right: 0px;
+            border-bottom: 6px solid transparent;
+        }
+
+        .rspeech > div > div:after {
+            content: '';
+            width: 0px;
+            height: 0px;
+            position: absolute;
+            top: 7px;
+            right: -5px;
+            border-left: 5px solid rgb(255, 253, 247);
+            border-top: 5px solid transparent;
+            border-right: 0px;
+            border-bottom: 5px solid transparent;
+        }
+    </style>
+</head>
+<body class="xFCsrow">
+    <section class="xPanel2 xFIfixed" style="width:350px;">
+        <header class="group" onclick="onchggroup(this)">
+			<div id="idols_tab" class="active">我的偶像<span class="badge" style="background-color:#ff0000"></span></div>
+			<div id="fans_tab" >我的粉丝<span class="badge" style="background-color:#ff0000"></span></div>
+			<div id="strangers_tab" >陌生人<span class="badge" style="background-color:#ff0000"></span></div>
+			<div id="sysmsgs_tab" >系统消息<span class="badge" style="background-color:#ff0000"></span></div>
+			</header>
+		<div id="friends" style="padding:0px;">
+			<div id="idols" class="list">
+				{% for x in idols %}
+				<div data_id="{{x.id}}" onclick="onuser(this,{{x.id}})">
+					<div></div>
+					<div class="face"><img width="42px" height="42px" src="{{x.face}}"/></div>
+					<div>
+						<div>{{x.name}}</div>
+						<div class="profile">{{x.profile}}</div>
+					</div>
+					<div></div>
+					<span class="badge" style="background-color:#ff0000">{{x.count}}</span>
+				</div>
+				{% endfor %}
+			</div>
+			<div id="fans" class="list" style="display:none">
+				{% for x in fans %}
+				<div data_id="{{x.id}}" onclick="onuser(this,{{x.id}})">
+					<div></div>
+					<div class="face"><img width="42px" height="42px" src="{{x.face}}"/></div>
+					<div>
+						<div>{{x.name}}</div>
+						<div class="profile">{{x.profile}}</div>
+					</div>
+					<div></div>
+					<span class="badge" style="background-color:#ff0000">{{x.count}}</span>
+				</div>
+				{% endfor %}
+			</div>
+			<div id="strangers" class="list" style="display:none">
+				{% for x in strangers %}
+				<div data_id="{{x.id}}" onclick="onuser(this,{{x.id}})">
+					<div></div>
+					<div class="face"><img width="42px" height="42px" src="{{x.face}}"/></div>
+					<div>
+						<div>{{x.name}}</div>
+						<div class="profile">{{x.profile}}</div>
+					</div>
+					<div></div>
+					<span class="badge" style="background-color:#ff0000">{{x.count}}</span>
+				</div>
+				{% endfor %}
+			</div>
+			<div id="sysmsgs" class="list" style="display:none">
+				{% for x in sysmsgs %}
+				<div data_id="{{x.id}}" onclick="onuser(this,{{x.id}})">
+					<div></div>
+					<div class="face"><img width="42px" height="42px" src="{{x.face}}"/></div>
+					<div>
+						<div>{{x.name}}</div>
+						<div class="profile">{{x.profile}}</div>
+					</div>
+					<div></div>
+					<span class="badge" style="background-color:#ff0000">{{x.count}}</span>
+				</div>
+				{% endfor %}
+			</div>
+
+		</div>
+    </section>
+    <section class="xPanel2">
+        <header id="title">对话</header>
+        <div id="speechlist" class="xScroll" style="height:100px;flex-grow: 1;"></div>
+        <footer class="xFCsrow xFIfixed" style="padding:10px; height: 200px; width: 100%; align-items: flex-end;">
+            <textarea id="kereplay" class="xrAngle" style="margin-right:10px; padding:5px 10px; height:180px;width:100px;resize:none;"></textarea>
+            <div class="xFIfixed"><button onclick="onsend()">发送</button></div>
+        </footer>
+	</section>
+<script type="text/javascript">
+    var g_user = parent.g_user, g_focus_id;
+    if (g_user == undefined) {Reqdata("/curuserinf", "", function (res) {g_user = res.data;g_user.fields = res.fields;});}
+
+	var int=self.setInterval(checknewmsg,3000);
+
+    var kereplay;
+    KindEditor.ready(function (K) {
+        kereplay = K.create('#kereplay', {
+            uploadJson: '/cr', resizeMode:0,items: ['cut', 'copy', 'paste', '|', 'formatblock', 'fontname', 'fontsize', 'forecolor', 'hilitecolor', 'bold', 'italic',
+                'underline', 'removeformat', '|', 'link', 'unlink', '|', 'fullscreen',]
+        });
+    });
+
+    function onchggroup(This) {
+		var node = $(event.target);
+		$(This).children().removeClass("active");
+		node.addClass("active");
+		if (node.attr("id") == "idols_tab" ){
+			$("#friends").children().hide();
+			$("#idols").show();
+		}
+		else if (node.attr("id") == "fans_tab" ){
+			$("#friends").children().hide();
+			$("#fans").show();
+		}
+		else if (node.attr("id") == "sysmsgs_tab" ){
+			$("#friends").children().hide();
+			$("#sysmsgs").show();
+		}
+		else if (node.attr("id") == "strangers_tab" ){
+			$("#friends").children().hide();
+			$("#strangers").show();
+		}
+    }
+    function onuser(This, id) {
+        g_focus_id = id;
+        $("#title").html( "与 <b>"+$(This).find("div > div:first-child").html() +"</b> 会话");
+		Reqdata( "/rdmsg?mtd=chat&user_id="+id,"", function(res){
+            res.data.map(x =>{x.prof = GetSub(db_job, "id", x.job).sname});
+            $("#speechlist").html(res.data.map(x => renderspeech(x)).join(""));
+		});
+    }
+
+    function onsend() {
+        kereplay.sync();//将KindEditor的数据同步到textarea标签。
+        var value_content = $("#kereplay").val();
+		//KindEditor.html("#s_content","");  
+		kereplay.html("");
+
+        var fd = new FormData();
+        fd.append("body", value_content);
+        SendForm('/msgto?type=2&user_id=' + g_focus_id, fd, "", function (res) {
+			checknewmsg();
+			Reqdata( "/rdmsg?mtd=chat&user_id="+g_focus_id,"", function(res){
+				res.data.map(x =>{x.prof = GetSub(db_job, "id", x.job).sname});
+				$("#speechlist").html(res.data.map(x => renderspeech(x)).join(""));
+			});
+		});
+    }
+
+    function renderspeech(speech) {
+        if (speech.src != g_user.id) {
+            r = `<div class="lspeech"><div><img src="{face}" /></div>
+                <div><span>【{prof}】{name}</span>{whn}<div>{say}</div>
+                </div></div>`.format(speech)
+        }
+        else {
+            r =`<div class="rspeech"><div>{whn}<span>【{prof}】{name}</span>
+                    <div>{say}</div></div><div><img src="{face}" /></div>
+            </div>`.format(speech)
+        }
+        return r;
+    }
+	function checknewmsg(){
+		Reqdata( "/msgcheckdetail","", function(res){
+			["fans","idols","strangers","sysmsgs"].forEach(sheet=>{
+				var count = 0;
+				res[sheet].forEach(user=>{
+					count += parseInt(user.count);
+					var node = $("[data_id="+user.id+"]");
+					if ( node.length != 0){
+						node.children("span").html(user.count);
+					}
+					else{
+						Reqdata( "/userbrief?id="+user.id,sheet, function(res2,ctx){
+							var userhtml=`<div data_id="{u.id}" onclick="onuser(this,{u.id})">
+								<div></div>
+								<div class="face"><img width="42px" height="42px" src="{u.face}"/></div>
+								<div>
+									<div>{u.name}</div>
+									<div class="profile">{u.profile}</div>
+								</div>
+								<div></div>
+								<span class="badge" style="background-color:#ff0000">{u.count}</span>
+							</div>`.format(s=s,u=res2.user)
+							$("#"+ctx).append(userhtml);
+						});
+					}
+				});
+				count = count != 0 ? count : "";
+				$("#"+sheet+"_tab").children("span").html(count);
+			});
+		});
+	}
+</script>
+
+</body>
+</html>
