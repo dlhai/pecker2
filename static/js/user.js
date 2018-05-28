@@ -108,14 +108,21 @@ function onusersave(user) {
 
     var formdata = new FormData(document.getElementById("form_useredit"));
     var fd = new FormData();
+	var count = 0;
     for (var x in g_chged) {
         if (x == "face" || x == "idimg")
             fd.append(x, $("#" + x).get(0).files[0]);
         else
             fd.append(x, formdata.get(x));
+		count++;
     }
-    for (var x in g_datechged)
+    for (var x in g_datechged){
 		fd.append(x, formdata.get(x));
+		count++
+	}
+	if ( count == 0)
+		return;
+
 	g_chged = new Object();
 	g_datechged = new Object();
 

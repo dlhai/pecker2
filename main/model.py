@@ -29,9 +29,9 @@ db_job = [
     {"id":"18","sname":"su博客","name":"博客超级帐号","su":""},
     {"id":"19","sname":"公众","name":"公众","su":"18"},
 ]
-
 def getjob(id):
-    return list(filter(lambda x: x.id==id, db_job))[0]
+    id=str(id)
+    return list(filter(lambda x: x["id"]==id, db_job))[0]
 
 db_tbl = [
     { "id": "0", "name": "none", "title": "占位" },

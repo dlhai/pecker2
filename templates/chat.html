@@ -222,7 +222,7 @@
         </footer>
 	</section>
 <script type="text/javascript">
-    var g_user = parent.g_user, g_focus_id;
+    var g_user = parent.g_user, g_focus_id, g_brief = new Array();
     if (g_user == undefined) {Reqdata("/curuserinf", "", function (res) {g_user = res.data;g_user.fields = res.fields;});}
 
 	var int=self.setInterval(checknewmsg,3000);
@@ -284,14 +284,16 @@
 
     function renderspeech(speech) {
         if (speech.src != g_user.id) {
-            r = `<div class="lspeech"><div><img src="{face}" /></div>
-                <div><span>【{prof}】{name}</span>{whn}<div>{say}</div>
-                </div></div>`.format(speech)
+			var srcfmt = {"1":`<div class="lspeech"><div><img src="{face}" /></div><div><span>【{prof}】{name}</span>{whn}<div>{say}</div></div></div>`,
+			"2":`<div class="lspeech"><div><img src="{face}" /></div><div><span>【{prof}】{name}</span>{whn}<div>{say}</div></div></div>`,
+			"3":`<div class="lspeech"><div><img src="{face}" /></div><div><span>【{prof}】{name}</span>{whn}<div>{say}</div></div></div>`, }
+
+            r = srcfmt[speech.type].format(mix(speech,g_brief[speech.src]))
         }
         else {
             r =`<div class="rspeech"><div>{whn}<span>【{prof}】{name}</span>
                     <div>{say}</div></div><div><img src="{face}" /></div>
-            </div>`.format(speech)
+            </div>`.format(mix(speech,g_brief[speech.src]))
         }
         return r;
     }
@@ -299,25 +301,29 @@
 		Reqdata( "/msgcheckdetail","", function(res){
 			["fans","idols","strangers","sysmsgs"].forEach(sheet=>{
 				var count = 0;
+				var s = sheet=="sysmsgs"?"s":"";
 				res[sheet].forEach(user=>{
 					count += parseInt(user.count);
-					var node = $("[data_id="+user.id+"]");
+					var node = $("[data_id="+s+user.id+"]");
 					if ( node.length != 0){
 						node.children("span").html(user.count);
 					}
 					else{
-						Reqdata( "/userbrief?id="+user.id,sheet, function(res2,ctx){
-							var userhtml=`<div data_id="{u.id}" onclick="onuser(this,{u.id})">
+						Reqdata( "/userbrief?id="+user.id,{sheet:sheet,s:s,count:user.count}, function(res2,ctx){
+							g_brief[res.user.id]=res.user;
+							res2.user.s=ctx.s;
+							res2.user.count=ctx.count;
+							var userhtml=`<div data_id="{s}{id}" onclick="onuser(this,{id})">
 								<div></div>
-								<div class="face"><img width="42px" height="42px" src="{u.face}"/></div>
+								<div class="face"><img width="42px" height="42px" src="{face}"/></div>
 								<div>
-									<div>{u.name}</div>
-									<div class="profile">{u.profile}</div>
+									<div>{name}</div>
+									<div class="profile">{profile}</div>
 								</div>
 								<div></div>
-								<span class="badge" style="background-color:#ff0000">{u.count}</span>
-							</div>`.format(s=s,u=res2.user)
-							$("#"+ctx).append(userhtml);
+								<span class="badge" style="background-color:#ff0000">{count}</span>
+							</div>`.format(res2.user)
+							$("#"+ctx.sheet).append(userhtml);
 						});
 					}
 				});

@@ -11,18 +11,27 @@ from main.tools import *
 @app.route("/userbrief")
 @login_required
 def userbrief():
-    param = request.args.to_dict()
+    params = request.args.to_dict()
     r = obj(result="404",fun="userbrief")
-    if "id" not in param:
+    if "id" not in params:
         r.msg = "缺少参数 id"
         return tojson(r)
 
-    r.user = QueryObj("select id,name,face,profile,job from user where id=%s"%params["id"])
+    r.user = QueryObj("select id,name,face,profile,sex,job from user where id=%s"%params["id"])
     if len(r.user)==0:
         r.msg = "id不存在"
         return tojson(r)
     r.user = r.user[0]
-    r.user.jobname = getjob(r.user.job).sname
+    r.user.jobname = getjob(r.user.job)["sname"]
+    if r.user.face == "":
+        if r.user.sex == "1":
+            r.user.face = "img/face_default_male.png"
+        elif r.user.sex == "0":
+            r.user.face = "img/face_default_female.png"
+        else:
+            r.user.face = "img/face_default.png"
+
+    r.result=200
     return tojson(r)
 
 #申请转换职业
@@ -30,17 +39,17 @@ def userbrief():
 @app.route("/reqjob")
 @login_required
 def chgjob():
-    param = request.args.to_dict()
+    params = request.args.to_dict()
     r = obj(result="404",fun="reqjob")
-    if "newjob" not in param:
+    if "newjob" not in params:
         r.msg = "缺少参数 newjob"
         return tojson(r)
     newjob=params["newjob"]
 
     rec = obj()
-    rec.type = params["type"]
+    rec.type = 1 #1changejob
     rec.src = current_user.id
-    rec.dst = getjob(newjob).su
+    rec.dst = getjob(newjob)["su"]
     if rec.dst =="":
         r.msg = "newjob不是有效值"
         return tojson(r)

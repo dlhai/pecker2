@@ -3,7 +3,6 @@ from flask import Flask,request, Response, jsonify
 from flask_login import (LoginManager, login_required, login_user,
                              logout_user, UserMixin,current_user)
 import json
-
 from main2 import app,login_manager,check
 from main.tools import *
 from main.model import *
@@ -29,6 +28,7 @@ def reg():
     ret=check(js,"reg")
     if ret.result == "200":
         js["val"]["status"]="1"
+        js["val"]["job"]="19"
         fields=",".join(map( lambda x: "'"+x+"'", js["val"].keys()))
         values=",".join(map( lambda x: "'"+x+"'", js["val"].values()))
         sql = "insert into user({0}) values({1})".format(fields,values)

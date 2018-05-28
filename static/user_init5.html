@@ -63,7 +63,7 @@
             var formdata = new FormData(document.getElementById("joblist"));
             var jobid = formdata.get("job");
             Reqdata("/reqjob?newjob="+jobid );
-            ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"6"}}`.format(g_user.id));
+            ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"8"}}`.format(g_user.id));
             window.location.href = '/static/portal.html'
         }
     </script>

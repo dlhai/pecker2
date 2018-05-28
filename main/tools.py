@@ -40,6 +40,6 @@ def newdir(path):
 
 import pdb
 if __name__ == "__main__":
-    o = obj(a=1,b=2,c="as")
-    txt=tosql("dsd",o)
-    a=0
+    rec = obj()
+    rec.type = 1 #1changejob
+    rec.sss=2
