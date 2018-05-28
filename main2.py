@@ -18,7 +18,6 @@ from flask_login import (LoginManager, login_required, login_user,
 
 
 import os.path
-import json
 import pdb
 
 app = Flask(__name__)

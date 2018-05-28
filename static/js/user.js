@@ -97,8 +97,11 @@ function hidechgpwd(This) {
     });
 }
 
-function onusersave(dlg) {
-	var user = dlg.user;
+function ondlgusersave(dlg) {
+    onusersave(dlg.user);
+}
+
+function onusersave(user) {
     delete g_chged.pwd;
     delete g_chged.newpwd1;
     delete g_chged.newpwd2;
@@ -129,7 +132,7 @@ function onusersave(dlg) {
 var g_chged = new Object();
 $("html").on("change", function () {
     var node = event.target;
-    if (node.tagName == "INPUT"){
+    if (node.tagName == "INPUT" || node.tagName == "SELECT"){
 		var name=$(node).attr("name");
         g_chged[name] = true;
 	}
@@ -170,7 +173,7 @@ function onuseradd() {
         dlg2.Add(`<form id="form_useredit" style="height:350px;">` + xruserlive(newuser, g_user.fields) + `</form>`);
         dlg2.Show();
 		dlg2.user = newuser;
-        dlg2.submit = onusersave;
+        dlg2.submit = ondlgusersave;
     }
     dlg.Show();
 }
@@ -180,6 +183,6 @@ function onuseredit() {
 	dlg.Add(`<form id="form_useredit" style="height:350px;">` + xruserlive(g_focus, g_user.fields) + `</form>`);
     dlg.Show();
 	dlg.user = g_focus;
-    dlg.submit = onusersave;
+    dlg.submit = ondlgusersave;
 }
 

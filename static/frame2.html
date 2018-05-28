@@ -136,7 +136,16 @@
 			$('#'+pid).addClass("active");
 		});
 
-		function renderuser(){
+        function renderuser() {
+            if (g_user.face == "") {
+                if (g_user.sex == "1")
+                    g_user.face = "img/face_default_male.png";
+                else if (g_user.sex == "0")
+                    g_user.face = "img/face_default_female.png";
+                else
+                    g_user.face = "img/face_default.png";
+            }
+
 			var r=`<div style="padding:10px;" >
 					<img src="static/img/mail.jpg" style="height:30px;width:30px;" data_url="/blog/view_msg">
 					<span id="msgcheck" class="badge" style="background-color:#ff0000">50</span>
