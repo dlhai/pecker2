@@ -20,6 +20,21 @@ from main.tools import *
 #      2message   curuser touser                                          say
 #      3notify    system  relationuser table_id   row_id                  say
 
+#用户消息界面，好友列表
+@app.route('/blog/chat')
+@login_required
+def chat():
+    return render_template("chat.html")
+
+@app.route('/blog/rdfriends')
+@login_required
+def rdfriends():
+    r = obj(result="200",fun="msgcheck")
+    r.fans = QueryObj("select id,name,face,profile from user where id in (select fans_id from follow where idol_id=%s)"%current_user.id)
+    r.idols = QueryObj("select id,name,face,profile from user where id in (select idol_id from follow where fans_id=%s)"%current_user.id)
+    return tojson(r)
+
+
 #主界面，检查未读消息数量
 @app.route('/msgcheck')
 @login_required
@@ -53,30 +68,6 @@ def msgcheckdetail():
 
     r.sysmsgs = QueryObj("select src as id, count(*) as count from msg where type!=2 and readtime is null and dst=%s group by src"%current_user.id)
     return tojson(r)
-
-#用户消息界面，好友列表
-@app.route('/blog/view_msg')
-@login_required
-def view_msg():
-    param = request.args.to_dict()
-    fans = QueryObj("select id,name,face,profile from user where id in (select fans_id from follow where idol_id=%s)"%current_user.id)
-    idols = QueryObj("select id,name,face,profile from user where id in (select idol_id from follow where fans_id=%s)"%current_user.id)
-
-    #news = QueryObj("select src,user.name,user.face,user.profile,count(*) as count from msg,user where msg.src=user.id and type=2 and readtime is null and dst=%s group by src"%current_user.id)
-    strangers = []
-    #for x in news:
-    #    t = filter( lambda y: y.id ==x.src, fans)
-    #    if len(t) > 0:
-    #        t[0].count = x.count
-    #        continue
-    #    t = filter( lambda y: y.id ==x.src, idols)
-    #    if len(t) > 0:
-    #        t[0].count = x.count
-    #        continue
-    #    strangers.append(x)
-
-    sysmsgs = []#QueryObj("select src,user.name,user.profile,count(*) as count from msg,user where msg.src=user.id and type!=2 and readtime is null and dst=%s group by src"%current_user.id)
-    return render_template("chat.html",fans=fans,idols=idols,strangers=strangers,sysmsgs=sysmsgs, me=current_user)
 
 
 #给某人发消息
@@ -134,6 +125,6 @@ def rdmsg():
     else:
         sql = "select * from msg where type=2 and ((src={me} and dst={to}) or (src={to} and dst={me}))"
 
-    r.data = QueryObj(sql+" order by whn limit 0,200".format(me=current_user.id, to=params["user_id"]))
+    r.data = QueryObj((sql+" order by whn limit 0,200").format(me=current_user.id, to=params["user_id"]))
     r.result="200"
     return Response(tojson(r), mimetype='application/json')

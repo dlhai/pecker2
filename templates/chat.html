@@ -154,63 +154,10 @@
 			<div id="sysmsgs_tab" >系统消息<span class="badge" style="background-color:#ff0000"></span></div>
 			</header>
 		<div id="friends" style="padding:0px;">
-			<div id="idols" class="list">
-				{% for x in idols %}
-				<div data_id="{{x.id}}" onclick="onuser(this,{{x.id}})">
-					<div></div>
-					<div class="face"><img width="42px" height="42px" src="{{x.face}}"/></div>
-					<div>
-						<div>{{x.name}}</div>
-						<div class="profile">{{x.profile}}</div>
-					</div>
-					<div></div>
-					<span class="badge" style="background-color:#ff0000">{{x.count}}</span>
-				</div>
-				{% endfor %}
-			</div>
-			<div id="fans" class="list" style="display:none">
-				{% for x in fans %}
-				<div data_id="{{x.id}}" onclick="onuser(this,{{x.id}})">
-					<div></div>
-					<div class="face"><img width="42px" height="42px" src="{{x.face}}"/></div>
-					<div>
-						<div>{{x.name}}</div>
-						<div class="profile">{{x.profile}}</div>
-					</div>
-					<div></div>
-					<span class="badge" style="background-color:#ff0000">{{x.count}}</span>
-				</div>
-				{% endfor %}
-			</div>
-			<div id="strangers" class="list" style="display:none">
-				{% for x in strangers %}
-				<div data_id="{{x.id}}" onclick="onuser(this,{{x.id}})">
-					<div></div>
-					<div class="face"><img width="42px" height="42px" src="{{x.face}}"/></div>
-					<div>
-						<div>{{x.name}}</div>
-						<div class="profile">{{x.profile}}</div>
-					</div>
-					<div></div>
-					<span class="badge" style="background-color:#ff0000">{{x.count}}</span>
-				</div>
-				{% endfor %}
-			</div>
-			<div id="sysmsgs" class="list" style="display:none">
-				{% for x in sysmsgs %}
-				<div data_id="{{x.id}}" onclick="onuser(this,{{x.id}})">
-					<div></div>
-					<div class="face"><img width="42px" height="42px" src="{{x.face}}"/></div>
-					<div>
-						<div>{{x.name}}</div>
-						<div class="profile">{{x.profile}}</div>
-					</div>
-					<div></div>
-					<span class="badge" style="background-color:#ff0000">{{x.count}}</span>
-				</div>
-				{% endfor %}
-			</div>
-
+			<div id="idols" class="list"></div>
+			<div id="fans" class="list" style="display:none"></div>
+			<div id="strangers" class="list" style="display:none"></div>
+			<div id="sysmsgs" class="list" style="display:none"></div>
 		</div>
     </section>
     <section class="xPanel2">
@@ -222,8 +169,30 @@
         </footer>
 	</section>
 <script type="text/javascript">
-    var g_user = parent.g_user, g_focus_id, g_brief = new Array();
-    if (g_user == undefined) {Reqdata("/curuserinf", "", function (res) {g_user = res.data;g_user.fields = res.fields;});}
+    var g_user = parent.g_user, g_focus_id, g_sheet="idols", g_brief = new Array();
+    if (g_user == undefined) {
+		Reqdata("/curuserinf", "", function (res) {
+			g_user = res.data;
+			g_user.fields = res.fields;
+			g_brief[g_user.id]=g_user});
+	}
+	Reqdata( "/blog/rdfriends", "", function(res){
+		tpl=`<div data_id="{id}" onclick="onuser(this,{id})">
+			<div></div>
+			<div class="face"><img width="42px" height="42px" src="{face}"/></div>
+			<div>
+				<div>{name}</div>
+				<div class="profile">{profile}</div>
+			</div>
+			<div></div>
+			<span class="badge" style="background-color:#ff0000"></span>
+		</div>`
+
+		$("#idols").html(res.idols.map(x=>tpl.format(x)).join(""));
+		$("#fans").html(res.fans.map(x=>tpl.format(x)).join(""));
+		res.idols.forEach(x=>g_brief[x.id]=x);
+		res.fans.forEach(x=>g_brief[x.id]=x);
+	});
 
 	var int=self.setInterval(checknewmsg,3000);
 
@@ -242,24 +211,28 @@
 		if (node.attr("id") == "idols_tab" ){
 			$("#friends").children().hide();
 			$("#idols").show();
+			g_sheet="idols";
 		}
 		else if (node.attr("id") == "fans_tab" ){
 			$("#friends").children().hide();
 			$("#fans").show();
+			g_sheet="fans";
 		}
 		else if (node.attr("id") == "sysmsgs_tab" ){
 			$("#friends").children().hide();
 			$("#sysmsgs").show();
+			g_sheet="sysmsgs";
 		}
 		else if (node.attr("id") == "strangers_tab" ){
 			$("#friends").children().hide();
 			$("#strangers").show();
+			g_sheet="strangers";
 		}
     }
     function onuser(This, id) {
         g_focus_id = id;
         $("#title").html( "与 <b>"+$(This).find("div > div:first-child").html() +"</b> 会话");
-		Reqdata( "/rdmsg?mtd=chat&user_id="+id,"", function(res){
+		Reqdata( "/rdmsg?type="+g_sheet+"&user_id="+id,"", function(res){
             res.data.map(x =>{x.prof = GetSub(db_job, "id", x.job).sname});
             $("#speechlist").html(res.data.map(x => renderspeech(x)).join(""));
 		});
@@ -284,11 +257,20 @@
 
     function renderspeech(speech) {
         if (speech.src != g_user.id) {
-			var srcfmt = {"1":`<div class="lspeech"><div><img src="{face}" /></div><div><span>【{prof}】{name}</span>{whn}<div>{say}</div></div></div>`,
-			"2":`<div class="lspeech"><div><img src="{face}" /></div><div><span>【{prof}】{name}</span>{whn}<div>{say}</div></div></div>`,
-			"3":`<div class="lspeech"><div><img src="{face}" /></div><div><span>【{prof}】{name}</span>{whn}<div>{say}</div></div></div>`, }
+			speech.bold="";
+			speech.button="";
+			if ( speech.readtime == "" )
+				speech.bold='style="font-weight:bold;"'
+			if ( speech.type == "1" )
+				speech.button=`<input type="button" value="同意"><input type="button" value="拒绝">`
 
-            r = srcfmt[speech.type].format(mix(speech,g_brief[speech.src]))
+			tpl=`<div class="lspeech">
+					<div><img src="{face}" /></div>
+					<div><span>【{prof}】{name}</span>{whn}
+					<div {bold}>{say}</div>{button}</div>
+				</div>`
+				m = mix(speech,g_brief[speech.src]);
+            r = tpl.format(mix(speech,g_brief[speech.src]))
         }
         else {
             r =`<div class="rspeech"><div>{whn}<span>【{prof}】{name}</span>
