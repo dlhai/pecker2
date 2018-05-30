@@ -16,9 +16,10 @@ from main.tools import *
 ############## websocket功能 ###############################################
 
 #when  type       src      dst         table_id   row_id  jsn             say     readtime    result
-#      1changejob curuser jobmanager                      {newjob:jobid}  say
-#      2message   curuser touser                                          say
-#      3notify    system  relationuser table_id   row_id                  say
+#      0message   curuser touser                                          say
+#      1notify    system  relationuser table_id   row_id                  say
+#
+#      5changejob curuser jobmanager                      {newjob:jobid}  say
 
 #用户消息界面，好友列表
 @app.route('/blog/chat')
@@ -90,7 +91,7 @@ def msgto():
         return tojson(r)
     rec.dst = params["user_id"]
 
-    if rec.type == "1":#1changejob
+    if rec.type == "5":#1changejob
         rec.jsn=form["jsn"]
 
     htm = form["body"]
@@ -122,11 +123,68 @@ def rdmsg():
         r.msg="缺少参数 user_id"
         return tojson(r)
     if params["type"] == "sysmsgs":
-        sql = "select * from msg where type!=2 and ((src={me} and dst={to}) or (src={to} and dst={me}))"
+        sql = "select * from msg where type!=0 and ((src={me} and dst={to}) or (src={to} and dst={me}))"
     else:
-        sql = "select * from msg where type=2 and ((src={me} and dst={to}) or (src={to} and dst={me}))"
-
+        sql = "select * from msg where type=0 and ((src={me} and dst={to}) or (src={to} and dst={me}))"
     r.data = QueryObj((sql+" order by whn limit 0,200").format(me=current_user.id, to=params["user_id"]))
     r.result="200"
-    ss = tojson(r)
+    vals = obj(readtime=datetime.datetime.now())
+    whrs = obj(dst=current_user.id,src=params["user_id"], type= 1 if params["type"]=="sysmsgs" else 0)
+    conn.execute(toupdate("msg",vals,whrs))
+
+    return Response(tojson(r), mimetype='application/json')
+
+
+#处理需要批准的消息
+@app.route("/msgdeal", methods=['POST'])
+@login_required
+def msgdeal():
+    params = request.args.to_dict()
+    r = obj(result="404",fun="msgdeal")
+
+    if "id" not in params:
+        r.msg="缺少参数 id"
+        return tojson(r)
+
+    if "result" not in params:
+        r.msg="缺少参数 result"
+        return tojson(r)
+
+    rec = QueryObj( "select * from msg where id="+params["id"] )
+    if len(rec) != 1:
+        r.msg="id 不正确"
+        return tojson(r)
+    rec = rec[0]
+    if rec.result != "":
+        r.msg="id 不正确"
+        return tojson(r)
+
+    if rec.type == "5":
+        vals = obj(readtime=datetime.datetime.now(),result=params["result"])
+        whrs = obj(id=params["id"])
+        conn.execute(toupdate("msg",vals,whrs))
+        aa=rec.jsn.replace("'", '"')
+        aa=time.strftime("%m-%d %H:%M", rec.whn)
+        jsn = json.loads(rec.jsn.replace("'", '"'))
+        msg = obj(type=2,whn=datetime.datetime.now(),src=current_user.id,dst=rec.src)
+        msg.whn = datetime.datetime.now()
+        if vals.result == "1":
+            msg.say ="您于【%s】发起的职业变更申请被批准了，您的职业已经变更为【%s】"%( time.strftime("%m-%d %H:%M", rec.whn), getjob(jsn.newjob)["sname"])
+        else:
+            msg.say ="您于【%s】发起的职业变更申请被拒绝了。"%time.strftime("%m-%d %H:%M", rec.whn)
+        conn.execute(toinsert("msg",msg))
+
+    htm = form["body"]
+    rec.say = htm.replace("'", "''") #sql字符串边界转义
+    if len(rec.say) < 2:
+        r.msg="内容不能少于2字节"
+        return tojson(r)
+    if len(rec.say) > 2048:
+        r.msg="内容大于少于2048字节"
+        return tojson(r)
+
+    rec.src = current_user.id
+    rec.whn = datetime.datetime.now()
+    conn.execute(toinsert("msg",rec))
+    r.result="200"
     return Response(tojson(r), mimetype='application/json')

@@ -47,7 +47,7 @@ def chgjob():
     newjob=params["newjob"]
 
     rec = obj()
-    rec.type = 1 #1changejob
+    rec.type = 5 #1changejob
     rec.src = current_user.id
     rec.dst = getjob(newjob)["su"]
     if rec.dst =="":

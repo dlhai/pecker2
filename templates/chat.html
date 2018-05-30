@@ -236,7 +236,7 @@
     function onuser(This, id) {
         g_focus_id = id;
         $("#title").html( "与 <b>"+$(This).find("div > div:first-child").html() +"</b> 会话");
-		Reqdata( "/rdmsg?type="+g_sheet+"&user_id="+id,"", function(res){
+		Reqdata( "/rdmsg?type="+g_sheet+"&user_id="+g_focus_id,"", function(res){
             $("#speechlist").html(res.data.map(x => renderspeech(x)).join(""));
 		});
     }
@@ -260,28 +260,38 @@
     function renderspeech(speech) {
         if (speech.src != g_user.id) {
 			speech.bold="";
-            speech.button = "";
-            user g_brief[speech.src]
+            speech.deal = "";
+            user=g_brief[speech.src];
 			if ( speech.readtime == "" )
 				speech.bold='style="font-weight:bold;"'
             if (speech.type == "1") {
-                speech.button = `<div style="float:right"><input type="button" value="同意"><input type="button" value="拒绝"></div>`
-                jsn = $.parseJSON(speech.jsn.replace(/'/g, '"'));
+                var jsn = $.parseJSON(speech.jsn.replace(/'/g, '"'));
                 speech.say = "您好，我想把职位从【{0}】变更为【{1}】请予以批准!".format(user.prof,getjob(jsn.newjob).sname)
+				if ( speech.result=="0"){
+					speech.deal = `<div style="height:30px;padding: 5px;"><div style="float:right">已拒绝</div>`
+				}
+				else if ( speech.result=="1"){
+					speech.deal = `<div style="height:30px;padding: 5px;"><div style="float:right">已批准</div>`
+				}
+				else{
+					speech.deal = `<div style="height:30px;padding: 5px;"><div style="float:right">
+							<input type="button" value="批准" onclick="msgdeal({id},1)">
+							<input type="button" value="拒绝" onclick="msgdeal({id},0)" style="margin-left:10px;">
+						</div></div>`.format(speech)
+				}
             }
 
 			tpl=`<div class="lspeech">
 					<div><img src="{face}" /></div>
 					<div><span>【{prof}】{name}</span>{whn}
-					<div {bold}>{say}{button}</div></div>
+					<div {bold}>{say}{deal}</div></div>
 				</div>`
-				m = mix(speech,g_brief[speech.src]);
-            r = tpl.format(mix(speech,g_brief[speech.src]))
+            r = tpl.format(mix(speech,user))
         }
         else {
             r =`<div class="rspeech"><div>{whn}<span>【{prof}】{name}</span>
                     <div>{say}</div></div><div><img src="{face}" /></div>
-            </div>`.format(mix(speech,g_brief[speech.src]))
+            </div>`.format(mix(speech,user))
         }
         return r;
     }
@@ -314,9 +324,21 @@
 							$("#"+ctx.sheet).append(userhtml);
 						});
 					}
+					if (user.id==g_focus_id){
+						Reqdata( "/rdmsg?type="+g_sheet+"&user_id="+g_focus_id,"", function(res3){
+							$("#speechlist").html(res3.data.map(x => renderspeech(x)).join(""));
+						});
+					}
 				});
 				count = count != 0 ? count : "";
 				$("#"+sheet+"_tab").children("span").html(count);
+			});
+		});
+	}
+	function msgdeal(id,result){
+		Reqdata("/msgdeal?id="+id+"&result="+result, "", function(res){
+			Reqdata( "/rdmsg?type="+g_sheet+"&user_id="+g_focus_id,"", function(res3){
+				$("#speechlist").html(res3.data.map(x => renderspeech(x)).join(""));
 			});
 		});
 	}
