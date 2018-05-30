@@ -73,6 +73,7 @@ def curuserinf():
         if len(qr) <= 0:
             return '{"roleuser":"'+param['account']+'","result":404}\n'
         user = qr[0]
+        user.prof=getjob(user.job)["sname"]
         del user.pwd
         ret.data = user
 

@@ -30,10 +30,11 @@ def chat():
 @login_required
 def rdfriends():
     r = obj(result="200",fun="msgcheck")
-    r.fans = QueryObj("select id,name,face,profile from user where id in (select fans_id from follow where idol_id=%s)"%current_user.id)
-    r.idols = QueryObj("select id,name,face,profile from user where id in (select idol_id from follow where fans_id=%s)"%current_user.id)
+    r.fans = QueryObj("select id,name,face,profile,job,depart_id from user where id in (select fans_id from follow where idol_id=%s)"%current_user.id)
+    r.idols = QueryObj("select id,name,face,profile,job,depart_id from user where id in (select idol_id from follow where fans_id=%s)"%current_user.id)
+    [ setattr(x,"prof",getjob(x.job)["sname"]) for x in r.fans]
+    [ setattr(x,"prof",getjob(x.job)["sname"]) for x in r.idols]
     return tojson(r)
-
 
 #主界面，检查未读消息数量
 @app.route('/msgcheck')
@@ -127,4 +128,5 @@ def rdmsg():
 
     r.data = QueryObj((sql+" order by whn limit 0,200").format(me=current_user.id, to=params["user_id"]))
     r.result="200"
+    ss = tojson(r)
     return Response(tojson(r), mimetype='application/json')

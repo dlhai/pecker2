@@ -112,6 +112,9 @@ var db_job = [
 	{"id":"18","sname":"su博客","name":"博客超级帐号"},
 	{"id":"19","sname":"公众","name":"公众"},
 ]
+function getjob(id) {
+    return GetArItem(db_job, "id", id);
+}
 
 function GetRoleUser(name) {
     ReqdataS("/roleuserall", "", function (res) { db_roleusers = res.data; });

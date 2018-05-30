@@ -171,11 +171,15 @@
 <script type="text/javascript">
     var g_user = parent.g_user, g_focus_id, g_sheet="idols", g_brief = new Array();
     if (g_user == undefined) {
-		Reqdata("/curuserinf", "", function (res) {
-			g_user = res.data;
-			g_user.fields = res.fields;
-			g_brief[g_user.id]=g_user});
-	}
+        Reqdata("/curuserinf", "", function (res) {
+            g_user = res.data;
+            g_user.fields = res.fields;
+            g_brief[g_user.id] = g_user
+        });
+    }
+    else
+        g_brief[g_user.id] = g_user;
+
 	Reqdata( "/blog/rdfriends", "", function(res){
 		tpl=`<div data_id="{id}" onclick="onuser(this,{id})">
 			<div></div>
@@ -233,7 +237,6 @@
         g_focus_id = id;
         $("#title").html( "与 <b>"+$(This).find("div > div:first-child").html() +"</b> 会话");
 		Reqdata( "/rdmsg?type="+g_sheet+"&user_id="+id,"", function(res){
-            res.data.map(x =>{x.prof = GetSub(db_job, "id", x.job).sname});
             $("#speechlist").html(res.data.map(x => renderspeech(x)).join(""));
 		});
     }
@@ -248,8 +251,7 @@
         fd.append("body", value_content);
         SendForm('/msgto?type=2&user_id=' + g_focus_id, fd, "", function (res) {
 			checknewmsg();
-			Reqdata( "/rdmsg?mtd=chat&user_id="+g_focus_id,"", function(res){
-				res.data.map(x =>{x.prof = GetSub(db_job, "id", x.job).sname});
+			Reqdata( "/rdmsg?user_id="+g_focus_id,"", function(res){
 				$("#speechlist").html(res.data.map(x => renderspeech(x)).join(""));
 			});
 		});
@@ -258,16 +260,20 @@
     function renderspeech(speech) {
         if (speech.src != g_user.id) {
 			speech.bold="";
-			speech.button="";
+            speech.button = "";
+            user g_brief[speech.src]
 			if ( speech.readtime == "" )
 				speech.bold='style="font-weight:bold;"'
-			if ( speech.type == "1" )
-				speech.button=`<input type="button" value="同意"><input type="button" value="拒绝">`
+            if (speech.type == "1") {
+                speech.button = `<div style="float:right"><input type="button" value="同意"><input type="button" value="拒绝"></div>`
+                jsn = $.parseJSON(speech.jsn.replace(/'/g, '"'));
+                speech.say = "您好，我想把职位从【{0}】变更为【{1}】请予以批准!".format(user.prof,getjob(jsn.newjob).sname)
+            }
 
 			tpl=`<div class="lspeech">
 					<div><img src="{face}" /></div>
 					<div><span>【{prof}】{name}</span>{whn}
-					<div {bold}>{say}</div>{button}</div>
+					<div {bold}>{say}{button}</div></div>
 				</div>`
 				m = mix(speech,g_brief[speech.src]);
             r = tpl.format(mix(speech,g_brief[speech.src]))
@@ -292,7 +298,7 @@
 					}
 					else{
 						Reqdata( "/userbrief?id="+user.id,{sheet:sheet,s:s,count:user.count}, function(res2,ctx){
-							g_brief[res.user.id]=res.user;
+							g_brief[user.id]=res2.user;
 							res2.user.s=ctx.s;
 							res2.user.count=ctx.count;
 							var userhtml=`<div data_id="{s}{id}" onclick="onuser(this,{id})">

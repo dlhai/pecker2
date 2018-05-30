@@ -17,12 +17,12 @@ def userbrief():
         r.msg = "缺少参数 id"
         return tojson(r)
 
-    r.user = QueryObj("select id,name,face,profile,sex,job from user where id=%s"%params["id"])
+    r.user = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id=%s"%params["id"])
     if len(r.user)==0:
         r.msg = "id不存在"
         return tojson(r)
     r.user = r.user[0]
-    r.user.jobname = getjob(r.user.job)["sname"]
+    r.user.prof = getjob(r.user.job)["sname"]
     if r.user.face == "":
         if r.user.sex == "1":
             r.user.face = "img/face_default_male.png"
@@ -53,7 +53,7 @@ def chgjob():
     if rec.dst =="":
         r.msg = "newjob不是有效值"
         return tojson(r)
-    rec.jsn="{newjob:%s}"%newjob
+    rec.jsn="{'newjob':'%s'}"%newjob
     rec.say = ""
     rec.whn = datetime.datetime.now()
 
