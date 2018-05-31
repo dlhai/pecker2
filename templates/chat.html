@@ -174,7 +174,7 @@
         Reqdata("/curuserinf", "", function (res) {
             g_user = res.data;
             g_user.fields = res.fields;
-            g_brief[g_user.id] = g_user
+            g_brief[g_user.id] = g_user;
         });
     }
     else
@@ -264,7 +264,7 @@
             user=g_brief[speech.src];
 			if ( speech.readtime == "" )
 				speech.bold='style="font-weight:bold;"'
-            if (speech.type == "1") {
+            if (speech.type == "5") {
                 var jsn = $.parseJSON(speech.jsn.replace(/'/g, '"'));
                 speech.say = "您好，我想把职位从【{0}】变更为【{1}】请予以批准!".format(user.prof,getjob(jsn.newjob).sname)
 				if ( speech.result=="0"){
@@ -275,8 +275,8 @@
 				}
 				else{
 					speech.deal = `<div style="height:30px;padding: 5px;"><div style="float:right">
-							<input type="button" value="批准" onclick="msgdeal({id},1)">
-							<input type="button" value="拒绝" onclick="msgdeal({id},0)" style="margin-left:10px;">
+							<input type="button" value="批准" onclick="msgdeal({id},1)" style="padding: 0px 6px;" >
+							<input type="button" value="拒绝" onclick="msgdeal({id},0)" style="margin-left:10px;padding: 0px 6px;">
 						</div></div>`.format(speech)
 				}
             }
@@ -324,7 +324,8 @@
 							$("#"+ctx.sheet).append(userhtml);
 						});
 					}
-					if (user.id==g_focus_id){
+                    if (user.id == g_focus_id) {
+                        if
 						Reqdata( "/rdmsg?type="+g_sheet+"&user_id="+g_focus_id,"", function(res3){
 							$("#speechlist").html(res3.data.map(x => renderspeech(x)).join(""));
 						});
