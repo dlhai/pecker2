@@ -10,7 +10,7 @@
 </style>
 </head>
 <body>
-    <div class="table">
+    <div class="table" style="margin:10px;">
         <div class="table-tr">
             <div class="table-td">广东</div>
         </div>
@@ -22,11 +22,8 @@
         </div>
     </div>
 
-	<script type="text/javascript">
-        var str = "'bc'de'cf";
-        var str1 = str.replace(/'/g, '"');
-        alert(str1);  
+    <input type="button" value="批准" onclick="msgdeal({id},1)">
 
-	</script>
+    <input type="button" value="拒绝" onclick="msgdeal({id},1)">
 </body>
 </html>

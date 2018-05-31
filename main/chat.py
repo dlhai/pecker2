@@ -129,11 +129,10 @@ def rdmsg():
     r.data = QueryObj((sql+" order by whn limit 0,200").format(me=current_user.id, to=params["user_id"]))
     [ setattr(x,"whn",x.whn[5:16]) for x in r.data]
     r.result="200"
-
-    vals = obj(readtime=datetime.datetime.now())
-    whrs = obj(dst=current_user.id,src=params["user_id"], type= 1 if params["type"]=="sysmsgs" else 0)
-    conn.execute(toupdate("msg",vals,whrs))
-
+    if len(r.data): #标记为已阅读
+        vals = obj(readtime=datetime.datetime.now())
+        whrs = obj(dst=current_user.id,src=params["user_id"], type= 1 if params["type"]=="sysmsgs" else 0)
+        conn.execute(toupdate("msg",vals,whrs))
     return Response(tojson(r), mimetype='application/json')
 
 

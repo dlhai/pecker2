@@ -41,5 +41,10 @@ def newdir(path):
 import pdb
 if __name__ == "__main__":
     rec = obj()
-    rec.type = 1 #1changejob
-    rec.sss=2
+    rec.type = "1" #1changejob
+    rec.sss="2"
+    vals=",".join([ k+"='"+v+"'" for k,v in rec.__dict__.items()])
+
+    for k,v in rec.__dict__.items():
+        print(k,v)
+    aa=0
