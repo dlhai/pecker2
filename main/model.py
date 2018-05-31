@@ -175,7 +175,7 @@ def toinsert(tbl,obj):
     return sql
 
 def toupdate(tbl,values,where):
-    vals=",".join([ k+"='"+v+"'" for k,v in values.__dict__.keys()])
-    whrs=",".join([ k+"='"+v+"'" for k,v in where.__dict__.keys()])
+    vals=",".join([ k+"='"+str(v)+"'" for k,v in values.__dict__.items()])
+    whrs=" and ".join([ k+"='"+str(v)+"'" for k,v in where.__dict__.items()])
     sql = "update {0} set {1} where {2}".format(tbl, vals,whrs)
     return sql

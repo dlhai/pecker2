@@ -1,7 +1,7 @@
 #encoding:utf8
 from flask import Flask,request, Response,jsonify,render_template
 from flask_login import login_required,current_user
-import datetime
+import datetime,json
 from main2 import app,login_manager,check
 from main.model import *
 from main.tools import *
@@ -68,7 +68,7 @@ def msgcheckdetail():
     r.fans = list(filter(lambda x:hasattr(x,"count"),r.fans))
     r.idols = list(filter(lambda x:hasattr(x,"count"),r.idols))
 
-    r.sysmsgs = QueryObj("select src as id, count(*) as count from msg where type!=2 and readtime is null and dst=%s group by src"%current_user.id)
+    r.sysmsgs = QueryObj("select src as id, count(*) as count,max(whn) as whn from msg where type!=2 and readtime is null and dst=%s group by src"%current_user.id)
     return tojson(r)
 
 
@@ -127,7 +127,9 @@ def rdmsg():
     else:
         sql = "select * from msg where type=0 and ((src={me} and dst={to}) or (src={to} and dst={me}))"
     r.data = QueryObj((sql+" order by whn limit 0,200").format(me=current_user.id, to=params["user_id"]))
+    [ setattr(x,"whn",x.whn[5:16]) for x in r.data]
     r.result="200"
+
     vals = obj(readtime=datetime.datetime.now())
     whrs = obj(dst=current_user.id,src=params["user_id"], type= 1 if params["type"]=="sysmsgs" else 0)
     conn.execute(toupdate("msg",vals,whrs))
@@ -136,7 +138,7 @@ def rdmsg():
 
 
 #处理需要批准的消息
-@app.route("/msgdeal", methods=['POST'])
+@app.route("/msgdeal")
 @login_required
 def msgdeal():
     params = request.args.to_dict()
@@ -159,32 +161,19 @@ def msgdeal():
         r.msg="id 不正确"
         return tojson(r)
 
-    if rec.type == "5":
+    if rec.type == 5:
         vals = obj(readtime=datetime.datetime.now(),result=params["result"])
         whrs = obj(id=params["id"])
         conn.execute(toupdate("msg",vals,whrs))
-        aa=rec.jsn.replace("'", '"')
-        aa=time.strftime("%m-%d %H:%M", rec.whn)
+
         jsn = json.loads(rec.jsn.replace("'", '"'))
         msg = obj(type=2,whn=datetime.datetime.now(),src=current_user.id,dst=rec.src)
         msg.whn = datetime.datetime.now()
         if vals.result == "1":
-            msg.say ="您于【%s】发起的职业变更申请被批准了，您的职业已经变更为【%s】"%( time.strftime("%m-%d %H:%M", rec.whn), getjob(jsn.newjob)["sname"])
+            msg.say ="您于【%s】发起的职业变更申请被批准了，您的职业已经变更为【%s】"%( rec.whn[5:16], getjob(jsn["newjob"])["sname"])
         else:
-            msg.say ="您于【%s】发起的职业变更申请被拒绝了。"%time.strftime("%m-%d %H:%M", rec.whn)
+            msg.say ="您于【%s】发起的职业变更申请被拒绝了。"%rec.whn[5:16]
         conn.execute(toinsert("msg",msg))
 
-    htm = form["body"]
-    rec.say = htm.replace("'", "''") #sql字符串边界转义
-    if len(rec.say) < 2:
-        r.msg="内容不能少于2字节"
-        return tojson(r)
-    if len(rec.say) > 2048:
-        r.msg="内容大于少于2048字节"
-        return tojson(r)
-
-    rec.src = current_user.id
-    rec.whn = datetime.datetime.now()
-    conn.execute(toinsert("msg",rec))
     r.result="200"
     return Response(tojson(r), mimetype='application/json')

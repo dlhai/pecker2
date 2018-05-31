@@ -169,7 +169,7 @@
         </footer>
 	</section>
 <script type="text/javascript">
-    var g_user = parent.g_user, g_focus_id, g_sheet="idols", g_brief = new Array();
+    var g_user = parent.g_user, g_brief = new Array(),g_focus_id, g_sheet="idols", g_stamp="";
     if (g_user == undefined) {
         Reqdata("/curuserinf", "", function (res) {
             g_user = res.data;
@@ -235,11 +235,18 @@
     }
     function onuser(This, id) {
         g_focus_id = id;
+		g_stamp = "";
         $("#title").html( "与 <b>"+$(This).find("div > div:first-child").html() +"</b> 会话");
+		refreshchat();
+    }
+	function refreshchat(){
 		Reqdata( "/rdmsg?type="+g_sheet+"&user_id="+g_focus_id,"", function(res){
             $("#speechlist").html(res.data.map(x => renderspeech(x)).join(""));
+			if ( res.data.length > 0 ){
+				g_stamp = res.data[res.data.length-1].whn;
+			}
 		});
-    }
+	}
 
     function onsend() {
         kereplay.sync();//将KindEditor的数据同步到textarea标签。
@@ -251,9 +258,6 @@
         fd.append("body", value_content);
         SendForm('/msgto?type=2&user_id=' + g_focus_id, fd, "", function (res) {
 			checknewmsg();
-			Reqdata( "/rdmsg?user_id="+g_focus_id,"", function(res){
-				$("#speechlist").html(res.data.map(x => renderspeech(x)).join(""));
-			});
 		});
     }
 
@@ -264,19 +268,19 @@
             user=g_brief[speech.src];
 			if ( speech.readtime == "" )
 				speech.bold='style="font-weight:bold;"'
-            if (speech.type == "1") {
+            if (speech.type == "5") {
                 var jsn = $.parseJSON(speech.jsn.replace(/'/g, '"'));
                 speech.say = "您好，我想把职位从【{0}】变更为【{1}】请予以批准!".format(user.prof,getjob(jsn.newjob).sname)
 				if ( speech.result=="0"){
-					speech.deal = `<div style="height:30px;padding: 5px;"><div style="float:right">已拒绝</div>`
+					speech.deal = `<div style="height:30px;padding: 5px;"><div style="float:right">已拒绝</div></div>`
 				}
 				else if ( speech.result=="1"){
-					speech.deal = `<div style="height:30px;padding: 5px;"><div style="float:right">已批准</div>`
+					speech.deal = `<div style="height:30px;padding: 5px;"><div style="float:right">已批准</div></div>`
 				}
 				else{
 					speech.deal = `<div style="height:30px;padding: 5px;"><div style="float:right">
-							<input type="button" value="批准" onclick="msgdeal({id},1)">
-							<input type="button" value="拒绝" onclick="msgdeal({id},0)" style="margin-left:10px;">
+							<input type="button" value="批准" onclick="msgdeal({id},1)" style="margin-left:10px;padding:0px 6px;">
+							<input type="button" value="拒绝" onclick="msgdeal({id},0)" style="margin-left:10px;padding:0px 6px;">
 						</div></div>`.format(speech)
 				}
             }
@@ -291,7 +295,7 @@
         else {
             r =`<div class="rspeech"><div>{whn}<span>【{prof}】{name}</span>
                     <div>{say}</div></div><div><img src="{face}" /></div>
-            </div>`.format(mix(speech,user))
+            </div>`.format(mix(speech,g_user))
         }
         return r;
     }
@@ -324,10 +328,8 @@
 							$("#"+ctx.sheet).append(userhtml);
 						});
 					}
-					if (user.id==g_focus_id){
-						Reqdata( "/rdmsg?type="+g_sheet+"&user_id="+g_focus_id,"", function(res3){
-							$("#speechlist").html(res3.data.map(x => renderspeech(x)).join(""));
-						});
+					if (user.id==g_focus_id && g_stamp < user.whn){
+						refreshchat();
 					}
 				});
 				count = count != 0 ? count : "";
