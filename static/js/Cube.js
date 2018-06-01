@@ -1,4 +1,4 @@
-﻿$("html").on("change", function () {
+﻿$("html").on("change", function (event) {
     var node = event.target;
     if (node.tagName == "INPUT" && node.type == "file") {
         var file = node.files[0];
@@ -316,7 +316,7 @@ function RenderTable2(res, style, fun) {
     return r;
 }
 //点击反色
-$("html").on("click", function () {
+$("html").on("click", function (event) {
     var node = $(event.target);
     if (node[0].localName == "td" && node.parents(".xTable").length > 0) {
         node = node.parent();
@@ -365,7 +365,7 @@ function TableBindClick3(tableid, callback) {
 
 
 //按钮下拉窗口，css:  .xCombox .xPopWnd
-$("html").on("click", function () {
+$("html").on("click", function (event) {
     var node = $(event.target);
     if (node.hasClass("xCombox")) { // 先看是否自己
         var pop = node.children(".xPopWnd");
@@ -391,7 +391,7 @@ $("html").on("click", function () {
 });
 
 //按钮下拉菜单，css  .xCombox .xMenu
-$("html").on("click", function () {
+$("html").on("click", function (event) {
     var node = $(event.target);
     if (node.hasClass("xCombox")) { // 先看是否自己
         var pop = node.children(".xMenu");
@@ -422,7 +422,7 @@ $("html").on("click", function () {
 
 //点击图文表格列表（学历、证件、维修记录等,xpecker.css）
 g_curitems = new Array();
-$("html").on("click", function () {
+$("html").on("click", function (event) {
     var td = $(event.target);
     if (td.parents(".listdata").length > 0) {
         var node = $(td.parents(".listdata")[0]);

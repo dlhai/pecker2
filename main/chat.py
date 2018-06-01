@@ -31,10 +31,36 @@ def chat():
 @login_required
 def rdfriends():
     r = obj(result="200",fun="msgcheck")
-    r.fans = QueryObj("select id,name,face,profile,job,depart_id from user where id in (select fans_id from follow where idol_id=%s)"%current_user.id)
-    r.idols = QueryObj("select id,name,face,profile,job,depart_id from user where id in (select idol_id from follow where fans_id=%s)"%current_user.id)
-    [ setattr(x,"prof",getjob(x.job)["sname"]) for x in r.fans]
-    [ setattr(x,"prof",getjob(x.job)["sname"]) for x in r.idols]
+    r.fans = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in (select fans_id from follow where idol_id=%s)"%current_user.id)
+    r.idols = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in (select idol_id from follow where fans_id=%s)"%current_user.id)
+    r.sysusrs = QueryObj('''select distinct user_id from 
+                        (select dst as user_id,max(whn) as whn from msg where src={id} and type!=0 group by dst 
+                         union 
+                         select src as user_id,max(whn) as whn from msg where dst={id} and type!=0 group by src ) 
+                         order by whn limit 0,100'''.format(id=current_user.id))
+    if len(r.sysusrs)>0:
+        r.sysusrs = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in (%s)"%",".join(list(map(lambda x:str(x.user_id),r.sysusrs))))
+    r.strangers = QueryObj('''select distinct user_id from 
+                        (select dst as user_id,max(whn) as whn from msg where src={id} and type=0 group by dst 
+                         union 
+                         select src as user_id,max(whn) as whn from msg where dst={id} and type=0 group by src ) 
+                         order by whn desc'''.format(id=current_user.id))
+    def filterfriends(ar,r):
+        ret = []
+        for x in ar:
+            la = list(filter(lambda y : x.user_id == y.id,r.fans))
+            lb = list(filter(lambda y : x.user_id == y.id,r.idols))
+            if len(la)==0 and len(lb)==0:
+                ret.append(str(x.user_id))
+            if len(ret)>=100: #只取前100个
+                return ret
+        return ret
+    r.strangers = filterfriends(r.strangers,r)
+    if len(r.strangers)>0:
+        r.strangers = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in (%s)"%",".join(r.strangers))
+    [ setattr(x,"prof",getjob(x.job)["sname"]) for y in[r.fans,r.idols,r.sysusrs,r.strangers] for x in y ]
+    [ verifyface(x) for y in[r.fans,r.idols,r.sysusrs,r.strangers] for x in y ]
+
     return tojson(r)
 
 #主界面，检查未读消息数量
@@ -53,7 +79,7 @@ def msgcheckdetail():
     r.fans = QueryObj("select fans_id as id from follow where idol_id=%s"%current_user.id)
     r.idols = QueryObj("select idol_id as id from follow where fans_id=%s"%current_user.id)
 
-    newmsgs = QueryObj("select src as id,count(*) as count from msg where type=2 and readtime is null and dst=%s group by src"%current_user.id)
+    newmsgs = QueryObj("select src as id,count(*) as count from msg where type=0 and readtime is null and dst=%s group by src"%current_user.id)
     r.strangers = []
     for x in newmsgs:
         t1 = list(filter( lambda y: y.id ==x.id, r.fans))
@@ -68,7 +94,7 @@ def msgcheckdetail():
     r.fans = list(filter(lambda x:hasattr(x,"count"),r.fans))
     r.idols = list(filter(lambda x:hasattr(x,"count"),r.idols))
 
-    r.sysmsgs = QueryObj("select src as id, count(*) as count,max(whn) as whn from msg where type!=2 and readtime is null and dst=%s group by src"%current_user.id)
+    r.sysmsgs = QueryObj("select src as id, count(*) as count,max(whn) as whn from msg where type!=0 and readtime is null and dst=%s group by src"%current_user.id)
     return tojson(r)
 
 

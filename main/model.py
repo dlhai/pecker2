@@ -179,3 +179,12 @@ def toupdate(tbl,values,where):
     whrs=" and ".join([ k+"='"+str(v)+"'" for k,v in where.__dict__.items()])
     sql = "update {0} set {1} where {2}".format(tbl, vals,whrs)
     return sql
+
+def verifyface(user):
+    if user.face == "":
+        if user.sex == "1":
+            user.face = "img/face_default_male.png"
+        elif user.sex == "0":
+            user.face = "img/face_default_female.png"
+        else:
+            user.face = "img/face_default.png"

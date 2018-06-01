@@ -107,6 +107,11 @@ function onusersave(user) {
     delete g_chged.newpwd2;
 
     var formdata = new FormData(document.getElementById("form_useredit"));
+	if ( formdata.get("name")=="" ){
+		alert("姓名不能为空");
+		return;
+	}
+
     var fd = new FormData();
 	var count = 0;
     for (var x in g_chged) {
@@ -118,7 +123,7 @@ function onusersave(user) {
     }
     for (var x in g_datechged){
 		fd.append(x, formdata.get(x));
-		count++
+		count++;
 	}
 	if ( count == 0)
 		return;

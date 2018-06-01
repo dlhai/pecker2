@@ -23,13 +23,7 @@ def userbrief():
         return tojson(r)
     r.user = r.user[0]
     r.user.prof = getjob(r.user.job)["sname"]
-    if r.user.face == "":
-        if r.user.sex == "1":
-            r.user.face = "img/face_default_male.png"
-        elif r.user.sex == "0":
-            r.user.face = "img/face_default_female.png"
-        else:
-            r.user.face = "img/face_default.png"
+    verifyface(r.user)
 
     r.result=200
     return tojson(r)

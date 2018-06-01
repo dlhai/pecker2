@@ -283,7 +283,7 @@ x4Tree.prototype.Extend = function (expr) {
 }
 
 // 树控件的事件处理
-$("html").on("click", function () {
+$("html").on("click", function (event) {
     if (event.target.tagName != "IMG" && event.target.tagName != "SPAN")
         return;
     var node = $(event.target);

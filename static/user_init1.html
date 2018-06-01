@@ -42,6 +42,7 @@
         }
 
         function onnextstep() {
+			onusersave(g_user);
             ReqdataP("/wt", `{"ls":"user","id":"{0}","val":{"status":"2"}}`.format(g_user.id));
             window.location.href = '/static/user_init2.html'
         }

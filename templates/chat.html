@@ -25,8 +25,8 @@
 		.list>div>span{position:absolute;left:335px;margin-top: 4px;}
 		.badge{padding: 0px 3px;}
 		.list>div>div{display:table-cell;vertical-align: top;border-bottom:1px solid Silver;padding:3px;}
-		.list>div>div:first-child{width:2px;border-bottom:0px;}
-		.list>div>div:last-of-type{width:2px;border-bottom:0px;}
+		.list>div>div:first-child{width:2px;border-bottom:0px;background-color: #ffffff;}
+		.list>div>div:last-of-type{width:2px;border-bottom:0px;background-color: #ffffff;}
 		.list .face{width:48px;}
 		.list .face>img{border-radius: 4px;}
 		.list .profile{
@@ -43,7 +43,7 @@
             display: inline-block;
 			margin:0 1px;
 		}
-        .group>.active, .group>div:hover, .group>div:focus, .list>div:hover {
+        .group>.active, .group>div:hover, .group>div:focus, .list>div:hover,.list>.active {
             color: #555555;
             background-color: #d5d5d5;
         }
@@ -147,7 +147,7 @@
 </head>
 <body class="xFCsrow">
     <section class="xPanel2 xFIfixed" style="width:350px;">
-        <header class="group" onclick="onchggroup(this)">
+        <header class="group" onclick="onchggroup(event,this)">
 			<div id="idols_tab" class="active">我的偶像<span class="badge" style="background-color:#ff0000"></span></div>
 			<div id="fans_tab" >我的粉丝<span class="badge" style="background-color:#ff0000"></span></div>
 			<div id="strangers_tab" >陌生人<span class="badge" style="background-color:#ff0000"></span></div>
@@ -194,8 +194,12 @@
 
 		$("#idols").html(res.idols.map(x=>tpl.format(x)).join(""));
 		$("#fans").html(res.fans.map(x=>tpl.format(x)).join(""));
+		$("#strangers").html(res.strangers.map(x=>tpl.format(x)).join(""));
+		$("#sysmsgs").html(res.sysusrs.map(x=>tpl.format(x)).join(""));
 		res.idols.forEach(x=>g_brief[x.id]=x);
 		res.fans.forEach(x=>g_brief[x.id]=x);
+		res.sysusrs.forEach(x=>g_brief[x.id]=x);
+		res.strangers.forEach(x=>g_brief[x.id]=x);
 	});
 
 	var int=self.setInterval(checknewmsg,3000);
@@ -208,7 +212,7 @@
         });
     });
 
-    function onchggroup(This) {
+    function onchggroup(event,This) {
 		var node = $(event.target);
 		$(This).children().removeClass("active");
 		node.addClass("active");
@@ -234,6 +238,8 @@
 		}
     }
     function onuser(This, id) {
+		$("#friends").find(".active").removeClass("active");
+		$(This).addClass("active");
         g_focus_id = id;
 		g_stamp = "";
         $("#title").html( "与 <b>"+$(This).find("div > div:first-child").html() +"</b> 会话");

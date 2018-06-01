@@ -78,7 +78,9 @@
             <div id="id_portal" class="active" data_url="static/portal.html">资讯</div>
         </div>
         <div id="modulelist1" class="group" style="font-size:16px;display:none"></div>
-        <div id="modulelist2" class="group little" style="font-size:14px;" data_pid="id_portal"><div data_url="/blog/news" >新闻</div><div data_url="/blog/writings">博客</div><div data_url="/blog/docs">文库</div></div>
+        <div id="modulelist2" class="group little" style="font-size:14px;" data_pid="id_portal">
+			<div data_url="/blog/news" >新闻</div><div data_url="/blog/writings">博客</div><div data_url="/blog/docs">文库</div>
+		</div>
         <div class="pull-right">
 			<div class="group"><form style="padding:10px;" ><input class="search" type="text" placeholder="搜索" /></form></div>
 			<div id ="user" class="group"><div data_url="static/login.html">登录</div><div data_url="static/login.html">注册</div></div>
@@ -106,17 +108,34 @@
 				else{
 					g_user = res.data;
 					g_user.fields = res.fields;
-					var ss = renderuser();
 					$("#user").html(renderuser());
+					var ar = GetSub(db_roles,"id", g_user.job ).modules;
+					$("#modulelist1").html(ar.map(x=>`<div id="url" data_url="{url}">{name}</div>`.format(x)).join(""));
 					self.setInterval(msgcheck,10000);
 				}
 			});
 		}
 
-		$("html").on("click", function () {
+		$("html").on("click", function (event) {
 			var node = $(event.target);
-
 			var text = node.html();
+			if ( text == "资讯" ){
+				$("#modulelist2").html(`<div data_url="/blog/news" >新闻</div><div data_url="/blog/writings">博客</div><div data_url="/blog/docs">文库</div>`);
+        	}
+			else if (node.parent().attr("id")=="modulelist1" ){ // 点在主功能列表上
+				var ar = GetSub(db_roles,"id", g_user.job ).modules;
+				var m = GetSub(ar,"name",text);
+				if (m.subs!=undefined){
+					$("#modulelist2").html(m.subs.map(x=>`<div data_url="{url}">{name}</div>`.format(x)).join(""));
+					$("#modulelist2").children(":first-child").addClass("active");
+					$("#modulelist2").attr("data_pid", node.attr("id") );
+				}
+				else{
+					$("#modulelist2").html("");
+					$("#modulelist2").attr("data_pid", "" );
+				}
+			};
+
 			var id = node.attr( "id" );
 			var url = node.attr( "data_url" );
 			var pid = node.parent().attr( "data_pid" );

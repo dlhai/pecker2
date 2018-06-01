@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>display普通表格</title>
+    <script src="js/jquery.js">
+</script>
+
 <style type="text/css">
 .table {display: table; width: 100%; border-collapse: collapse;}
 .table>div {display: table-row; }
@@ -22,8 +25,16 @@
         </div>
     </div>
 
-    <input type="button" value="批准" onclick="msgdeal({id},1)">
+    <input type="button" value="批准">
 
-    <input type="button" value="拒绝" onclick="msgdeal({id},1)">
+    <input type="button" value="拒绝">
+
+<script type="text/javascript">
+		$("html").on("click", function (event) {
+			var node = $(event.target);
+
+			alert(event.target.nodeName); // "click"事件
+		});
+</script>
 </body>
 </html>
