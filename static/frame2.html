@@ -77,7 +77,7 @@
 	        <div class="xSystem" data_url="static/system.html">啄木鸟</div>
             <div id="id_portal" class="active" data_url="static/portal.html">资讯</div>
         </div>
-        <div id="modulelist1" class="group" style="font-size:16px;display:none"></div>
+        <div id="modulelist1" class="group" style="font-size:16px;"></div>
         <div id="modulelist2" class="group little" style="font-size:14px;" data_pid="id_portal">
 			<div data_url="/blog/news" >新闻</div><div data_url="/blog/writings">博客</div><div data_url="/blog/docs">文库</div>
 		</div>
@@ -110,7 +110,7 @@
 					g_user.fields = res.fields;
 					$("#user").html(renderuser());
 					var ar = GetSub(db_roles,"id", g_user.job ).modules;
-					$("#modulelist1").html(ar.map(x=>`<div id="url" data_url="{url}">{name}</div>`.format(x)).join(""));
+					$("#modulelist1").html(ar.map(x=>`<div id="url" data_url="static/{url}">{name}</div>`.format(x)).join(""));
 					self.setInterval(msgcheck,10000);
 				}
 			});
@@ -126,7 +126,7 @@
 				var ar = GetSub(db_roles,"id", g_user.job ).modules;
 				var m = GetSub(ar,"name",text);
 				if (m.subs!=undefined){
-					$("#modulelist2").html(m.subs.map(x=>`<div data_url="{url}">{name}</div>`.format(x)).join(""));
+					$("#modulelist2").html(m.subs.map(x=>`<div data_url="static/{url}">{name}</div>`.format(x)).join(""));
 					$("#modulelist2").children(":first-child").addClass("active");
 					$("#modulelist2").attr("data_pid", node.attr("id") );
 				}

@@ -122,7 +122,6 @@ function Create(fields) {
     return r;
 }
 
-
 // 将a和b合并，新的对象有a和b的所有属性，若两个均有某一属性，则a的属性优先
 function mix(a,b){
 	var r = Clone(b);

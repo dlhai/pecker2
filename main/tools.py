@@ -23,6 +23,11 @@ def tojson(o):
     else:
         return '"'+str(o)+'"'
 
+def toret(r,**kw):
+    for k,v in kw.items():
+        setattr( r, k, v)
+    return tojson(r)
+
 #把(a,b,c) 变成 in ('a','b','c')
 def To(k,v):
     if v[0] == "(":

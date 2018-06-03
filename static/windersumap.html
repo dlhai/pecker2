@@ -55,13 +55,14 @@
         Reqdata("/rd?ls=efan&winderarea_id=" + area.id, "", function (efans) {
             g_efans = efans;
             g_efans.data.forEach((x, i) => CreateMark("efan32", x, g_efans.ls, g_efans.fields, ShowEfanWindow));
+			if (g_modectrl.editmode)
+				g_efans.data.forEach(x => x.mk.enableDragging());
         });
 
         // 更新当前对象为自己
         if (g_modectrl.editmode){
             UpdateCurData("winderarea", area);
             area.plg.enableEditing();
-            g_efans.data.forEach(x => x.mk.enableDragging());
         }
     }
 

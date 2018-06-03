@@ -74,47 +74,24 @@ body {
 
 
 /*树*/
-.xTree {
+.xTree,x4Tree {
 	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
 	font-size: 16px;
 	color: #666;
 	white-space: nowrap;
 }
 
-.xTree > div div {
+.xTree > div div,.x4Tree > div div {
 	padding-left: 18px;
 	border: 0px;
 	margin: 0px;
 }
-.xTree div>img {
+.xTree div>img,.x4Tree div>img {
 	border: 0px;
 	vertical-align: middle;
     width: 18px;
 }
-.xTree div > span > img {
-    margin-right: 5px;
-    width: 18px;
-}
-
-/*新版，对CSS来讲，与上版相同，仅js变化*/
-.x4Tree {
-	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
-	font-size: 16px;
-	color: #666;
-	white-space: nowrap;
-}
-
-.x4Tree > div div {
-	padding-left: 18px;
-	border: 0px;
-	margin: 0px;
-}
-.x4Tree div>img {
-	border: 0px;
-	vertical-align: middle;
-    width: 18px;
-}
-.x4Tree div > span > img {
+.xTree div > span > img,.x4Tree div > span > img {
     margin-right: 5px;
     width: 18px;
 }

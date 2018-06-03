@@ -40,6 +40,21 @@ def check(js,th):
 def index():
     return app.send_static_file('frame2.html')
 
+#frame用来填用户角色组合框，发布版要删掉
+@app.route("/roleuserall")
+def roleuserall():
+    user = QueryObj( "select min(id) as id, account, name, job, depart_id, depart_table, face from user group by job")
+    for u in [x for x in user if atoi(x.depart_table) != 0]:
+        tbl = gettbl(u.depart_table)
+        u.depart = QueryObj( "select * from "+tbl["name"]+" where id="+str(u.depart_id))[0]
+        if tbl["name"] == "winder":
+            u.sub = QueryObj( "select id, name from winderarea where winder_id="+str(u.depart_id))
+    ret=obj()
+    ret.fun="roleuserall"
+    ret.result = "200"
+    ret.data = user
+    return Response(tojson(ret), mimetype='application/json')
+
 ############## kindedit功能 ###############################################
 @app.route("/kedit", methods=['GET', 'POST'])
 def kedit():
@@ -77,7 +92,8 @@ from main.chat import *
 from main.views import *
 from main.blog import *
 from main.user import *
-
+from main.vender import *
+from main.winder import *
 
 class CLog:
     def write(data):
@@ -92,7 +108,12 @@ if __name__ == "__main__":
             "./static/uploads/employ_image", "./static/uploads/edu_image1", "./static/uploads/edu_image2"]);
     app.config['JSON_AS_ASCII'] = False
     #app.config['DEBUG'] = True
-    print( app.url_map )
+
+    #print( app.url_map )
+    urlmap = [" <Rule '{r}' {mtd} -> {ep} >,".format(r=x.rule,mtd=x.methods,ep=x.endpoint) for x in app.url_map._rules]
+    urlmap.sort()
+    [print(x) for x in urlmap]
+
     app.run( host="0.0.0.0" )
     #from gevent import pywsgi
     #from geventwebsocket.handler import WebSocketHandler

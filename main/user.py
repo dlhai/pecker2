@@ -6,9 +6,32 @@ from main2 import app,login_manager,check
 from main.model import *
 from main.tools import *
 
-#申请转换职业
-#/userbrief?id=
-@app.route("/userbrief")
+#删除用户
+#/user/remove?id=
+@app.route("/user/remove")
+@login_required
+def userremove():
+    params = request.args.to_dict()
+    r = obj(result="404",fun="user/remove")
+    if "id" not in params:
+        return toret(r,msg="缺少参数id")
+
+    user = QueryObj("select * from user where id=%s"%params["id"])
+    if len(user)==0:
+        return toret(r,msg="id不存在")
+    if user.depart_id != 0:
+        return toret(r,msg="所属单位不为空")
+    
+    #仅清除用户关注和粉丝（避免在他人用户好友列表中出现），其他如发表文章和参与事物不做处理
+    conn.execute(todelete("follow",obj(idols=user.id)))
+    conn.execute(todelete("follow",obj(fans=user.id)))
+    conn.execute(toupdate("user",obj(status=-1),obj(id=user.id)))
+    return toret(r,result=200)
+
+
+#用户摘要，用来显示头像标签等
+#/user/brief?id=
+@app.route("/user/brief")
 @login_required
 def userbrief():
     params = request.args.to_dict()
@@ -29,10 +52,10 @@ def userbrief():
     return tojson(r)
 
 #申请转换职业
-#Reqdata("/reqjob?newjob="+jobid )
-@app.route("/reqjob")
+#Reqdata("/user/reqjob?newjob="+jobid )
+@app.route("/user/reqjob")
 @login_required
-def chgjob():
+def reqjob():
     params = request.args.to_dict()
     r = obj(result="404",fun="reqjob")
     if "newjob" not in params:

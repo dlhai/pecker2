@@ -3,7 +3,7 @@
         "id": "1", "type": "winder", "name": "叶片超级帐号", modules: [
             { name: "地图", url: "windersumap.html" },
             { name: "风场", url: "windersu.html" },
-            { name: "人员", url: "user3.html" },
+            { name: "人员", url: "user_list.html" },
             { name: "厂家", url: "vender.html" }]
     },
     {
@@ -87,6 +87,24 @@ var branch = {
     "efan": { "type": "efan", "name": "风电机", "sub": "leaf", "image": "" },
     "efanvender": { "type": "efanvender", "name": "整机供应商", "image": "" },
     "leafvender": { "type": "leafvender", "name": "叶片供应商", "image": "" },
+    "sub": function (type) {
+        return this[this[type].sub]
+    }
+}
+
+var g_treebranch = {
+    "devwh": { "sub": "", "image": "img/devwh.png", },
+
+    "matprov": { "sub": "matwh", "image": "img/folder.gif", },
+    "matwh": { "sub": "", "image": "img/devwh.png", },
+
+    "root": { "sub": "winderco", "name": "企业列表", "image": "", },
+    "winderco": { "sub": "winderprov", "name": "风电企业", "image": "img/diy/1_open.png" },
+    "winderprov": { "sub": "winder", "name": "省区", "image": "img/folder.gif" },
+    "winder": { "sub": "winderarea", "name": "风场", "image": "img/diy/3.png" },
+    "winderarea": { "sub": "efan", "name": "风区", "image": "img/page.gif" },
+    "efan": { "sub": "leaf", "name": "风电机", "image": "" },
+    "leaf": { "sub": "", "name": "叶片", "image": "" },
     "sub": function (type) {
         return this[this[type].sub]
     }
@@ -288,7 +306,8 @@ function ReqdataP(url, data, ctx, cb) {
             json = $.parseJSON(xmlhttp.responseText);
             if (json.result != "200")
                 alert("方法：" + url + "\n应答：[" + json.result + "]" + json.msg)
-            cb(json, ctx);
+			if (cb != undefined)
+				cb(json, ctx);
         }
     };
     xmlhttp.open("POST", url, true);

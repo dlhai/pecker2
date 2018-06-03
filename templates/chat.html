@@ -317,7 +317,7 @@
 						node.children("span").html(user.count);
 					}
 					else{
-						Reqdata( "/userbrief?id="+user.id,{sheet:sheet,s:s,count:user.count}, function(res2,ctx){
+						Reqdata( "/user/brief?id="+user.id,{sheet:sheet,s:s,count:user.count}, function(res2,ctx){
 							g_brief[user.id]=res2.user;
 							res2.user.s=ctx.s;
 							res2.user.count=ctx.count;

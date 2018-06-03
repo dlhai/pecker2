@@ -39,7 +39,7 @@
 </head>
 <body class="xFCsrow" >
     <section class="xPanel2" style="width:100px"><!--两个子项都固定宽度100，使它们获得相同的增量-->
-        <header class="heading">列表<div style="float: right;"><a onClick="onclickfun('useradd')">添加</a></div></header>
+        <header class="heading">列表<div style="float: right;"><a onClick="onuseradd()">添加</a></div></header>
         <div id="userlist" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;">
         </div>
     </section>
@@ -50,37 +50,45 @@
     </section>
 
     <script type="text/javascript">
-        var g_focus, g_users, g_ethnic, g_departs, g_user = parent.g_user, g_userfields, g_pane ="信息";
-        Reqdata("/curuserinf", "", function (res) {
-            g_user = res.data;
-            g_userfields = res.fields;
+        var g_focus, g_users, g_ethnic, g_departs, g_user = parent.g_user, g_pane ="信息";
+		if (g_user == undefined) {
+			Reqdata("/curuserinf", "", function (res) {
+				g_user = res.data;
+				g_user.fields = res.fields;
+				init();
+			});
+		}
+		else{
+			init();
+		}
 
-            Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
-            if (isInArray(["1", "4", "7"], g_user.job))
-                Reqdata("/rd?ls=" + { "1": "winder", "4": "devwh", "7": "matwh" }[g_user.job], "", function (res) { g_departs = res; });
-            Reqdata(GetUrl(), "", function (res) {
-                g_users = res;
-                var fielddepart = GetSub(g_users.fields, "name", "depart_id");
-                if (!isInArray(["1", "4", "7"], g_user.job)) { // 除此三类超级用户外不显示所在单位(风场、仓库、驻地)
-                    var idx = GetIdx(g_users.fields, "name", "depart_id");
-                    fielddepart.twidth = 0;
-                    fielddepart.ftype = "none";
-                    if (g_user.job == 13) {// 专家超级帐号
-                        var idx = GetIdx(g_users.fields, "name", "skill");
-                        g_users.fields[idx].twidth = "100px";
-                        g_users.fields[idx].ftype = "multiselect";
-                    }
-                }
-                else {
-                    var idx = GetIdx(g_users.fields, "name", "depart_id");
-                    fielddepart.twidth = "100px";
-                    fielddepart.ftype = "select";
-                }
+		function init() {
+			Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
+			if (isInArray(["1", "4", "7"], g_user.job))
+				Reqdata("/rd?ls=" + { "1": "winder", "4": "devwh", "7": "matwh" }[g_user.job], "", function (res) { g_departs = res; });
+			Reqdata(GetUrl(), "", function (res) {
+				g_users = res;
+				var fielddepart = GetSub(g_users.fields, "name", "depart_id");
+				if (!isInArray(["1", "4", "7"], g_user.job)) { // 除此三类超级用户外不显示所在单位(风场、仓库、驻地)
+					var idx = GetIdx(g_users.fields, "name", "depart_id");
+					fielddepart.twidth = 0;
+					fielddepart.ftype = "none";
+					if (g_user.job == 13) {// 专家超级帐号
+						var idx = GetIdx(g_users.fields, "name", "skill");
+						g_users.fields[idx].twidth = "100px";
+						g_users.fields[idx].ftype = "multiselect";
+					}
+				}
+				else {
+					var idx = GetIdx(g_users.fields, "name", "depart_id");
+					fielddepart.twidth = "100px";
+					fielddepart.ftype = "select";
+				}
 
-                $("#userlist").html(RenderTable2(g_users, undefined, ValToView));
-                onclickpane($(".live")[0]);
-            });
-        });
+				$("#userlist").html(RenderTable2(g_users, undefined, ValToView));
+				onclickpane($(".live")[0]);
+			});
+		};
         function GetUrl() {
             var param = (g_user.depart_id == "0") ? "" : ("&depart_id=" + g_user.depart_id);
             var url = "/rduser?job=" + GetsubJob(g_user.job, "string") + param
@@ -130,6 +138,8 @@
                 var modules = [{ code: "user", name: "基本信息" }, { code: "certif", name: "证件信息" },
                     { code: "edu", name: "受教育经历" }, { code: "employ", name: "就业经历" }];
                 $("#pane").html(modules.map(x => tpl.format(x)).join(""));
+				if (g_focus != undefined)
+					showdetail(g_focus);
             }
             else {
                 var tpl = `<section class="xPanel2">

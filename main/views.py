@@ -4,21 +4,6 @@ import json
 from main2 import app,login_manager,check
 from main.model import *
 
-#frame用来填用户角色组合框
-@app.route("/roleuserall")
-def roleuserall():
-    user = QueryObj( "select min(id) as id, account, name, job, depart_id, depart_table, face from user group by job")
-    for u in [x for x in user if atoi(x.depart_table) != 0]:
-        tbl = gettbl(u.depart_table)
-        u.depart = QueryObj( "select * from "+tbl["name"]+" where id="+str(u.depart_id))[0]
-        if tbl["name"] == "winder":
-            u.sub = QueryObj( "select id, name from winderarea where winder_id="+str(u.depart_id))
-    ret=obj()
-    ret.fun="roleuserall"
-    ret.result = "200"
-    ret.data = user
-    return Response(tojson(ret), mimetype='application/json')
-
 #id到名字的转换
 @app.route("/id2name")
 def id2name():
@@ -161,7 +146,7 @@ def rduser():
             +"user.idimg,user.phone,user.qq,user.mail,user.wechat,user.addr from user"\
             +" where "
     sql +=" and ".join([ To(k,v) for k,v in param.items()])
-    return query4("queryuser",fields=select(base.sl).where(base.c.table=="user"),data = sql)
+    return query5("queryuser",fields=select(base.sl).where(base.c.table=="user"),data = sql)
 
 #读取用户的未完成入库单列表
 #测试链接 http://127.0.0.1:5000/rdmatins?user_id=?

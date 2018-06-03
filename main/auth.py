@@ -49,15 +49,18 @@ def reg():
 def login():
     param = request.args.to_dict()
     user = loaduser("account='%s'"%param["account"])
+    r = obj(result="404",fun="login")
     if user is not None and user.pwd == param["pwd"]:
+        if user.status == -1:
+            return tojson(r)
         login_user(User(user))
+        r.result = 200
         fmt = '{"login":"%s","result":"200","nexturl":"%s"}'
         if 0<user.status<6:
-            return fmt%(param['account'], '/static/user_init'+str(user.status)+'.html')
+            r.nexturl='/static/user_init'+str(user.status)+'.html'
         else:
-            return fmt%(param['account'], '/static/portal.html')
-    else:
-        return '{"login":"'+param['account']+'","result":404}\n'
+            r.nexturl='/static/portal.html'
+    return tojson(r)
 
 #frame用来读取当前用户信息，需要所在单位名称、下级单位列表
 @app.route("/curuserinf")

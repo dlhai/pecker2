@@ -168,17 +168,34 @@ class pagnition:
         ar = [ x for x in ar if x >=0 ] #少于5页时
         return ar
 
+def todict(p):
+    d = p
+    if type(p)!=type({}):
+        d = obj.__dict__
+    return d
+
 def toinsert(tbl,obj):
-    fields=",".join(map( lambda x: "'"+x+"'", obj.__dict__.keys()))
-    values=",".join(map( lambda x: "'"+str(x)+"'", obj.__dict__.values()))
+    d = todict(obj)
+    fields=",".join(map( lambda x: "'"+x+"'", d.keys()))
+    values=",".join(map( lambda x: "'"+str(x)+"'", d.values()))
     sql = "insert into {0}({1}) values({2})".format(tbl, fields,values)
     return sql
 
 def toupdate(tbl,values,where):
-    vals=",".join([ k+"='"+str(v)+"'" for k,v in values.__dict__.items()])
-    whrs=" and ".join([ k+"='"+str(v)+"'" for k,v in where.__dict__.items()])
+    vals=",".join([ k+"='"+str(v)+"'" for k,v in todict(values).items()])
+    whrs=" and ".join([ k+"='"+str(v)+"'" for k,v in todict(where).items()])
     sql = "update {0} set {1} where {2}".format(tbl, vals,whrs)
     return sql
+
+def todelete(tbl,where):
+    whrs=" and ".join([ k+"='"+str(v)+"'" for k,v in where.__dict__.items()])
+    sql = "delete from {1} where {2}".format(tbl, whrs)
+    return sql
+
+def querycount(tbl,where):
+    whrs=" and ".join([ k+"='"+str(v)+"'" for k,v in where.__dict__.items()])
+    return QueryObj( "select count(*) as count from {1} where {2}".format(tbl, whrs) )[0].count
+
 
 def verifyface(user):
     if user.face == "":

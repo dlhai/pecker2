@@ -307,3 +307,92 @@ $("html").on("click", function (event) {
         }
     }
 });
+
+
+// 树控件，与第4版的区别:
+// 1.事件委托位置优化到x5Tree
+// 2.onTreeItemClick的参数node为span节点，3版可能为faceimg
+// <div id="{ls_id}">
+//     <img src="plus.gif">
+//     <span><img src="{face.jpg}">{text}</span>
+//     <div>next grade</div>
+//     <div>next grade</div>
+//     ......
+// </div>
+// ID 根节点类型, 叶节点类型, 点击回调函数
+function x5Tree(expr, ls, param, leaf, useritemclick) {
+    this.leaf = leaf;
+    this.onTreeItemClick = useritemclick;
+    this.Req(expr, ls, param);
+    this.root = true;
+
+	// 树控件的事件处理
+	var tree = $(expr);
+    tree.addClass("xTree");
+	tree.on("click", function (event) {
+		if (event.target.tagName != "IMG" && event.target.tagName != "SPAN")
+			return;
+		var node = $(event.target);
+		var treeid = node.parents(".xTree").attr("id");
+		if ( g[treeid] == undefined){
+			alert("找不到xTree对象");
+			return;
+		}
+		if (event.target.tagName == "IMG" && node.parent()[0].tagName == "DIV") { // 点在加号上
+			var id = node.parent().attr("id");
+			g[treeid].Extend("#" + id);
+		}
+		else { //  点在标签上
+			if (g[treeid].onTreeItemClick != undefined){
+				if (event.target.tagName == "IMG")
+					node = node.parent();
+				node = node.parent();
+				var at = node.attr("id").split("_");
+				g[treeid].onTreeItemClick(at[0], at[1], node); // 回调
+			}
+		}
+	});
+}
+x5Tree.prototype.Req = function (expr, ls, param) {
+    Reqdata("/rd?ls=" + ls + (param ? "&" + param : ""), this, function (res, ctx) {
+        var html = "";
+        var data = res.data;
+        res.data.forEach(x => {
+            if (ls == ctx.leaf) { // 叶节点，少了左边的加号，为缩进对齐加了一层div
+                if (ctx.root) { // 根节点是叶节点时，不要加外层div
+                    html += "<div id=\"" + ls + "_" + x.id + "\"><span><img src=\""
+                        + g_treebranch[ls].image + "\">" + x.name + "</span></div>\n"
+                }
+                else {
+                    html += "<div><div id=\"" + ls + "_" + x.id + "\"><span><img src=\""
+                        + g_treebranch[ls].image + "\">" + x.name + "</span></div></div>\n"
+                }
+            }
+            else { // 
+                html += "<div id=\"" + ls + "_" + x.id + "\">"
+                    + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
+                    + g_treebranch[ls].image + "\">" + x.name + "</span></div>\n"
+			}
+        });
+        ctx.root = false;
+
+        $(expr).append().append(html);
+        $(expr).children("img").attr("src", "img/nolines_minus.gif"); // 把加号改成减号
+    });
+}
+x5Tree.prototype.Extend = function (expr) {
+    var node = $(expr);
+    var children = node.children("div");
+    if (children.length == 0) { // 无子项,去请求
+        var at = expr.slice(1).split("_");
+        this.Req(expr, g_treebranch[at[0]].sub, at[0] + "_id=" + at[1]);
+    }
+    else if (children.css("display") == "none") { // 有子项,展开
+        $(event.srcElement).attr("src", "img/nolines_minus.gif");
+        children.css("display", "block");
+    }
+    else { // 有子项,合并
+        $(event.srcElement).attr("src", "img/nolines_plus.gif");
+        children.css("display", "none");
+    }
+}

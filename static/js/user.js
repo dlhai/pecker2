@@ -196,5 +196,11 @@ function onuseredit() {
     dlg.Show();
 	dlg.user = g_focus;
     dlg.submit = ondlgusersave;
+	dlg.remove = function (dlg){ 
+		Reqdata( "/user/remove?id="+dlg.user.id, "", function(res){
+            if (res.result != 200) { alert("删除失败！"); return; }
+            dlg.closedlg();
+		});
+	};
 }
 

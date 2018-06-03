@@ -146,9 +146,67 @@ cbDlg.prototype.closedlg = function () {
     $('#' + this.id).remove();
 }
 
-function showDlg() {
-    var dlg = new cbDlg();
-    dlg.Show();
+//form对话框组件
+function cbFormDlg(title, css, subs) {
+    this.id = "cbFormDlg" + Math.ceil(Math.random() * 1000000).toString();
+    this.css = css? css:"width:450px";
+    this.title = title ? title:"标题";
+    this.subs = new Array();
+    if (subs)
+        this.subs.push(subs);
+}
+cbFormDlg.prototype.Add = function (sub) {
+    this.subs.push(sub);
+}
+cbFormDlg.prototype.Show = function () {
+    var html = '<div class="modal fade" id="' + this.id + '" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">'
+        + '<div class="modal-dialog" style="' + this.css + '">'
+        + '<div class="modal-content">'
+        + '    <div class="modal-header">'
+        + '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>'
+        + '        <h4 class="modal-title" id="ModalDlgTitle">' + this.title + '</h4>'
+        + '   </div>'
+        + '    <form id="ModalDlgContent" class="modal-body" style="padding:5px">';
+    this.subs.forEach(x => { html += x.toString() });
+    html += '    </form>'
+        + ` <div class="modal-footer">
+                <div style="float:left;">`+
+                    (this.urlremove ? `<button type="button" class="btn btn-default" style="color:#aaaaaa">删除</button>` : "") +
+                    `<div id="msg" style="display:inline-block;"></div>
+                </div>
+                <button type="button" class="btn btn-primary">提交</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+        </div><!-- /.modal -->`;
+    $("body").append(html);
+    $('#' + this.id).find("button").on("click", '', { This: this }, function (ev) {
+        if (ev.target.innerText == "提交") ev.data.This.submit();
+        else if (ev.target.innerText == "关闭") ev.data.This.closedlg();
+        else if (ev.target.innerText == "删除") ev.data.This.remove();
+    });
+
+    $('#' + this.id).on('hide.bs.modal', "", { This: this }, function (ev) {ev.data.This.closedlg(); });
+    $('#' + this.id).modal('show');
+}
+cbFormDlg.prototype.closedlg = function () {
+    $('#' + this.id).remove();
+}
+cbFormDlg.prototype.submit = function () {
+    var fd = new FormData(document.getElementById("ModalDlgContent"));
+	if ( this.check && !this.check(fd) )
+		return;
+
+	ReqdataP( this.urlsubmit, "", function(res){
+		if (res.result != 200) { alert("修改失败！"); return; }
+		this.closedlg();
+	});
+}
+cbFormDlg.prototype.remove = function () {
+	Reqdata( this.urlremove, "", function(res){
+		if (res.result != 200) { alert("删除失败！"); return; }
+		dlg.closedlg();
+	});
 }
 
 
@@ -262,6 +320,15 @@ function RenderForm4(entity, fields, cb) {
     return r;
 }
 
+//与第4版区别是增加了表单的名字
+function RenderForm5(id, entity, fields, cb) {
+    var r = '<form id="{0}" class="x2Form">'.format(id);
+    r +=RenderFormIn(entity, fields, cb);
+    r += "</form>";
+    return r;
+}
+
+
 function xCreateNode(param) {
     var pm = Object(); 
     pm.name = param.name == undefined ? "div" : param.name;
@@ -278,7 +345,7 @@ g_TableCurRow = new Object();
 function RenderTable2(res, style, fun) {
     var r = "<table id=\"" + res.ls + "\" class=\"xTable\"><thead><tr>";
     if (style)
-        r = "<table id=\"" + res.ls + "\" class=\"" + style + "\"><thead><tr>";
+        r = "<table id=\"" + res.ls + "\" class=\"xTable\" style=\"" + style + "\"><thead><tr>";
     res.fields.forEach(field => {
         if (!field.hasOwnProperty("twidth"))
             field.twidth = -1;

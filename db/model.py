@@ -577,3 +577,11 @@ if len(data1) == len(data2):
             break;
         sql = "update dev set driver_id=" +str(data2[i].id)+ " where id="+ str(data1[i].id)
         conn.execute(sql)
+
+
+#刷数据库
+#1.红蓝分不在列表显示
+#2.prof不能保存
+#3.文章brief显示
+#4.用户动态显示
+#5.efanvender_id和leafvender_id改为vender_id
