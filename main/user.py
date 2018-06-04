@@ -77,3 +77,48 @@ def reqjob():
     conn.execute(toinsert("msg",rec))
     return Response(tojson(obj(result="200",fun="reqjob")), mimetype='application/json')
 
+
+#查询下属所有用户
+#测试链接 http://127.0.0.1:5000/rduser?type=winder&key1=val1&key2=val2....
+@app.route("/user/staff")
+@login_required
+def userstaff():
+    whr = {
+        1:"job=2 or job=3",                                         #1	su叶片	叶片超级帐号	""
+        2:"job=3 and depart_id=%d"%current_user.depart_id,          #2	风场长	风场主管	1
+                                                                    #3	驻场	驻场	1
+        4:"job=5 or job=6",                                         #4	su设备	设备超级帐号	""
+        5:"job=6 and depart_id=%d"%current_user.depart_id,          #5	驻地长	驻地主管	4
+                                                                    #6	司机	设备司机	4
+        7:"job=8 or job=9",                                         #7	su仓库	仓库超级帐号	""
+        8:"job=9 and depart_id=%d"%current_user.depart_id,          #8	仓库长	仓库主管	7
+                                                                    #9	仓管	仓库管理员	7
+        10:"job=11 or job=12",                                      #10	su调度	调度超级帐号	""
+        11:"job=12",                                                #11	调度长	调度主管	10
+                                                                    #12	调度	调度	10
+        13:"job=14",                                                #13	su专家	专家超级帐号	""
+                                                                    #14	专家	专家	13
+        15:"job=16 or job=17",                                      #15	su技工	技工超级帐号	""
+        16:"id in ( select b_id from link where type ='team' and a_id=%d)"%current_user.id, #16	队长	维修队长	15
+                                                                    #17	技工	技工	15
+        18:"job=19",                                                #18	su博客	博客超级帐号	""
+                                                                    #19	公众	公众	18
+        }
+    r = obj(result="404",fun="userstaff")
+    if current_user.job not in whr:
+        return toret(r,msg="您没有下级用户")
+    r.data = QueryObj( "select * from user where "+ whr[current_user.job])
+    [delattr(x,"pwd") for x in r.data] # 清除密码列
+    r.fields = QueryObj(select(base.sl).where(base.c.table=="user"))
+    r.ls="user"
+
+    if current_user.job not in [1, 4, 7]:#非三类超级用户(风场、仓库、驻地)，关闭所属单位
+        field = list(filter( lambda x : x.name == "depart_id", r.fields))[0]
+        field.twidth = "0"
+        field.ftype = "none"
+    if current_user.job != 13:#非专家超级帐号，关闭领域
+        field = list(filter( lambda x : x.name == "skill", r.fields))[0]
+        field.twidth = "0"
+        field.ftype = "none";
+    r.result=200
+    return Response(tojson(r), mimetype='application/json')

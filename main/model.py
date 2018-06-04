@@ -171,7 +171,7 @@ class pagnition:
 def todict(p):
     d = p
     if type(p)!=type({}):
-        d = obj.__dict__
+        d = p.__dict__
     return d
 
 def toinsert(tbl,obj):

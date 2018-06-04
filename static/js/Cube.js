@@ -190,6 +190,8 @@ cbFormDlg.prototype.Show = function () {
     $('#' + this.id).modal('show');
 }
 cbFormDlg.prototype.closedlg = function () {
+	if ( this.closing )
+		this.closing();
     $('#' + this.id).remove();
 }
 cbFormDlg.prototype.submit = function () {
@@ -197,15 +199,17 @@ cbFormDlg.prototype.submit = function () {
 	if ( this.check && !this.check(fd) )
 		return;
 
-	ReqdataP( this.urlsubmit, fd,"", function(res){
+	postform( this.urlsubmit, fd, this, function(res, ctx){
 		if (res.result != 200) { alert("修改失败！"); return; }
-		this.closedlg();
+		alert("提交成功！");
+		ctx.closedlg();
 	});
 }
 cbFormDlg.prototype.remove = function () {
-	Reqdata( this.urlremove, "", function(res){
+	ReqData( this.urlremove, this, function(res,ctx){
 		if (res.result != 200) { alert("删除失败！"); return; }
-		dlg.closedlg();
+		alert("删除成功！");
+		ctx.closedlg();
 	});
 }
 
@@ -382,6 +386,14 @@ function RenderTable2(res, style, fun) {
     g_TableCurRow[res.ls] = -1;
     return r;
 }
+
+function GetRowDataID( ls ){
+	var row = g_TableCurRow[ls];
+	if ( row == -1 )
+		return 0;
+	return $("#"+ls+ " tbody" ).children(":nth-child(" + ++row + ")").attr( "data_id");
+}
+
 //点击反色
 $("html").on("click", function (event) {
     var node = $(event.target);

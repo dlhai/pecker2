@@ -56,7 +56,7 @@ function f_message(user_id,user_name) {
         var value_content = $("#kemsg").val();
 		fd.append( "body", value_content );
 
-		SendForm('/msgto?type=0&user_id='+user_id, fd, "", function(res){
+		postform('/msgto?type=0&user_id='+user_id, fd, "", function(res){
 			alert('留言成功');
 		    thisdlg.closedlg();
 		});
@@ -71,7 +71,7 @@ function f_replay(writing_id) {
 	fd.append( "writing_id", writing_id );
 	fd.append( "body", value_content );
 
-	SendForm('/publish?board=4', fd, "",function(res){
+	postform('/publish?board=4', fd, "",function(res){
 		alert('评论成功');
 		location.reload();
 	});
@@ -122,7 +122,7 @@ function f_writing() {
 		fd.append( "label", label.join(",") );
 		fd.append( "body", value_content );
 
-		SendForm('/publish?board='+board, fd, "",function(res){
+		postform('/publish?board='+board, fd, "",function(res){
 			alert('发表成功');
 		    thisdlg.closedlg();
 		});

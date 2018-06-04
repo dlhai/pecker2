@@ -262,7 +262,7 @@
 
         var fd = new FormData();
         fd.append("body", value_content);
-        SendForm('/msgto?type=2&user_id=' + g_focus_id, fd, "", function (res) {
+        postform('/msgto?type=2&user_id=' + g_focus_id, fd, "", function (res) {
 			checknewmsg();
 		});
     }

@@ -16,69 +16,79 @@
 </head>
 <body class="xFCsrow" >
     <section class="xPanel2" style="width:100px;">
-        <header class="heading">整机供应商<div style="float: right;"><a href="#" onClick="EfanVNew(this)">新建</a> <a href="#" onClick="EfanVEdit(this)">修改</a></div></header>
+        <header class="heading">整机供应商<div style="float: right;"><a href="#" onClick="onEfanVNew(this)">新建</a> <a href="#" onClick="onEfanVEdit(this)">修改</a></div></header>
         <div id="efan_vender_list" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
     </section>
     <section class="xPanel2" style="width:100px;">
-        <header class="heading">叶片供应商<div style="float: right;"><a href="#" onClick="LeafVNew(this)">新建</a> <a href="#" onClick="LeafVEdit(this)">修改</a></div></header>
+        <header class="heading">叶片供应商<div style="float: right;"><a href="#" onClick="onLeafVNew(this)">新建</a> <a href="#" onClick="onLeafVEdit(this)">修改</a></div></header>
         <div id="leaf_vender_list" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
     </section>
 
     <script type="text/javascript">
         var g_efanVs = new Object();
         var g_leafVs = new Object();
-        Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (efanVs) {
-            g_efanVs = efanVs;
-            g_efanVs.ls = "efan"+g_efanVs.ls;
-            $("#efan_vender_list").html(RenderTable2(efanVs));
-            TableBindClick3(efanVs.ls);
-        });
-        Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (leafVs) {
-            g_leafVs = leafVs;
-            g_leafVs.ls = "leaf" + g_leafVs.ls;
-            $("#leaf_vender_list").html(RenderTable2(leafVs));
-            TableBindClick3(leafVs.ls);
-        });
+		refreshefan();
+		refreshleaf();
+		function refreshefan(){
+			Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (efanVs) {
+				g_efanVs = efanVs;
+				g_efanVs.ls = "efan"+g_efanVs.ls;
+				$("#efan_vender_list").html(RenderTable2(efanVs));
+			});
+		}
+		function refreshleaf(){
+			Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (leafVs) {
+				g_leafVs = leafVs;
+				g_leafVs.ls = "leaf" + g_leafVs.ls;
+				$("#leaf_vender_list").html(RenderTable2(leafVs));
+			});
+		}
 
-        function EfanVEdit(This) {
+        function onEfanVEdit(This) {
             if (g_TableCurRow[g_efanVs.ls] == -1)
                 return;
-            var efanv = GetSub(g_efanVs.data, "id", g_TableCurRow[g_efanVs.ls]);
+
+            var efanv = GetSub(g_efanVs.data, "id", GetRowDataID(g_efanVs.ls));
             var title = "编辑 " + branch[g_efanVs.ls].name;
             var cnt = RenderForm4( efanv, g_efanVs.fields);
 
 			var dlg = new cbFormDlg(title, "width:610px", cnt);
 			dlg.urlsubmit = "/vender/modify?id="+efanv.id;
 			dlg.urlremove = "/vender/remove?id="+efanv.id;
+			dlg.closing = refreshefan;
             dlg.Show();
         }
-        function LeafVEdit(This) {
+        function onLeafVEdit(This) {
             if (g_TableCurRow[g_leafVs.ls] == -1)
                 return;
-            var leafv = GetSub(g_leafVs.data, "id", g_TableCurRow[g_leafVs.ls]);
+
+            var leafv = GetSub(g_leafVs.data, "id", GetRowDataID(g_leafVs.ls));
             var title = "编辑 " + branch[g_leafVs.ls].name;
             var cnt = RenderForm4(leafv, g_leafVs.fields);
 
 			var dlg = new cbFormDlg(title, "width:610px", cnt);
 			dlg.urlsubmit = "/vender/modify?id="+leafv.id;
 			dlg.urlremove = "/vender/remove?id="+leafv.id;
+			dlg.closing = refreshleaf;
             dlg.Show();
         }
 
-        function EfanVNew(This) {
+        function onEfanVNew(This) {
             var title = "新建 " + branch[g_efanVs.ls].name;
             var cnt = RenderForm4(Create(g_efanVs.fields), g_efanVs.fields);
 
 			var dlg = new cbFormDlg(title, "width:610px", cnt);
-			dlg.urlsubmit = "/vender/create?type=0";
+			dlg.urlsubmit = "/vender/create?type=17";
+			dlg.closing = refreshefan;
             dlg.Show();
         }
-        function LeafVNew(This) {
+        function onLeafVNew(This) {
             var title = "新建 " + branch[g_leafVs.ls].name;
             var cnt = RenderForm4(Create(g_leafVs.fields), g_leafVs.fields);
 
 			var dlg = new cbFormDlg(title, "width:610px", cnt);
-			dlg.urlsubmit = "/vender/create?type=1";
+			dlg.urlsubmit = "/vender/create?type=18";
+			dlg.closing = refreshleaf;
             dlg.Show();
         }
 
