@@ -197,7 +197,7 @@ cbFormDlg.prototype.submit = function () {
 	if ( this.check && !this.check(fd) )
 		return;
 
-	ReqdataP( this.urlsubmit, "", function(res){
+	ReqdataP( this.urlsubmit, fd,"", function(res){
 		if (res.result != 200) { alert("修改失败！"); return; }
 		this.closedlg();
 	});

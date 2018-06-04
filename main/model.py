@@ -189,12 +189,13 @@ def toupdate(tbl,values,where):
 
 def todelete(tbl,where):
     whrs=" and ".join([ k+"='"+str(v)+"'" for k,v in where.__dict__.items()])
-    sql = "delete from {1} where {2}".format(tbl, whrs)
+    sql = "delete from {0} where {1}".format(tbl, whrs)
     return sql
 
 def querycount(tbl,where):
     whrs=" and ".join([ k+"='"+str(v)+"'" for k,v in where.__dict__.items()])
-    return QueryObj( "select count(*) as count from {1} where {2}".format(tbl, whrs) )[0].count
+    rs =QueryObj( "select count(*) as count from {0} where {1}".format(tbl, whrs) )
+    return rs[0].count
 
 
 def verifyface(user):

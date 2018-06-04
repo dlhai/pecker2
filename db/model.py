@@ -98,7 +98,7 @@ def dict_flow(x):
 tbl_msg=Table('msg', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('type',Integer),
-	Column('whn',Integer),
+	Column('whn',Date),
 	Column('src',Integer),
 	Column('dst',Integer),
 	Column('table_id',Integer),
@@ -114,7 +114,7 @@ tbl_mark=Table('mark', metadata,
 	Column('id',Integer,primary_key=True),
 	Column('user_id',Integer),
 	Column('type',Integer),
-	Column('whn',Integer))
+	Column('whn',Date))
 def dict_mark(x):
     return dict(user_id="",type="",whn="")
 
@@ -193,11 +193,13 @@ tbl_writing=Table('writing', metadata,
 	Column('user_id',Integer),
 	Column('date',Date),
 	Column('title',String(64)),
+	Column('brief',String(512)),
 	Column('body',String(10240)))
+
+
 def dict_writing(x):
-    return dict(writing_id=choice([0,randint(1,x) if x>1 else 0 ]),
-                board=rndnum(1,3),section="",label=xsample("_keyword",3,5),user_id=rndnum(50,59),date=rnddate(0,2*365),title=rnditem("_quiz"),
-                body="\r\n".join([x[0] for x in sample(data("_songci").data,10)]))
+    writing_id=choice([0,randint(1,x) if x>1 else 0 ])
+    return dict(writing_id=writing_id,board=rndnum(1,3),section="",label=xsample("_keyword",3,5),user_id=rndnum(50,59),date=rnddate(0,2*365),title=rnditem("_quiz"),brief=rnditem("_songci"),body="\r\n".join(["<p>"+x[0]+"</p>" for x in sample(data("_songci").data,10 if writing_id==0 else 1)]))
 
 tbl_follow=Table('follow', metadata,
 	Column('id',Integer,primary_key=True),
@@ -260,10 +262,10 @@ tbl_efan=Table('efan', metadata,
 	Column('winder_id',Integer,ForeignKey('winder.id')),
 	Column('code',String(32)),
 	Column('type',String(32)),
-	Column('efanvender_id',Integer),
+	Column('vender_id',Integer),
 	Column('position',String(64)))
 def dict_efan(x,y):
-    return dict(winderarea_id=x.id,winder_id=x.winder_id,code=rndqq(),type=rndtype("efan"),efanvender_id=rnditem("efanvender").id,position=rndgps(x.position))
+    return dict(winderarea_id=x.id,winder_id=x.winder_id,code=rndqq(),type=rndtype("efan"),vender_id=rnditem("efanvender").id,position=rndgps(x.position))
 
 tbl_leaf=Table('leaf', metadata,
 	Column('id',Integer,primary_key=True),
@@ -271,14 +273,14 @@ tbl_leaf=Table('leaf', metadata,
 	Column('winderarea_id',Integer,ForeignKey('winderarea.id')),
 	Column('winder_id',Integer,ForeignKey('winder.id')),
 	Column('efan_id',Integer,ForeignKey('efan.id')),
-	Column('leafvender_id',Integer),
+	Column('vender_id',Integer),
 	Column('mat',String(32)),
 	Column('producedate',Date),
 	Column('putondate',Date))
 def dict_leaf(x,y):
     pdt=rnddate(4*365,5*365)
     a="abc"
-    return dict(code=x.code+a[y],winderarea_id=x.winderarea_id,winder_id=x.winder_id,efan_id=x.id,leafvender_id=rnditem("leafvender").id,mat=rnditem("_mainmat"),producedate=pdt,putondate=rnddatespan(pdt,30,365))
+    return dict(code=x.code+a[y],winderarea_id=x.winderarea_id,winder_id=x.winder_id,efan_id=x.id,vender_id=rnditem("leafvender").id,mat=rnditem("_mainmat"),producedate=pdt,putondate=rnddatespan(pdt,30,365))
 
 tbl_fault=Table('fault', metadata,
 	Column('id',Integer,primary_key=True),
@@ -519,7 +521,6 @@ conn.execute(tbl_leaf.insert(),[dict_leaf(x,y) for x in data("efan") for y in ra
 QueryAll(tbl_leaf)
 
 
-conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","1","")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"winder","2","") for x in data("winder")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"winder","3","") for x in data("winder") for y in range(rndnum(2,3))])
 conn.execute(tbl_config.insert(),[dict_config("ethnic",x[0]) for x in data("_ethnic").data])
@@ -532,7 +533,6 @@ conn.execute(tbl_dev.insert(),[dict_dev(x,y,z) for x in data("devwh") for y in d
 QueryAll(tbl_dev)
 
 
-conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","4","")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"devwh","5","") for x in data("devwh")])
 conn.execute(tbl_user.insert(),[dict_user(x.devwh_id,"devwh","6","") for x in data("dev")])
 conn.execute(tbl_vender.insert(),[dict_vender(x,25) for x in data("_matvender")])
@@ -546,7 +546,6 @@ QueryAll(tbl_matwh)
 conn.execute(tbl_mat.insert(),[dict_mat(x) for x in data("_mat")])
 QueryAll(tbl_mat)
 
-conn.execute(tbl_user.insert(),[dict_user(0,"__sys__","7","")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"matwh","8","") for x in data("matwh")])
 conn.execute(tbl_user.insert(),[dict_user(x.id,"matwh","9","") for x in data("matwh") for y in range(rndnum(2,5))])
 QueryAll(tbl_matin)
@@ -577,11 +576,3 @@ if len(data1) == len(data2):
             break;
         sql = "update dev set driver_id=" +str(data2[i].id)+ " where id="+ str(data1[i].id)
         conn.execute(sql)
-
-
-#刷数据库
-#1.红蓝分不在列表显示
-#2.prof不能保存
-#3.文章brief显示
-#4.用户动态显示
-#5.efanvender_id和leafvender_id改为vender_id

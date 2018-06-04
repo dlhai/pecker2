@@ -44,7 +44,7 @@ def vendermodify():
 #/vender/remove?id=
 @app.route("/vender/remove")
 @login_required
-def reqjob():
+def venderremove():
     params = request.args.to_dict()
     r = obj(result="404",fun="/vender/remove")
     if "id" not in params:
@@ -54,7 +54,7 @@ def reqjob():
     if len(u) == 0:
         return toret(r,msg="id不存在")
 
-    if querycount( gettbl(u[0].type).name,obj(vender_id=params["id"]))>0:
+    if querycount( gettbl(u[0].type)["name"],obj(vender_id=params["id"]))>0:
         return toret(r,msg="已经使用")
 
     conn.execute(todelete("vender", obj(id=params["id"])))

@@ -299,7 +299,7 @@ function Reqdata(url, ctx, fun) {
     xmlhttp.send();
 }
 
-function ReqdataP(url, data, ctx, cb) {
+function ReqdataP(url, fd, ctx, cb) {
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -312,7 +312,7 @@ function ReqdataP(url, data, ctx, cb) {
     };
     xmlhttp.open("POST", url, true);
     xmlhttp.setRequestHeader("Content-Type", "application/json");
-    xmlhttp.send(data);
+    xmlhttp.send(fd);
 }
 
 function Sendform(url, fd, ctx, cb) {
