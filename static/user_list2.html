@@ -66,13 +66,25 @@
 			Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
 			if (isInArray(["1", "4", "7"], g_user.job))
 				Reqdata("/rd?ls=" + { "1": "winder", "4": "devwh", "7": "matwh" }[g_user.job], "", function (res) { g_departs = res; });
+			
+			refresh();
+			onclickpane($(".live")[0]);
+		};
+
+		function refresh(){
 			Reqdata("/user/staff", "", function (res) {
 				g_users = res;
 				g_users.ls="usertable"
 				$("#userlist").html(RenderTable2(g_users, undefined, ValToView));
-				onclickpane($(".live")[0]);
+				if ( g_focus != undefined){
+					var select = "#{tid}>tbody>[data_id={id}]".format({tid:g_users.ls, id:g_focus.id});
+					SetCurRow( g_users.ls, $(select).index());
+
+					g_focus = GetSub(g_users.data, "id", g_focus.id);
+					showdetail(g_focus);
+				}
 			});
-		};
+		}
 
         //点击表格行或列表行
         g_curitems = new Array();

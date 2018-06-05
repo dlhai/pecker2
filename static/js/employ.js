@@ -76,7 +76,7 @@ function onemployedit() {
 
     var dlg = new cbDlg("编辑 证件", "width:600px");
     dlg.btndel = true;
-    dlg.Add(`<form id="certif_live">` + xremploylive(employ, g_employs.fields) + `</form>`);
+    dlg.Add(`<form id="employ_live">` + xremploylive(employ, g_employs.fields) + `</form>`);
     dlg.Show();
     dlg.submit = function (thisdlg) {
         var fd = employcheck();

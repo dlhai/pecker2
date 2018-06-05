@@ -387,11 +387,24 @@ function RenderTable2(res, style, fun) {
     return r;
 }
 
-function GetRowDataID( ls ){
-	var row = g_TableCurRow[ls];
+function GetCurRowDataID( tableid ){
+	var row = g_TableCurRow[tableid];
 	if ( row == -1 )
 		return 0;
-	return $("#"+ls+ " tbody" ).children(":nth-child(" + ++row + ")").attr( "data_id");
+	return $("#"+tableid+ ">tbody>:nth-child(" + row + ")").attr( "data_id");
+}
+
+function SetCurRow( tableid, idx ){
+	idx++;
+    var currow = g_TableCurRow[tableid];
+    if (currow != -1) {
+        if (currow % 2 == 0)
+            $("#"+tableid+ ">tbody>:nth-child(" + currow + ")>*").css("background-color", "#f5f5f5");
+        else
+            $("#"+tableid+ ">tbody>:nth-child(" + currow + ")>*").css("background-color", "#ffffff");
+    }
+	$("#"+tableid+ ">tbody>:nth-child(" + idx + ")>*").css("background-color", "#00f0f5");
+    g_TableCurRow[tableid] = idx;
 }
 
 //点击反色
@@ -403,17 +416,9 @@ $("html").on("click", function (event) {
         var tag = tbody[0].localName;
         if (tag.toLowerCase() == "thead")
             return;
+
         var tableid = tbody.parent().attr("id");
-        var currow = g_TableCurRow[tableid];
-        if (currow != -1) {
-            currow++;
-            if (currow % 2 == 0)
-                tbody.children(":nth-child(" + currow + ")").children().css("background-color", "#f5f5f5");
-            else
-                tbody.children(":nth-child(" + currow + ")").children().css("background-color", "#ffffff");
-        }
-        node.children().css("background-color", "#00f0f5");
-        g_TableCurRow[tableid] = node.index();
+		SetCurRow( tableid, node.index() );
     }
 });
 

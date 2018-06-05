@@ -97,10 +97,6 @@ function hidechgpwd(This) {
     });
 }
 
-function ondlgusersave(dlg) {
-    onusersave(dlg.user);
-}
-
 function onusersave(user) {
     delete g_chged.pwd;
     delete g_chged.newpwd1;
@@ -150,7 +146,7 @@ $("html").on("change", function () {
 	}
 });
 
-//专用函数
+//user_list专用函数
 function onuseradd() {
     var tpl =
         `<div class="x2Form" style="padding: 0px 0px 0px 30px;">
@@ -185,7 +181,12 @@ function onuseradd() {
         dlg2.Add(`<form id="form_useredit" style="height:350px;">` + xruserlive(newuser, g_user.fields) + `</form>`);
         dlg2.Show();
 		dlg2.user = newuser;
-        dlg2.submit = ondlgusersave;
+        dlg2.submit = function (dlg) {
+			onusersave(dlg.user);
+			dlg.closedlg();
+			refresh();
+		}
+;
     }
     dlg.Show();
 }
@@ -195,7 +196,11 @@ function onuseredit() {
 	dlg.Add(`<form id="form_useredit" style="height:350px;">` + xruserlive(g_focus, g_user.fields) + `</form>`);
     dlg.Show();
 	dlg.user = g_focus;
-    dlg.submit = ondlgusersave;
+    dlg.submit = function (dlg) {
+			onusersave(dlg.user);
+			dlg.closedlg();
+			refresh();
+	}
 	dlg.remove = function (dlg){ 
 		Reqdata( "/user/remove?id="+dlg.user.id, "", function(res){
             if (res.result != 200) { alert("删除失败！"); return; }

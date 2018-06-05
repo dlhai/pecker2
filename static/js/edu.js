@@ -79,7 +79,7 @@ function oneduedit() {
 
     var dlg = new cbDlg("编辑 教育经历", "width:600px");
     dlg.btndel = true;
-    dlg.Add(`<form id="certif_live">` + xredulive(edu, g_edus.fields) + `</form>`);
+    dlg.Add(`<form id="edu_live">` + xredulive(edu, g_edus.fields) + `</form>`);
     dlg.Show();
     dlg.submit = function (thisdlg) {
         var fd = educheck();

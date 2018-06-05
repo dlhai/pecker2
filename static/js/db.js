@@ -3,7 +3,7 @@
         "id": "1", "type": "winder", "name": "叶片超级帐号", modules: [
             { name: "地图", url: "windersumap.html" },
             { name: "风场", url: "windersu.html" },
-            { name: "人员", url: "user_list.html" },
+            { name: "人员", url: "user_list2.html" },
             { name: "厂家", url: "vender.html" }]
     },
     {
@@ -12,7 +12,7 @@
             { name: "设备", usesub: true, url: "winder2.html" },
             { name: "案件", usesub: true, url: "coord.html" },
             { name: "记录", usesub: true, url: "repairlog.html" },
-            { name: "人员", url: "user3.html" }]
+            { name: "人员", url: "user_list2.html" }]
     },
     {
         "id": "3", "type": "winder", "name": "驻场", modules: [
@@ -25,14 +25,14 @@
         "id": "4", "type": "dev", "name": "设备超级帐号", modules: [
             { name: "地图", url: "devmap.html" },
             { name: "驻地", url: "devsu.html" },
-            { name: "人员", url: "user3.html" },
+            { name: "人员", url: "user_list2.html" },
             { name: "厂家", url: "devvender.html" }]
     },
     {
         "id": "5", "type": "dev", "name": "驻地主管", modules: [
             { name: "地图", url: "devmap.html" },
             { name: "驻地", url: "devwh.html" },
-            { name: "人员", url: "user3.html" }]
+            { name: "人员", url: "user_list2.html" }]
     },
     {
         "id": "6", "type": "dev", "name": "设备司机", modules: [
@@ -41,7 +41,7 @@
     {
         "id": "7", "type": "wh", "name": "仓库超级帐号", modules: [
             { name: "仓库", url: "matsu.html" },
-            { name: "人员", url: "user3.html" },
+            { name: "人员", url: "user_list2.html" },
             { name: "材料", url: "material.html" }]
     },
     {
@@ -49,7 +49,7 @@
             { name: "入库", url: "matin.html" },
             { name: "出库", url: "matout.html" },
             { name: "查询", usesub: true, subs: [{ name: "库存", url: "matquery.html" }, { name: "入库", url: "matqueryin.html" }, { name: "出库", url: "matqueryout.html" }]},
-            { name: "人员", url: "user3.html" }]
+            { name: "人员", url: "user_list2.html" }]
     },
     {
         "id": "9", "type": "wh", "name": "仓库管理员", modules: [
@@ -57,21 +57,21 @@
             { name: "出库", url: "matout.html" },
             { name: "查询", usesub: true, subs: [{ name: "库存", url: "matquery.html" }, { name: "入库", url: "matqueryin.html" }, { name: "出库", url: "matqueryout.html" }] }],
     },
-    { "id": "10", "type": "coord", "name": "调度超级帐号", modules: [{ name: "调度", url: "user3.html" }] },
+    { "id": "10", "type": "coord", "name": "调度超级帐号", modules: [{ name: "调度", url: "user_list2.html" }] },
     { "id": "11", "type": "coord", "name": "调度主管", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
     { "id": "12", "type": "coord", "name": "调度", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
-    {"id": "13", "type": "expert", "name": "专家超级帐号", modules: [{ name: "专家", url: "user3.html" }]},
+    {"id": "13", "type": "expert", "name": "专家超级帐号", modules: [{ name: "专家", url: "user_list2.html" }]},
     {
         "id": "14", "type": "expert", "name": "专家", modules: [
             { name: "案件", url: "coord.html" },
             { name: "记录", url: "repairlog.html" }]
     },
-    { "id": "15", "type": "repair", "name": "技工超级帐号", modules: [{ name: "技工", url: "user3.html" }] },
+    { "id": "15", "type": "repair", "name": "技工超级帐号", modules: [{ name: "技工", url: "user_list2.html" }] },
     {
         "id": "16", "type": "repair", "name": "维修队长", modules: [
             { name: "案件", url: "coord.html" },
             { name: "记录", url: "repairlog.html" },
-            { name: "人员", url: "user3.html" }]
+            { name: "人员", url: "user_list2.html" }]
     },
     { "id": "17", "name": "技工", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
     { "id": "18", "name": "博客超级帐号", modules: []},
