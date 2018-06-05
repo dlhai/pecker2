@@ -68,6 +68,7 @@
 				Reqdata("/rd?ls=" + { "1": "winder", "4": "devwh", "7": "matwh" }[g_user.job], "", function (res) { g_departs = res; });
 			Reqdata("/user/staff", "", function (res) {
 				g_users = res;
+				g_users.ls="usertable"
 				$("#userlist").html(RenderTable2(g_users, undefined, ValToView));
 				onclickpane($(".live")[0]);
 			});
@@ -95,7 +96,7 @@
                         <div id="{code}" style="padding:5px 0px 5px 0px;"></div>
                     </section>`;
 
-                var modules = [{ code: "userinf", name: "基本信息" }, { code: "certif", name: "证件信息" },
+                var modules = [{ code: "user", name: "基本信息" }, { code: "certif", name: "证件信息" },
                     { code: "edu", name: "受教育经历" }, { code: "employ", name: "就业经历" }];
                 $("#pane").html(modules.map(x => tpl.format(x)).join(""));
 				if (g_focus != undefined)
@@ -113,7 +114,7 @@
 
         function showdetail(user) {
             if (g_pane == "信息") {
-                $("#userinf").html(xrusershow(user, g_users.fields));
+                $("#user").html(xrusershow(user, g_users.fields));
                 Reqdata("/rd?ls=certif&user_id=" + user.id, "", function (res) { g_certifs = res; $("#certif").html(xrcertifshow(res.data));});
                 Reqdata("/rd?ls=edu&user_id=" + user.id, "", function (res) { g_edus = res;$("#edu").html(xredushow(res.data)); });
                 Reqdata("/rd?ls=employ&user_id=" + user.id, "", function (res) { g_employs = res;$("#employ").html(xremployshow(res.data)); });
