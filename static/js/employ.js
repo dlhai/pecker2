@@ -16,11 +16,15 @@ function xremployshow(data) {
                 </div>
             </div>
             {% }); %}`
+    g_curitems["employ"] = -1;
     return dtpl(tpl)(data);
 }
 
 function employcheck() {
     var formdata = new FormData(document.getElementById("employ_live"));
+    var img = formdata.get("image");
+    if (img.size == 0)
+        formdata.delete("image");
     if (formdata.get("Organization") == "") {
         $("#msg").html("工作单位不能为空！");
         return;
@@ -57,26 +61,28 @@ function onemployadd() {
         var fd = employcheck();
         if (fd == undefined)
             return;
-        Sendform('/cr?ls=employ', fd, "", employupdate);
+        postform('/cr?ls=employ', fd, "", employupdate);
         thisdlg.closedlg();
     };
 }
 function onemployedit() {
     var idx = g_curitems["employ"];
-    if (idx == undefined)
+    if (idx == -1) {
+        alert("请选择一个项目");
         return;
+    }
     var data_id = $("#employ").children(":nth-child(" + (int(idx) + 1) + ")").attr("data_id");
     var employ = GetSub(g_employs.data, "id", data_id);
 
     var dlg = new cbDlg("编辑 证件", "width:600px");
     dlg.btndel = true;
-    dlg.Add(xremploylive(employ, g_employs.fields));
+    dlg.Add(`<form id="certif_live">` + xremploylive(employ, g_employs.fields) + `</form>`);
     dlg.Show();
     dlg.submit = function (thisdlg) {
         var fd = employcheck();
         if (fd == undefined)
             return;
-        Sendform('/wt?ls=employ', fd, "", employupdate);
+        postform('/wt?ls=employ&id=' + employ.id, fd, "", employupdate);
         thisdlg.closedlg();
     };
     dlg.remove = function (thisdlg) {

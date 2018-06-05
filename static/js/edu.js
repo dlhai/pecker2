@@ -16,10 +16,17 @@ function xredushow(data) {
                 </div>
             </div>
             {% }); %}`
+    g_curitems["edu"] = -1;
     return dtpl(tpl)(data);
 }
 function educheck() {
     var formdata = new FormData(document.getElementById("edu_live"));
+    var img = formdata.get("image1");
+    if (img.size == 0)
+        formdata.delete("image1");
+    var img = formdata.get("image2");
+    if (img.size == 0)
+        formdata.delete("image2");
     if (formdata.get("startdate") == "") {
         $("#msg").html("开始时间不能为空！");
         return;
@@ -57,26 +64,28 @@ function oneduadd() {
         var fd = educheck();
         if (fd == undefined)
             return;
-        Sendform('/cr?ls=edu', fd, "", eduupdate);
+        postform('/cr?ls=edu', fd, "", eduupdate);
         thisdlg.closedlg();
     };
 }
 function oneduedit() {
     var idx = g_curitems["edu"];
-    if (idx == undefined)
+    if (idx == -1) {
+        alert("请选择一个项目");
         return;
+    }
     var data_id = $("#edu").children(":nth-child(" + (int(idx) + 1) + ")").attr("data_id");
     var edu = GetSub(g_edus.data, "id", data_id);
 
     var dlg = new cbDlg("编辑 教育经历", "width:600px");
     dlg.btndel = true;
-    dlg.Add(xredulive(edu, g_edus.fields));
+    dlg.Add(`<form id="certif_live">` + xredulive(edu, g_edus.fields) + `</form>`);
     dlg.Show();
     dlg.submit = function (thisdlg) {
         var fd = educheck();
         if (fd == undefined)
             return;
-        Sendform('/wt?ls=edu', fd, "", eduupdate);
+        postform('/wt?ls=edu&id=' + edu.id, fd, "", eduupdate);
         thisdlg.closedlg();
     };
     dlg.remove = function (thisdlg) {

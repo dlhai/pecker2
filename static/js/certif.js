@@ -16,11 +16,15 @@ function xrcertifshow(data) {
                 </div>
             </div>
             {% }); %}`
+    g_curitems["certif"] = -1;
     return dtpl(tpl)(data);
 }
 
 function certifcheck() {
     var formdata = new FormData(document.getElementById("certif_live"));
+    var img = formdata.get("image");
+    if (img.size == 0)
+        formdata.delete("image");
     if (formdata.get("name") == "") {
         $("#msg").html("证件名称不能为空！");
         return;
@@ -57,26 +61,28 @@ function oncertifadd() {
         var fd = certifcheck();
         if (fd == undefined)
             return;
-        Sendform('/cr?ls=certif', fd, "", certifupdate);
+        postform('/cr?ls=certif', fd, "", certifupdate);
         thisdlg.closedlg();
     };
 }
 function oncertifedit() {
     var idx = g_curitems["certif"];
-    if (idx == undefined)
+    if (idx == -1){
+        alert("请选择一个项目");
         return;
+    }
     var data_id = $("#certif").children(":nth-child(" + (int(idx) + 1) + ")").attr("data_id");
     var certif = GetSub(g_certifs.data, "id", data_id);
 
     var dlg = new cbDlg("编辑 证件", "width:600px");
     dlg.btndel = true;
-    dlg.Add(xrcertiflive(certif, g_certifs.fields));
+    dlg.Add(`<form id="certif_live">` + xrcertiflive(certif, g_certifs.fields) + `</form>`);
     dlg.Show();
     dlg.submit = function (thisdlg) {
         var fd = certifcheck();
         if (fd == undefined)
             return;
-        Sendform('/wt?ls=certif', fd, "", certifupdate);
+        postform('/wt?ls=certif&id=' + certif.id, fd, "", certifupdate);
         thisdlg.closedlg();
     };
     dlg.remove = function (thisdlg) {

@@ -96,7 +96,7 @@ def wt():
         files = request.files.to_dict()
         fields =request.form.to_dict()
         if "id" not in params:
-            return toret(obj(result=404,msg="缺少参数 user_id"))
+            return toret(obj(result=404,msg="缺少参数 id"))
 
         # 1. 保存附件
         fmt = "./uploads/{ls}_{fd}/{ls}_{fd}_{id}{ext}"
