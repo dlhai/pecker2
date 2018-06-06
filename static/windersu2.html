@@ -18,9 +18,9 @@
     <script src="js/winder.js"></script>
 </head>
 <body class="xFCsrow">
-    <section class="xPanel2 xFIfixed xScroll" style="width: 300px;padding:5px;">
-        <header>节点信息<div style="float: right;"><a id="id_addshow" href="javascript:onAddShow()">新建企业</a></div></header>
-        <div id="root" class="xTree"></div>
+    <section class="xPanel2 xFIfixed" style="width:300px;">
+        <header>节点信息<div style="float: right;"><a href="javascript:onAddWinderco()">新建企业</a></div></header>
+        <div id="root" class="xTree xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
     </section>
     <div id="curitem" class="xFCscol" >
         <section class="xPanel2 xFIfixed">
@@ -40,12 +40,10 @@
         Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (efanv) { g_efanvenders = efanv; });
         Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (leafv) { g_leafvenders = leafv; });
 
-        g.root = new x5Tree("#root", "winderco", "", "winderarea", function (type, id, node ) { // 点击树节点
+        g.root = new x5Tree("#root", "winderco", "", "winderarea", onclicktreeitem);
+
+		function onclicktreeitem(type, id, node ) { // 点击树节点
             $("#subitem_list").html("");
-            if (type == "winderco")
-                $("#id_addshow").show();
-            else
-                $("#id_addshow").hide();
 
 			// 显示节点详细
             Reqdata("/rd?ls=" + type + "&id=" + id, "", function (res) {
@@ -70,7 +68,7 @@
 				    });
                 }
             });
-        });
+        }
 
 		function f2s(u, field){
 			var fn = field;
@@ -86,9 +84,7 @@
 			return u[fn];
 		};
 
-        function onAddShow() {
-            if (g_focus.ls == "winderco") // 只用支持winderco
-                return;
+        function onAddWinderco() {
             var u = Create(g_windercos.fields);
 
             var title = "新建 " + g_treebranch[g_windercos.ls].name;
@@ -96,6 +92,7 @@
 
             var dlg = new cbFormDlg(title, "width:610px", cnt);
             dlg.urlsubmit = "/winder/create?ls=" + g_windercos.ls;
+			dlg.closing = function (reason){g.root.reset();}
             dlg.Show();
         }
 
@@ -104,13 +101,26 @@
             var cnt = RenderForm4( g_focus.data[0], g_focus.fields,f2s);
 
 			var dlg = new cbFormDlg(title, "width:610px", cnt);
-            dlg.urlsubmit = "/winder/modify?id=" + g_focus.id+"&ls="+g_focus.ls;
-            dlg.urlremove = "/winder/remove?id=" + g_focus.id+"&ls="+g_focus.ls;
+            dlg.urlsubmit = "/winder/modify?id=" + g_focus.data[0].id+"&ls="+g_focus.ls;
+            dlg.urlremove = "/winder/remove?id=" + g_focus.data[0].id+"&ls="+g_focus.ls;
+			dlg.closing = function (reason){
+				if ( reason == "remove"){
+					g.root.reset();
+					$("#item_detail").html("");
+					$("#subitem_list").html("");
+				}
+				else{ // 刷新focus面板
+					Reqdata("/rd?ls=" + g_focus.ls + "&id=" + g_focus.data[0].id, "", function (res) {
+						g_focus = res;
+						$("#item_detail").html(RenderPane2(res.data[0], res.fields, f2s));
+					});
+				}
+			}
             dlg.Show();
         }
         function onAddChild() {
             if (g_focussubs.ls != "efan") {
-				var obj = Create(sublist.fields);
+				var obj = Create(g_focussubs.fields);
                 // 根据对象类型不同，需要设置部分外键
                 if (g_focussubs.ls == "winderprov") {
                     obj.winderco_id = g_focus.data[0].id;
@@ -129,7 +139,7 @@
 				var cnt = RenderForm4(obj, g_focussubs.fields,f2s);
 
 				var dlg = new cbFormDlg(title, "width:610px", cnt);
-				dlg.urlsubmit = "/winder/create?ls="+g_focussubs.ls;
+				dlg.urlsubmit = "/winder/create?ls="+g_focussubs.ls + "&"+g_focus.ls+"_id="+g_focus.data[0].id;
 				dlg.Show();
             }
             else {

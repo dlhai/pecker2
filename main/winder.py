@@ -31,7 +31,7 @@ def windercreate():
         return toret(r,msg="缺少参数ls")
     if params["ls"] not in ["winderco","winderprov","winder","winderarea"]:
         return toret(r,msg="ls不正确")
-
+    #.....
     result,msg = check(params["ls"],form)
     if not result:
         return toret(r,msg=msg)

@@ -321,10 +321,14 @@ $("html").on("click", function (event) {
 // </div>
 // ID 根节点类型, 叶节点类型, 点击回调函数
 function x5Tree(expr, ls, param, leaf, useritemclick) {
+	this.expr = expr;
+	this.ls = ls;
+    this.param = param;
     this.leaf = leaf;
-    this.onTreeItemClick = useritemclick;
-    this.Req(expr, ls, param);
     this.root = true;
+    this.onTreeItemClick = useritemclick;
+
+    this.Req(expr, ls, param);
 
 	// 树控件的事件处理
 	var tree = $(expr);
@@ -353,6 +357,11 @@ function x5Tree(expr, ls, param, leaf, useritemclick) {
 		}
 	});
 }
+x5Tree.prototype.reset = function () {
+	$(this.expr).html("");
+    this.root = true;
+    this.Req(this.expr, this.ls, this.param);
+}
 x5Tree.prototype.Req = function (expr, ls, param) {
     Reqdata("/rd?ls=" + ls + (param ? "&" + param : ""), this, function (res, ctx) {
         var html = "";
@@ -376,7 +385,7 @@ x5Tree.prototype.Req = function (expr, ls, param) {
         });
         ctx.root = false;
 
-        $(expr).append().append(html);
+        $(expr).append(html);
         $(expr).children("img").attr("src", "img/nolines_minus.gif"); // 把加号改成减号
     });
 }

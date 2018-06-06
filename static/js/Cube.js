@@ -189,9 +189,9 @@ cbFormDlg.prototype.Show = function () {
     $('#' + this.id).on('hide.bs.modal', "", { This: this }, function (ev) {ev.data.This.closedlg(); });
     $('#' + this.id).modal('show');
 }
-cbFormDlg.prototype.closedlg = function () {
+cbFormDlg.prototype.closedlg = function (reason) {
 	if ( this.closing )
-		this.closing();
+		this.closing(reason);
     $('#' + this.id).remove();
 }
 cbFormDlg.prototype.submit = function () {
@@ -202,14 +202,14 @@ cbFormDlg.prototype.submit = function () {
 	postform( this.urlsubmit, fd, this, function(res, ctx){
 		if (res.result != 200) { alert("修改失败！"); return; }
 		alert("提交成功！");
-		ctx.closedlg();
+		ctx.closedlg("submit");
 	});
 }
 cbFormDlg.prototype.remove = function () {
-	ReqData( this.urlremove, this, function(res,ctx){
+	Reqdata( this.urlremove, this, function(res,ctx){
 		if (res.result != 200) { alert("删除失败！"); return; }
 		alert("删除成功！");
-		ctx.closedlg();
+		ctx.closedlg("remove");
 	});
 }
 
