@@ -19,6 +19,7 @@
 </head>
 <body class="xFCsrow">
     <section class="xPanel2 xFIfixed xScroll" style="width: 300px;padding:5px;">
+        <header>节点信息<div style="float: right;"><a id="id_addshow" href="javascript:onAddShow()">新建企业</a></div></header>
         <div id="root" class="xTree"></div>
     </section>
     <div id="curitem" class="xFCscol" >
@@ -33,13 +34,18 @@
     </div>
 
     <script type="text/javascript">
-        var g_focus, g_focussubs, g_focussubsubs, g_efanvenders, g_leafvenders;
+        var g_focus, g_focussubs, g_focussubsubs, g_windercos, g_efanvenders, g_leafvenders;
 
+        Reqdata("/rd?ls=winderco", "", function (wcs) { g_windercos = wcs; });
         Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (efanv) { g_efanvenders = efanv; });
         Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (leafv) { g_leafvenders = leafv; });
 
         g.root = new x5Tree("#root", "winderco", "", "winderarea", function (type, id, node ) { // 点击树节点
             $("#subitem_list").html("");
+            if (type == "winderco")
+                $("#id_addshow").show();
+            else
+                $("#id_addshow").hide();
 
 			// 显示节点详细
             Reqdata("/rd?ls=" + type + "&id=" + id, "", function (res) {
@@ -73,20 +79,33 @@
 			if ( fn == "winderco_id" || fn == "winderprov_id" || fn == "winder_id"){
 				return $("#"+fn.split("_")[0]+"_"+u[fn]).children("span").text();
 			}
-            else if (field == "leafvender_id") 
-				return GetSub(g_leafvenders.data, "id", u[fn]).name;
-            else if (field == "efanvender_id") 
-				return GetSub(g_efanvenders.data, "id", u[fn]).name;
+            else if (fn == "leafvender_id") 
+                return GetSub(g_leafvenders.data, "id", u["vender_id"]).name;
+            else if (fn == "efanvender_id") 
+                return GetSub(g_efanvenders.data, "id", u["vender_id"]).name;
 			return u[fn];
 		};
+
+        function onAddShow() {
+            if (g_focus.ls == "winderco") // 只用支持winderco
+                return;
+            var u = Create(g_windercos.fields);
+
+            var title = "新建 " + g_treebranch[g_windercos.ls].name;
+            var cnt = RenderForm4(u, g_windercos.fields, f2s);
+
+            var dlg = new cbFormDlg(title, "width:610px", cnt);
+            dlg.urlsubmit = "/winder/create?ls=" + g_windercos.ls;
+            dlg.Show();
+        }
 
         function onEditShow() {
             var title = "编辑 " + g_treebranch[g_focus.ls].name;
             var cnt = RenderForm4( g_focus.data[0], g_focus.fields,f2s);
 
 			var dlg = new cbFormDlg(title, "width:610px", cnt);
-			dlg.urlsubmit = "/winder/modify?id="+efanv.id+"&ls="+g_focus.ls;
-			dlg.urlremove = "/winder/remove?id="+efanv.id+"&ls="+g_focus.ls;
+            dlg.urlsubmit = "/winder/modify?id=" + g_focus.id+"&ls="+g_focus.ls;
+            dlg.urlremove = "/winder/remove?id=" + g_focus.id+"&ls="+g_focus.ls;
             dlg.Show();
         }
         function onAddChild() {
@@ -106,7 +125,7 @@
                 else {
                     alert("leaf_su:不能识别的类型");
                 }
-				var title = "编辑 " + g_treebranch[g_focussubs.ls].name;
+				var title = "新建 " + g_treebranch[g_focussubs.ls].name;
 				var cnt = RenderForm4(obj, g_focussubs.fields,f2s);
 
 				var dlg = new cbFormDlg(title, "width:610px", cnt);

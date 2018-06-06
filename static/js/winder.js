@@ -5,7 +5,7 @@
         + '           <strong>型号:</strong><span>{%=it.type%}</span>'
         + '          <strong>生产厂家:</strong><span>{%=f2s(it,"efanvender_id")%}</span>'
         + '          <div style="float: right;">'
-        + '              <a id="{%=it.id%}" onClick="EditEfan({%=it.id%})">编辑</a>'
+        + '              <a id="{%=it.id%}" onClick="onEditEfan({%=it.id%})">编辑</a>'
         + '          </div>'
         + '      </header>'
         + '      <table>'
