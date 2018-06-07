@@ -327,7 +327,7 @@ $("html").on("click", function () { $("xMenu").hide();});
 /*风机编辑表单，需要日期控件配合、dote模板配合*/
 .xEFanForm {margin: 0px 15px;}
 .xEFanForm>*{margin: 5px;}
-.xEFanForm>form>input, .xEFanForm>form>select {
+.xEFanForm>header>input, .xEFanForm>header>select {
     border-radius: 4px;
     border: 1px solid #95b7ff;
     display: inline-block;

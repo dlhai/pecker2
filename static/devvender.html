@@ -26,22 +26,42 @@
 
     <script type="text/javascript">
         var g_devVs = new Object();
-        Reqdata("/rd?ls=vender&type=" + GetTbl("dev").id, "", function (devVs) {
-            g_devVs = devVs;
-            $("#dev_vender_list").html(RenderTable2(devVs));
-            TableBindClick3(devVs.ls);
-        });
+        refresh();
+
+        function refresh() {
+            Reqdata("/rd?ls=vender&type=" + GetTbl("dev").id, "", function (devVs) {
+                g_devVs = devVs;
+                $("#dev_vender_list").html(RenderTable2(devVs));
+            });
+        }
 
         function onDevVNew(This) {
+            var title = "新建 设备供应商";
+            var cnt = RenderForm4(Create(g_devVs.fields), g_devVs.fields);
+
+            var dlg = new cbFormDlg(title, "width:610px", cnt);
+            dlg.urlsubmit = "/vender/create?type=" + GetTbl("dev").id;
+            dlg.closing = refresh;
+            dlg.Show();
+
+
             var title = "新建 设备供应商";
             var cnt = RenderForm4(Create(g_devVs.fields), g_devVs.fields);
             (new cbDlg(title, "width:610px", cnt)).Show();
         }
         function onDevVEdit(This) {
-            var efanv = GetSub(g_devVs.data, "id", g_TableCurRow[g_devVs.ls]);
+            if (g_TableCurRow[g_devVs.ls] == -1)
+                return;
+
+            var devV = GetSub(g_devVs.data, "id", GetRowDataID(g_devVs.ls));
             var title = "编辑 设备供应商";
-            var cnt = RenderForm4(efanv, g_devVs.fields);
-            (new cbDlg(title, "width:610px", cnt)).Show();
+            var cnt = RenderForm4(devV, g_devVs.fields);
+
+            var dlg = new cbFormDlg(title, "width:610px", cnt);
+            dlg.urlsubmit = "/vender/modify?id=" + devV.id;
+            dlg.urlremove = "/vender/remove?id=" + devV.id;
+            dlg.closing = refresh;
+            dlg.Show();
         }
 
     </script>
