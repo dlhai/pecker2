@@ -106,7 +106,12 @@
 
             var dlg = new cbFormDlg(title, "width:610px", cnt);
             dlg.urlsubmit = "/winder/create?ls=" + g_windercos.ls;
-			dlg.closing = function (reason){g.root.reset();}
+			dlg.closing = function (reason){
+				dlg.res.fields = g_focus.fields;
+				g_focus = dlg.res;
+				g.root.addchild( "#root",g_focus );
+				$("#item_detail").html(RenderPane2(g_focus.data[0], g_focus.fields, f2s));
+			}
             dlg.Show();
         }
 
@@ -119,13 +124,15 @@
             dlg.urlremove = "/winder/remove?id=" + g_focus.data[0].id+"&ls="+g_focus.ls;
 			dlg.closing = function (reason){
 				if ( reason == "remove"){
-					g.root.reset();
+					g.root.remove(g_focus);
 					$("#item_detail").html("");
 					$("#subitem_list").html("");
 				}
 				else{ // 刷新focus面板
 					Reqdata("/rd?ls=" + g_focus.ls + "&id=" + g_focus.data[0].id, "", function (res) {
+						dlg.res.fields = g_focus.fields;
 						g_focus = res;
+						g.root.update(g_focus);
 						$("#item_detail").html(RenderPane2(res.data[0], res.fields, f2s));
 					});
 				}
@@ -154,6 +161,10 @@
 
 				var dlg = new cbFormDlg(title, "width:610px", cnt);
 				dlg.urlsubmit = "/winder/create?ls="+g_focussubs.ls + "&"+g_focus.ls+"_id="+g_focus.data[0].id;
+				dlg.closing = function (reason){
+					g.root.addchild( "#"+g_focus.ls+"_"+g_focus.data[0].id, dlg.res );
+					$("#subitem_list").append(RenderPane2(dlg.res.data[0], g_focussubs.fields, f2s));
+				}
 				dlg.Show();
             }
             else {
@@ -165,7 +176,10 @@
 				var title = "新建风电机";
 				var cnt = tplEfanForm(efan);
 				var dlg = new cbFormDlg(title, "width:610px", cnt);
-				dlg.urlsubmit = "/winder/createefan";
+				dlg.urlsubmit = "/winder/efancreate";
+				dlg.closing = function (reason){
+					$("#subitem_list").append(dlg.res.data.map(x=>tplEfanPane(x)).join(""));
+				}
 				dlg.Show();
             }
         }
@@ -176,8 +190,16 @@
 			var cnt = tplEfanForm(efan);
 
 			var dlg = new cbFormDlg(title, "width:610px", cnt);
-			dlg.urlsubmit = "/winder/modifyefan";
-			dlg.urlremove = "/winder/removeefan";
+			dlg.urlsubmit = "/winder/efanmodify";
+			dlg.urlremove = "/winder/efanremove";
+			dlg.closing = function (reason){
+				if ( reason == "remove"){
+					$("#efan_"+id).remove();
+				}
+				else{
+					$("#efan_"+id).html(tplEfanPane(dlg.res.data[0]));
+				}
+			}
             dlg.Show("xEFanForm");
         }
     </script>

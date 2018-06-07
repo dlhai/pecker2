@@ -325,7 +325,6 @@ function x5Tree(expr, ls, param, leaf, useritemclick) {
 	this.ls = ls;
     this.param = param;
     this.leaf = leaf;
-    this.root = true;
     this.onTreeItemClick = useritemclick;
 
     this.Req(expr, ls, param);
@@ -357,35 +356,57 @@ function x5Tree(expr, ls, param, leaf, useritemclick) {
 		}
 	});
 }
-x5Tree.prototype.reset = function () {
-	$(this.expr).html("");
-    this.root = true;
-    this.Req(this.expr, this.ls, this.param);
+
+// 重置节点的子节点列表(暂无用途故屏蔽)
+// x5Tree.prototype.reset = function (expr) {
+// 	if (!expr || expr == "")
+// 		expr ="#root";
+// 	$(expr).html("");
+// 	this.Req(expr, this.ls, this.param);
+// }
+
+// 设置节点文本
+x5Tree.prototype.update = function (res) {
+	res.data.forEach(x => {
+		$("#"+res.ls+"_"+x.id).html("<span><img src=\"" + img + "\">" + x.name + "</span>");
+	}
 }
+
+// 添加子节点
+x5Tree.prototype.addchild = function (expr,res) {
+    var html = "";
+	var ls = res.ls;
+	var img = g_treebranch[ls].image;
+	res.data.forEach(x => {
+        if (ls == ctx.leaf) { // 叶节点，少了左边的加号，为缩进对齐加了一层div
+            if (ctx.root) { // 根节点是叶节点时，不要加外层div
+                html += "<div id=\"" + ls + "_" + x.id + "\"><span><img src=\""
+                    + img + "\">" + x.name + "</span></div>\n"
+            }
+            else {
+                html += "<div><div id=\"" + ls + "_" + x.id + "\"><span><img src=\""
+                    + img + "\">" + x.name + "</span></div></div>\n"
+            }
+        }
+        else { // 
+            html += "<div id=\"" + ls + "_" + x.id + "\">"
+                + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
+                + img + "\">" + x.name + "</span></div>\n"
+		}
+    });
+    $(expr).append(html);
+}
+
+// 删除子节点
+x5Tree.prototype.remove = function (res) {
+	res.data.forEach(x => {
+		$("#"+res.ls+"_"+x.id).remove();
+	}
+}
+
 x5Tree.prototype.Req = function (expr, ls, param) {
     Reqdata("/rd?ls=" + ls + (param ? "&" + param : ""), this, function (res, ctx) {
-        var html = "";
-        var data = res.data;
-        res.data.forEach(x => {
-            if (ls == ctx.leaf) { // 叶节点，少了左边的加号，为缩进对齐加了一层div
-                if (ctx.root) { // 根节点是叶节点时，不要加外层div
-                    html += "<div id=\"" + ls + "_" + x.id + "\"><span><img src=\""
-                        + g_treebranch[ls].image + "\">" + x.name + "</span></div>\n"
-                }
-                else {
-                    html += "<div><div id=\"" + ls + "_" + x.id + "\"><span><img src=\""
-                        + g_treebranch[ls].image + "\">" + x.name + "</span></div></div>\n"
-                }
-            }
-            else { // 
-                html += "<div id=\"" + ls + "_" + x.id + "\">"
-                    + "<img src=\"img/nolines_plus.gif\"><span><img src=\""
-                    + g_treebranch[ls].image + "\">" + x.name + "</span></div>\n"
-			}
-        });
-        ctx.root = false;
-
-        $(expr).append(html);
+		addchild(res);
         $(expr).children("img").attr("src", "img/nolines_minus.gif"); // 把加号改成减号
     });
 }

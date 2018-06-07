@@ -2,7 +2,7 @@
     {
         "id": "1", "type": "winder", "name": "叶片超级帐号", modules: [
             { name: "地图", url: "windersumap.html" },
-            { name: "风场", url: "windersu.html" },
+            { name: "风场", url: "windersu2.html" },
             { name: "人员", url: "user_list2.html" },
             { name: "厂家", url: "vender.html" }]
     },
@@ -107,6 +107,13 @@ var g_treebranch = {
     "leaf": { "sub": "", "name": "叶片", "image": "" },
     "sub": function (type) {
         return this[this[type].sub]
+    }
+    "parent": function (type) {
+		for i in this{
+			if (this[i].sub != undefined && this[i].sub == type)
+				return i;
+		}
+        return "";
     }
 }
 

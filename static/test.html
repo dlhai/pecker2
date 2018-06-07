@@ -1,40 +1,24 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>display普通表格</title>
-    <script src="js/jquery.js">
+<script src="https://cdn.bootcss.com/jquery/1.10.2/jquery.min.js">
 </script>
 
-<style type="text/css">
-.table {display: table; width: 100%; border-collapse: collapse;}
-.table>div {display: table-row; }
-.table>div>div {display: table-cell; border: 1px solid gray; text-align: center;vertical-align: middle;}
-</style>
 </head>
 <body>
-    <div class="table" style="margin:10px;">
-        <div class="table-tr">
-            <div class="table-td">广东</div>
-        </div>
-        <div class="table-tr">
-            <div class="table-td">河南</div>
-        </div>
-        <div class="table-tr">
-            <div class="table-td">江苏</div>
-        </div>
-    </div>
 
-    <input type="button" value="批准">
+<p>点击按钮循环对象属性。</p>
 
-    <input type="button" value="拒绝">
+<button onclick="myFunction()">点我</button>
 
-<script type="text/javascript">
-		$("html").on("click", function (event) {
-			var node = $(event.target);
+<span id="12312"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEwAACxMBAJqcGAAAA6ZJREFUWIXFlktsG1UYhb+58dgTj13bpG4TJ6WqQitSUEsQNCIg8ZCQUNmhKpuyqVggsUJiwwIR2ICABbBFiO4QLUJFVUHdQhseAZKWAg5phUjdxE4auzZ+j8d3WLg2E8WPSeOEs5rR/Pec8z/unasAHD45G9QMdVJaTAghImwtEhacLqvlycsnRtPK4ZOzQa3imQIObrHwGkhJ1PCUx4VmqJPbLQ4gBCPuiucNIS0mtlu8YQI54XLac7VH4fOJYQC+ms8wGy/w2uMDALx9Ic7ogJdn7gkA8Nxn15CWIwsDwqlbBej3qbw3leDr+TSxjIFQIJYxiN4sMXezRNjr4vzVjEPx2xach9bw/KE+xu/2sVN3UahIHh7UGQlr7PapZA3J8UN9CMU5n8tpoCktXj4fAyCRrZAumXzwwwoA88kyK3mThYwBgLWBCihjH/3RMrzP62KX7thjUyznTFJFs+X3tuxP7fPzynj/pgy8czHBmeitlt/bzkCyUN2UeI2jdfadDbQpnWMDHTjatsDeu5l4gU9mVhvvFrXRsQ9c/fHVxwbYG3Sv49iwAXv53D0KPy/l25LVodi2YacWtDVQqEhKpkRzCYbv8vD6ExGEAgoK0rL45u8s3y5kGwePVxUc3R9gt64CkDMkRrX9nuy4x1LFKhG/oNdVI18tmHwZvcWZuXQju70BN8fuC/HsgSBeVdjWdp6hjgaSBZOIv5bRuxcTnP0zjWk7ax/o93JkUCdnSE79lsLv6eHYwVBj7eYN2LKYTRTWiANcShS4lCg03g/0aQ0DXalAypbF0f0BlrKVpnHXUiWuLBcJ9fb8Z74bFbBn8eQ+Pyt5k36f2mhLHR/PrHJluUhQc9nWdj7IOv4NkzaSc/MZXjq3wKe/JtfF5cq1uJBmq0C3hrCOOvn0Yp6zc2nG9ugATC3k+D6WAyC4lS0I9dbCr2cM3roQbxq/tgVd3gVPD+9gzw4338VyTF3PMbdaxLLg3rDG2JCPR4Z07t/V23TtnRuwlVEBRsIaI2GNFx7cSbpU63vQ1vc6LJwNYUcDRtUib0h09/p5bSZcxz+lKlUHl0NH153jX/zFkSGdsUGdhyI6gRbC6VKVnxbzTC/mmb7h8MfV7krWDEKpnXY1Qz6kZTG9mOfHG3muJktsiOy2gTiwuXvXHUJKuSQsOP1/iAMIoZwSZbU8KSXRbVeX/G5a2pvi8onRtOEpj0v4EGTz06WbulIugfW+qXge/eXF4cy/C7eVCw87IhIAAAAASUVORK5CYII=">hahah!</span>
 
-			alert(event.target.nodeName); // "click"事件
-		});
+<script>
+function myFunction() {
+	var html = $("#12312").html();
+	$("#12312").html(html.substr(0,html.indexOf(">")+1)+"hhhh");
+}
 </script>
+
 </body>
 </html>

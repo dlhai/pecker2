@@ -35,8 +35,10 @@ def windercreate():
     result,msg = check(params["ls"],form)
     if not result:
         return toret(r,msg=msg)
+    r.ls = params["ls"]
+    conn.execute(toinsert(r.ls,form))
+    r.data = QueryObj("select * from {ls} where id in (select max(id) from {ls})".format(ls=r.ls))
 
-    conn.execute(toinsert(params["ls"],form))
     return toret(r,result=200)
 
 #/winder/modify?ls=&id=
@@ -56,8 +58,11 @@ def windermodify():
     result,msg = check(params["ls"],form)
     if not result:
         return toret(r,msg=msg)
-
+    
+    r.ls = params["ls"]
     conn.execute(toupdate(params["ls"], form, obj(id=params["id"])))
+    r.data = QueryObj("select * from {ls} where id in (select max(id) from {ls})".format(ls=r.ls))
+
     return toret(r,result=200)
 
 #/winder/remove?ls=&id=
@@ -96,6 +101,10 @@ def efancreate():
         return toret(r,msg="code不正确")
 
     conn.execute(toinsert("efan",form))
+    #...
+
+    r.data = QueryObj("select * from efan where id in (select max(id) from efan)")
+    r.data[0].leafs = QueryObj("select * from leaf where efan_id=%d"%r.data[0].id)
     return toret(r,result=200)
 
 #/winder/efanmodify?id=
@@ -109,8 +118,13 @@ def efanmodify():
         return toret(r,msg="缺少参数id")
     if "code" not in form or form["code"]=="":
         return toret(r,msg="code不正确")
+    
+    id=params["id"]
+    conn.execute(toupdate("efan", form, obj(id=id)))
+    #...
 
-    conn.execute(toupdate("efan", form, obj(id=params["id"])))
+    r.data = QueryObj("select * from efan where id =%d"%id)
+    r.data[0].leafs = QueryObj("select * from leaf where efan_id=%d"%id)
     return toret(r,result=200)
 
 #/winder/efanremove?id=

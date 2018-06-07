@@ -198,18 +198,21 @@ cbFormDlg.prototype.submit = function () {
     var fd = new FormData(document.getElementById("ModalDlgContent"));
 	if ( this.check && !this.check(fd) )
 		return;
-
 	postform( this.urlsubmit, fd, this, function(res, ctx){
-		if (res.result != 200) { alert("修改失败！"); return; }
-		alert("提交成功！");
-		ctx.closedlg("submit");
+		ctx.res=res;
+		if (res.result == 200){
+			alert("提交成功！");
+			ctx.closedlg("submit");
+		}
 	});
 }
 cbFormDlg.prototype.remove = function () {
 	Reqdata( this.urlremove, this, function(res,ctx){
-		if (res.result != 200) { alert("删除失败！"); return; }
-		alert("删除成功！");
-		ctx.closedlg("remove");
+		ctx.res=res;
+		if (res.result != 200) { 
+			alert("删除成功！");
+			ctx.closedlg("remove");
+		}
 	});
 }
 
@@ -311,6 +314,10 @@ function RenderFormIn(entity, fields, cb) {
         var val = cb != undefined ? cb(entity, field) : val;
 
         r += "<div><label>" + field.title + "</label>";
+		if ( field.ftype=="div" ){
+			r += `<input type="hidden" name="`+field.name+`" value="`+entity[field.name]+`">`;
+			attr = ""; // 清空避免name重复
+		}
         r += RenderFormItem(field.ftype, attr, val);
         r += "</div>";
     });
