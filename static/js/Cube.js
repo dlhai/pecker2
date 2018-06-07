@@ -158,7 +158,7 @@ function cbFormDlg(title, css, subs) {
 cbFormDlg.prototype.Add = function (sub) {
     this.subs.push(sub);
 }
-cbFormDlg.prototype.Show = function () {
+cbFormDlg.prototype.Show = function (cls) {
     var html = '<div class="modal fade" id="' + this.id + '" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">'
         + '<div class="modal-dialog" style="' + this.css + '">'
         + '<div class="modal-content">'
@@ -166,7 +166,7 @@ cbFormDlg.prototype.Show = function () {
         + '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>'
         + '        <h4 class="modal-title" id="ModalDlgTitle">' + this.title + '</h4>'
         + '   </div>'
-        + '    <form id="ModalDlgContent" class="modal-body" style="padding:5px">';
+        + '   <form id="ModalDlgContent" class="modal-body '+cls+'" style="padding:5px">';
     this.subs.forEach(x => { html += x.toString() });
     html += '    </form>'
         + ` <div class="modal-footer">

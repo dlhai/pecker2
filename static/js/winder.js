@@ -51,11 +51,11 @@ var tplEfanCheckPane = doT.template('<div class="xEFanPanel">'
         + '      </table>'
         + '  </div>');
 
-var tplEfanForm = doT.template('<form id="form_efan" class="xEFanForm">'
-        + '<header>'
+var tplEfanForm = doT.template(
+        '<header>'
         + '    <strong>编号:</strong><input name="code" value="{%=it.code%}" />'
         + '    <strong>型号:</strong><input name="type" value="{%=it.type%}" />'
-        + '   <strong>生产厂家:</strong><select name="efanvender_id" style="margin-right:0px;">{%=FieldToEdit(it,"efanvender_id")%}</select>'
+    + '   <strong>生产厂家:</strong><select name="efanvender_id" style="margin-right:0px;width:100px;">{%=f2e(it,"efanvender_id")%}</select>'
         + '</header>'
         + '<table>'
         + '    <thead><tr><th>编号</th><th>主要材料</th><th>出厂时间</th><th>挂机时间</th><th style="width:90px">生产厂家</th></tr></thead>'
@@ -66,9 +66,8 @@ var tplEfanForm = doT.template('<form id="form_efan" class="xEFanForm">'
         + '            <td><input name="{%=i%}mat" value="{%=it.leafs[i].mat%}" /></td>'
         + '            <td><input name="{%=i%}producedate" value="{%=it.leafs[i].producedate%}" onClick="xrlaydate(this)" /></td>'
         + '            <td><input name="{%=i%}putondate" value="{%=it.leafs[i].putondate%}" onClick="xrlaydate(this)" /></td>'
-        + '            <td><select name="{%=i%}leafvender_id" data-id="{%=FieldToEdit(it.leafs[i],"leafvender_id")%}" ></select></td>'
+        + '            <td><select name="{%=i%}leafvender_id" >{%=f2e(it.leafs[i],"leafvender_id")%}</select></td>'
         + '        </tr>'
         + '        {% } %}'
         + '    </tbody>'
-        + '</table>'
-        + '</form>');
+        + '</table>');
