@@ -367,9 +367,10 @@ function x5Tree(expr, ls, param, leaf, useritemclick) {
 
 // 设置节点文本
 x5Tree.prototype.update = function (res) {
-	res.data.forEach(x => {
-		$("#"+res.ls+"_"+x.id).html("<span><img src=\"" + img + "\">" + x.name + "</span>");
-	}
+    var img = g_treebranch[res.ls].image;
+    res.data.forEach(x => {
+        $("#" + res.ls + "_" + x.id +">span" ).html("<img src=\"" + img + "\">" + x.name);
+    });
 }
 
 // 添加子节点
@@ -378,8 +379,8 @@ x5Tree.prototype.addchild = function (expr,res) {
 	var ls = res.ls;
 	var img = g_treebranch[ls].image;
 	res.data.forEach(x => {
-        if (ls == ctx.leaf) { // 叶节点，少了左边的加号，为缩进对齐加了一层div
-            if (ctx.root) { // 根节点是叶节点时，不要加外层div
+        if (ls == this.leaf) { // 叶节点，少了左边的加号，为缩进对齐加了一层div
+            if (this.expr == expr) { // 根节点是叶节点时，不要加外层div
                 html += "<div id=\"" + ls + "_" + x.id + "\"><span><img src=\""
                     + img + "\">" + x.name + "</span></div>\n"
             }
@@ -399,14 +400,14 @@ x5Tree.prototype.addchild = function (expr,res) {
 
 // 删除子节点
 x5Tree.prototype.remove = function (res) {
-	res.data.forEach(x => {
-		$("#"+res.ls+"_"+x.id).remove();
-	}
+    res.data.forEach(x => {
+        $("#" + res.ls + "_" + x.id).remove();
+    });
 }
 
 x5Tree.prototype.Req = function (expr, ls, param) {
     Reqdata("/rd?ls=" + ls + (param ? "&" + param : ""), this, function (res, ctx) {
-		addchild(res);
+		ctx.addchild(expr, res);
         $(expr).children("img").attr("src", "img/nolines_minus.gif"); // 把加号改成减号
     });
 }

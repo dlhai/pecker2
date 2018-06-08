@@ -106,10 +106,10 @@ var g_treebranch = {
     "efan": { "sub": "leaf", "name": "风电机", "image": "" },
     "leaf": { "sub": "", "name": "叶片", "image": "" },
     "sub": function (type) {
-        return this[this[type].sub]
-    }
+        return this[this[type].sub];
+    },
     "parent": function (type) {
-		for i in this{
+		for (var i in this){
 			if (this[i].sub != undefined && this[i].sub == type)
 				return i;
 		}
