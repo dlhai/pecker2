@@ -12,6 +12,43 @@
     }
 });
 
+// 直接为数组用这一版
+function RenderSelect(ar, selid, type) {
+    var r = "";
+    if (selid == "" )
+        r += '<option selected></option>';
+    else
+        r += '<option></option>';
+
+    ar.forEach(x=>{
+        if (typeof (type) != "undefined" && x.type != type)
+            return;
+
+        if (x["id"] == selid || x["name"] == selid )
+            r += '<option value="' + x["id"] + '" selected>' + x["name"] + '</option>';
+        else
+            r += '<option value="' + x["id"] + '">' + x["name"] + '</option>';
+    });
+    return r;
+}
+
+// 使用data采用这一版
+function RenderSelect2(res, selid) {
+    var r = "";
+    if (selid=="")
+        r += '<option selected></option>';
+    else
+        r += '<option></option>';
+    for (var i in res.data) {
+        var x = res.data[i];
+        if (x["id"] == selid || x["name"] == selid)
+            r += '<option value="' + x["id"] + '" selected>' + x["name"] + '</option>';
+        else
+            r += '<option value="' + x["id"] + '">' + x["name"] + '</option>';
+    }
+    return r;
+}
+
 function RenderSelectSkill(val) {
     if (val == "") val = "　";
     var cnt = db_skill.map(x => { return val.indexOf(x.name) == -1 ? ("<div>" + x.name + "</div>") : ('<div class="selected">' + x.name + "</div>") });
@@ -209,13 +246,17 @@ cbFormDlg.prototype.submit = function () {
 cbFormDlg.prototype.remove = function () {
 	Reqdata( this.urlremove, this, function(res,ctx){
 		ctx.res=res;
-		if (res.result != 200) { 
+		if (res.result == 200) { 
 			alert("删除成功！");
 			ctx.closedlg("remove");
 		}
 	});
 }
 
+cbFormDlg.prototype.selectnone = function () {
+    var nodes = $("#ModalDlgContent select");
+	nodes.each((i,x)=>x.selectedIndex = -1);
+}
 
 function RenderPane(ar, idx, fun) {
     var r = "";

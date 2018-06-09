@@ -12,271 +12,206 @@
 
     <script src="js/utils.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
-    <script src="js/Cube.js"></script>
     <script src="js/db.js"></script>
+    <script src="js/Cube.js"></script>
     <script src="js/xpecker.js"></script>
+    <script src="js/winder.js"></script>
 </head>
 <body class="xFCsrow">
-    <section class="xPanel2 xFIfixed xScroll" style="width: 300px;padding:5px;">
-        <div id="root" class="xTree"></div>
+    <section class="xPanel2 xFIfixed" style="width:300px;">
+        <header>组织结构<div style="float: right;"><a href="javascript:onAddWinderco()">新建企业</a></div></header>
+        <div id="root" class="xTree xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
     </section>
     <div id="curitem" class="xFCscol" >
         <section class="xPanel2 xFIfixed">
-            <header>节点信息<div style="float: right;"><a href="javascript:EditShow()">编辑</a></div></header>
+            <header>节点信息<div style="float: right;"><a href="javascript:onEditShow()">编辑</a></div></header>
             <div id="item_detail" class="x2Form" style="padding:5px;"></div>
         </section>
         <section class="xPanel2">
-            <header>下级列表<div style="float: right;"> <a href="javascript:ImportData()">导入</a> <a href="javascript:AddChild()">添加</a></div></header>
+            <header>下级列表<div style="float: right;"> <a href="javascript:onImportData()">导入</a> <a href="javascript:onAddChild()">添加</a></div></header>
             <div class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"><div id="subitem_list"></div></div>
         </section>
     </div>
 
-    <div class="modal fade" id="ModalDlg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">
-        <div class="modal-dialog" style="width:610px">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" id="ModalDlgTitle">模态框（Modal）标题</h4>
-                </div>
-                <div id="ModalDlgContent" class="modal-body" style="padding:5px 0px">
-                    <div><label>标识</label><input name="id" value="1234"></div>
-                    <div><label>所属风场</label><input value="69"/></div>
-                    <div><label>名称</label><input value="达尔罕茂明安联合旗风区"/></div>
-                    <div><label>备注</label><textarea name="a" style="resize:none;width:500px;max-height:45px;">小重山章良能柳暗花明春事深,小阑红芍药,已抽簪。雨馀风软碎鸣禽,迟迟日,犹带一分阴。往事莫沉吟，身闲时序好、且凳临。旧游无处不堪寻，无寻处、惟有少年心。</textarea></div>
-                    <div><label>位置</label><textarea name="a" style="resize:none;width:500px;max-height:45px;">109.790407 40.523169,109.857074 40.523169,109.857074 40.613169,109.790407 40.613169</textarea></div>
-                </div>
-                <div class="modal-footer">
-                    <div style="float:left;"><button type="button" class="btn btn-default" style="color:#aaaaaa">删除</button></div>
-                    <button type="button" class="btn btn-primary">提交</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal -->
-    </div>
-
-    <script id="tpl_efan_list" type="text/template">
-        {% it.data.forEach(efan=>{ %}
-        <div class="xEFanPanel">
-            <header>
-                <img src="img/diy/3.png" />
-                <strong>编号:</strong><span>{%=efan.code%}</span>
-                <strong>型号:</strong><span>{%=efan.type%}</span>
-                <strong>生产厂家:</strong><span class="efanvender_id">{%=efan.efanvender_id%}</span>
-                <div style="float: right;">
-                    <a id="{%=efan.id%}" onClick="EditEfan(this)">编辑</a>
-                </div>
-            </header>
-            <table>
-                <thead><tr><th>编号</th><th>主要材料</th><th>出厂时间</th><th>挂机时间</th><th>生产厂家</th></tr></thead>
-                <tbody>
-                    {% additlist.data.forEach(leaf=>{ %}
-                    {% if (leaf.efan_id==efan.id) { %}
-                    <tr>
-                        <td>{%=leaf.code%}</td>
-                        <td>{%=leaf.mat%}</td>
-                        <td>{%=leaf.producedate%}</td>
-                        <td>{%=leaf.putondate%}</td>
-                        <td class="leafvender_id">{%=leaf.leafvender_id%}</td>
-                    </tr>
-                    {% } %}
-                    {% }); %}
-                </tbody>
-            </table>
-        </div>
-        {% }); %}
-    </script>
-
-    <script id="tpl_efan_edit2" type="text/template">
-        <div class="xEFanForm">
-            <form id="form_efan">
-                <strong>编号:</strong><input name="code" value="{%=it.code%}" />
-                <strong>型号:</strong><input name="type" value="{%=it.type%}" />
-                <strong>生产厂家:</strong><select class="efanvender_id" data-id="{%=it.efanvender_id%}" name="efanvender_id" style="margin-right:0px;"></select>
-            </form>
-            <form id="form_leaf0" /><form id="form_leaf1" /><form id="form_leaf3" />
-            <table>
-                <thead><tr><th>编号</th><th>主要材料</th><th>出厂时间</th><th>挂机时间</th><th style="width:90px">生产厂家</th></tr></thead>
-                <tbody>
-                    {% for (var i = 0; i < it.leafs.length; i++) { %}
-                    <tr>
-                        <td><input form="form_leaf{%=it.leafs[i]%}" name="code" value="{%=it.leafs[i].code%}" /></td>
-                        <td><input form="form_leaf{%=it.leafs[i]%}" name="mat" value="{%=it.leafs[i].mat%}" /></td>
-                        <td><input form="form_leaf{%=it.leafs[i]%}" name="producedate" value="{%=it.leafs[i].producedate%}" onClick="xrlaydate(this)"/></td>
-                        <td><input form="form_leaf{%=it.leafs[i]%}" name="putondate" value="{%=it.leafs[i].putondate%}" onClick="xrlaydate(this)"/></td>
-                        <td><select form="form_leaf{%=it.leafs[i]%}" class="leafvender_id" name="leafvender_id" data-id="{%=it.leafs[i].leafvender_id%}" ></select></td>
-                    </tr>
-                    {% } %}
-                </tbody>
-            </table>
-        </div>
-    </script>
-    <script id="tpl_efan_import" type="text/template">
-        <div style="margin: 10px 15px;">
-            <div>为{%=it.data[0].name%}批量导入{%=branch.sub(cur.ls).name%}</div>
-            <div style="margin:5px 0px;">表格请按照模板填写，点此下载模板</div>
-            <input type="file" id="upload_efan" name="upload_efan" /><input type="button" value="上传" onclick="uploadFile()" />
-            <div style="border:1px solid #dddddd;width:100%;height:15px;"><div id="progress" style="background-color:#0094ff;width:50%;height:100%;"></div></div>
-        </div>
-    </script>
-
     <script type="text/javascript">
-        var cur = null; // 面板当前显示的元素
-        var sublist = null;// 表格当前显示的列表
-        var additlist = null; // 表格元素中的子元素列表（叶片列表）
+        var g_focus, g_focussubs, g_windercos, g_efanvenders, g_leafvenders;
 
-        g.root = new x4Tree("#root", "winderco", "", "winderarea", function (type, id) { // 点击树节点
+        Reqdata("/rd?ls=winderco", "", function (wcs) { g_windercos = wcs; });
+        Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (efanv) { g_efanvenders = efanv; });
+        Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (leafv) { g_leafvenders = leafv; });
+
+        g.root = new x5Tree("#root", "winderco", "", "winderarea", onclicktreeitem);
+
+		function onclicktreeitem(type, id, node ) { // 点击树节点
             $("#subitem_list").html("");
 
-            // 显示节点详细，这步的查询有优化掉的可能
-            Reqdata("/rd?ls=" + type + "&id=" + id, "", function (d) {
-                cur = d;
-                $("#item_detail").html(RenderPane2(d.data[0], d.fields));
-                ID2Name(d, 0);
+			// 显示节点详细
+            Reqdata("/rd?ls=" + type + "&id=" + id, "", function (res) {
+                g_focus = res;
+                $("#item_detail").html(RenderPane2(res.data[0], res.fields, f2s));
             });
 
             // 显示节点下级列表
-            var subtype = branch.sub(type).type;
+            var subtype = g_treebranch[type].sub;
             Reqdata("/rd?ls=" + subtype + "&" + type + "_id=" + id, "", function (d2) {
-                sublist = d2;
+                g_focussubs = d2;
                 if (type != "winderarea") // 普通列表
-                    $("#subitem_list").html(RenderTable2(d2, 0));   
+                    $("#subitem_list").html(RenderTable2(d2, "", f2s));   
                 else {                     // 风机列表
                     Reqdata("/rd?ls=leaf&" + type + "_id=" + id, "", function (d3) {
-                        additlist = d3;
-                        var tpl_efan_list = doT.template(document.getElementById('tpl_efan_list').innerHTML);
-                        $("#subitem_list").html(tpl_efan_list(d2));
-
-                        Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (d4) {
-                            var nodes = $(".efanvender_id");
-							nodes.each((i,n)=>{n.innerHTML = GetSub(d4.data, "id", n.innerHTML).name;});
-							nodes.removeClass("efanvender_id");
-                        });
-                        Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (d5) {
-                            var nodes = $(".leafvender_id");
-                            for (var i = 0; i < nodes.length; i++)
-                                nodes[i].innerHTML = GetSub(d5.data, "id", nodes[i].innerHTML).name;
-                            nodes.removeClass("leafvender_id");
-                        });
-                    });
+						g_focussubs.data.forEach(x => {
+							x.leafs = new Array();
+							d3.data.forEach(y => {if (x.id == y.efan_id) x.leafs.push(y);});
+						});
+						$("#subitem_list").html(g_focussubs.data.map(x=>tplEfanPane(x)).join(""));
+				    });
                 }
             });
-        });
-
-        function ImportData() {
-            var tpl_efan_list = doT.template(document.getElementById('tpl_efan_import').innerHTML);
-            $("#ModalDlgContent").html(tpl_efan_list(cur, 0));
-            $("#ModalDlgTitle").html("导入 " + branch.sub(cur.ls).name);
-            $('#ModalDlg').modal('show');
         }
 
-        function EditShow() {
-            $("#ModalDlgContent").html(RenderForm4(cur.data[0], cur.fields));
-            fillselect(cur, 0);
-            ID2Name(cur, 0);
-            $("#ModalDlgTitle").html("编辑 "+branch[cur.ls].name);
-            $('#ModalDlg').modal('show');
+        function f2s(u, field) {
+            var fn = field;
+            if (typeof field != "string")
+                fn = field.name;
+            if (fn == "winderco_id" || fn == "winderprov_id" || fn == "winder_id") {
+                return $("#" + fn.split("_")[0] + "_" + u[fn]).children("span").text();
+            }
+            else if (fn == "leafvender_id")
+                return u["vender_id"]=="" ? "": GetSub(g_leafvenders.data, "id", u["vender_id"]).name;
+            else if (fn == "efanvender_id")
+                return u["vender_id"]=="" ? "": GetSub(g_efanvenders.data, "id", u["vender_id"]).name;
+            return u[fn];
+        };
+
+        function f2e(u, field) {
+            var fn = field;
+            if (typeof field != "string")
+                fn = field.name;
+            if (fn == "winderco_id" || fn == "winderprov_id" || fn == "winder_id") {
+                return $("#" + fn.split("_")[0] + "_" + u[fn]).children("span").text();
+            }
+            else if (fn == "leafvender_id") 
+                return RenderSelect(g_leafvenders.data, u["vender_id"]);
+            else if (fn == "efanvender_id")
+                return RenderSelect(g_efanvenders.data, u["vender_id"]);
+            return u[fn];
+        };
+
+        function onAddWinderco() {
+            var u = Create(g_windercos.fields);
+
+            var title = "新建 " + g_treebranch[g_windercos.ls].name;
+            var cnt = RenderForm4(u, g_windercos.fields, f2s);
+
+            var dlg = new cbFormDlg(title, "width:610px", cnt);
+            dlg.urlsubmit = "/winder/create?ls=" + g_windercos.ls;
+			dlg.closing = function (reason){
+				dlg.res.fields = g_focus.fields;
+				g_focus = dlg.res;
+				g.root.addchild( "#root",g_focus );
+				$("#item_detail").html(RenderPane2(g_focus.data[0], g_focus.fields, f2s));
+			}
+            dlg.Show();
         }
-        function AddChild() {
-            sub = branch.sub(cur.ls);
-            if (sub.type != "efan") {
-                var child = { type: sub.type, fields: sublist.fields, data: [Create(sublist.fields)] };
+
+        function onEditShow() {
+            var title = "编辑 " + g_treebranch[g_focus.ls].name;
+            var cnt = RenderForm4( g_focus.data[0], g_focus.fields,f2s);
+
+			var dlg = new cbFormDlg(title, "width:610px", cnt);
+            dlg.urlsubmit = "/winder/modify?id=" + g_focus.data[0].id+"&ls="+g_focus.ls;
+            dlg.urlremove = "/winder/remove?id=" + g_focus.data[0].id+"&ls="+g_focus.ls;
+			dlg.closing = function (reason){
+				if ( reason == "remove"){
+					g.root.remove(g_focus);
+					$("#item_detail").html("");
+					$("#subitem_list").html("");
+				}
+                else if (reason == "submit") { // 刷新focus面板
+					Reqdata("/rd?ls=" + g_focus.ls + "&id=" + g_focus.data[0].id, "", function (res) {
+						dlg.res.fields = g_focus.fields;
+						g_focus = res;
+						g.root.update(g_focus);
+						$("#item_detail").html(RenderPane2(res.data[0], res.fields, f2s));
+					});
+				}
+			}
+            dlg.Show();
+        }
+        function onAddChild() {
+            if (g_focussubs.ls != "efan") {
+				var obj = Create(g_focussubs.fields);
                 // 根据对象类型不同，需要设置部分外键
-                if (child.type == "winderprov") {
-                    child.data[0].winderco_id = cur.data[0].id;
+                if (g_focussubs.ls == "winderprov") {
+                    obj.winderco_id = g_focus.data[0].id;
                 }
-                else if (child.type == "winder") {
-                    child.data[0].winderprov_id = cur.data[0].id;
-                    child.data[0].winderco_id = cur.data[0].winderco_id;
+                else if (g_focussubs.ls == "winder") {
+                    obj.winderprov_id = g_focus.data[0].id;
+                    obj.winderco_id = g_focus.data[0].winderco_id;
                 }
-                else if (child.type == "winderarea") {
-                    child.data[0].winder_id = cur.data[0].id;
+                else if (g_focussubs.ls == "winderarea") {
+                    obj.winder_id = g_focus.data[0].id;
                 }
                 else {
                     alert("leaf_su:不能识别的类型");
                 }
-                $("#ModalDlgContent").html(RenderForm4(child.data[0], child.fields));
-                fillselect(child, 0);
-                ID2Name(child, 0);
-                $("#ModalDlgTitle").html("添加 " + sub.name);
-                $('#ModalDlg').modal('show');
+				var title = "新建 " + g_treebranch[g_focussubs.ls].name;
+				var cnt = RenderForm4(obj, g_focussubs.fields,f2s);
+
+				var dlg = new cbFormDlg(title, "width:610px", cnt);
+				dlg.urlsubmit = "/winder/create?ls="+g_focussubs.ls + "&"+g_focus.ls+"_id="+g_focus.data[0].id;
+                dlg.closing = function (reason) {
+                    if (reason == "submit") {
+                        g.root.addchild("#" + g_focus.ls + "_" + g_focus.data[0].id, dlg.res);
+
+						var subtype = g_treebranch[g_focus.ls].sub;
+						Reqdata("/rd?ls=" + subtype + "&" + g_focus.ls + "_id=" + g_focus.data[0].id, "", function (d2) {
+							g_focussubs = d2;
+							$("#subitem_list").html(RenderTable2(d2, "", f2s));   
+						});
+                    }
+				}
+				dlg.Show();
             }
             else {
-                var efan = Create(sublist.fields);
-                efan.winderarea_id = cur.data[0].id;
-                efan.winder_id = cur.data[0].winder_id;
-                efan.leafs = [Create(additlist.fields), Create(additlist.fields), Create(additlist.fields)];
-                $("#ModalDlgTitle").html("添加 " + sub.name);
-                RenderEfanForm(efan);
-                //fillselect(efan, 0);
-                //var nodes = $("#ModalDlgContent select");
-                //for (var i = 0; i < nodes.length; i++)
-                //    nodes[i].selectedIndex = -1;
-                //ID2Name(efan, 0);
+                var efan = Create(g_focussubs.fields);
+                efan.winderarea_id = g_focus.data[0].id;
+                efan.winder_id = g_focus.data[0].winder_id;
+                efan.leafs = [Create(g_focussubsubs.fields), Create(g_focussubsubs.fields), Create(g_focussubsubs.fields)];
+
+				var title = "新建风电机";
+				var cnt = tplEfanForm(efan);
+				var dlg = new cbFormDlg(title, "width:610px", cnt);
+				dlg.urlsubmit = "/winder/efancreate";
+                dlg.closing = function (reason) {
+                    if (reason == "submit") {
+                        $("#subitem_list").append(dlg.res.data.map(x => tplEfanPane(x)).join(""));
+                    }
+				}
+				dlg.Show("xEFanForm");
+				dlg.selectnone();
             }
         }
 
-        function EditEfan(t) {
-            var efan = GetSub(sublist.data, "id", $(t).attr("id"));
-            efan.leafs = new Array();
-            for (var i in additlist.data) {
-                if (additlist.data[i].efan_id == efan.id)
-                    efan.leafs.push(additlist.data[i])
-            }
-            if (efan.leafs.length != 3)
-                alert("叶片数量错");
-            $("#ModalDlgTitle").html("编辑 " + branch[sublist.ls].name);
-            RenderEfanForm(efan);
+        function onEditEfan(id) {
+			var title = "编辑风电机";
+            var idx = GetIdx(g_focussubs.data, "id", id);
+			var cnt = tplEfanForm(g_focussubs.data[idx]);
+
+			var dlg = new cbFormDlg(title, "width:610px", cnt);
+			dlg.urlsubmit = "/winder/efanmodify?id="+g_focussubs.data[idx].id;
+			dlg.urlremove = "/winder/efanremove?id="+g_focussubs.data[idx].id;
+			dlg.closing = function (reason){
+				if ( reason == "remove"){
+					$("#efan_"+id).remove();
+				}
+                else if (reason == "submit") {
+					g_focussubs.data[idx]=dlg.res.data[0];
+					$("#efan_"+id).html(tplEfanPaneIn(dlg.res.data[0]));
+				}
+			}
+            dlg.Show("xEFanForm");
         }
-
-        function RenderEfanForm(efan) {
-            var tpl_efan_edit = doT.template(document.getElementById('tpl_efan_edit2').innerHTML);
-            $("#ModalDlgContent").html(tpl_efan_edit(efan));
-            Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (d4) {
-                var nodes = $(".efanvender_id");
-                for (var i = 0; i < nodes.length; i++) {
-                    var selid = nodes[i].getAttribute("data-id");
-                    nodes[i].innerHTML = RenderSelect(d4.data, selid);
-                    if ( selid == "" )
-                        nodes[i].selectedIndex = -1;
-                }
-                nodes.removeClass("efanvender_id");
-            });
-            Reqdata("/rd?ls=vender&type=" + GetTbl("leaf").id, "", function (d5) {
-                var nodes = $(".leafvender_id");
-                nodes.each((i, n) => {
-                    var selid = n.getAttribute("data-id");
-                    n.innerHTML = RenderSelect(d5.data, selid);
-                    if (selid == "")
-                        n.selectedIndex = -1;
-                });
-                nodes.removeClass("leafvender_id");
-            });
-            $('#ModalDlg').modal('show');
-        }
-
-        function uploadFile() {
-            var file = $("#upload_efan").get(0).files[0];
-            var formData = new FormData();
-            formData.append("file", file);
-            var req = new XMLHttpRequest();
-            req.upload.onprogress = onprogress;
-            req.onreadystatechange = function () {
-                if (req.readyState == 4 && req.status == 200) {
-                    alert(req.responseText);
-                }
-            };
-            req.open("POST", "/upload", true);
-            req.send(formData);
-        }  
-        function onprogress(evt) {
-            var loaded = evt.loaded;     //已经上传大小情况   
-            var tot = evt.total;      //附件总大小   
-            var per = Math.floor(100 * loaded / tot);  //已经上传的百分比   
-            $("#progress").html(per + "%");
-            $("#progress").css("width", per + "%");
-        }  
-
-        // 表单验证的几种方法： http://www.jb51.net/article/92741.htm
     </script>
 </body>
 </html>

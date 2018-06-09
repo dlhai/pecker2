@@ -40,33 +40,6 @@ $(function () {
     }
 });
 
-// 直接为数组用这一版
-function RenderSelect(ar, selid, type) {
-    var r = "";
-    ar.forEach(x=>{
-        if (typeof (type) != "undefined" && x.type != type)
-            return;
-
-        if (x["id"] == selid || x["name"] == selid )
-            r += '<option value="' + x["id"] + '" selected>' + x["name"] + '</option>';
-        else
-            r += '<option value="' + x["id"] + '">' + x["name"] + '</option>';
-    });
-    return r;
-}
-
-// 使用data采用这一版
-function RenderSelect2(res, selid) {
-    var r = "";
-    for (var i in res.data) {
-        var x = res.data[i];
-        if (x["id"] == selid || x["name"] == selid)
-            r += '<option value="' + x["id"] + '" selected>' + x["name"] + '</option>';
-        else
-            r += '<option value="' + x["id"] + '">' + x["name"] + '</option>';
-    }
-    return r;
-}
 
 function ID2Name(ar, idx) {
     var param = new Array();
@@ -85,19 +58,6 @@ function ID2Name(ar, idx) {
             $("#"+j).removeAttr("id"); // 清除ID属性是因为弹出表单时，有可能导致ID重复
         }
     });
-}
-
-function fillselect(ar, idx) {
-    for (var i in ar.fields) {
-        var fields = ar.fields[i];
-        if (fields.ftype == "select") {
-            var at = fields.name.split("_");
-            Reqdata("/rd?ls=" + at[0], function (d) {
-                var selid = ar.data[idx][fields.name];
-                $("#" + fields.name + "_" + selid).html(RenderSelect(d, selid));
-            });
-        }
-    }
 }
 
 function EFanCreate(fields1, fields2, winder_id, area_id) {

@@ -175,14 +175,27 @@ def todict(p):
     return d
 
 def toinsert(tbl,obj):
-    d = todict(obj)
-    fields=",".join(map( lambda x: "'"+x+"'", d.keys()))
-    values=",".join(map( lambda x: "'"+str(x)+"'", d.values()))
-    sql = "insert into {0}({1}) values({2})".format(tbl, fields,values)
+    if type(obj) == type([]):
+        [delattr(u,"id") for u in obj if hasattr(u,"id")]
+        d = todict(obj[0])
+        fields=",".join(map( lambda x: "'"+x+"'", d.keys()))
+        values = ",".join(["("+",".join(map( lambda x: "'"+str(x)+"'", u.__dict__.values()))+")" for u in obj ])
+        sql = "insert into {0}({1}) values{2}".format(tbl, fields,values)
+    else:
+        d = todict(obj)
+        if "id" in d:
+            del d["id"]
+        fields=",".join(map( lambda x: "'"+x+"'", d.keys()))
+        values=",".join(map( lambda x: "'"+str(x)+"'", d.values()))
+        sql = "insert into {0}({1}) values({2})".format(tbl, fields,values)
     return sql
 
+
 def toupdate(tbl,values,where):
-    vals=",".join([ k+"='"+str(v)+"'" for k,v in todict(values).items()])
+    dvals = todict(values)
+    if "id" in dvals:
+        del dvals["id"]
+    vals=",".join([ k+"='"+str(v)+"'" for k,v in dvals.items()])
     whrs=" and ".join([ k+"='"+str(v)+"'" for k,v in todict(where).items()])
     sql = "update {0} set {1} where {2}".format(tbl, vals,whrs)
     return sql
