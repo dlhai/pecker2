@@ -50,7 +50,8 @@
     </section>
 
     <script type="text/javascript">
-        var g_focus, g_users, g_ethnic, g_departs, g_user = parent.g_user, g_pane ="信息";
+        var g_focus, g_users, g_ethnic, g_departs, g_pane ="信息";
+		var g_user = parent.g_user, 
 		if (g_user == undefined) {
 			Reqdata("/curuserinf", "", function (res) {
 				g_user = res.data;

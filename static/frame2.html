@@ -91,18 +91,14 @@
     </div>
 
     <script type="text/javascript">
-        var g_user, g_role; // 当前用户、当前角色
+        var g_user, g_role, g_intervalid;
 
 		InitUser();
-		function msgcheck(){
-			Reqdata( "/msgcheck","", function(res){ 
-				$("#msgcheck").html(res.count!="0"? res.count:"" );
-			});
-		}
-
 		function InitUser(){
 			Reqdata("/curuserinf", "", function (res) {
 				if ( res.is_anonymous == "True"){
+					if (g_intervalid != undefined)
+						clearInterval(g_intervalid);
 					$("#user").html(`<div data_url="static/login.html">登录</div><div data_url="static/login.html">注册</div>`);
 				}
 				else{
@@ -110,15 +106,25 @@
 					g_user.fields = res.fields;
 					$("#user").html(renderuser());
 					var ar = GetSub(db_roles,"id", g_user.job ).modules;
-					$("#modulelist1").html(ar.map(x=>`<div id="url" data_url="static/{url}">{name}</div>`.format(x)).join(""));
-					self.setInterval(msgcheck,10000);
+					$("#modulelist1").html(ar.map(x=>`<div id="{url}" data_url="static/{url}">{name}</div>`.format(x)).join(""));
+					g_intervalid = self.setInterval(msgcheck,10000);
 				}
+			});
+		}
+
+		function msgcheck(){
+			Reqdata( "/msgcheck","", function(res){ 
+				$("#msgcheck").html(res.count!="0"? res.count:"" );
 			});
 		}
 
 		$("html").on("click", function (event) {
 			var node = $(event.target);
 			var text = node.html();
+			var id = node.attr( "id" );
+			var url = node.attr( "data_url" );
+			var pid = node.parent().attr( "data_pid" );
+
 			if ( text == "资讯" ){
 				$("#modulelist2").html(`<div data_url="/blog/news" >新闻</div><div data_url="/blog/writings">博客</div><div data_url="/blog/docs">文库</div>`);
         	}
@@ -130,15 +136,23 @@
 					$("#modulelist2").children(":first-child").addClass("active");
 					$("#modulelist2").attr("data_pid", node.attr("id") );
 				}
+				else if ( (g_user.job == "2" || g_user.job == "3")&& m.name=="设备"){
+					var tpl= `<div data_url="static/`+m.url+`?id={id}">{name}</div>`;
+					$("#modulelist2").html(g_user.subs.map(x=>tpl.format(x)).join(""));
+					$("#modulelist2").attr("data_pid", node.attr("id") );
+
+					$('.active').removeClass("active");
+					node.addClass("active");
+					$("#modulelist2 :first-child").addClass("active");
+					$('#mainframe').attr('src', `static/`+m.url+`?id=`+g_user.subs[0].id);
+					return;
+				}
 				else{
 					$("#modulelist2").html("");
 					$("#modulelist2").attr("data_pid", "" );
 				}
 			};
 
-			var id = node.attr( "id" );
-			var url = node.attr( "data_url" );
-			var pid = node.parent().attr( "data_pid" );
 			if ( text == "退出" ){
 				Reqdata( "/logout", "", function(res){
 					InitUser();

@@ -102,10 +102,10 @@ function points2str( ar ) {
 // 计算中心点位置
 function CalCenter(path) {
     var lng = 0, lat = 0;
-    for (var i in path) {
-        lng += path[i].lng;
-        lat += path[i].lat;
-    }
+    path.forEach(pt=>{
+        lng += pt.lng;
+        lat += pt.lat;
+    });
     return new BMap.Point(lng / path.length, lat / path.length);
 }
 function CreateAreaLabel(area) {

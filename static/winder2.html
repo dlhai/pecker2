@@ -5,15 +5,10 @@
     <title>啄木鸟风电维保系统</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" href="css/bootstrap.css"/>
-    <script type="text/javascript" src="js/doTe.js"></script>
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
-
     <script src="laydate/laydate.js"></script>
-    <style>/*为了解决BootStrap中css和layDate的css样式冲突*/
-        .laydate_box, .laydate_box * {box-sizing: content-box;}
-        .laydate_box th {text-align: center;}
-    </style>
+    <script type="text/javascript" src="js/doTe.js"></script>
 
     <script src="js/utils.js"></script>
     <script src="js/db.js"></script>
@@ -21,31 +16,36 @@
     <script src="js/xpecker.js"></script>
     <link rel="stylesheet" href="css/Cube.css" />
     <script src="js/Cube.js"></script>
+    <script src="js/winder.js"></script>
 </head>
 <body class="xFCscol">
     <section class="xPanel2">
         <header class="heading">风电机列表
             <div style="float: right;">
-                <a onclick="onSelect(this)">全选</a> <a onclick="onSelect(this)">全消</a> <a onclick="onSelect(this)">反选</a> <a onclick="onRepair()" style="margin-left:20px;">报修</a>
-                <a onclick="onQueryLog()">记录</a> <a onclick="onImport()" style="margin-left:20px;">导入</a> <a onclick="onNew()">添加</a>
+                <a onclick="onSelect(this)">全选</a> <a onclick="onSelect(this)">全消</a> <a onclick="onSelect(this)">反选</a> <a onclick="onCreateCase()" style="margin-left:20px;">报修</a>
+                 <a onclick="onImport()" style="margin-left:20px;">导入</a> <a onclick="onNew()">添加</a>
             </div>
         </header>
         <div id="item_list" class="xScroll" style="padding: 5px; flex-grow: 1;"></div>
     </section>
 
     <script type="text/javascript">
-        var g_user = parent.g_user, g_winderarea_id = GetParam("id"), g_efanvenders, g_leafvenders, g_efans, g_leafs;
-        if (g_user == undefined) {
-            g_user = GetRoleUser("风场主管");
-            Reqdata("/rd?ls=winderarea&winder_id=" + g_user.depart_id, "", function (sub) {
-                g_user.sub = sub.data;
-                g_winderarea_id = sub.data[0].id;
-                init();
-            });
-        }
-        else{
-            init();
-        }
+        var g_efanvenders, g_leafvenders, g_efans, g_leafs;
+
+		var g_winderarea_id = GetParam("id");
+		var g_user = parent.g_user;
+		if (g_user == undefined) {
+			Reqdata("/curuserinf", "", function (res) {
+				g_user = res.data;
+				g_user.fields = res.fields;
+				if ( g_winderarea_id == "" )
+					g_winderarea_id = g_user.subs[0].id;
+				init();
+			});
+		}
+		else{
+			init();
+		}
 
         function init(){
             var count = 0;
@@ -59,13 +59,45 @@
                 x.leafs = new Array();
                 g_leafs.data.forEach(y => {if (x.id == y.efan_id) x.leafs.push(y);});
             });
-            var html = "";
-            var pane = new EFanPane(true);
-            g_efans.data.forEach(leaf => {
-                html += pane.Render(leaf);
-            });
 
-            $("#item_list").html(html);
+            $("#item_list").html(g_efans.data.map(efan=>tplEfanCheckPane(efan)).join(""));
+        }
+
+		function onCreateEfan(){
+            var efan = Create(g_efans.fields);
+            efan.winderarea_id = g_winderarea_id;
+            efan.winder_id = g_user.depart_id;
+            efan.leafs = [Create(g_leafs.fields), Create(g_leafs.fields), Create(g_leafs.fields)];
+
+			var title = "新建风电机";
+			var cnt = tplEfanForm(efan);
+			var dlg = new cbFormDlg(title, "width:610px", cnt);
+			dlg.urlsubmit = "/winder/efancreate";
+            dlg.closing = function (reason) {
+                if (reason == "submit") {
+                    $("#item_list").append(dlg.res.data.map(x => tplEfanCheckPane(x)).join(""));
+                }
+			}
+			dlg.Show("xEFanForm");
+        }
+        function onEditEfan(id) {
+			var title = "编辑风电机";
+            var idx = GetIdx(g_efans.data, "id", id);
+			var cnt = tplEfanForm(g_efans.data[idx]);
+
+			var dlg = new cbFormDlg(title, "width:610px", cnt);
+			dlg.urlsubmit = "/winder/efanmodify?id="+g_efans.data[idx].id;
+			dlg.urlremove = "/winder/efanremove?id="+g_efans.data[idx].id;
+			dlg.closing = function (reason){
+				if ( reason == "remove"){
+					$("#efan_"+id).remove();
+				}
+                else if (reason == "submit") {
+					g_efans.data[idx]=dlg.res.data[0];
+					$("#efan_"+id).html(tplEfanCheckPaneIn(dlg.res.data[0]));
+				}
+			}
+            dlg.Show("xEFanForm");
         }
 
         function onSelect(This) {
@@ -78,36 +110,33 @@
             else
                 inputs.each(function () {$(this).prop('checked', !$(this).prop("checked"));});
         }
-        function onRepair() {
-            Reqdata("/rd?ls=fault&id=0", "", res => {
-                var dlg = new cbDlg();
-                dlg.title = "报修";
-                dlg.css = "width:610px";
-                if (!res.fields.some(x => x.name == "devices"))
-                    res.fields.push({ "title": "报修设备", "name": "devices", "forder": "2", "ftype": "div_long" });
+        function onCreateCase() {
+            Reqdata("/rd?ls=fault&id=0", "", res => { // 为了获得fields
+                if (!res.fields.some(x => x.name == "devices")) //devices在link表内
+                    res.fields.push({ "title": "报修设备", "name": "devices", "forder": "5", "ftype": "div_long" });
                 xfieldsort(res.fields);
                 var data = Create(res.fields);
-                data.devices = "02548973,7018263954,6578329041,049385176,6730259481,742630958";
+                data.devices = $("#item_list input").toArray().fmap(function(x){if($(x).prop('checked'))return $(x).attr("data_id")});
                 data.winder_id = g_user.depart_id;
                 data.report_id = g_user.id;
-                dlg.Add(RenderForm4(data, res.fields));
-                dlg.Add(xrimagelistlive([""]));
-            });
-        }
+				data.reporttime = (new Date()).format("yyyy-MM-dd");
 
-        function onNew() {
-            var efan = EFanCreate(g_efans.fields, g_leafs.fields, g_user.depart_id, g_winderarea_id);
-            var form = new EfanForm();
-            var dlg = new cbDlg();
-            dlg.title = "新建 风电机";
-            dlg.css="width:620px";
-            dlg.Add(form.Render(efan));
-            dlg.Show();
-            var nodes = $("select");
-            nodes[0].selectedIndex = -1;
-            nodes[1].selectedIndex = -1;
-            nodes[2].selectedIndex = -1;
-            nodes[3].selectedIndex = -1;
+                var dlg = new cbFormDlg();
+                dlg.title = "报修";
+                dlg.css = "width:610px";
+                dlg.Add(RenderForm4(data, res.fields, function(u, field) {
+					var fn = field;
+					if (typeof field != "string")
+						fn = field.name;
+					if (fn == "report_id") return g_user.name;
+					else if (fn == "winder_id") return g_user.depart.name;
+					else if (fn=="devices") return u["devices"].map(x=>GetSub( g_efans.data, "id", x ).code).join(",");
+					return u[fn];
+				}));
+                dlg.Add(xrimagelistlive([""]));
+				dlg.urlsubmit = "/case/createfault";
+				dlg.Show();
+            });
         }
 
         function onImport() {
@@ -116,16 +145,6 @@
             dlg.title = "导入 风电机";
             dlg.css = "width:620px";
             dlg.Add(tpl_efan_list());
-            dlg.Show();
-        }
-
-        function EditEfan(t) {
-            var efan = GetSub(g_efans.data, "id", $(t).attr("id"));
-            var form = new EfanForm();
-            var dlg = new cbDlg();
-            dlg.title = "编辑 风电机";
-            dlg.css = "width:620px";
-            dlg.Add(form.Render(efan));
             dlg.Show();
         }
 
@@ -148,17 +167,6 @@
             };
             req.open("POST", "/upload", true);
             req.send(formData);
-        }
-
-        function FieldToShow(data, field) {
-            if (field== "efanvender_id") return GetSub(g_efanvenders.data, "id", data[field]).name;
-            else if (field == "leafvender_id") return GetSub(g_leafvenders.data, "id", data[field]).name;
-            else return data[field];
-        }
-        function FieldToEdit(data, field) {
-            if (field == "efanvender_id") return RenderSelect(g_efanvenders.data, data[field]);
-            else if (field == "leafvender_id") return RenderSelect(g_leafvenders.data, data[field]);
-            else return data[field];
         }
 
     </script>

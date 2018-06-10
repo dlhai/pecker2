@@ -3,7 +3,10 @@ def rndstr(len):
     return ''.join(random.sample("abcdefghijklmnopqrstuvwxyz0123456789", len))
 
 class obj:
-    def __init__(self,  **kw ):
+    def __init__(self, *o, **kw ):
+        for x in o:
+            for k,v in x.__dict__.items():
+                setattr( self, k, v)
         for k,v in kw.items():
             setattr( self, k, v)
 

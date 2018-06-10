@@ -105,7 +105,8 @@ class CLog:
 
 if __name__ == "__main__":
     newdir(["./static/uploads","./static/uploads/user_face","./static/uploads/user_idimg","./static/uploads/certif_image",
-            "./static/uploads/employ_image", "./static/uploads/edu_image1", "./static/uploads/edu_image2"]);
+            "./static/uploads/employ_image", "./static/uploads/edu_image1", "./static/uploads/edu_image2", 
+            "./static/uploads/fault_image"]);
     app.config['JSON_AS_ASCII'] = False
     #app.config['DEBUG'] = True
 
@@ -125,3 +126,4 @@ if __name__ == "__main__":
 #添加QueryUser接口，密码处理，所在单位处理
 #风场面板中还没有相关人员显示。
 
+#功能表：

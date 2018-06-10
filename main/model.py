@@ -129,7 +129,7 @@ def loaduser(where):
         tbl = gettbl(user.depart_table)
         user.depart = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0]
         if tbl["name"] == "winder":
-            user.sub = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
+            user.subs = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
     user.idols = list(map( lambda x:x.idol_id,QueryObj( "select idol_id from follow where fans_id="+str(user.id))))
     return user
 

@@ -69,34 +69,6 @@
             });
         }
 
-        function f2s(u, field) {
-            var fn = field;
-            if (typeof field != "string")
-                fn = field.name;
-            if (fn == "winderco_id" || fn == "winderprov_id" || fn == "winder_id") {
-                return $("#" + fn.split("_")[0] + "_" + u[fn]).children("span").text();
-            }
-            else if (fn == "leafvender_id")
-                return u["vender_id"]=="" ? "": GetSub(g_leafvenders.data, "id", u["vender_id"]).name;
-            else if (fn == "efanvender_id")
-                return u["vender_id"]=="" ? "": GetSub(g_efanvenders.data, "id", u["vender_id"]).name;
-            return u[fn];
-        };
-
-        function f2e(u, field) {
-            var fn = field;
-            if (typeof field != "string")
-                fn = field.name;
-            if (fn == "winderco_id" || fn == "winderprov_id" || fn == "winder_id") {
-                return $("#" + fn.split("_")[0] + "_" + u[fn]).children("span").text();
-            }
-            else if (fn == "leafvender_id") 
-                return RenderSelect(g_leafvenders.data, u["vender_id"]);
-            else if (fn == "efanvender_id")
-                return RenderSelect(g_efanvenders.data, u["vender_id"]);
-            return u[fn];
-        };
-
         function onAddWinderco() {
             var u = Create(g_windercos.fields);
 
@@ -189,7 +161,6 @@
                     }
 				}
 				dlg.Show("xEFanForm");
-				dlg.selectnone();
             }
         }
 

@@ -9,17 +9,17 @@
     {
         "id": "2", "type": "winder", "name": "风场主管", modules: [
             { name: "地图", url: "windermap.html" },
-            { name: "设备", usesub: true, url: "winder2.html" },
-            { name: "案件", usesub: true, url: "coord.html" },
-            { name: "记录", usesub: true, url: "repairlog.html" },
+            { name: "设备", url: "winder2.html" },
+            { name: "案件", url: "coord.html" },
+            { name: "记录", url: "repairlog.html" },
             { name: "人员", url: "user_list2.html" }]
     },
     {
         "id": "3", "type": "winder", "name": "驻场", modules: [
             { name: "地图", url: "windermap.html" },
-            { name: "设备", usesub: true, url: "winder2.html" },
-            { name: "案件", usesub: true, url: "coord.html" },
-            { name: "记录", usesub: true, url: "repairlog.html" }]
+            { name: "设备", url: "winder2.html" },
+            { name: "案件", url: "coord.html" },
+            { name: "记录", url: "repairlog.html" }]
     },
     {
         "id": "4", "type": "dev", "name": "设备超级帐号", modules: [
@@ -48,14 +48,14 @@
         "id": "8", "type": "wh", "name": "仓库主管", modules: [
             { name: "入库", url: "matin.html" },
             { name: "出库", url: "matout.html" },
-            { name: "查询", usesub: true, subs: [{ name: "库存", url: "matquery.html" }, { name: "入库", url: "matqueryin.html" }, { name: "出库", url: "matqueryout.html" }]},
+            { name: "查询", subs: [{ name: "库存", url: "matquery.html" }, { name: "入库", url: "matqueryin.html" }, { name: "出库", url: "matqueryout.html" }]},
             { name: "人员", url: "user_list2.html" }]
     },
     {
         "id": "9", "type": "wh", "name": "仓库管理员", modules: [
             { name: "入库", url: "matin.html" },
             { name: "出库", url: "matout.html" },
-            { name: "查询", usesub: true, subs: [{ name: "库存", url: "matquery.html" }, { name: "入库", url: "matqueryin.html" }, { name: "出库", url: "matqueryout.html" }] }],
+            { name: "查询", subs: [{ name: "库存", url: "matquery.html" }, { name: "入库", url: "matqueryin.html" }, { name: "出库", url: "matqueryout.html" }] }],
     },
     { "id": "10", "type": "coord", "name": "调度超级帐号", modules: [{ name: "调度", url: "user_list2.html" }] },
     { "id": "11", "type": "coord", "name": "调度主管", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },

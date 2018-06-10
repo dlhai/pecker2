@@ -87,7 +87,7 @@ def curuserinf():
         tbl = gettbl(user.depart_table)
         user.depart = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0]
         if tbl["name"] == "winder":
-            user.sub = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
+            user.subs = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
     ret=obj()
     ret.fun="curuserinf"
     ret.result = "200"

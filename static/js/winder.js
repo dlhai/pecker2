@@ -2,7 +2,7 @@
 	var r = ""
 	+ ((wr== true )? '<div id="efan_{%=it.id%}" class="xEFanPanel">':"")
     + '    <header>'
-	+ ((chk== true )? '<input type="checkbox" style="margin-top:0px;">':"")
+	+ ((chk== true )? '<input data_id="{%=it.id%}" type="checkbox" style="margin-top:0px;">':"")
     //+ '          <img src="img/diy/3.png" style="vertical-align:top;"/>'
     + '          <strong>编号:</strong><span>{%=it.code%}</span>'
     + '          <strong>型号:</strong><span>{%=it.type%}</span>'
@@ -59,3 +59,51 @@ var tplEfanForm = doT.template(
         + '        {% } %}'
         + '    </tbody>'
         + '</table>');
+
+function f2s(u, field) {
+    var fn = field;
+    if (typeof field != "string")
+        fn = field.name;
+    if (fn == "winderco_id" || fn == "winderprov_id" || fn == "winder_id") {
+        return $("#" + fn.split("_")[0] + "_" + u[fn]).children("span").text();
+    }
+    else if (fn == "leafvender_id")
+        return u["vender_id"]=="" ? "": GetSub(g_leafvenders.data, "id", u["vender_id"]).name;
+    else if (fn == "efanvender_id")
+        return u["vender_id"]=="" ? "": GetSub(g_efanvenders.data, "id", u["vender_id"]).name;
+    return u[fn];
+};
+
+function f2e(u, field) {
+    var fn = field;
+    if (typeof field != "string")
+        fn = field.name;
+    if (fn == "winderco_id" || fn == "winderprov_id" || fn == "winder_id") {
+        return $("#" + fn.split("_")[0] + "_" + u[fn]).children("span").text();
+    }
+    else if (fn == "leafvender_id") 
+        return RenderSelect(g_leafvenders.data, u["vender_id"]);
+    else if (fn == "efanvender_id")
+        return RenderSelect(g_efanvenders.data, u["vender_id"]);
+    return u[fn];
+};
+
+function onEditEfan(id) {
+	var title = "编辑风电机";
+    var idx = GetIdx(g_focussubs.data, "id", id);
+	var cnt = tplEfanForm(g_focussubs.data[idx]);
+
+	var dlg = new cbFormDlg(title, "width:610px", cnt);
+	dlg.urlsubmit = "/winder/efanmodify?id="+g_focussubs.data[idx].id;
+	dlg.urlremove = "/winder/efanremove?id="+g_focussubs.data[idx].id;
+	dlg.closing = function (reason){
+		if ( reason == "remove"){
+			$("#efan_"+id).remove();
+		}
+        else if (reason == "submit") {
+			g_focussubs.data[idx]=dlg.res.data[0];
+			$("#efan_"+id).html(tplEfanPaneIn(dlg.res.data[0]));
+		}
+	}
+    dlg.Show("xEFanForm");
+}

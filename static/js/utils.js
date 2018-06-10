@@ -82,7 +82,7 @@ function GetParam(name) {
     var url = decodeURI(window.location.search);
     var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
     var r = url.substr(1).match(reg);
-    if (r != null) return unescape(r[2]); return null;
+    if (r != null) return unescape(r[2]); return "";
 }
 
 function GetSub(ar, attr, val) {

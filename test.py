@@ -65,6 +65,9 @@ class CLog:
         pass
 
 if __name__ == "__main__":
+    d = {"aa123":"asdfasdf","ba123":"asdfasdf","aa123":"asdfasdf","ab123":"asdfasdf","aa123":"asdfasdf"}
+    imgs=[d.pop(k) for k in list(d.keys()) if k.startswith("aa") ] #imgs保证了顺序
+
     newdir(["./static/uploads","./static/uploads/user_face","./static/uploads/user_idimg","./static/uploads/certif_image",
             "./static/uploads/employ_image", "./static/uploads/edu_image1", "./static/uploads/edu_image2"]);
     app.config['JSON_AS_ASCII'] = False

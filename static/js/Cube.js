@@ -58,7 +58,7 @@ function RenderSelectSkill(val) {
 function xrimagelist(img) {
     var tpl = `<label for="{id}"><img style="width: 100%; height: 100%;" {img} />
                         <input type="file" id="{id}" accept="image/*"></label>`;
-    return tpl.format({ id: rndstr(8), img: (img == "" ? "" : 'src="' + img + '"') });
+    return tpl.format({ id: "img_"+rndstr(8), img: (img == "" ? "" : 'src="' + img + '"') });
 }
 
 //背景带十字，点击可换图
@@ -68,14 +68,14 @@ function xrimagelive(img) {
     var width = arguments[2] ? arguments[2] : "100%";
     var heigh = arguments[3] ? arguments[3] : "100%";
     var tpl = `<label {clss} for="{id}"><img style="width: {width}; height: {heigh};" {image} />
-                        <input type="file" id="{id}" accept="image/*"></label>`;
-    return tpl.format({ id: rndstr(8), clss: clss, image: image, width: width, heigh: heigh });
+                        <input type="file" id="{id}" name="{id}" accept="image/*"></label>`;
+    return tpl.format({ id: "img_"+rndstr(8), clss: clss, image: image, width: width, heigh: heigh });
 }
 
-//背景带十字，点击可换图(第2版)
+//背景带十字，点击可换图(第2版，参数多)
 function xrimagelive2(img, id, name, clss, style) {
     var image = img == "" ? "" : 'src="' + img + '"';
-    id = id ? id : rndstr(8);
+    id = id ? id : "img_"+rndstr(8);
     name = name ? 'name="' + name + '"' : '';
     clss = clss ? clss : "";
     style = style ? 'style="' + style + '"': "";
@@ -253,11 +253,6 @@ cbFormDlg.prototype.remove = function () {
 	});
 }
 
-cbFormDlg.prototype.selectnone = function () {
-    var nodes = $("#ModalDlgContent select");
-	nodes.each((i,x)=>x.selectedIndex = -1);
-}
-
 function RenderPane(ar, idx, fun) {
     var r = "";
     ar.fields.sort(function (a, b) { return parseInt(a.forder) - parseInt(b.forder); });
@@ -355,7 +350,7 @@ function RenderFormIn(entity, fields, cb) {
         var val = cb != undefined ? cb(entity, field) : val;
 
         r += "<div><label>" + field.title + "</label>";
-		if ( field.ftype=="div" ){
+		if ( field.ftype=="div" || field.ftype=="div_long" ){
 			r += `<input type="hidden" name="`+field.name+`" value="`+entity[field.name]+`">`;
 			attr = ""; // 清空避免name重复
 		}
