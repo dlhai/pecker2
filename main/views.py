@@ -4,16 +4,6 @@ import json
 from main2 import app,login_manager,check
 from main.model import *
 
-#id到名字的转换
-@app.route("/id2name")
-def id2name():
-    r = {}
-    for k,v in request.args.to_dict().items():
-        ar = k.split("_")
-        qa = conn.execute( "select name from " + ar[0] + ' where id="' + v+'"').fetchall()
-        r[k+"_"+v]=qa[0][0]
-    return jsonify(r)
-
 @app.route("/upload",methods=['POST'])
 def upload():
     d1 =request.files.to_dict(); 

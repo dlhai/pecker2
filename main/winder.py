@@ -61,7 +61,7 @@ def windermodify():
     
     r.ls = params["ls"]
     conn.execute(toupdate(params["ls"], form, obj(id=params["id"])))
-    r.data = QueryObj("select * from {ls} where id in (select max(id) from {ls})".format(ls=r.ls))
+    r.data = QueryObj("select * from {ls} where id={id})".format(id=params["id"]))
 
     return toret(r,result=200)
 
@@ -122,7 +122,7 @@ def efancreate():
 def efanmodify():
     params = request.args.to_dict()
     form =request.form.to_dict()
-    r = obj(result="404",fun="winder/efancreate")
+    r = obj(result="404",fun="winder/efanmodify")
     if "id" not in params:
         return toret(r,msg="缺少参数id")
     if "code" not in form or form["code"]=="":

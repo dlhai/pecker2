@@ -99,7 +99,7 @@
 					$("#item_detail").html("");
 					$("#subitem_list").html("");
 				}
-                else if (reason == "submit") { // 刷新focus面板
+                else if (reason == "submit") { // 刷新focus面板(这里好像有问题，不需要reqdata，用dlg.res即可)
 					Reqdata("/rd?ls=" + g_focus.ls + "&id=" + g_focus.data[0].id, "", function (res) {
 						dlg.res.fields = g_focus.fields;
 						g_focus = res;

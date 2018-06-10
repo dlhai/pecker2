@@ -4,27 +4,6 @@
 // 0205 移动位置 xpecker:function TableBindClick3(tableid, callback) => cube: function TableBindClick3(tableid, callback)
 g = new Object();
 
-//表格点击反色
-var g_TableCurRow = new Object();
-function TableBindClick2(tableid) {
-    var currow = -1;
-    $("#"+tableid+" tr").click(function () {
-        var tag = $(this).parent()[0].localName;
-        if (tag.toLowerCase() == "thead")
-            return;
-        if (currow != -1) {
-            currow++;
-            if (currow % 2 == 0)
-                $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#f5f5f5");
-            else
-                $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#ffffff");
-        }
-        currow = $(this).index();
-        g_TableCurRow[tableid] = $(this).attr("data_id");
-        $(this).children().css("background-color", "#00f0f5");
-    });
-}
-
 //文档控件
 $(function () {
     $(".x3Doc>.x3Doc-handle").on("click", function ()
@@ -39,128 +18,6 @@ $(function () {
         $(".x3Doc>.x3Doc-click").removeClass("x3Doc-click");
     }
 });
-
-
-function ID2Name(ar, idx) {
-    var param = new Array();
-    for (var i in ar.fields) {
-        var name = ar.fields[i].name;
-        var val = ar.data[idx][name];
-        if (name.indexOf("_") != -1 && val != "" && ar.fields[i].type != "select" )
-            param.push(name + "=" + val);
-    }
-    if (param.length == 0)
-        return;
-
-    Reqdata("/id2name?" + param.join("&"), "", function (d) {
-        for (var j in d) {
-            $("#"+j).html(d[j]);
-            $("#"+j).removeAttr("id"); // 清除ID属性是因为弹出表单时，有可能导致ID重复
-        }
-    });
-}
-
-function EFanCreate(fields1, fields2, winder_id, area_id) {
-    var efan = Create(fields1);
-    efan.winder_id = g_user.depart_id;
-    efan.winderarea_id = g_winderarea_id;
-    efan.leafs = [Create(fields2), Create(fields2), Create(fields2)];
-    efan.leafs[0].winder_id = g_user.depart_id;
-    efan.leafs[0].winderarea_id = g_winderarea_id;
-    efan.leafs[1].winder_id = g_user.depart_id;
-    efan.leafs[1].winderarea_id = g_winderarea_id;
-    efan.leafs[2].winder_id = g_user.depart_id;
-    efan.leafs[2].winderarea_id = g_winderarea_id;
-    return efan;
-}
-
-function xrefan(efan) {
-    var tpl = doT.template(`<div class="xEFanPanel">
-            <header>
-                <img src="img/diy/3.png" style="vertical-align:top;"/>
-                <strong>编号:</strong><span>{%=it.code%}</span>
-                <strong>型号:</strong><span>{%=it.type%}</span>
-                <strong>生产厂家:</strong><span>{%=ShowField(it,"efanvender_id")%}</span>
-             </header>
-             <table>
-                 <thead><tr><th>编号</th><th>主要材料</th><th>出厂时间</th><th>挂机时间</th><th>生产厂家</th></tr></thead>
-                 <tbody>
-                     {% it.leafs.forEach(leaf=> { %}
-                     <tr>
-                         <td>{%=leaf.code%}</td>
-                         <td>{%=leaf.mat%}</td>
-                         <td>{%=leaf.producedate%}</td>
-                         <td>{%=leaf.putondate%}</td>
-                         <td>{%=ShowField(leaf,"leafvender_id")%}</td>
-                     </tr>
-                     {% }); %}
-                 </tbody>
-             </table>
-         </div>`);
-    return tpl(efan);
-}
-
-function EFanPane(check ) {
-    var tpl = '<div class="xEFanPanel">'
-        + '    <header>';
-    if (check) tpl += '<input type="checkbox" style="margin-top:0px;">';
-    tpl += //'            <img src="img/diy/3.png" style="vertical-align:top;"/>'+
-         '          <strong>编号:</strong><span>{%=it.code%}</span>'
-        + '           <strong>型号:</strong><span>{%=it.type%}</span>'
-        + '          <strong>生产厂家:</strong><span>{%=FieldToShow(it,"efanvender_id")%}</span>'
-        + '          <div style="float: right;">'
-        + '              <a id="{%=it.id%}" onClick="EditEfan(this)">编辑</a>'
-        + '          </div>'
-        + '      </header>'
-        + '      <table>'
-        + '          <thead><tr><th>编号</th><th>主要材料</th><th>出厂时间</th><th>挂机时间</th><th>生产厂家</th></tr></thead>'
-        + '          <tbody>'
-        + '              {% it.leafs.forEach(leaf=> { %}'
-        + '              <tr>'
-        + '                  <td>{%=leaf.code%}</td>'
-        + '                  <td>{%=leaf.mat%}</td>'
-        + '                  <td>{%=leaf.producedate%}</td>'
-        + '                  <td>{%=leaf.putondate%}</td>'
-        + '                  <td>{%=FieldToShow(leaf,"leafvender_id")%}</td>'
-        + '              </tr>'
-        + '              {% }); %}'
-        + '          </tbody>'
-        + '      </table>'
-        + '  </div>';
-    this.tpl = doT.template(tpl);
-}
-
-EFanPane.prototype.Render = function( efan ){
-    return this.tpl(efan);
-}
-
-function EfanForm() {
-    this.tpl = doT.template('<div class="xEFanForm">'
-        + '<form id="form_efan">'
-        + '    <strong>编号:</strong><input name="code" value="{%=it.code%}" />'
-        + '    <strong>型号:</strong><input name="type" value="{%=it.type%}" />'
-        + '   <strong>生产厂家:</strong><select name="efanvender_id" style="margin-right:0px;">{%=FieldToEdit(it,"efanvender_id")%}</select>'
-        + '</form>'
-        + '<form id="form_leaf0" /><form id="form_leaf1" /><form id="form_leaf3" />'
-        + '<table>'
-        + '    <thead><tr><th>编号</th><th>主要材料</th><th>出厂时间</th><th>挂机时间</th><th style="width:90px">生产厂家</th></tr></thead>'
-        + '    <tbody>'
-        + '        {% for (var i = 0; i < it.leafs.length; i++) { %}'
-        + '        <tr>'
-        + '            <td><input form="form_leaf{%=it.leafs[i]%}" name="code" value="{%=it.leafs[i].code%}" /></td>'
-        + '            <td><input form="form_leaf{%=it.leafs[i]%}" name="mat" value="{%=it.leafs[i].mat%}" /></td>'
-        + '            <td><input form="form_leaf{%=it.leafs[i]%}" name="producedate" value="{%=it.leafs[i].producedate%}" onClick="xrlaydate(this)" /></td>'
-        + '            <td><input form="form_leaf{%=it.leafs[i]%}" name="putondate" value="{%=it.leafs[i].putondate%}" onClick="xrlaydate(this)" /></td>'
-        + '            <td><select form="form_leaf{%=it.leafs[i]%}" name="leafvender_id" data-id="{%=FieldToEdit(it.leafs[i],"leafvender_id")%}" ></select></td>'
-        + '        </tr>'
-        + '        {% } %}'
-        + '    </tbody>'
-        + '</table>'
-        + '</div>');
-}
-EfanForm.prototype.Render = function (efan) {
-    return this.tpl(efan);
-}
 
 // 树控件，与第3版的区别:
 // 1.事件使用了委托，不再要绑定
@@ -272,6 +129,7 @@ $("html").on("click", function (event) {
 // 树控件，与第4版的区别:
 // 1.事件委托位置优化到x5Tree
 // 2.onTreeItemClick的参数node为span节点，3版可能为faceimg
+// 3.增加update、addchild、remove等方法
 // <div id="{ls_id}">
 //     <img src="plus.gif">
 //     <span><img src="{face.jpg}">{text}</span>

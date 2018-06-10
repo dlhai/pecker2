@@ -9,20 +9,10 @@
     <link rel="stylesheet" href="css/bootstrap.css"/>
     <script src="js/bootstrap.js"></script>
     <script src="laydate/laydate.js"></script>
-    <style>
-        /*为了解决BootStrap中css和layDate的css样式冲突*/
-        .laydate_box, .laydate_box * {
-            box-sizing: content-box;
-        }
-        .laydate_box th {
-            text-align: center;
-        }
-    </style>
-
     <script src="js/utils.js"></script>
-    <link rel="stylesheet" href="css/xpecker.css" />
-    <script src="js/Cube.js"></script>
     <script src="js/db.js"></script>
+    <script src="js/Cube.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
 </head>
 <body class="xFCsrow">
@@ -41,29 +31,98 @@
         </section>
     </div>
     <script type="text/javascript">
-        var g_devwhs, g_curwh, g_devs, g_curdev, g_devvenders,g_drivers;
-        Reqdata("/rd?ls=devwh", "", function (res) { g_devwhs = res; });
-        Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res) { g_devvenders = res; });
-        g.xTree = new x4Tree("#xTree", "devwh", "", "devwh", function (type,id) {
-            g_curwh = GetSub(g_devwhs.data, "id", id);
-			var query = "/rduser?depart_table={0}&depart_id={1}&job={2}".format(
-				GetSub(db_tbl, "name", "devwh").id, id, GetSub(db_job, "name", "设备司机").id );
-			Reqdata(query, "", function (res) { g_drivers = res; });
-            $("#item_detail").html(RenderPane2(g_curwh, g_devwhs.fields));
+        var g_devwhs, g_focus, g_devs, g_curdev, g_devvenders,g_drivers;
+		
+        Reqdata("/rd?ls=devwh", "", function (res) {
+			g_devwhs = res; 
+			g_focus = {"fields":g_devwhs.fields,"ls": g_devwhs.ls};
+		});
+        Reqdata("/rd?ls=vender&type=21", "", function (res) { g_devvenders = res; });
+        g.xTree = new x5Tree("#xTree", "devwh", "", "devwh", function (type,id) {
+            g_focus.data=[GetSub(g_devwhs.data, "id", id)];
+            $("#item_detail").html(RenderPane2(g_focus.data[0], g_devwhs.fields));
+
+			Reqdata("/rduser?job=6&depart_id="+id, "", function (res) { g_drivers = res; });
             Reqdata("/rd?ls=dev&devwh_id=" + id, "", function (res) {
                 g_devs = res;
-                $("#subitem_list").html(RenderTable2(res, "", FieldToShow));
-                TableBindClick3(res.ls, function (devid) {g_curdev = GetSub(g_devs.data, "id", devid);});
+                $("#subitem_list").html(RenderTable2(res, "", f2s));
             });
         });
 
-        function onNewWh() { (new cbDlg("新建 驻地", "width:610px", RenderForm4(Create(g_devwhs.fields), g_devwhs.fields, FieldToEdit))).Show();}
-        function onEditWh() { (new cbDlg("编辑 驻地", "width:610px", RenderForm4(g_curwh, g_devwhs.fields))).Show();}
+        function onNewWh() {
+            var title = "新建 驻地";
+			var u = Create(g_devwhs.fields);
+            var cnt = RenderForm4(u, g_devwhs.fields, f2e);
 
-        function onNewDev() { (new cbDlg("新建 设备", "width:610px", RenderForm4(Create(g_devs.fields), g_devs.fields, FieldToEdit))).Show(); }
-        function onEditDev() { (new cbDlg("编辑 设备", "width:610px", RenderForm4(g_curdev, g_devs.fields, FieldToEdit))).Show(); }
+			var dlg = new cbFormDlg(title, "width:610px", cnt);
+			dlg.urlsubmit = "/dev/devwhcreate";
+			dlg.closing = function (reason){if ( reason == "submit"){
+				g_focus.data = dlg.res.data;
+				g_devwhs.data = g_devwhs.data.concat(dlg.res.data);
+				g.xTree.addchild( "#xTree",g_focus );
+				$("#item_detail").html(RenderPane2(g_focus.data[0], g_focus.fields, f2s));
+				$("#subitem_list").html("");
+			}}
 
-        function FieldToShow(data, field){
+            dlg.Show();
+		}
+        function onEditWh() {
+            var title = "编辑 驻地";
+            var cnt = RenderForm4( g_focus.data[0], g_focus.fields,f2s);
+
+			var dlg = new cbFormDlg(title, "width:610px", cnt);
+            dlg.urlsubmit = "/dev/devwhmodify?id=" + g_focus.data[0].id;
+            dlg.urlremove = "/dev/devwhremove?id=" + g_focus.data[0].id;
+			dlg.closing = function (reason){
+				if ( reason == "remove"){
+					g.xTree.remove(g_focus);
+					$("#item_detail").html("");
+					$("#subitem_list").html("");
+				}
+                else if (reason == "submit") { // 刷新focus面板
+					var idx = GetIdx(g_devwhs.data, "id", g_focus.data[0].id);
+					g_focus.data = dlg.res.data;
+					g_devwhs.data[idx]=dlg.res.data[0];
+					g.xTree.update(g_focus);
+					$("#item_detail").html(RenderPane2(g_focus.data[0], g_focus.fields, f2s));
+				}
+			}
+            dlg.Show();
+		}
+
+        function onNewDev() {
+            var title = "新建 设备";
+            var cnt = RenderForm4(Create(g_devs.fields), g_devs.fields, f2e);
+
+			var dlg = new cbFormDlg(title, "width:610px", cnt);
+			dlg.urlsubmit = "/dev/devcreate";
+			dlg.closing = function (reason){
+				Reqdata("/rd?ls=dev&devwh_id=" + g_focus.data[0].id, "", function (res) {
+					g_devs = res;
+					$("#subitem_list").html(RenderTable2(res, "", f2s));
+				});
+			}
+            dlg.Show();
+		}
+        function onEditDev(){
+            var title = "编辑 设备";
+			var idx = GetIdx(g_devs.data, "id", GetCurRowDataID());
+            var cnt = RenderForm4( g_devs.data[idx], g_devs.fields,f2s);
+
+			var dlg = new cbFormDlg(title, "width:610px", cnt);
+            dlg.urlsubmit = "/dev/devmodify?id=" + g_devs.data[idx].id;
+            dlg.urlremove = "/dev/devremove?id=" + g_devs.data[idx].id;
+			dlg.closing = function (reason){
+				if ( reason == "remove")
+					g_devs.data.splice(idx, 1); 
+                else if (reason == "submit")
+					g_devs.data[idx] = dlg.res.data[0];
+				$("#subitem_list").html(RenderTable2(g_devs, "", f2s));
+			}
+            dlg.Show();
+		}
+
+        function f2s(data, field){
             if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
             else if (field.name == "devwh_id") return GetSub(g_devwhs.data, "id", data[field.name]).name;
             else if (field.name == "status") return GetSub(status_dev, "id", data[field.name]).name;
@@ -72,7 +131,7 @@
 				return GetSub(g_drivers.data, "id", data[field.name]).name;
             else return data[field.name];
         }
-        function FieldToEdit(data, field) {
+        function f2e(data, field) {
             if (field.name == "clss") return RenderSelect(db_devclss, data[field.name] );
             else if (field.name == "devwh_id") return RenderSelect(g_devwhs.data, data[field.name]);
             else if (field.name == "status") return RenderSelect(status_dev, data[field.name]);

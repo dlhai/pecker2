@@ -43,17 +43,12 @@
             dlg.urlsubmit = "/vender/create?type=" + GetTbl("dev").id;
             dlg.closing = refresh;
             dlg.Show();
-
-
-            var title = "新建 设备供应商";
-            var cnt = RenderForm4(Create(g_devVs.fields), g_devVs.fields);
-            (new cbDlg(title, "width:610px", cnt)).Show();
         }
         function onDevVEdit(This) {
             if (g_TableCurRow[g_devVs.ls] == -1)
                 return;
 
-            var devV = GetSub(g_devVs.data, "id", GetRowDataID(g_devVs.ls));
+            var devV = GetSub(g_devVs.data, "id", GetCurRowDataID(g_devVs.ls));
             var title = "编辑 设备供应商";
             var cnt = RenderForm4(devV, g_devVs.fields);
 

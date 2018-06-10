@@ -94,6 +94,7 @@ from main.blog import *
 from main.user import *
 from main.vender import *
 from main.winder import *
+from main.dev import *
 
 class CLog:
     def write(data):
@@ -127,3 +128,103 @@ if __name__ == "__main__":
 #风场面板中还没有相关人员显示。
 
 #功能表：
+#    主框架√ 缺单位信息，缺主页，缺搜索
+#var db_roles = [
+#    {
+#        "id": "1", "type": "winder", "name": "叶片超级帐号", modules: [
+#            { name: "地图", url: "windersumap.html" },√
+#            { name: "风场", url: "windersu.html" },√
+#            { name: "人员", url: "user_list2.html" },√
+#            { name: "厂家", url: "vender.html" }]√
+#    },
+#    {
+#        "id": "2", "type": "winder", "name": "风场主管", modules: [
+#            { name: "地图", url: "windermap.html" },√
+#            { name: "设备", url: "winder2.html" },√
+#            { name: "案件", url: "coord.html" },
+#            { name: "记录", url: "repairlog.html" },
+#            { name: "人员", url: "user_list2.html" }]√
+#    },
+#    {
+#        "id": "3", "type": "winder", "name": "驻场", modules: [
+#            { name: "地图", url: "windermap.html" },√
+#            { name: "设备", url: "winder2.html" },√
+#            { name: "案件", url: "coord.html" },
+#            { name: "记录", url: "repairlog.html" }]
+#    },
+#    {
+#        "id": "4", "type": "dev", "name": "设备超级帐号", modules: [
+#            { name: "地图", url: "devmap.html" },
+#            { name: "驻地", url: "devsu.html" },
+#            { name: "人员", url: "user_list2.html" },√
+#            { name: "厂家", url: "devvender.html" }]√
+#    },
+#    {
+#        "id": "5", "type": "dev", "name": "驻地主管", modules: [
+#            { name: "地图", url: "devmap.html" },
+#            { name: "驻地", url: "devwh.html" },
+#            { name: "人员", url: "user_list2.html" }]√
+#    },
+#    {
+#        "id": "6", "type": "dev", "name": "设备司机", modules: [
+#            { name: "设备", url: "devdriver.html" }]
+#    },
+#    {
+#        "id": "7", "type": "wh", "name": "仓库超级帐号", modules: [
+#            { name: "仓库", url: "matsu.html" },
+#            { name: "人员", url: "user_list2.html" },
+#            { name: "材料", url: "material.html" }]
+#    },
+#    {
+#        "id": "8", "type": "wh", "name": "仓库主管", modules: [
+#            { name: "入库", url: "matin.html" },
+#            { name: "出库", url: "matout.html" },
+#            { name: "查询", subs: [
+#               { name: "库存", url: "matquery.html" }, 
+#               { name: "入库", url: "matqueryin.html" }, 
+#               { name: "出库", url: "matqueryout.html" }]},
+#            { name: "人员", url: "user_list2.html" }]
+#    },
+#    {
+#        "id": "9", "type": "wh", "name": "仓库管理员", modules: [
+#            { name: "入库", url: "matin.html" },
+#            { name: "出库", url: "matout.html" },
+#            { name: "查询", subs: [
+#               { name: "库存", url: "matquery.html" }, 
+#               { name: "入库", url: "matqueryin.html" },
+#               { name: "出库", url: "matqueryout.html" }] }],
+#    },
+#    { "id": "10", "type": "coord", "name": "调度超级帐号", modules: [
+#       { name: "人员", url: "user_list2.html" }] },√
+#    { "id": "11", "type": "coord", "name": "调度主管", modules: [
+#       { name: "案件", url: "coord.html" }, 
+#       { name: "记录", url: "repairlog.html" }] },
+#    { "id": "12", "type": "coord", "name": "调度", modules: [
+#       { name: "案件", url: "coord.html" }, 
+#       { name: "记录", url: "repairlog.html" }] },
+#    {"id": "13", "type": "expert", "name": "专家超级帐号", modules: [
+#       { name: "专家", url: "user_list2.html" }]},
+#    {
+#        "id": "14", "type": "expert", "name": "专家", modules: [
+#            { name: "案件", url: "coord.html" },
+#            { name: "记录", url: "repairlog.html" }]
+#    },
+#    { "id": "15", "type": "repair", "name": "技工超级帐号", modules: [
+#       { name: "技工", url: "user_list2.html" }] },
+#    {
+#        "id": "16", "type": "repair", "name": "维修队长", modules: [
+#            { name: "案件", url: "coord.html" },
+#            { name: "记录", url: "repairlog.html" },
+#            { name: "人员", url: "user_list2.html" }]
+#    },
+#    { "id": "17", "name": "技工", modules: [
+#       { name: "案件", url: "coord.html" }, 
+#       { name: "记录", url: "repairlog.html" }] },
+#    { "id": "18", "name": "博客超级帐号", modules: []},
+#    { "id": "19", "name": "公众", modules: [
+#       { name: "文章列表", url: "coord.html" },  
+#       { name: "用户文章", url: "repairlog.html" }] },文章中支持图片功能 
+#       { name: "消息", url: "repairlog.html" }] },
+#    ]},
+#];
+
