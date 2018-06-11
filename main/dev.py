@@ -97,10 +97,10 @@ def devremove():
     if "id" not in params:
         return toret(r,msg="缺少参数id")
 
-    if querycount("xxx",obj(xxx="xxx",id=params["id"])) > 0:
-        return toret(r,msg="已xxx，不能删除")
-
     id = params["id"]
+    if querycount("devwork",obj(dev_id=id)) > 0:
+        return toret(r,msg="已产生设备调用，不能删除")
+
     conn.execute(todelete("dev", obj(id=id)))
     return toret(r,result=200)
 
