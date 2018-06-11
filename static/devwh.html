@@ -10,10 +10,30 @@
     <script type="text/javascript" src="js/doTe.js"></script>
 	<script src="laydate/laydate.js"></script>
 	<script src="js/utils.js"></script>
+    <link rel="stylesheet" href="css/cube.css"/>
     <script src="js/Cube.js"></script>
     <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
+
+    <style>
+        .narrow>div>div:first-of-type,.narrow>div>input:first-of-type {width: 136px;}
+        .narrow>div>label:first-of-type {width: 40px;}
+        .narrow>div,.narrow>div>div:first-of-type {margin-right: 0px;}
+        .live {
+            background: #808080;
+            border: 0px;
+        }
+
+        .title {
+            display: inline-block;
+            border-radius: 4px;
+            padding: 4px 15px;
+            border: 1px solid #dddddd;
+        }
+
+    </style>
+
     <style>
         .pane_image>div {
             margin: 5px 0px 5px 5px;
@@ -35,13 +55,6 @@
             margin: 0px 5px;
             width: 137px;
         }
-
-        /*图片框无图时的背景十字架图片*/
-        .ImgBlank {
-            position: relative;
-            background: url(img/add.png);
-            background-size: cover;
-        }
     </style>
 
 </head>
@@ -54,7 +67,7 @@
     <div id="curitem" class="xFCscol"  style="width:100px;">
         <section class="xPanel2 xFIfixed">
             <header>设备信息<div style="float: right;"><a href="javascript:onEditDev()">编辑</a></div></header>
-            <div id="item_detail" class="x2Form" style="padding:5px;"></div>
+            <div id="item_detail" style="padding:5px;"></div>
         </section>
         <section class="xPanel2">
             <header class="xFIfixed">任务列表</header>
@@ -67,7 +80,7 @@
             <div class="pane_image" style="width: 100%; height: 80px; margin: 0px; padding:0px; display:block;border:0px;">
                 <div style="float: left; margin:0px;"><img style="width: 78px; height: 78px;" src="{%=it.face%}" /></div>
                 <div style="margin-top:0px;"><label>编号</label><div style="display:inline-block;">{%=it.code%}</div></div>
-                <div><label>分类</label><div>{%=ShowField(it,"clss")%}</div></div>
+                <div><label>分类</label><div>{%=f2s(it,"clss")%}</div></div>
             </div>
             <img style="width: 280px; height: 160px;" src="{%=it.img%}" />
         </div>
@@ -77,23 +90,27 @@
         <div style="height:240px;width:280px;float: left; display:block;">
             <div class="pane_image" style="width: 100%; height: 80px; margin: 0px; padding:0px; display:block;border:0px;">
                 <div style="float: left; margin:0px;">
-                    <label class="ImgBlank" style="display:inline-block;width:78px;margin:0px;" for="SelectFace"> <img id="viewface" style="width: 78px; height: 78px;;z-index: 999;" src="{%=it.face%}" /> </label>
-                    <input type="file" id="SelectFace" accept="image/*" style="display:none;" onchange="imgPreview(this,'viewface')">
+                    <label class="imagelive" style="display:inline-block;width:78px;margin:0px;" for="SelectFace"> 
+						<img id="viewface" style="width: 78px; height: 78px;;z-index: 999;" src="{%=it.face%}" />
+						<input type="file" id="SelectFace" accept="image/*" style="display:none;" onchange="imgPreview(this,'viewface')">
+					</label>
                 </div>
                 <div style="margin-top:0px;"><label>编号</label><div style="display:inline-block;">{%=it.code%}在</div></div>
                 <div style="position:relative;">
-                    <label>分类</label><select>{%=FieldToEdit(it,GetSub(g_devs.fields, "name", "clss"))%}</select>
+                    <label>分类</label><select>{%=f2e(it,GetSub(g_devs.fields, "name", "clss"))%}</select>
                 </div>
             </div>
-            <label class="ImgBlank" style="display:inline-block;" for="selectidimg"> <img id="viewidimg" style="width: 280px; height: 160px;z-index: 999;" src="{%=it.img%}" /> </label>
-            <input type="file" id="selectidimg" accept="image/*" style="display:none;" onchange="imgPreview(this,'viewidimg')">
+            <label class="imagelive" style="display:inline-block;" for="selectidimg">
+				<img id="viewidimg" style="width: 280px; height: 160px;z-index: 999;" src="{%=it.img%}" /> 
+				<input type="file" id="selectidimg" accept="image/*" style="display:none;" onchange="imgPreview(this,'viewidimg')">
+			</label>
         </div>
     </script>
 
     <script type="text/javascript">
         var tpl_dev_pane = doT.template(document.getElementById('tpl_dev_pane').innerHTML);
         var tpl_dev_form = doT.template(document.getElementById('tpl_dev_form').innerHTML);
-        var g_devwhs, g_devs, g_devvenders, g_drivers, g_focus;
+        var g_devwhs, g_devs, g_devvenders, g_drivers, g_guiders, g_users,g_focus;
         var g_user = parent.g_user;
         if (g_user == undefined) {
             Reqdata("/curuserinf", "", function (res) {
@@ -107,9 +124,9 @@
         }
 
         function init() {
-            Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res1) { g_devvenders = res1; });
-            Reqdata("/rduser?depart_table=" + GetSub(db_tbl, "name", "devwh").id + "&depart_id=" + g_user.depart.id, "", function (res2) { g_driver = res2; });
-
+            Reqdata("/rd?ls=vender&type=21", "", function (res) { g_devvenders = res; });
+			Reqdata("/user/briefs?job=(11,12)", "", function (res) { g_guiders = res; });
+            Reqdata("/rduser?job=(5,6)&depart_id=" + g_user.depart.id, "", function (res) { g_driver = res; });
             Reqdata("/rd?ls=dev&devwh_id=" + g_user.depart.id, "", function (res3) {
                 g_devs = res3;
                 GetSub(g_devs.fields, "name", "code").ftype = "none";
@@ -117,49 +134,49 @@
                 GetSub(g_devs.fields, "name", "devwh_id").twidth = 0;
                 GetSub(g_devs.fields, "name", "producedate").twidth = 0;
                 GetSub(g_devs.fields, "name", "buydate").twidth = 0;
-                $("#item_list").html(RenderTable2(g_devs, undefined, FieldToShow));
-            });
-
-            $("html").on("click", function (event) {
-                var td = $(event.target);
-                if (td[0].localName == "td" && td.parents(".xTable").length > 0) {
-                    g_focus = GetSub(g_devs.data, "id", GetCurRowDataID(g_devs.ls));
-                    var pane = tpl_dev_pane(g_focus);
-                    pane += RenderPane2(g_focus, g_devs.fields, FieldToShow);
-                    $("#item_detail").html(pane);
-
-                    // 任务记录
-                    Reqdata("/rd?ls=devwork&dev_id=" + g_focus.id, "", function (works) {
-                        GetSub(works.fields, "name", "remark").twidth = 0;
-                        GetSub(works.fields, "name", "devwh_id").twidth = 0;
-                        GetSub(works.fields, "name", "clss").twidth = 0;
-                        GetSub(works.fields, "name", "dev_id").twidth = 0;
-                        GetSub(works.fields, "name", "driver_id").twidth = 0;
-                        $("#tasklist").html(RenderTable2(works, undefined, function (data, field) {
-                            if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
-                            else if (field.name == "status") return GetSub(status_devwork, "id", data[field.name]).name;
-                            else if (field.name == "deal_id") return GetSub(status_devwork, "id", data[field.name]).name;
-                            else if (field.name == "status") return GetSub(status_devwork, "id", data[field.name]).name;
-                            else return data[field.name];
-                        }));
-                    });
-                }
+                $("#item_list").html(RenderTable2(g_devs, undefined, f2s));
             });
         }
+		// 表格单击
+        $("html").on("click", function (event) {
+            var td = $(event.target);
+            if (td[0].localName == "td" && td.parents(".xTable").length > 0) {
+                g_focus = GetSub(g_devs.data, "id", GetCurRowDataID(g_devs.ls));
+                //var pane = tpl_dev_pane(g_focus)+RenderPane2(g_focus, g_devs.fields, f2s);
+                $("#item_detail").html(devpane(g_focus,g_devs.fields));
 
-        function ShowField(data, field) {
-            if (field == "clss") return GetSub(db_devclss, "id", data[field]).name;
-            else return data[field];
+                // 任务记录
+                Reqdata("/rd?ls=devwork&dev_id=" + g_focus.id, "", function (works) {
+                    GetSub(works.fields, "name", "remark").twidth = 0;
+                    GetSub(works.fields, "name", "devwh_id").twidth = 0;
+                    GetSub(works.fields, "name", "clss").twidth = 0;
+                    GetSub(works.fields, "name", "dev_id").twidth = 0;
+                    GetSub(works.fields, "name", "driver_id").twidth = 0;
+                    $("#tasklist").html(RenderTable2(works, undefined, workf2s));
+                });
+            }
+        });
+
+		function workf2s(data, field) {
+			var fn = field.name;
+            if (fn == "clss") return data[fn] == "" ? "" :GetSub(db_devclss, "id", data[fn]).name;
+            else if (fn == "status") return data[fn] == "" ? "" :GetSub(status_devwork, "id", data[fn]).name;
+            else if (fn == "deal_id") return data[fn] == "" ? "" :GetSub(g_driver.data, "id", data[fn]).name;
+            else if (fn == "guide_id") 
+				return data[fn] == "" ? "" :GetSub(g_guiders.users, "id", data[fn]).name;
+            else return data[fn];
         }
-        function FieldToShow(data, field) {
-            if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
-            else if (field.name == "devwh_id") return g_user.depart.name;
-            else if (field.name == "status") return GetSub(status_dev, "id", data[field.name]).name;
-            else if (field.name == "vender_id") return GetSub(g_devvenders.data, "id", data[field.name]).name;
-            else if (field.name == "driver_id") return GetSub(g_driver.data, "id", data[field.name]).name;
-            else return data[field.name];
+
+        function f2s(data, field) {
+			var fn = (typeof field == "string") ? field : field.name;
+            if (fn == "clss") return data[fn] == "" ? "" :GetSub(db_devclss, "id", data[fn]).name;
+            else if (fn == "devwh_id") return g_user.depart.name;
+            else if (fn == "status") return data[fn] == "" ? "" :GetSub(status_dev, "id", data[fn]).name;
+            else if (fn == "vender_id") return data[fn] == "" ? "" :GetSub(g_devvenders.data, "id", data[fn]).name;
+            else if (fn == "driver_id") return data[fn] == "" ? "" :GetSub(g_driver.data, "id", data[fn]).name;
+            else return data[fn];
         }
-        function FieldToEdit(data, field) {
+        function f2e(data, field) {
             if (field.name == "clss") return RenderSelect(db_devclss, data[field.name]);
             else if (field.name == "devwh_id") return RenderSelect([g_user.depart], data[field.name]);
             else if (field.name == "status") return RenderSelect(status_dev, data[field.name]);
@@ -169,21 +186,39 @@
         }
 
         function onNewDev() {
-            var dev = Create(g_devs.fields);
-            var form = '<div class="x2Form">';
-            form += tpl_dev_form(dev);
-            form += RenderFormIn(dev, g_devs.fields, FieldToEdit);
-            form += "</div>";
-            (new cbDlg("新建 设备", "width:900px", form)).Show();
-        }
-        function onEditDev() {
-            var dev = g_curdev;
-            var form = '<div class="x2Form">';
-            form += tpl_dev_form(dev);
-            form += RenderFormIn(dev, g_devs.fields, FieldToEdit);
-            form += "</div>";
-            (new cbDlg("编辑 设备", "width:900px", form)).Show();
-        }
+            var title = "新建 设备";
+            var u = Create(g_devs.fields);
+            u.devwh_id = g_focus.data[0].id;
+            var cnt = RenderForm4(u, g_devs.fields, f2e);
+
+			var dlg = new cbFormDlg(title, "width:610px", cnt);
+			dlg.urlsubmit = "/dev/devcreate";
+			dlg.closing = function (reason){
+				Reqdata("/rd?ls=dev&devwh_id=" + g_focus.data[0].id, "", function (res) {
+					g_devs = res;
+					$("#subitem_list").html(RenderTable2(res, "", f2s));
+				});
+			}
+            dlg.Show();
+		}
+        function onEditDev(){
+            var title = "编辑 设备";
+            var idx = GetIdx(g_devs.data, "id", GetCurRowDataID(g_devs.ls));
+            //var cnt = RenderForm4( g_devs.data[idx], g_devs.fields,f2e);
+			var cnt = devform( g_devs.data[idx], g_devs.fields);
+
+			var dlg = new cbFormDlg(title, "width:910px", cnt);
+            dlg.urlsubmit = "/dev/devmodify?id=" + g_devs.data[idx].id;
+            dlg.urlremove = "/dev/devremove?id=" + g_devs.data[idx].id;
+			dlg.closing = function (reason){
+				if ( reason == "remove")
+					g_devs.data.splice(idx, 1); 
+                else if (reason == "submit")
+					g_devs.data[idx] = dlg.res.data[0];
+				$("#subitem_list").html(RenderTable2(g_devs, "", f2s));
+			}
+            dlg.Show();
+		}
 
         function imgPreview(fileDom, idimg) {
             var file = fileDom.files[0];
@@ -192,6 +227,45 @@
             reader.readAsDataURL(file);
         }
 
+		function devpane(dev, fields) {
+			var ui2 = `
+				<div style="float:left;display:block;height:240px;width:280px;margin-top:5px;margin-left:10px;">
+					<div style="float:left;display:block;height:78px;width:78px;">
+						<img style="width:100%;height:100%;" src="{face}">
+					</div>
+					<div class="x2Form narrow">
+						<div style="margin-top:0px;"><label>编号</label><div style="display:inline-block;">{code}</div></div>
+						<div><label>分类</label><div>{clssname}</div></div>
+					</div>
+					<div style="width:280px;height:160px;margin-top:5px">
+						<img style="width:100%;height:100%;" src="{img}" >
+					</div>
+				</div>`;
+			dev.clssname=f2s(dev,"clss");
+			return ui2.format(dev) + RenderPane3(dev, fields, f2s);
+		}
+
+		function devform(dev, fields) {
+			var ui2 = `
+				<div style="float:left;display:block;height:240px;width:280px;margin-top:5px;margin-left:10px;">
+					<div style="float:left;display:block;">
+						<label class="imagelive" style="height:78px;width:78px;" for="face">
+							<img style="width:100%;height:100%;"  src="{face}" >
+							<input type="file" id="face" name="face" accept="image/*">
+						</label>
+					</div>
+					<div class="x2Form narrow">
+						<div style="margin-top:0px;"><label>编号</label><input type="text" value="{code}" style="display:inline-block;" /></div>
+						<div><label>分类</label><div>{clss}</div></div>
+					</div>
+					<label class="imagelive" style="width:280px;height:160px;margin-top:5px" for="idimg">
+						<img style="width:100%;height:100%;" {idimg} >
+						<input type="file" id="idimg" name="idimg" accept="image/*">
+					</label>
+				</div>`;
+
+			return ui2.format(dev) + RenderForm4(dev, fields, f2e);
+		}
     </script>
 </body>
 </html>

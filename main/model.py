@@ -175,7 +175,10 @@ def todict(p):
     return d
 
 def towhere(where):
-    return " and ".join([ k+"='"+str(v)+"'" for k,v in todict(where).items()])
+    r = " and ".join([ k+"='"+str(v)+"'" for k,v in todict(where).items()])
+    r =r.replace("='(", " in (")
+    r =r.replace(")'", ")")
+    return r
 
 def toinsert(tbl,obj):
     if type(obj) == type([]):

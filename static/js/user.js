@@ -50,7 +50,8 @@ function xruserlive(user, fields) {
                                 </div>
                             </div>
                         </div>
-                    </div><label class="imagelive" style="width:280px;height:160px;margin-top:5px" for="idimg">
+                    </div>
+					<label class="imagelive" style="width:280px;height:160px;margin-top:5px" for="idimg">
                         <img style="width:100%;height:100%;" {idimg} >
                         <input type="file" id="idimg" name="idimg" accept="image/*">
                     </label>
