@@ -99,13 +99,12 @@
 					$("#item_detail").html("");
 					$("#subitem_list").html("");
 				}
-                else if (reason == "submit") { // 刷新focus面板(这里好像有问题，不需要reqdata，用dlg.res即可)
-					Reqdata("/rd?ls=" + g_focus.ls + "&id=" + g_focus.data[0].id, "", function (res) {
-						dlg.res.fields = g_focus.fields;
-						g_focus = res;
-						g.root.update(g_focus);
-						$("#item_detail").html(RenderPane2(res.data[0], res.fields, f2s));
-					});
+                else if (reason == "submit") {
+                    g_focus.data = dlg.res.data;
+					dlg.res.fields = g_focus.fields;
+					g_focus = res;
+					g.root.update(g_focus);
+                    $("#item_detail").html(RenderPane2(g_focus.data[0], g_focus.fields, f2s));
 				}
 			}
             dlg.Show();

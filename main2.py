@@ -155,7 +155,7 @@ if __name__ == "__main__":
 #    {
 #        "id": "4", "type": "dev", "name": "设备超级帐号", modules: [
 #            { name: "地图", url: "devmap.html" },
-#            { name: "驻地", url: "devsu.html" },
+#            { name: "驻地", url: "devsu.html" },√
 #            { name: "人员", url: "user_list2.html" },√
 #            { name: "厂家", url: "devvender.html" }]√
 #    },
@@ -163,7 +163,7 @@ if __name__ == "__main__":
 #        "id": "5", "type": "dev", "name": "驻地主管", modules: [
 #            { name: "地图", url: "devmap.html" },
 #            { name: "驻地", url: "devwh.html" },
-#            { name: "人员", url: "user_list2.html" }]√
+#            { name: "人员", url: "user_list2.html" }]
 #    },
 #    {
 #        "id": "6", "type": "dev", "name": "设备司机", modules: [

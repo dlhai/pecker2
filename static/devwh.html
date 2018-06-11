@@ -8,13 +8,7 @@
     <link rel="stylesheet" href="css/bootstrap.css"/>
     <script src="js/bootstrap.js"></script>
     <script type="text/javascript" src="js/doTe.js"></script>
-
 	<script src="laydate/laydate.js"></script>
-    <style>/*为了解决BootStrap中css和layDate的css样式冲突*/
-        .laydate_box, .laydate_box * {box-sizing: content-box;}
-        .laydate_box th {text-align: center;}
-    </style>
-
 	<script src="js/utils.js"></script>
     <script src="js/Cube.js"></script>
     <script src="js/db.js"></script>
@@ -99,39 +93,60 @@
     <script type="text/javascript">
         var tpl_dev_pane = doT.template(document.getElementById('tpl_dev_pane').innerHTML);
         var tpl_dev_form = doT.template(document.getElementById('tpl_dev_form').innerHTML);
-        var g_devwhs, g_devs, g_devvenders, g_user = parent.g_user, g_driver, g_editmode = false;;
-        if (g_user == undefined)
-            g_user = GetRoleUser("驻地主管");
-
-        Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res1) { g_devvenders = res1; });
-        Reqdata("/rduser?depart_table=" + GetSub(db_tbl, "name", "devwh").id + "&depart_id=" + g_user.depart.id, "", function (res2) { g_driver = res2; });
-        Reqdata("/rd?ls=dev&devwh_id="+g_user.depart.id, "", function (res3) {
-            g_devs = res3;
-            GetSub(g_devs.fields, "name", "code").ftype = "none";
-            GetSub(g_devs.fields, "name", "clss").ftype = "none";
-            GetSub(g_devs.fields, "name", "devwh_id").twidth = 0;
-            GetSub(g_devs.fields, "name", "producedate").twidth = 0;
-            GetSub(g_devs.fields, "name", "buydate").twidth = 0;
-            $("#item_list").html(RenderTable2(g_devs, undefined, FieldToShow));
-            TableBindClick3(g_devs.ls, function (id) {
-                g_curdev = GetSub(g_devs.data, "id", id);
-                var pane = tpl_dev_pane(g_curdev);
-                pane += RenderPane2(g_curdev, g_devs.fields, FieldToShow);
-                $("#item_detail").html(pane);
-
-                // 任务记录
-                Reqdata("/rd?ls=devwork&dev_id=" + id, "", function (works) {
-                    $("#tasklist").html(RenderTable2(works, undefined, function (data, field) {
-                        if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
-                        else if (field.name == "devwh_id") return g_user.depart.name;
-                        else if (field.name == "status") return GetSub(status_devwork, "id", data[field.name]).name;
-                        else if (field.name == "dev_id") return GetSub(g_devs.data, "id", data[field.name]).name;
-                        else if (field.name == "driver_id") return GetSub(g_driver.data, "id", data[field.name]).name;
-                        else return data[field.name];
-                    }));
-                });
+        var g_devwhs, g_devs, g_devvenders, g_drivers, g_focus;
+        var g_user = parent.g_user;
+        if (g_user == undefined) {
+            Reqdata("/curuserinf", "", function (res) {
+                g_user = res.data;
+                g_user.fields = res.fields;
+                init();
             });
-        });
+        }
+        else {
+            init();
+        }
+
+        function init() {
+            Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res1) { g_devvenders = res1; });
+            Reqdata("/rduser?depart_table=" + GetSub(db_tbl, "name", "devwh").id + "&depart_id=" + g_user.depart.id, "", function (res2) { g_driver = res2; });
+
+            Reqdata("/rd?ls=dev&devwh_id=" + g_user.depart.id, "", function (res3) {
+                g_devs = res3;
+                GetSub(g_devs.fields, "name", "code").ftype = "none";
+                GetSub(g_devs.fields, "name", "clss").ftype = "none";
+                GetSub(g_devs.fields, "name", "devwh_id").twidth = 0;
+                GetSub(g_devs.fields, "name", "producedate").twidth = 0;
+                GetSub(g_devs.fields, "name", "buydate").twidth = 0;
+                $("#item_list").html(RenderTable2(g_devs, undefined, FieldToShow));
+            });
+
+            $("html").on("click", function (event) {
+                var td = $(event.target);
+                if (td[0].localName == "td" && td.parents(".xTable").length > 0) {
+                    g_focus = GetSub(g_devs.data, "id", GetCurRowDataID(g_devs.ls));
+                    var pane = tpl_dev_pane(g_focus);
+                    pane += RenderPane2(g_focus, g_devs.fields, FieldToShow);
+                    $("#item_detail").html(pane);
+
+                    // 任务记录
+                    Reqdata("/rd?ls=devwork&dev_id=" + g_focus.id, "", function (works) {
+                        GetSub(works.fields, "name", "remark").twidth = 0;
+                        GetSub(works.fields, "name", "devwh_id").twidth = 0;
+                        GetSub(works.fields, "name", "clss").twidth = 0;
+                        GetSub(works.fields, "name", "dev_id").twidth = 0;
+                        GetSub(works.fields, "name", "driver_id").twidth = 0;
+                        $("#tasklist").html(RenderTable2(works, undefined, function (data, field) {
+                            if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
+                            else if (field.name == "status") return GetSub(status_devwork, "id", data[field.name]).name;
+                            else if (field.name == "deal_id") return GetSub(status_devwork, "id", data[field.name]).name;
+                            else if (field.name == "status") return GetSub(status_devwork, "id", data[field.name]).name;
+                            else return data[field.name];
+                        }));
+                    });
+                }
+            });
+        }
+
         function ShowField(data, field) {
             if (field == "clss") return GetSub(db_devclss, "id", data[field]).name;
             else return data[field];

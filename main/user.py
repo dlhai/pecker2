@@ -51,6 +51,29 @@ def userbrief():
     r.result=200
     return tojson(r)
 
+#用户摘要，用来显示头像标签等
+#/user/briefs?id=
+@app.route("/user/briefs")
+@login_required
+def userbriefs():
+    params = request.args.to_dict()
+    r = obj(result="404",fun="userbrief")
+    if "id" not in params:
+        r.msg = "缺少参数 id"
+        return tojson(r)
+
+    r.user = QueryObj("select id,name,face,profile,sex,job,depart_id from user where %s"%towhere(params))
+    if len(r.user)==0:
+        r.msg = "id不存在"
+        return tojson(r)
+    r.user = r.user[0]
+    r.user.prof = getjob(r.user.job)["sname"]
+    verifyface(r.user)
+
+    r.result=200
+    return tojson(r)
+
+
 #申请转换职业
 #Reqdata("/user/reqjob?newjob="+jobid )
 @app.route("/user/reqjob")

@@ -61,7 +61,7 @@ def windermodify():
     
     r.ls = params["ls"]
     conn.execute(toupdate(params["ls"], form, obj(id=params["id"])))
-    r.data = QueryObj("select * from {ls} where id={id})".format(id=params["id"]))
+    r.data = QueryObj("select * from {ls} where id={id}".format(ls=r.ls, id=params["id"]))
 
     return toret(r,result=200)
 

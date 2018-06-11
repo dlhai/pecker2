@@ -174,6 +174,9 @@ def todict(p):
         d = p.__dict__
     return d
 
+def towhere(where):
+    return " and ".join([ k+"='"+str(v)+"'" for k,v in todict(where).items()])
+
 def toinsert(tbl,obj):
     if type(obj) == type([]):
         [delattr(u,"id") for u in obj if hasattr(u,"id")]
