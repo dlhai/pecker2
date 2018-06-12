@@ -367,14 +367,13 @@ function RenderForm4(entity, fields, cb) {
     return r;
 }
 
-//与第4版区别是增加了表单的名字
+//与第4版区别是外包idv改成了form，并增加参数表单的id
 function RenderForm5(id, entity, fields, cb) {
     var r = '<form id="{0}" class="x2Form">'.format(id);
     r +=RenderFormIn(entity, fields, cb);
     r += "</form>";
     return r;
 }
-
 
 function xCreateNode(param) {
     var pm = Object(); 
@@ -426,6 +425,8 @@ function RenderTable2(res, style, fun) {
     });
     r += "</tbody></table>";
 
+    if (res.ls == "dev")
+        console.log("tableid=" + res.ls + ",idx=(" + g_TableCurRow[res.ls] + "=>-1)")
     g_TableCurRow[res.ls] = -1;
     return r;
 }
@@ -437,8 +438,9 @@ function GetCurRowDataID( tableid ){
 	return $("#"+tableid+ ">tbody>:nth-child(" + row + ")").attr( "data_id");
 }
 
-function SetCurRow( tableid, idx ){
+function SetCurRow(tableid, idx) {
 	idx++;
+    console.log("tableid=" + tableid + ",idx=(" + g_TableCurRow[tableid] + "=>" + idx + ")")
     var currow = g_TableCurRow[tableid];
     if (currow != -1) {
         if (currow % 2 == 0)
@@ -464,32 +466,6 @@ $("html").on("click", function (event) {
 		SetCurRow( tableid, node.index() );
     }
 });
-
-// 可以去掉了
-function TableBindClick3(tableid, callback) {
-    var currow = -1;
-    $("#" + tableid + " tr").click(function () {
-        var tag = $(this).parent()[0].localName;
-        if (tag.toLowerCase() == "thead")
-            return;
-        if (currow != -1) {
-            currow++;
-            if (currow % 2 == 0)
-                $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#f5f5f5");
-            else
-                $(this).parent().children(":nth-child(" + currow + ")").children().css("background-color", "#ffffff");
-        }
-        $(this).children().css("background-color", "#00f0f5");
-
-        currow = $(this).index();
-        g_TableCurRow[tableid] = $(this).attr("data_id");
-
-        if (callback)
-            callback($(this).attr("data_id"));
-    });
-}
-//---------table end------------------
-
 
 //按钮下拉窗口，css:  .xCombox .xPopWnd
 $("html").on("click", function (event) {

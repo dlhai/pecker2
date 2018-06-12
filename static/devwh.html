@@ -178,7 +178,7 @@
         }
         function f2e(data, field) {
             if (field.name == "clss") return RenderSelect(db_devclss, data[field.name]);
-            else if (field.name == "devwh_id") return RenderSelect([g_user.depart], data[field.name]);
+            else if (field.name == "devwh_id") return g_user.depart.name;
             else if (field.name == "status") return RenderSelect(status_dev, data[field.name]);
             else if (field.name == "vender_id") return RenderSelect(g_devvenders.data, data[field.name]);
             else if (field.name == "driver_id") return RenderSelect(g_driver.data, data[field.name]);
@@ -263,8 +263,7 @@
 						<input type="file" id="idimg" name="idimg" accept="image/*">
 					</label>
 				</div>`;
-
-			return ui2.format(dev) + RenderForm4(dev, fields, f2e);
+            return ui2.format(dev) + xCreateNode({ "name": "div", "class": "x2Form", "style": "min-height:250px;", "body": RenderFormIn(dev, fields, f2e) } );
 		}
     </script>
 </body>
