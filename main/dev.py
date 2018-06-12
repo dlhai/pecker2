@@ -61,13 +61,22 @@ def devwhremove():
 def devcreate():
     params = request.args.to_dict()
     form =request.form.to_dict()
+    files = request.files.to_dict()
     r = obj(result="404",fun="dev/devcreate")
 
     if "code" not in form or form["code"]=="":
         return toret(r,msg="code不正确")
 
+    id = QueryObj("select max(id) as max from dev")[0].max+1
+    fmt = "./uploads/dev_{fd}/dev_{id}{ext}"
+    for k,v in files.items():
+        if k in ["face","img"]:
+            fname = fmt.format(id=id, fd=k, ext=os.path.splitext(v.filename)[1] )
+            v.save("./static/"+fname)
+            form[k]=fname
+
     conn.execute(toinsert("dev",form))
-    r.data = QueryObj("select * from dev where id in (select max(id) from dev)")
+    r.data = QueryObj("select * from dev where id="+str(id))
     return toret(r,result=200)
 
 #/dev/devmodify?id=
@@ -76,12 +85,20 @@ def devcreate():
 def devmodify():
     params = request.args.to_dict()
     form =request.form.to_dict()
+    files = request.files.to_dict()
     r = obj(result="404",fun="dev/devmodify")
 
     if "id" not in params:
         return toret(r,msg="缺少参数id")
     if "code" not in form or form["code"]=="":
         return toret(r,msg="code不正确")
+
+    fmt = "./uploads/dev_{fd}/dev_{id}{ext}"
+    for k,v in files.items():
+        if k in ["face","img"]:
+            fname = fmt.format(id=u.id, fd=k, ext=os.path.splitext(v.filename)[1] )
+            v.save("./static/"+fname)
+            form[k]=fname
 
     id=params["id"]
     conn.execute(toupdate("dev", form, obj(id=id)))
