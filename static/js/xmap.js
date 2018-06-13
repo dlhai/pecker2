@@ -23,6 +23,23 @@ function UpdateCurData(type, data) {
     g_curdata = { "type": type, "data": data };
 }
 
+function SaveData(curdata) {
+    if (curdata.type == undefined)
+        return;
+    if (curdata.type == "winderarea")
+        position = curdata.data.plg.getPath();
+    else
+        position = [curdata.data.mk.getPosition()];
+
+    var val = `{"ls":"{ls}","id":"{id}","val":{"position":"{position}"}}`.format({
+        "ls": curdata.type, "id": curdata.data.id,
+        "position": position.map(x => x.lng + " " + x.lat).join(",")
+    });
+    console.log(val);
+    ReqdataP("/wt?ls=" + curdata.type, val);
+}
+
+
 function IsCurData(type, data) {
     if (typeof g_curdata == "undefined" && type == "undefine")
         return true;
@@ -36,7 +53,6 @@ function IsCurData(type, data) {
         return true;
 }
 
-
 function CreateMap( id ) {
     g_map = new BMap.Map(id);
     g_map.centerAndZoom(new BMap.Point(116.404, 39.915), 6); //设置中心点坐标和地图级别
@@ -48,6 +64,20 @@ function CreateMap( id ) {
 
 function CreateMark(iconname, data, type, fields, cbclick) {
     var marker = new BMap.Marker(CreatePoint(data.position), { icon: GetIcon(iconname) });
+    var label = new BMap.Label("name" in data ? data.name : data.code, { offset: new BMap.Size(-10, 32) });
+    label.setStyle({ border: "0px", color: "blue" });
+    marker.setLabel(label);
+    g_map.addOverlay(marker);
+    data.mk = marker;
+    marker.addEventListener("dragend", function (map_type, target, pixel, point) { UpdateCurData(type, data); });
+    marker.addEventListener("click", function (e) { cbclick != undefined ? cbclick(type, data, fields, e) : ShowWindow(type, data, fields, e); });
+    label.addEventListener("click", function (e) { cbclick != undefined ? cbclick(type, data, fields, e) : ShowWindow(type, data, fields, e); });
+}
+
+// 与上版区别：
+// 使用data.face作为地图上显示的图标，有的对象没有face属性，因此CreateMark不能被代替
+function CreateMark2(data, type, fields, cbclick) {
+    var marker = new BMap.Marker(CreatePoint(data.position), { icon: GetIcon(data.face) });
     var label = new BMap.Label("name" in data ? data.name : data.code, { offset: new BMap.Size(-10, 32) });
     label.setStyle({ border: "0px", color: "blue" });
     marker.setLabel(label);
@@ -78,14 +108,27 @@ function filterpoint(ar) {
 function GetIcon(iconname) {
     icons = new Object();
     if (!(iconname in icons)) {
-        var name = "/static/img/" + iconname + ".png";
-        icons[iconname] = new BMap.Icon(name, new BMap.Size(32, 32));
-        icons[iconname].imageSize = new BMap.Size(32, 32);
+		if ( -1 == iconname.indexOf( "/" ))
+		{	//使用默认图标
+			var name = "/static/img/" + iconname + ".png";
+			icons[iconname] = new BMap.Icon(name, new BMap.Size(32, 32));
+			icons[iconname].imageSize = new BMap.Size(32, 32);
+		}
+		else
+		{	//使用自带图标
+			icons[iconname] = new BMap.Icon(iconname, new BMap.Size(32, 32));
+			icons[iconname].imageSize = new BMap.Size(32, 32);
+		}
     }
     return icons[iconname];
 }
 
+var g_usecenter = 0;
 function CreatePoint(pos) {
+	if ( pos == undefined || pos == "" ){
+		g_usecenter +=1;
+		return g_map.getCenter();
+	}
     var ar = pos.split(" ");
     return new BMap.Point(parseFloat(ar[0]), parseFloat(ar[1]));
 }

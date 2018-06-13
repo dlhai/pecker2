@@ -14,6 +14,7 @@
     <script src="js/Cube.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
+    <script src="js/dev.js"></script>
 </head>
 <body class="xFCsrow">
     <section class="xPanel2 xFIfixed" style="width: 300px;">
@@ -60,7 +61,7 @@
 				g_focus.data = dlg.res.data;
 				g_devwhs.data = g_devwhs.data.concat(dlg.res.data);
 				g.xTree.addchild( "#xTree",g_focus );
-				$("#item_detail").html(RenderPane2(g_focus.data[0], g_focus.fields, f2s));
+				$("#item_detail").html(RenderPane2(g_focus.data[0], g_focus.fields ));
 				$("#subitem_list").html("");
 			}}
 
@@ -84,7 +85,7 @@
 					g_focus.data = dlg.res.data;
 					g_devwhs.data[idx]=dlg.res.data[0];
 					g.xTree.update(g_focus);
-					$("#item_detail").html(RenderPane2(g_focus.data[0], g_focus.fields, f2s));
+					$("#item_detail").html(RenderPane2(g_focus.data[0], g_focus.fields ));
 				}
 			}
             dlg.Show();
@@ -124,22 +125,6 @@
             dlg.Show();
 		}
 
-        function f2s(data, field){
-            if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
-            else if (field.name == "devwh_id") return GetSub(g_devwhs.data, "id", data[field.name]).name;
-            else if (field.name == "status") return GetSub(status_dev, "id", data[field.name]).name;
-            else if (field.name == "vender_id") return GetSub(g_devvenders.data, "id", data[field.name]).name;
-            else if (field.name == "driver_id") return GetSub(g_drivers.data, "id", data[field.name]).name;
-            else return data[field.name];
-        }
-        function f2e(data, field) {
-            if (field.name == "clss") return RenderSelect(db_devclss, data[field.name] );
-            else if (field.name == "devwh_id") return data[field.name]==""? "":GetSub(g_devwhs.data, "id", data[field.name]).name;
-            else if (field.name == "status") return RenderSelect(status_dev, data[field.name]);
-            else if (field.name == "vender_id") return RenderSelect(g_devvenders.data, data[field.name]);
-            else if (field.name == "driver_id") return RenderSelect(g_drivers.data, data[field.name]);
-            else return data[field.name];
-        }
     </script>
 </body>
 </html>

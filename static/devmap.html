@@ -15,14 +15,21 @@
     <script src="js/xpecker.js"></script>
     <script src="js/Cube.js"></script>
     <script src="js/xmap.js"></script>
-  
+	<script src="js/dev.js"></script>
+
+    <style>
+        .narrow>div>div:first-of-type,.narrow>div>input:first-of-type {width: 136px;}
+        .narrow>div>label:first-of-type {width: 40px;}
+        .narrow>div,.narrow>div>div:first-of-type {margin-right: 0px;}
+    </style>
+
 </head>
 <body onbeforeunload="UpdateCurData()">
     <div id="allmap" style="height: 100%;width: 100%;"></div>
 </body>
 </html>
 <script type="text/javascript">
-    var g_map = CreateMap("allmap"), g_devwhs, g_devs, g_devvenders, g_editmode = false;;
+    var g_map = CreateMap("allmap"), g_devwhs, g_devs, g_driver,g_devvenders, g_editmode = false;;
     g_user = parent.g_user;
     if (g_user == undefined) {
         Reqdata("/curuserinf", "", function (res) {
@@ -36,15 +43,21 @@
     }
 
     function init() {
+		Reqdata("/rduser?job=(5,6)" + (g_user.job == "4" ? "" : "&depart_id="+g_user.depart_id), "", function (res) { 
+			g_driver = res; 
+		});
         Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res) { g_devvenders = res; });
         // 在地图上显示驻地
         var param_devwh = g_user.job == "4" ? "" : "&id=" + g_user.depart_id;
         Reqdata("/rd?ls=devwh" + param_devwh, "", function (res) {
             g_devwhs = res;
-            for (var x in res.data)
-                CreateMark("devwh", res.data[x], res.ls, res.fields);
+			g_usecenter = 0;
             if (res.data.length > 0)
                 g_map.centerAndZoom(CreatePoint(res.data[0].position), 11);
+            res.data.forEach((x,i)=>CreateMark("devwh", x, res.ls, res.fields));
+			if ( g_usecenter > 0 ){
+				alert( "部分驻地没有位置数据，显示在当前地图中央。" );
+			}
         });
 
         // 在地图上显示设备
@@ -54,23 +67,34 @@
               : g_user.job == "6" ? "&driver=" + g_user.id : "-1";
         Reqdata("/rd?ls=dev" + param_dev, "", function (res2) {
             g_devs = res2;
-            for (var x in res2.data)
-                CreateMark(GetSub(db_devclss, "id",res2.data[x].clss).name, res2.data[x], res2.ls, res2.fields);
+			g_usecenter = 0;
+            res2.data.forEach((x,i)=>CreateMark2( x, res2.ls, res2.fields, onclickItem));
+			if ( g_usecenter > 0 ){
+				alert( "部分设备没有位置数据，显示在当前地图中央。" );
+			}
         });
 
         // 编辑浏览模式控件
-        g_map.addControl(new ModeControl(function (mode) {
+        g_map.addControl( new ModeControl(10,10,function (mode) {
             if (mode) {
-                for (var i in g_devwh.data) g_devwhs.data[i].mk.enableDragging();
-                for (var i in g_devs.data) g_devs.data[i].mk.enableDragging();
+                g_devwhs.data.forEach( (x,i)=>x.mk.enableDragging());
+                g_devs.data.forEach( (x,i)=>x.mk.enableDragging());
             }
             else {
-                for (var i in g_devwh.data) g_devwhs.data[i].mk.disableDragging();
-                for (var i in g_devs.data) g_devs.data[i].mk.disableDragging();
+                g_devwhs.data.forEach( (x,i)=>x.mk.disableDragging());
+                g_devs.data.forEach( (x,i)=>x.mk.disableDragging());
             }
         }));
     }
 
+	function onclickItem(type, data, fields, e) {
+		var p = e.target;
+		var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+		tpl = '<div class="xRndAngle" style="height:390px;padding:5px 0px">{0}</div>';
+		var content = tpl.format(type=="dev" ? devpane(data,fields):RenderPane2(data, fields, FieldToShow));
+		var infoWindow = new BMap.InfoWindow(content, { width: 590, title: GetTbl(type).title + " 信息", enableMessage: true });
+		g_map.openInfoWindow(infoWindow, point); //开启信息窗口
+	}
 
     function FieldToShow(data, field) {
         if (field.name == "clss")
@@ -84,22 +108,5 @@
         else
             return data[field.name];
     }
-
-    function SaveData(curdata) {
-        if (curdata.type == undefined)
-            return;
-        if (curdata.type == "winderarea")
-            position = curdata.data.plg.getPath();
-        else
-            position = [curdata.data.mk.getPosition()];
-
-        var val = `{"ls":"{ls}","id":"{id}","val":{"position":"{position}"}}`.format({
-            "ls": curdata.type, "id": curdata.data.id,
-            "position": position.map(x => x.lng + " " + x.lat).join(",")
-        });
-        console.log(val);
-        ReqdataP("/wt?ls=" + curdata.type, val);
-    }
-
 
 </script>

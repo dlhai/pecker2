@@ -163,20 +163,4 @@
     });
     g_map.addControl(g_modectrl);
 
-    function SaveData(curdata) {
-        if (curdata.type == undefined)
-            return;
-        if (curdata.type == "winderarea")
-            position = curdata.data.plg.getPath();
-        else
-            position = [curdata.data.mk.getPosition()];
-
-        var val = `{"ls":"{ls}","id":"{id}","val":{"position":"{position}"}}`.format({
-            "ls": curdata.type, "id": curdata.data.id,
-            "position": position.map(x => x.lng + " " + x.lat).join(",")
-        });
-		console.log(val);
-        ReqdataP("/wt?ls=" + curdata.type, val);
-    }
-
 </script>

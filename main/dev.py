@@ -66,6 +66,8 @@ def devcreate():
 
     if "code" not in form or form["code"]=="":
         return toret(r,msg="code不正确")
+    if "clss" not in form or form["clss"]=="":
+        return toret(r,msg="clss不正确")
 
     id = QueryObj("select max(id) as max from dev")[0].max+1
     fmt = "./uploads/dev_{fd}/dev_{id}{ext}"
@@ -90,8 +92,10 @@ def devmodify():
 
     if "id" not in params:
         return toret(r,msg="缺少参数id")
-    if "code" not in form or form["code"]=="":
+    if "code" in form and form["code"]=="":
         return toret(r,msg="code不正确")
+    if "clss" in form and form["clss"]=="":
+        return toret(r,msg="clss不正确")
 
     fmt = "./uploads/dev_{fd}/dev_{id}{ext}"
     for k,v in files.items():
