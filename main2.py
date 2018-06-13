@@ -107,7 +107,7 @@ class CLog:
 if __name__ == "__main__":
     newdir(["./static/uploads","./static/uploads/user_face","./static/uploads/user_idimg","./static/uploads/certif_image",
             "./static/uploads/employ_image", "./static/uploads/edu_image1", "./static/uploads/edu_image2", 
-            "./static/uploads/fault_image"]);
+            "./static/uploads/fault_image","./static/uploads/dev_face","./static/uploads/dev_img"]);
     app.config['JSON_AS_ASCII'] = False
     #app.config['DEBUG'] = True
 
@@ -162,7 +162,7 @@ if __name__ == "__main__":
 #    {
 #        "id": "5", "type": "dev", "name": "驻地主管", modules: [
 #            { name: "地图", url: "devmap.html" },
-#            { name: "驻地", url: "devwh.html" },
+#            { name: "驻地", url: "devwh.html" },√
 #            { name: "人员", url: "user_list2.html" }]
 #    },
 #    {

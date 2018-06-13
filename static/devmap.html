@@ -22,40 +22,55 @@
 </body>
 </html>
 <script type="text/javascript">
-    var g_map = CreateMap("allmap"), g_devwhs, g_devs, g_devvenders, g_user = parent.g_user, g_editmode = false;;
-    if (g_user == undefined)
-        g_user = GetRoleUser("设备超级帐号");
+    var g_map = CreateMap("allmap"), g_devwhs, g_devs, g_devvenders, g_editmode = false;;
+    g_user = parent.g_user;
+    if (g_user == undefined) {
+        Reqdata("/curuserinf", "", function (res) {
+            g_user = res.data;
+            g_user.fields = res.fields;
+            init();
+        });
+    }
+    else {
+        init();
+    }
 
-    Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res) { g_devvenders = res; });
-    // 在地图上显示驻地
-    var param_devwh = g_user.job == "4" ? "" : "&id=" + g_user.depart_id;
-    Reqdata("/rd?ls=devwh" + param_devwh, "", function (res1) {
-        g_devwhs = res1;
-        for (var x in res1.data)
-            CreateMark("devwh", res1.data[x], res1.ls, res1.fields);
-        if (res1.data.length > 0 )
-            g_map.centerAndZoom(CreatePoint(res1.data[0].position), 11);
-    });
+    function init() {
+        Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res) { g_devvenders = res; });
+        // 在地图上显示驻地
+        var param_devwh = g_user.job == "4" ? "" : "&id=" + g_user.depart_id;
+        Reqdata("/rd?ls=devwh" + param_devwh, "", function (res) {
+            g_devwhs = res;
+            for (var x in res.data)
+                CreateMark("devwh", res.data[x], res.ls, res.fields);
+            if (res.data.length > 0)
+                g_map.centerAndZoom(CreatePoint(res.data[0].position), 11);
+        });
 
-    // 在地图上显示设备
-    var param_dev = g_user.job == "4" ? "" : g_user.job == "5" ? "&devwh_id=" + g_user.depart_id : g_user.job == "6" ? "&driver=" + g_user.id : "-1";
-    Reqdata("/rd?ls=dev" + param_dev, "", function (res2) {
-        g_devs = res2;
-        for (var x in res2.data)
-            CreateMark(GetSub(db_devclss, "id",res2.data[x].clss).name, res2.data[x], res2.ls, res2.fields);
-    });
+        // 在地图上显示设备
+        var param_dev =
+                g_user.job == "4" ? ""
+              : g_user.job == "5" ? "&devwh_id=" + g_user.depart_id
+              : g_user.job == "6" ? "&driver=" + g_user.id : "-1";
+        Reqdata("/rd?ls=dev" + param_dev, "", function (res2) {
+            g_devs = res2;
+            for (var x in res2.data)
+                CreateMark(GetSub(db_devclss, "id",res2.data[x].clss).name, res2.data[x], res2.ls, res2.fields);
+        });
 
-    // 编辑浏览模式控件
-    g_map.addControl(new ModeControl(function (mode) {
-        if (mode) {
-            for (var i in g_devwh.data) g_devwhs.data[i].mk.enableDragging();
-            for (var i in g_devs.data) g_devs.data[i].mk.enableDragging();
-        }
-        else {
-            for (var i in g_devwh.data) g_devwhs.data[i].mk.disableDragging();
-            for (var i in g_devs.data) g_devs.data[i].mk.disableDragging();
-        }
-    }));
+        // 编辑浏览模式控件
+        g_map.addControl(new ModeControl(function (mode) {
+            if (mode) {
+                for (var i in g_devwh.data) g_devwhs.data[i].mk.enableDragging();
+                for (var i in g_devs.data) g_devs.data[i].mk.enableDragging();
+            }
+            else {
+                for (var i in g_devwh.data) g_devwhs.data[i].mk.disableDragging();
+                for (var i in g_devs.data) g_devs.data[i].mk.disableDragging();
+            }
+        }));
+    }
+
 
     function FieldToShow(data, field) {
         if (field.name == "clss")
@@ -69,12 +84,22 @@
         else
             return data[field.name];
     }
-    //function FieldToEdit(data, field) {
-    //    if (field.name == "clss") return RenderSelect(db_devclss, data[field.name]);
-    //    else if (field.name == "devwh_id") return RenderSelect(g_devwhs.data, data[field.name]);
-    //    else if (field.name == "status") return RenderSelect(status_dev, data[field.name]);
-    //    else if (field.name == "vender") return RenderSelect(g_devvenders.data, data[field.name]);
-    //    else return data[field.name];
-    //}
+
+    function SaveData(curdata) {
+        if (curdata.type == undefined)
+            return;
+        if (curdata.type == "winderarea")
+            position = curdata.data.plg.getPath();
+        else
+            position = [curdata.data.mk.getPosition()];
+
+        var val = `{"ls":"{ls}","id":"{id}","val":{"position":"{position}"}}`.format({
+            "ls": curdata.type, "id": curdata.data.id,
+            "position": position.map(x => x.lng + " " + x.lat).join(",")
+        });
+        console.log(val);
+        ReqdataP("/wt?ls=" + curdata.type, val);
+    }
+
 
 </script>
