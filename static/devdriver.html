@@ -15,6 +15,14 @@
     <script src="js/db.js"></script>
     <script src="js/xpecker.js"></script>
     <script src="js/xmap.js"></script>
+    <script src="js/dev.js"></script>
+
+    <style>
+        .narrow>div>div:first-of-type,.narrow>div>input:first-of-type {width: 136px;}
+        .narrow>div>label:first-of-type {width: 40px;}
+        .narrow>div,.narrow>div>div:first-of-type {margin-right: 0px;}
+    </style>
+
     <style>
         .pane_image > div {
             margin: 5px 0px 5px 5px;
@@ -92,20 +100,30 @@
     </script>
 
     <script type="text/javascript"> //共享数据
-        var g_user = parent.g_user, g_devwhs, g_devs, g_dev, g_devvenders;
-        if (g_user == undefined)
-            g_user = GetRoleUser("设备司机");
+        var g_map = CreateMap("allmap"), g_devs, g_dev, g_devvenders;
+        g_user = parent.g_user;
+        if (g_user == undefined) {
+            Reqdata("/curuserinf", "", function (res) {
+                g_user = res.data;
+                g_user.fields = res.fields;
+                init();
+            });
+        }
+        else {
+            init();
+        }
 
-        ReqdataS("/rd?ls=devwh&id=" + g_user.depart_id, "", function (res1) { g_devwhs = res1; });// 驻地
-        var param_dev = "&driver_id=" + g_user.id;
-        ReqdataS("/rd?ls=dev" + param_dev, "", function (res2) {
-            g_devs = res2;
-            GetSub(g_devs.fields, "name", "code").forder = -1;
-            GetSub(g_devs.fields, "name", "clss").forder = -1;
-        });// 设备
-        if (g_devs.data.length > 0) {
-            g_dev = g_devs.data[0];
-            ReqdataS("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id + "&id="+g_dev.vender_id, "", function (res) { g_devvenders = res; });
+        function init() {
+            var param_dev = "&driver_id=" + g_user.id;
+            ReqdataS("/rd?ls=dev" + param_dev, "", function (res2) {
+                g_devs = res2;
+                GetSub(g_devs.fields, "name", "code").forder = -1;
+                GetSub(g_devs.fields, "name", "clss").forder = -1;
+            });// 设备
+            if (g_devs.data.length > 0) {
+                g_dev = g_devs.data[0];
+                ReqdataS("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id + "&id=" + g_dev.vender_id, "", function (res) { g_devvenders = res; });
+            }
         }
 
     </script>

@@ -128,13 +128,25 @@ if __name__ == "__main__":
 #风场面板中还没有相关人员显示。
 
 #功能表：
-#    主框架√ 缺单位信息，缺主页，缺搜索
+#    主框架√
+#       首页
+#       全局搜索
+#       消息√
+#       个人信息√
+#       单位信息
+#       切换用户√
+#    { "id": "18", "name": "博客超级帐号", modules: []},
+#    { "id": "19", "name": "公众", modules: [
+#       { name: "文章列表", url: "coord.html" },  
+#       { name: "用户文章", url: "repairlog.html" }] },文章中支持图片功能 
+#       { name: "消息", url: "repairlog.html" }] },
+#    ]},
 #var db_roles = [
 #    {
 #        "id": "1", "type": "winder", "name": "叶片超级帐号", modules: [
 #            { name: "地图", url: "windersumap.html" },√
 #            { name: "风场", url: "windersu.html" },√
-#            { name: "人员", url: "user_list2.html" },√
+#            { name: "人员", url: "user_list2.html" },√ 改变职业、改变所在单位、从公众添加、新建用户、不同角色显示字段不同、
 #            { name: "厂家", url: "vender.html" }]√
 #    },
 #    {
@@ -163,7 +175,7 @@ if __name__ == "__main__":
 #        "id": "5", "type": "dev", "name": "驻地主管", modules: [
 #            { name: "地图", url: "devmap.html" },√
 #            { name: "驻地", url: "devwh.html" },√
-#            { name: "人员", url: "user_list2.html" }]
+#            { name: "人员", url: "user_list2.html" }]√
 #    },
 #    {
 #        "id": "6", "type": "dev", "name": "设备司机", modules: [
@@ -172,7 +184,7 @@ if __name__ == "__main__":
 #    {
 #        "id": "7", "type": "wh", "name": "仓库超级帐号", modules: [
 #            { name: "仓库", url: "matsu.html" },
-#            { name: "人员", url: "user_list2.html" },
+#            { name: "人员", url: "user_list2.html" },√
 #            { name: "材料", url: "material.html" }]
 #    },
 #    {
@@ -220,11 +232,5 @@ if __name__ == "__main__":
 #    { "id": "17", "name": "技工", modules: [
 #       { name: "案件", url: "coord.html" }, 
 #       { name: "记录", url: "repairlog.html" }] },
-#    { "id": "18", "name": "博客超级帐号", modules: []},
-#    { "id": "19", "name": "公众", modules: [
-#       { name: "文章列表", url: "coord.html" },  
-#       { name: "用户文章", url: "repairlog.html" }] },文章中支持图片功能 
-#       { name: "消息", url: "repairlog.html" }] },
-#    ]},
 #];
 
