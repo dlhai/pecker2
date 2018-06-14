@@ -6,27 +6,33 @@ from main2 import app,login_manager,check
 from main.model import *
 from main.tools import *
 
-#删除用户
-#/user/remove?id=
-@app.route("/user/remove")
-@login_required
-def userremove():
-    params = request.args.to_dict()
-    r = obj(result="404",fun="user/remove")
-    if "id" not in params:
-        return toret(r,msg="缺少参数id")
+#frame用来读取当前用户信息，需要所在单位名称、下级单位列表
+@app.route("/curuserinf")
+#@login_required
+def curuserinf():
+    ret=obj()
+    ret.fun="curuserinf"
+    ret.result = "200"
+    ret.is_anonymous = current_user.is_anonymous
 
-    user = QueryObj("select * from user where id=%s"%params["id"])
-    if len(user)==0:
-        return toret(r,msg="id不存在")
-    if user.depart_id != 0:
-        return toret(r,msg="所属单位不为空")
-    
-    #仅清除用户关注和粉丝（避免在他人用户好友列表中出现），其他如发表文章和参与事物不做处理
-    conn.execute(todelete("follow",obj(idols=user.id)))
-    conn.execute(todelete("follow",obj(fans=user.id)))
-    conn.execute(toupdate("user",obj(status=-1),obj(id=user.id)))
-    return toret(r,result=200)
+    if not ret.is_anonymous:
+        qr = QueryObj( "select * from user where id="+str(current_user.id))
+        if len(qr) <= 0:
+            return '{"roleuser":"'+param['account']+'","result":404}\n'
+        user = qr[0]
+        user.prof=getjob(user.job)["sname"]
+        del user.pwd
+        ret.data = user
+
+        #找到用户的所在单位，若所在单位是风场，则需要读取风区列表
+        if atoi(user.depart_table) != 0: 
+            tbl = gettbl(user.depart_table)
+            user.depart = QueryObj( "select * from "+tbl["name"]+" where id="+str(user.depart_id))[0]
+            user.departfields=QueryObj(select(base.sl).where(base.c.table==tbl["name"]))
+            if tbl["name"] == "winder":
+                user.subs = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
+        ret.fields=QueryObj(select(base.sl).where(base.c.table=="user"))
+    return Response(tojson(ret), mimetype='application/json')
 
 
 #用户摘要，用来显示头像标签等
@@ -64,6 +70,29 @@ def userbriefs():
         verifyface(user)
     r.result=200
     return tojson(r)
+
+#删除用户
+#/user/remove?id=
+@app.route("/user/remove")
+@login_required
+def userremove():
+    params = request.args.to_dict()
+    r = obj(result="404",fun="user/remove")
+    if "id" not in params:
+        return toret(r,msg="缺少参数id")
+
+    user = QueryObj("select * from user where id=%s"%params["id"])
+    if len(user)==0:
+        return toret(r,msg="id不存在")
+    if user.depart_id != 0:
+        return toret(r,msg="所属单位不为空")
+    
+    #仅清除用户关注和粉丝（避免在他人用户好友列表中出现），其他如发表文章和参与事物不做处理
+    conn.execute(todelete("follow",obj(idols=user.id)))
+    conn.execute(todelete("follow",obj(fans=user.id)))
+    conn.execute(toupdate("user",obj(status=-1),obj(id=user.id)))
+    return toret(r,result=200)
+
 
 
 #申请转换职业

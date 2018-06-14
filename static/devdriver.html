@@ -4,55 +4,25 @@
     <meta charset="utf-8">
     <title>啄木鸟风电维保系统</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=nSxiPohfziUaCuONe4ViUP2N"></script>
     <script src="js/jquery.js"></script>
     <link rel="stylesheet" href="css/bootstrap.css"/>
     <script src="js/bootstrap.js"></script>
     <script type="text/javascript" src="js/doTe.js"></script>
+	<script src="laydate/laydate.js"></script>
     <script src="js/utils.js"></script>
-    <link rel="stylesheet" href="css/xpecker.css" />
+	<link rel="stylesheet" href="css/cube.css"/>
     <script src="js/Cube.js"></script>
     <script src="js/db.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
     <script src="js/xpecker.js"></script>
-    <script src="js/xmap.js"></script>
     <script src="js/dev.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=nSxiPohfziUaCuONe4ViUP2N"></script>
+    <script src="js/xmap.js"></script>
 
     <style>
         .narrow>div>div:first-of-type,.narrow>div>input:first-of-type {width: 136px;}
         .narrow>div>label:first-of-type {width: 40px;}
         .narrow>div,.narrow>div>div:first-of-type {margin-right: 0px;}
-    </style>
-
-    <style>
-        .pane_image > div {
-            margin: 5px 0px 5px 5px;
-            display: inline-flex;
-            flex-direction: row;
-            align-items: flex-start;
-            border: 0px;
-        }
-
-            .pane_image > div > label {
-                width: 40px;
-                text-align: right;
-                margin: 5px;
-            }
-
-            .pane_image > div > div:first-of-type {
-                border-radius: 4px;
-                border: 1px solid #dddddd;
-                display: inline-block;
-                padding: 5px 10px;
-                margin: 0px 5px;
-                width: 137px;
-            }
-
-        /*图片框无图时的背景十字架图片*/
-        .ImgBlank {
-            position: relative;
-            background: url(img/add.png);
-            background-size: cover;
-        }
     </style>
 
 </head>
@@ -62,8 +32,8 @@
 
     <div id="curitem" class="xFCscol" style="width:100px;">
         <section class="xPanel2 xFIfixed">
-            <header>设备信息<div style="float: right;"><a href="javascript:onEditDev()">编辑</a></div></header>
-            <div id="item_detail" class="x2Form" style="padding:5px;"></div>
+            <header>设备信息<div style="float: right;"><!--a href="javascript:onEditDev()">编辑</a--></div></header>
+            <div id="item_detail" style="padding:5px;"></div>
         </section>
         <section class="xPanel2">
             <header class="xFIfixed">任务列表</header>
@@ -100,12 +70,15 @@
     </script>
 
     <script type="text/javascript"> //共享数据
-        var g_map = CreateMap("allmap"), g_devs, g_dev, g_devvenders;
+        var g_map = CreateMap("item_map"), g_devwhs = new Object(), g_devs, g_devvenders, g_driver= new Object();
         g_user = parent.g_user;
         if (g_user == undefined) {
             Reqdata("/curuserinf", "", function (res) {
                 g_user = res.data;
+				g_driver.data = [g_user];
                 g_user.fields = res.fields;
+				g_devwhs.data = [g_user.depart];
+				g_devwhs.fields = g_user.departfields;
                 init();
             });
         }
@@ -114,110 +87,96 @@
         }
 
         function init() {
-            var param_dev = "&driver_id=" + g_user.id;
-            ReqdataS("/rd?ls=dev" + param_dev, "", function (res2) {
-                g_devs = res2;
-                GetSub(g_devs.fields, "name", "code").forder = -1;
-                GetSub(g_devs.fields, "name", "clss").forder = -1;
-            });// 设备
-            if (g_devs.data.length > 0) {
-                g_dev = g_devs.data[0];
-                ReqdataS("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id + "&id=" + g_dev.vender_id, "", function (res) { g_devvenders = res; });
-            }
+			// 编辑浏览模式控件
+			g_map.addControl(new ModeControl(function (mode) {
+				if (mode) 
+					g_devs.data.forEach((x,i)=>x.mk.enableDragging());
+				else
+					g_devs.data.forEach((x,i)=>x.mk.disableDragging());
+			}));
+			Reqdata("/user/briefs?job=(11,12)", "", function (res) { g_guiders = res; });// 调度
+            Reqdata("/user/briefs?job=(5,6)&depart_id=" + g_user.depart.id, "", function (res) { g_driver = res; }); // 本驻地所有人员
+            Reqdata("/rd?ls=dev" + "&driver_id=" + g_user.id, "", function (res) {
+                g_devs = res;
+				if (g_devs.data.length > 0){
+					Reqdata("/rd?ls=vender&type=21&id=" + g_devs.data[0].vender_id, "", function (res) {
+						g_devvenders = res; 
+						GetSub(g_devs.fields, "name", "code").ftype = "none";
+						GetSub(g_devs.fields, "name", "type").ftype = "none";
+						$("#item_detail").html(devpane(g_devs.data[0],g_devs.fields));
+					});
+				}
+
+                // 任务记录
+                Reqdata("/rd?ls=devwork&dev_id=" + g_devs.data[0].id, "", function (works) {
+                    GetSub(works.fields, "name", "remark").twidth = 0;
+                    GetSub(works.fields, "name", "devwh_id").twidth = 0;
+                    GetSub(works.fields, "name", "clss").twidth = 0;
+                    GetSub(works.fields, "name", "dev_id").twidth = 0;
+                    GetSub(works.fields, "name", "driver_id").twidth = 0;
+                    $("#tasklist").html(RenderTable2(works, undefined, workf2s));
+                });
+
+				g_map.centerAndZoom(CreatePoint(g_user.depart.position), 11);
+				CreateMark("devwh", g_user.depart, "devwh", g_user.departfields);
+				CreateMark2(g_devs.data[0], g_devs.ls, g_devs.fields,onclickItem);
+
+            });
         }
+
+		function workf2s(data, field) {
+			var fn = field.name;
+            if (fn == "clss") return data[fn] == "" ? "" :GetSub(db_devclss, "id", data[fn]).name;
+            else if (fn == "status") return data[fn] == "" ? "" :GetSub(status_devwork, "id", data[fn]).name;
+            else if (fn == "deal_id") 
+				return data[fn] == "" ? "" :GetSub(g_driver.users, "id", data[fn]).name;
+            else if (fn == "guide_id") 
+				return data[fn] == "" ? "" :GetSub(g_guiders.users, "id", data[fn]).name;
+            else return data[fn];
+        }
+
+        function onEditDev(){
+            var title = "编辑 设备";
+            var idx = 0;
+			var cnt = devform( g_devs.data[idx], g_devs.fields);
+
+			var dlg = new cbFormDlg(title, "width:910px", cnt);
+            dlg.urlsubmit = "/dev/devmodify?id=" + g_devs.data[idx].id;
+			dlg.check = devcheck;
+			dlg.closing = function (reason){
+				if (reason == "submit"){
+					g_devs.data[idx] = dlg.res.data[0];
+					$("#item_detail").html(devpane(g_devs.data[0],g_devs.fields));
+				}
+			}
+            dlg.Show();
+		}
+
+		function onclickItem(type, data, fields, e) {
+			var p = e.target;
+			var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+			tpl = '<div class="xRndAngle" style="height:390px;padding:5px 0px">{0}</div>';
+			var content = tpl.format(type=="dev" ? devpane(data,fields):RenderPane2(data, fields, FieldToShow));
+			var infoWindow = new BMap.InfoWindow(content, { width: 590, title: GetTbl(type).title + " 信息", enableMessage: true });
+			g_map.openInfoWindow(infoWindow, point); //开启信息窗口
+		}
+
+		function FieldToShow(data, field) {
+			if (field.name == "clss")
+				return GetSub(db_devclss, "id", data[field.name]).name;
+			else if (field.name == "devwh_id")
+				return GetSub(g_devwhs.data, "id", data[field.name]).name;
+			else if (field.name == "status")
+				return GetSub(status_dev, "id", data[field.name]).name;
+			else if (field.name == "vender")
+				return GetSub(g_devvenders.data, "id", data[field.name]).name;
+			else
+				return data[field.name];
+		}
+
 
     </script>
 
-    <script type="text/javascript"> // 地图部分
-        var g_map = CreateMap("item_map");
-
-        // 在地图上显示驻地
-        for (var x in g_devwhs.data)
-            CreateMark("devwh", g_devwhs.data[x], g_devwhs.ls, g_devwhs.fields);
-        if (g_devwhs.data.length > 0)
-            g_map.centerAndZoom(CreatePoint(g_devwhs.data[0].position), 11);
-
-        // 在地图上显示设备
-        for (var x in g_devs.data)
-            CreateMark(GetSub(db_devclss, "id", g_devs.data[x].clss).name, g_devs.data[x], g_devs.ls, g_devs.fields);
-
-        // 编辑浏览模式控件
-        g_map.addControl(new ModeControl(function (mode) {
-            if (mode) {
-                for (var i in g_devs.data) g_devs.data[i].mk.enableDragging();
-            }
-            else {
-                for (var i in g_devs.data) g_devs.data[i].mk.disableDragging();
-            }
-        }));
-
-        function FieldToShow(data, field) {
-            if (field.name == "clss")
-                return GetSub(db_devclss, "id", data[field.name]).name;
-            else if (field.name == "devwh_id")
-                return GetSub(g_devwhs.data, "id", data[field.name]).name;
-            else if (field.name == "status")
-                return GetSub(status_dev, "id", data[field.name]).name;
-            else if (field.name == "vender")
-                return GetSub(g_devvenders.data, "id", data[field.name]).name;
-            else
-                return data[field.name];
-        }
-
-    </script>
-
-    <script type="text/javascript"> // 右面表单和表格
-        var tpl_dev_pane = doT.template(document.getElementById('tpl_dev_pane').innerHTML);
-        var tpl_dev_form = doT.template(document.getElementById('tpl_dev_form').innerHTML);
-
-        var pane = tpl_dev_pane(g_dev);
-        pane += RenderPane2(g_dev, g_devs.fields, FieldToShow);
-        $("#item_detail").html(pane);
-
-        // 任务记录
-        Reqdata("/rd?ls=devwork&dev_id=" + g_dev.id, "", function (works) {
-            $("#tasklist").html(RenderTable2(works, undefined, function (data, field) {
-                if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
-                else if (field.name == "devwh_id") return g_user.depart.name;
-                else if (field.name == "status") return GetSub(status_devwork, "id", data[field.name]).name;
-                else if (field.name == "dev_id") return GetSub(g_devs.data, "id", data[field.name]).code;
-                else if (field.name == "vender_id") return GetSub(g_devvenders.data, "id", data[field.name]).name;
-                else if (field.name == "driver_id") return g_user.name;
-                else return data[field.name];
-            }));
-        });
-
-        function FieldToShow(data, field) {
-            if (field.name == "clss") return GetSub(db_devclss, "id", data[field.name]).name;
-            else if (field.name == "devwh_id") return g_user.depart.name;
-            else if (field.name == "status") return GetSub(status_dev, "id", data[field.name]).name;
-            else if (field.name == "vender_id") return GetSub(g_devvenders.data, "id", data[field.name]).name;
-            else if (field.name == "driver_id") return g_user.name;
-            else return data[field.name];
-        }
-        function FieldToEdit(data, field) {
-            if (field.name == "clss") return RenderSelect(db_devclss, data[field.name]);
-            else if (field.name == "devwh_id") return RenderSelect([g_user.depart], data[field.name]);
-            else if (field.name == "status") return RenderSelect(status_dev, data[field.name]);
-            else if (field.name == "vender") return RenderSelect(g_devvenders.data, data[field.name]);
-            else return data[field.name];
-        }
-
-        function onEditDev() {
-            var dev = g_dev;
-            var form = '<div class="x2Form">';
-            form += tpl_dev_form(dev);
-            form += RenderFormIn(dev, g_devs.fields, FieldToEdit);
-            form += "</div>";
-            (new cbDlg("编辑 设备", "width:900px", form)).Show();
-        }
-
-        function imgPreview(fileDom, idimg) {
-            var file = fileDom.files[0];
-            var reader = new FileReader();
-            reader.onload = function (e) { $("#" + idimg).attr("src", e.target.result); };
-            reader.readAsDataURL(file);
-        }
 
     </script>
 

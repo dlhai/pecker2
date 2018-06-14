@@ -1,0 +1,157 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/doTe.js"></script>
+    <script src="laydate/laydate.js"></script>
+    <script src="js/utils.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/Cube.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/xpecker.js"></script>
+</head>
+<body class="xFCsrow">
+    <section class="xPanel2 xFIfixed" style="width: 300px;">
+        <header>仓库列表<div style="float: right;"><a href="javascript:onNewProv()">新建</a></div></header>
+        <div id="xTree" class="xTree xScroll" style="padding: 5px;height:100px;flex-grow: 1;"></div>
+    </section>
+    <div id="curitem" class="xFCscol">
+        <section class="xPanel2 xFIfixed">
+            <header>节点信息<div style="float: right;"><a href="javascript:EditShow()">编辑</a></div></header>
+            <div id="item_detail" class="x2Form" style="padding:5px;"></div>
+        </section>
+        <section class="xPanel2">
+            <header>下级列表<div style="float: right;"> <a href="javascript:ImportData()">导入</a> <a href="javascript:AddChild()">新建</a> <a href="javascript:EditChild()">编辑</a></div></header>
+            <div class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"><div id="subitem_list"></div></div>
+        </section>
+    </div>
+
+    <script id="tpl_mat_import" type="text/template">
+        <div style="margin: 10px 15px;">
+            <div>为仓库批量导入库存材料</div>
+            <div style="margin:5px 0px;">表格请按照模板填写，点此下载模板</div>
+            <input type="file" id="upload_efan" name="upload_efan" /><input type="button" value="上传" onclick="uploadFile()" />
+            <div style="border:1px solid #dddddd;width:100%;height:15px;"><div id="progress" style="background-color:#0094ff;width:50%;height:100%;"></div></div>
+        </div>
+    </script>
+
+    <script type="text/javascript">
+        var g_matprovs, g_matprov, g_matwhs, g_matwh, g_curtri = new Object(), g_curtbi = new Object();
+        Reqdata("/rd?ls=matprov", "", function (res1) { g_matprovs = res1; });
+        Reqdata("/rd?ls=matwh", "", function (matwhs) { g_matwhs = matwhs; });
+        g.xTree = new x5Tree("#xTree", "matprov", "", "matwh", function (type, id) { // 点击树节点
+            g_curtri.type = type;
+            g_curtri.id = id;
+
+            if (type == "matprov") { // 点击仓库省区
+                g_curtbi.type = "matwh";
+                g_matprov = GetSub(g_matprovs.data, "id", id);
+                $("#item_detail").html(RenderPane2(g_matprov, g_matprovs.fields));
+                Reqdata("/rd?ls=matwh&matprov_id=" + id, "", function (res3) {
+                    $("#subitem_list").html(RenderTable2(res3, "", FieldToShow));
+                    TableBindClick3(res3.ls, function (rowid) { g_curtbi.type = res3.ls; g_curtbi.id = rowid; });
+                });
+            }
+            else if (type == "matwh") {
+                g_curtbi.type = "store";
+                g_matwh = GetSub(g_matwhs.data, "id", id);
+                $("#item_detail").html(RenderPane2(g_matwh, g_matwhs.fields, FieldToShow));
+                Reqdata("/rdstore?matwh_id=" + g_matwh.id, "", function (stores) {
+                    if (stores.fields.filter(x => { if (x.name == "innum") return x;}).length == 0 )
+                        stores.fields.push({ title: "库存数量", name: "innum", twidth: "80" });
+                    $("#subitem_list").html(RenderTable2(stores, "", (data, field) => {
+                        if (field.name == "innum")
+                            return int(data.innum) - int(data.outnum);
+                        return data[field.name];
+                    }));
+                    TableBindClick3(g_matwhs.ls, function (rowid) {
+
+                    });
+                });
+            }
+        });
+
+        function ImportData() {
+            var tpl_mat_import = doT.template(document.getElementById('tpl_mat_import').innerHTML);
+            (new cbDlg("导入材料", "width:610px", tpl_mat_import())).Show();
+        }
+
+        function onNewProv() {
+            var prov = Create(g_matprovs.fields);
+            var cnt = RenderForm4(prov, g_matprovs.fields);
+            (new cbDlg("新建 省区", "width:610px", cnt)).Show();
+        }
+
+        function EditShow() {
+            if (g_curtri.type == "matprov") {
+                var cnt = RenderForm4(g_matprov, g_matprovs.fields);
+                (new cbDlg("编辑 省区", "width:610px", cnt)).Show();
+            }
+            else {
+                var cnt = RenderForm4(g_matwh, g_matwhs.fields, FieldToEdit);
+                (new cbDlg("编辑 仓库", "width:610px", cnt)).Show();
+            }
+        }
+        function AddChild() {
+            if (g_curtbi.type == "matwh") {
+                var matwh = Create(g_matwhs.fields);
+                matwh.matprov_id = g_matprov.id;
+                var cnt = RenderForm4(matwh, g_matwhs.fields, FieldToEdit);
+                (new cbDlg("新建 仓库", "width:610px", cnt)).Show();
+            }
+            else if (g_curtbi.type == "mat") {
+            }
+        }
+        function EditChild() {
+            if (g_curtbi.type == "matwh") {
+                var matwh= GetSub(g_matwhs.data, "id", g_curtbi.id);
+                var cnt = RenderForm4(matwh, g_matwhs.fields, FieldToEdit);
+                (new cbDlg("编辑 仓库", "width:610px", cnt)).Show();
+            }
+            else if (g_curtbi.type == "mat") {
+            }
+        }
+
+        function FieldToShow(data, field) {
+            if (field.name == "scale") return GetSub(db_matwhscale, "id", data[field.name]).name;
+            else if (field.name == "matprov_id") return GetSub(g_matprovs.data, "id", data[field.name]).name;
+            else return data[field.name];
+        }
+        function FieldToEdit(data, field) {
+            if (field.name == "scale") return RenderSelect(db_matwhscale, data[field.name]);
+            else if (field.name == "matprov_id") return GetSub(g_matprovs.data, "id", data[field.name]).name;
+            else return data[field.name];
+        }
+
+        function uploadFile() {
+            var file = $("#upload_efan").get(0).files[0];
+            var formData = new FormData();
+            formData.append("file", file);
+            var req = new XMLHttpRequest();
+            req.upload.onprogress = onprogress;
+            req.onreadystatechange = function () {
+                if (req.readyState == 4 && req.status == 200) {
+                    alert(req.responseText);
+                }
+            };
+            req.open("POST", "/upload", true);
+            req.send(formData);
+        }
+        function onprogress(evt) {
+            var loaded = evt.loaded;     //已经上传大小情况
+            var tot = evt.total;      //附件总大小
+            var per = Math.floor(100 * loaded / tot);  //已经上传的百分比
+            $("#progress").html(per + "%");
+            $("#progress").css("width", per + "%");
+        }
+
+        // 表单验证的几种方法： http://www.jb51.net/article/92741.htm
+    </script>
+</body>
+</html>
+

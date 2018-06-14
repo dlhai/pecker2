@@ -8,7 +8,7 @@ function f2s(data, field) {
     else if (fn == "status") return data[fn] == "" ? "" :GetSub(status_dev, "id", data[fn]).name;
     else if (fn == "vender_id") return data[fn] == "" ? "" :GetSub(g_devvenders.data, "id", data[fn]).name;
     else if (fn == "driver_id") 
-		return data[fn] == "" ? "" :GetSub(g_driver.data, "id", data[fn]).name;
+		return data[fn] == "" ? "" :GetSub(g_driver.users, "id", data[fn]).name;
     else return data[fn];
 }
 function f2e(data, field) {

@@ -179,7 +179,7 @@ if __name__ == "__main__":
 #    },
 #    {
 #        "id": "6", "type": "dev", "name": "设备司机", modules: [
-#            { name: "设备", url: "devdriver.html" }]
+#            { name: "设备", url: "devdriver.html" }]√
 #    },
 #    {
 #        "id": "7", "type": "wh", "name": "仓库超级帐号", modules: [

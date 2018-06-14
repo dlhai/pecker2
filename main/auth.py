@@ -62,33 +62,6 @@ def login():
             r.nexturl='/static/portal.html'
     return tojson(r)
 
-#frame用来读取当前用户信息，需要所在单位名称、下级单位列表
-@app.route("/curuserinf")
-#@login_required
-def curuserinf():
-    ret=obj()
-    ret.fun="curuserinf"
-    ret.result = "200"
-    ret.is_anonymous = current_user.is_anonymous
-
-    if not ret.is_anonymous:
-        qr = QueryObj( "select * from user where id="+str(current_user.id))
-        if len(qr) <= 0:
-            return '{"roleuser":"'+param['account']+'","result":404}\n'
-        user = qr[0]
-        user.prof=getjob(user.job)["sname"]
-        del user.pwd
-        ret.data = user
-
-        #找到用户的所在单位，若所在单位是风场，则需要读取风区列表
-        if atoi(user.depart_table) != 0: 
-            tbl = gettbl(user.depart_table)
-            user.depart = QueryObj( "select id, name from "+tbl["name"]+" where id="+str(user.depart_id))[0]
-            if tbl["name"] == "winder":
-                user.subs = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
-        ret.fields=QueryObj(select(base.sl).where(base.c.table=="user"))
-    return Response(tojson(ret), mimetype='application/json')
- 
 @app.route('/chgpwd', methods=['POST'])
 @login_required
 def chgpwd():

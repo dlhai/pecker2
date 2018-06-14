@@ -57,7 +57,7 @@
 
         function init() {
             Reqdata("/rd?ls=vender&type=21", "", function (res) { g_devvenders = res; });
-			Reqdata("/user/briefs?job=(11,12)", "", function (res) { g_guiders = res; });
+			Reqdata("/user/briefs?job=(11,12)", "", function (res) { g_guiders = res; });// 调度
             Reqdata("/rduser?job=(5,6)&depart_id=" + g_user.depart.id, "", function (res) { g_driver = res; });
 			refreshdevlist();
         }
