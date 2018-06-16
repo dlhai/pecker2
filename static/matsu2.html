@@ -41,37 +41,30 @@
     </script>
 
     <script type="text/javascript">
-        var g_matprovs, g_matprov, g_matwhs, g_matwh, g_curtri = new Object(), g_curtbi = new Object();
+        var g_matprovs, g_matwhs, g_focus, g_matprov, g_matwh, g_curtri = new Object(), g_curtbi = new Object();
         Reqdata("/rd?ls=matprov", "", function (res1) { g_matprovs = res1; });
         Reqdata("/rd?ls=matwh", "", function (matwhs) { g_matwhs = matwhs; });
         g.xTree = new x5Tree("#xTree", "matprov", "", "matwh", function (type, id) { // 点击树节点
-            g_curtri.type = type;
-            g_curtri.id = id;
-
-            if (type == "matprov") { // 点击仓库省区
-                g_curtbi.type = "matwh";
-                g_matprov = GetSub(g_matprovs.data, "id", id);
-                $("#item_detail").html(RenderPane2(g_matprov, g_matprovs.fields));
+			g_focus = {"ls":type,"id":id}
+            if (g_focus.ls == "matprov") { // 点击仓库省区
+				g_focus.data = [GetSub(g_matprovs.data, "id", id)];
+                $("#item_detail").html(RenderPane2(g_focus.data[0], g_matprovs.fields));
                 Reqdata("/rd?ls=matwh&matprov_id=" + id, "", function (res3) {
                     $("#subitem_list").html(RenderTable2(res3, "", FieldToShow));
-                    TableBindClick3(res3.ls, function (rowid) { g_curtbi.type = res3.ls; g_curtbi.id = rowid; });
                 });
             }
             else if (type == "matwh") {
-                g_curtbi.type = "store";
-                g_matwh = GetSub(g_matwhs.data, "id", id);
-                $("#item_detail").html(RenderPane2(g_matwh, g_matwhs.fields, FieldToShow));
-                Reqdata("/rdstore?matwh_id=" + g_matwh.id, "", function (stores) {
-                    if (stores.fields.filter(x => { if (x.name == "innum") return x;}).length == 0 )
-                        stores.fields.push({ title: "库存数量", name: "innum", twidth: "80" });
+                g_focus.data = [GetSub(g_matwhs.data, "id", id)];
+                $("#item_detail").html(RenderPane2(g_focus.data[0], g_matwhs.fields, FieldToShow));
+                Reqdata("/mat/store?matwh_id=" + id, "", function (stores) {
+					GetSub(stores.fields, "name", "remark").twidth = 0;
+                    if (!stores.fields.some(x => x.name == "innum") )
+                        stores.fields.insertaftername("unit", { title: "库存数量", name: "innum", twidth: "80" });
                     $("#subitem_list").html(RenderTable2(stores, "", (data, field) => {
                         if (field.name == "innum")
-                            return int(data.innum) - int(data.outnum);
+                            return int(data.allin) - int(data.allout);
                         return data[field.name];
                     }));
-                    TableBindClick3(g_matwhs.ls, function (rowid) {
-
-                    });
                 });
             }
         });
@@ -82,9 +75,21 @@
         }
 
         function onNewProv() {
-            var prov = Create(g_matprovs.fields);
-            var cnt = RenderForm4(prov, g_matprovs.fields);
-            (new cbDlg("新建 省区", "width:610px", cnt)).Show();
+            var title = "新建 省区";
+			var u = Create(g_matprovs.fields);
+            var cnt = RenderForm4(u, g_matprovs.fields );
+
+			var dlg = new cbFormDlg(title, "width:610px", cnt);
+			dlg.urlsubmit = "/mat/whcreate";
+			dlg.closing = function (reason){if ( reason == "submit"){
+				g_focus.data = dlg.res.data;
+				g_matprovs.data = g_matprovs.data.concat(dlg.res.data);
+				g.xTree.addchild( "#xTree",g_focus );
+				$("#item_detail").html(RenderPane2(g_focus.data[0], g_focus.fields ));
+				$("#subitem_list").html("");
+			}}
+
+            dlg.Show();
         }
 
         function EditShow() {

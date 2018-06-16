@@ -58,6 +58,13 @@ Array.prototype.fmap = function (cb) {
     return this.map(cb).filter(x => x != undefined);
 }
 
+// 对Array的扩展
+Array.prototype.insertaftername = function (name, it ) {
+	idx =GetIdx(this, "name", name);
+	if ( idx != null)
+		this.splice(idx,0,it);
+}
+
 function isInArray(arr, value) {
     for (var i = 0; i < arr.length; i++) {
         if (value === arr[i]) {

@@ -40,22 +40,25 @@
     },
     {
         "id": "7", "type": "wh", "name": "仓库超级帐号", modules: [
+			{ name: "地图", url: "matmap.html" },
             { name: "仓库", url: "matsu.html" },
             { name: "人员", url: "user_list2.html" },
             { name: "材料", url: "material.html" }]
     },
     {
         "id": "8", "type": "wh", "name": "仓库主管", modules: [
+			{ name: "地图", url: "matmap.html" },
             { name: "入库", url: "matin.html" },
             { name: "出库", url: "matout.html" },
-            { name: "查询", subs: [{ name: "库存", url: "matquery.html" }, { name: "入库", url: "matqueryin.html" }, { name: "出库", url: "matqueryout.html" }]},
+            { name: "记录", subs: [{ name: "库存", url: "matquery.html" }, { name: "入库", url: "matqueryin.html" }, { name: "出库", url: "matqueryout.html" }]},
             { name: "人员", url: "user_list2.html" }]
     },
     {
         "id": "9", "type": "wh", "name": "仓库管理员", modules: [
+			{ name: "地图", url: "matmap.html" },
             { name: "入库", url: "matin.html" },
             { name: "出库", url: "matout.html" },
-            { name: "查询", subs: [{ name: "库存", url: "matquery.html" }, { name: "入库", url: "matqueryin.html" }, { name: "出库", url: "matqueryout.html" }] }],
+            { name: "记录", subs: [{ name: "库存", url: "matquery.html" }, { name: "入库", url: "matqueryin.html" }, { name: "出库", url: "matqueryout.html" }] }],
     },
     { "id": "10", "type": "coord", "name": "调度超级帐号", modules: [{ name: "调度", url: "user_list2.html" }] },
     { "id": "11", "type": "coord", "name": "调度主管", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },

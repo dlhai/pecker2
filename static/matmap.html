@@ -22,11 +22,18 @@
 </body>
 </html>
 <script type="text/javascript">
-    // 仅从设备地图复制而来，还没开始做。。。
-
     var g_map = CreateMap("allmap"), g_devwhs, g_devs, g_devvenders, g_user = parent.g_user, g_editmode = false;;
-    if (g_user == undefined)
-        g_user = GetRoleUser("设备超级帐号");
+    g_user = parent.g_user;
+    if (g_user == undefined) {
+        Reqdata("/curuserinf", "", function (res) {
+            g_user = res.data;
+            g_user.fields = res.fields;
+            init();
+        });
+    }
+    else {
+        init();
+    }
 
     Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res) { g_devvenders = res; });
     // 在地图上显示驻地
