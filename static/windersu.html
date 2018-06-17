@@ -34,7 +34,7 @@
     </div>
 
     <script type="text/javascript">
-        var g_focus, g_focussubs, g_windercos, g_efanvenders, g_leafvenders;
+        var g_focus = new Object(), g_focussubs, g_windercos, g_efanvenders, g_leafvenders;
 
         Reqdata("/rd?ls=winderco", "", function (wcs) { g_windercos = wcs; });
         Reqdata("/rd?ls=vender&type=" + GetTbl("efan").id, "", function (efanv) { g_efanvenders = efanv; });
@@ -100,7 +100,6 @@
 					$("#subitem_list").html("");
 				}
                 else if (reason == "submit") {
-                    g_focus.data = dlg.res.data;
 					dlg.res.fields = g_focus.fields;
 					g_focus = res;
 					g.root.update(g_focus);

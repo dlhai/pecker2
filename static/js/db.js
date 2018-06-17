@@ -96,10 +96,10 @@ var branch = {
 }
 
 var g_treebranch = {
-    "devwh": { "sub": "", "image": "img/devwh.png", },
+    "devwh": { "sub": "", "name": "驻地", "image": "img/devwh.png", },
 
-    "matprov": { "sub": "matwh", "image": "img/folder.gif", },
-    "matwh": { "sub": "", "image": "img/devwh.png", },
+    "matprov": { "sub": "matwh", "name": "省区", "image": "img/folder.gif", },
+    "matwh": { "sub": "", "name": "仓库",  "image": "img/devwh.png", },
 
     "root": { "sub": "winderco", "name": "企业列表", "image": "", },
     "winderco": { "sub": "winderprov", "name": "风电企业", "image": "img/diy/1_open.png" },

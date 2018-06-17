@@ -29,7 +29,7 @@
 </body>
 </html>
 <script type="text/javascript">
-    var g_map = CreateMap("allmap"), g_devwhs, g_devs, g_driver,g_devvenders, g_editmode = false;;
+    var g_map = CreateMap("allmap"), g_devwhs, g_devs, g_drivers,g_devvenders, g_editmode = false;;
     g_user = parent.g_user;
     if (g_user == undefined) {
         Reqdata("/curuserinf", "", function (res) {
@@ -44,7 +44,7 @@
 
     function init() {
 		Reqdata("/rduser?job=(5,6)" + (g_user.job == "4" ? "" : "&depart_id="+g_user.depart_id), "", function (res) { 
-			g_driver = res; 
+			g_drivers = res; 
 		});
         Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "dev").id, "", function (res) { g_devvenders = res; });
         // 在地图上显示驻地

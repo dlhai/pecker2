@@ -70,12 +70,12 @@
     </script>
 
     <script type="text/javascript"> //共享数据
-        var g_map = CreateMap("item_map"), g_devwhs = new Object(), g_devs, g_devvenders, g_driver= new Object();
+        var g_map = CreateMap("item_map"), g_devwhs = new Object(), g_devs, g_devvenders, g_drivers= new Object();
         g_user = parent.g_user;
         if (g_user == undefined) {
             Reqdata("/curuserinf", "", function (res) {
                 g_user = res.data;
-				g_driver.data = [g_user];
+				g_drivers.users = [g_user];
                 g_user.fields = res.fields;
 				g_devwhs.data = [g_user.depart];
 				g_devwhs.fields = g_user.departfields;
@@ -95,7 +95,7 @@
 					g_devs.data.forEach((x,i)=>x.mk.disableDragging());
 			}));
 			Reqdata("/user/briefs?job=(11,12)", "", function (res) { g_guiders = res; });// 调度
-            Reqdata("/user/briefs?job=(5,6)&depart_id=" + g_user.depart.id, "", function (res) { g_driver = res; }); // 本驻地所有人员
+            Reqdata("/user/briefs?job=(5,6)&depart_id=" + g_user.depart.id, "", function (res) { g_drivers = res; }); // 本驻地所有人员
             Reqdata("/rd?ls=dev" + "&driver_id=" + g_user.id, "", function (res) {
                 g_devs = res;
 				if (g_devs.data.length > 0){
@@ -129,7 +129,7 @@
             if (fn == "clss") return data[fn] == "" ? "" :GetSub(db_devclss, "id", data[fn]).name;
             else if (fn == "status") return data[fn] == "" ? "" :GetSub(status_devwork, "id", data[fn]).name;
             else if (fn == "deal_id") 
-				return data[fn] == "" ? "" :GetSub(g_driver.users, "id", data[fn]).name;
+				return data[fn] == "" ? "" :GetSub(g_drivers.users, "id", data[fn]).name;
             else if (fn == "guide_id") 
 				return data[fn] == "" ? "" :GetSub(g_guiders.users, "id", data[fn]).name;
             else return data[fn];

@@ -16,51 +16,97 @@
 </head>
 <body class="xFCsrow">
     <section class="xPanel2" style="width:100px;">
-        <header class="heading">材料列表<div style="float: right;"><a href="#" onClick="MatNew(this)">新建</a> <a href="#" onClick="MatEdit(this)">修改</a></div></header>
+        <header class="heading">材料列表<div style="float: right;"><a href="#" onClick="onmatNew(this)">新建</a> <a href="#" onClick="onmatEdit(this)">修改</a></div></header>
         <div id="mat_list" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
     </section>
     <section class="xPanel2" style="width:100px;">
-        <header class="heading">材料供应商<div style="float: right;"><a href="#" onClick="MatVNew(this)">新建</a> <a href="#" onClick="MatVEdit(this)">修改</a></div></header>
+        <header class="heading">材料供应商<div style="float: right;"><a href="#" onClick="onMatVNew(this)">新建</a> <a href="#" onClick="onMatVEdit(this)">修改</a></div></header>
         <div id="vender_list" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
     </section>
 
     <script type="text/javascript">
-        var g_mats, g_venders;
+        var g_mats = new Object();
+        matrefresh();
 
-        Reqdata("/rd?ls=mat", "", function (mats) {
-            g_mats = mats;
-            $("#mat_list").html(RenderTable2(g_mats));
-            TableBindClick3(g_mats.ls);
-        });
+        function matrefresh() {
+            Reqdata("/rd?ls=mat", "", function (mats) {
+                g_mats = mats;
+				GetSub(g_mats.fields, "name", "remark").twidth = 0;
+                $("#mat_list").html(RenderTable2(mats));
+            });
+        }
 
-        Reqdata("/rd?ls=vender&type=" + GetTbl("mat").id, "", function (venders) {
-            g_venders = venders;
-            $("#vender_list").html(RenderTable2(g_venders));
-            TableBindClick3(g_venders.ls);
-        });
-
-        function MatNew(This) {
+        function onmatNew(This) {
             var title = "新建 材料";
-            var cnt = RenderForm4(Create(g_mats.fields), g_mats.fields);
-            (new cbDlg(title, "width:610px", cnt)).Show();
+            var cnt = RenderForm4(Create(g_mats.fields), g_mats.fields,matf2e);
+
+            var dlg = new cbFormDlg(title, "width:610px", cnt);
+            dlg.urlsubmit = "/mat/create";
+            dlg.closing = matrefresh;
+            dlg.Show();
         }
-        function MatEdit(This) {
-            var mat = GetSub(g_mats.data, "id", g_TableCurRow[g_mats.ls]);
+        function onmatEdit(This) {
+            if (g_TableCurRow[g_mats.ls] == -1)
+                return;
+
+            var mat = GetSub(g_mats.data, "id", GetCurRowDataID(g_mats.ls));
             var title = "编辑 材料";
-            var cnt = RenderForm4(mat, g_mats.fields);
-            (new cbDlg(title, "width:610px", cnt)).Show();
+            var cnt = RenderForm4(mat, g_mats.fields,matf2e);
+
+            var dlg = new cbFormDlg(title, "width:610px", cnt);
+            dlg.urlsubmit = "/mat/modify?id=" + mat.id;
+            dlg.urlremove = "/mat/remove?id=" + mat.id;
+            dlg.closing = matrefresh;
+            dlg.Show();
         }
 
-        function MatVNew(This) {
-            var title = "新建 供应商";
-            var cnt = RenderForm4(Create(g_venders.fields), g_venders.fields);
-            (new cbDlg(title, "width:610px", cnt)).Show();
+		var g_essential = [
+			{ "id": "0", "name": "是" },
+			{ "id": "1", "name": "否" },
+		]
+
+		function matf2e(data, field) {
+			var fn = field.name;
+            if (fn == "essential") return RenderSelect(g_essential, data[fn]);
+            else return data[fn];
         }
-        function MatVEdit(This) {
+
+    </script>
+
+    <script type="text/javascript">
+        var g_matVs = new Object();
+        refresh("init");
+
+        function refresh(reason) {
+			if (reason != undefined ){
+            Reqdata("/rd?ls=vender&type=" + GetTbl("mat").id, "", function (matVs) {
+                g_matVs = matVs;
+                $("#vender_list").html(RenderTable2(matVs));
+            });}
+        }
+
+        function onMatVNew(This) {
+            var title = "新建 供应商";
+            var cnt = RenderForm4(Create(g_matVs.fields), g_matVs.fields);
+
+            var dlg = new cbFormDlg(title, "width:610px", cnt);
+            dlg.urlsubmit = "/vender/create?type=" + GetTbl("mat").id;
+            dlg.closing = refresh;
+            dlg.Show();
+        }
+        function onMatVEdit(This) {
+            if (g_TableCurRow[g_matVs.ls] == -1)
+                return;
+
+            var matV = GetSub(g_matVs.data, "id", GetCurRowDataID(g_matVs.ls));
             var title = "编辑 供应商";
-            var vender = GetSub(g_venders.data, "id", g_TableCurRow[g_venders.ls]);
-            var cnt = RenderForm4(vender, g_venders.fields);
-            (new cbDlg(title, "width:610px", cnt)).Show();
+            var cnt = RenderForm4(matV, g_matVs.fields);
+
+            var dlg = new cbFormDlg(title, "width:610px", cnt);
+            dlg.urlsubmit = "/vender/modify?id=" + matV.id;
+            dlg.urlremove = "/vender/remove?id=" + matV.id;
+            dlg.closing = refresh;
+            dlg.Show();
         }
 
     </script>

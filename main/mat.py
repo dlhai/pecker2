@@ -31,7 +31,7 @@ def rdmatins():
     else:
         return '{result:404,msg:"用户职业不对！"}'
 
-    return query4("rdmatins",mfields=select(base.sl).where(base.c.table=="matin"),mdata = sqlmatin,
+    return query5("rdmatins",mfields=select(base.sl).where(base.c.table=="matin"),mdata = sqlmatin,
                  rfields=select(base.sl).where(base.c.table=="matinrec"),rdata = sqlmatinrec,)
 
 #读取用户的未完成出库单列表
@@ -107,41 +107,90 @@ def matstore():
         where matwh_id={0} group by mat_id ) as store on mat.id = store.mat_id order by mat_id '''
     return query5("rdstore",fields=select(base.sl).where(base.c.table=="mat"),data = sql.format(param["matwh_id"]))
 
+#/mat/provcreate
+@app.route("/mat/matprovcreate",methods=['POST'])
+@login_required
+def matprovcreate():
+    params = request.args.to_dict()
+    form =request.form.to_dict()
+    r = obj(result="404",fun="mat/matprovcreate")
 
-#/mat/matwhcreate
+    if "name" not in form or form["name"]=="":
+        return toret(r,msg="name不正确")
+
+    conn.execute(toinsert("matprov",form))
+    r.data = QueryObj("select * from matprov where id in (select max(id) from matprov)")
+    return toret(r,result=200)
+
+#/mat/provmodify?id=
+@app.route("/mat/matprovmodify",methods=['POST'])
+@login_required
+def matprovmodify():
+    params = request.args.to_dict()
+    form =request.form.to_dict()
+    r = obj(result="404",fun="mat/matprovmodify")
+
+    if "id" not in params:
+        return toret(r,msg="缺少参数id")
+    if "name" not in form or form["name"]=="":
+        return toret(r,msg="name不正确")
+
+    id=params["id"]
+    conn.execute(toupdate("matprov", form, obj(id=id)))
+    r.data = QueryObj("select * from matprov where id=%s"%id)
+    return toret(r,result=200)
+
+#/mat/provremove?id=
+@app.route("/mat/matprovremove")
+@login_required
+def matprovremove():
+    params = request.args.to_dict()
+    r = obj(result="404",fun="/mat/matprovremove")
+    if "id" not in params:
+        return toret(r,msg="缺少参数id")
+
+    if querycount("matwh",obj(matprov_id=params["id"])) > 0:
+        return toret(r,msg="省区不为空，不能删除")
+
+    id = params["id"]
+    conn.execute(todelete("matprov", obj(id=id)))
+    return toret(r,result=200)
+
+
+#/mat/whcreate
 @app.route("/mat/matwhcreate",methods=['POST'])
 @login_required
 def matwhcreate():
     params = request.args.to_dict()
     form =request.form.to_dict()
-    r = obj(result="404",fun="matwh/matwhcreate")
+    r = obj(result="404",fun="mat/matwhcreate")
 
-    if "code" not in form or form["code"]=="":
-        return toret(r,msg="code不正确")
+    if "name" not in form or form["name"]=="":
+        return toret(r,msg="name不正确")
 
     conn.execute(toinsert("matwh",form))
     r.data = QueryObj("select * from matwh where id in (select max(id) from matwh)")
     return toret(r,result=200)
 
-#/mat/matwhmodify?id=
+#/mat/whmodify?id=
 @app.route("/mat/matwhmodify",methods=['POST'])
 @login_required
 def matwhmodify():
     params = request.args.to_dict()
     form =request.form.to_dict()
-    r = obj(result="404",fun="matwh/matwhmodify")
+    r = obj(result="404",fun="mat/matwhmodify")
 
     if "id" not in params:
         return toret(r,msg="缺少参数id")
-    if "code" not in form or form["code"]=="":
-        return toret(r,msg="code不正确")
+    if "name" not in form or form["name"]=="":
+        return toret(r,msg="name不正确")
 
     id=params["id"]
     conn.execute(toupdate("matwh", form, obj(id=id)))
     r.data = QueryObj("select * from matwh where id=%s"%id)
     return toret(r,result=200)
 
-#/mat/matwhremove?id=
+#/mat/whremove?id=
 @app.route("/mat/matwhremove")
 @login_required
 def matwhremove():
@@ -150,10 +199,63 @@ def matwhremove():
     if "id" not in params:
         return toret(r,msg="缺少参数id")
 
-    if querycount("xxx",obj(xxx="xxx",id=params["id"])) > 0:
-        return toret(r,msg="已xxx，不能删除")
+    if querycount("matin",obj(matwh_id=params["id"])) > 0:
+        return toret(r,msg="已产生入库，不能删除")
+    if querycount("matout",obj(matwh_id=params["id"])) > 0:
+        return toret(r,msg="已产生出库，不能删除")
 
     id = params["id"]
     conn.execute(todelete("matwh", obj(id=id)))
+    return toret(r,result=200)
+
+#/mat/create
+@app.route("/mat/create",methods=['POST'])
+@login_required
+def matcreate():
+    params = request.args.to_dict()
+    form =request.form.to_dict()
+    r = obj(result="404",fun="mat/create")
+
+    if "code" not in form or form["code"]=="":
+        return toret(r,msg="code不正确")
+
+    conn.execute(toinsert("mat",form))
+    r.data = QueryObj("select * from mat where id in (select max(id) from mat)")
+    return toret(r,result=200)
+
+#/mat/modify?id=
+@app.route("/mat/modify",methods=['POST'])
+@login_required
+def matmodify():
+    params = request.args.to_dict()
+    form =request.form.to_dict()
+    r = obj(result="404",fun="mat/modify")
+
+    if "id" not in params:
+        return toret(r,msg="缺少参数id")
+    if "code" not in form or form["code"]=="":
+        return toret(r,msg="code不正确")
+    if "name" not in form or form["name"]=="":
+        return toret(r,msg="name不正确")
+
+    id=params["id"]
+    conn.execute(toupdate("mat", form, obj(id=id)))
+    r.data = QueryObj("select * from mat where id=%s"%id)
+    return toret(r,result=200)
+
+#/mat/remove?id=
+@app.route("/mat/remove")
+@login_required
+def matremove():
+    params = request.args.to_dict()
+    r = obj(result="404",fun="/mat/remove")
+    if "id" not in params:
+        return toret(r,msg="缺少参数id")
+
+    if querycount("matinrec",obj(mat_id=params["id"])) > 0:
+        return toret(r,msg="已产生入库，不能删除")
+
+    id = params["id"]
+    conn.execute(todelete("mat", obj(id=id)))
     return toret(r,result=200)
 

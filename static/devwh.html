@@ -42,7 +42,7 @@
     </div>
 
     <script type="text/javascript">
-        var g_devwhs, g_devs, g_devvenders, g_drivers, g_guiders, g_users,g_focus;
+        var g_devwhs = new Object(), g_devs, g_devvenders, g_drivers, g_guiders, g_users,g_focus;
         var g_user = parent.g_user;
         if (g_user == undefined) {
             Reqdata("/curuserinf", "", function (res) {
@@ -56,9 +56,10 @@
         }
 
         function init() {
+			g_devwhs = {"data":[g_user.depart], "fields": g_user.departfields};
             Reqdata("/rd?ls=vender&type=21", "", function (res) { g_devvenders = res; });
 			Reqdata("/user/briefs?job=(11,12)", "", function (res) { g_guiders = res; });// 调度
-            Reqdata("/rduser?job=(5,6)&depart_id=" + g_user.depart.id, "", function (res) { g_driver = res; });
+            Reqdata("/user/briefs?job=(5,6)&depart_id=" + g_user.depart.id, "", function (res) { g_drivers = res; });
 			refreshdevlist();
         }
 
@@ -97,7 +98,7 @@
 			var fn = field.name;
             if (fn == "clss") return data[fn] == "" ? "" :GetSub(db_devclss, "id", data[fn]).name;
             else if (fn == "status") return data[fn] == "" ? "" :GetSub(status_devwork, "id", data[fn]).name;
-            else if (fn == "deal_id") return data[fn] == "" ? "" :GetSub(g_driver.data, "id", data[fn]).name;
+            else if (fn == "deal_id") return data[fn] == "" ? "" :GetSub(g_drivers.users, "id", data[fn]).name;
             else if (fn == "guide_id") 
 				return data[fn] == "" ? "" :GetSub(g_guiders.users, "id", data[fn]).name;
             else return data[fn];

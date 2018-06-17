@@ -54,8 +54,13 @@ def venderremove():
     if len(u) == 0:
         return toret(r,msg="id不存在")
 
-    if querycount( gettbl(u[0].type)["name"],obj(vender_id=params["id"]))>0:
-        return toret(r,msg="已经使用")
+    lnktbl=gettbl(u[0].type)["name"]
+    if lnktbl != "mat":
+        if querycount( gettbl(u[0].type)["name"],obj(vender_id=params["id"]))>0:
+            return toret(r,msg="已经使用")
+    else:
+        if querycount( "matinrec",obj(vender_id=params["id"]))>0:
+            return toret(r,msg="已经使用")
 
     conn.execute(todelete("vender", obj(id=params["id"])))
     return toret(r,result=200)

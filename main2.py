@@ -184,14 +184,14 @@ if __name__ == "__main__":
 #    },
 #    {
 #        "id": "7", "type": "wh", "name": "仓库超级帐号", modules: [
-#            { name: "地图", url: "matmap.html" },
-#            { name: "仓库", url: "matsu.html" },
+#            { name: "地图", url: "matmap.html" },√
+#            { name: "仓库", url: "matsu.html" },√
 #            { name: "人员", url: "user_list2.html" },√
-#            { name: "材料", url: "material.html" }]
+#            { name: "材料", url: "material.html" }]√
 #    },
 #    {
 #        "id": "8", "type": "wh", "name": "仓库主管", modules: [
-#            { name: "地图", url: "matmap.html" },
+#            { name: "地图", url: "matmap.html" },√
 #            { name: "入库", url: "matin.html" },
 #            { name: "出库", url: "matout.html" },
 #            { name: "查询", subs: [

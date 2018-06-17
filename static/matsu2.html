@@ -26,7 +26,7 @@
             <div id="item_detail" class="x2Form" style="padding:5px;"></div>
         </section>
         <section class="xPanel2">
-            <header>下级列表<div style="float: right;"> <a href="javascript:ImportData()">导入</a> <a href="javascript:AddChild()">新建</a> <a href="javascript:EditChild()">编辑</a></div></header>
+            <header>下级列表<div style="float: right;"><a id="AddChild" href="javascript:AddChild()">新建</a></div></header>
             <div class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"><div id="subitem_list"></div></div>
         </section>
     </div>
@@ -41,21 +41,27 @@
     </script>
 
     <script type="text/javascript">
-        var g_matprovs, g_matwhs, g_focus, g_matprov, g_matwh, g_curtri = new Object(), g_curtbi = new Object();
+        var g_matprovs, g_matwhs, g_focus = new Object();
         Reqdata("/rd?ls=matprov", "", function (res1) { g_matprovs = res1; });
-        Reqdata("/rd?ls=matwh", "", function (matwhs) { g_matwhs = matwhs; });
         g.xTree = new x5Tree("#xTree", "matprov", "", "matwh", function (type, id) { // 点击树节点
 			g_focus = {"ls":type,"id":id}
             if (g_focus.ls == "matprov") { // 点击仓库省区
 				g_focus.data = [GetSub(g_matprovs.data, "id", id)];
+				g_focus.fields = g_matprovs.fields;
                 $("#item_detail").html(RenderPane2(g_focus.data[0], g_matprovs.fields));
                 Reqdata("/rd?ls=matwh&matprov_id=" + id, "", function (res3) {
-                    $("#subitem_list").html(RenderTable2(res3, "", FieldToShow));
+					g_matwhs = res3;
+					$("#subitem_list").html(RenderTable2(res3, "", f2s));
                 });
+				$("#AddChild").show();
             }
             else if (type == "matwh") {
-                g_focus.data = [GetSub(g_matwhs.data, "id", id)];
-                $("#item_detail").html(RenderPane2(g_focus.data[0], g_matwhs.fields, FieldToShow));
+                Reqdata("/rd?ls=matwh&id=" + id, "", function (res) {
+					g_focus = res;
+					g_focus.id = id;
+					$("#item_detail").html(RenderPane2(g_focus.data[0], g_focus.fields, f2s));
+                });
+
                 Reqdata("/mat/store?matwh_id=" + id, "", function (stores) {
 					GetSub(stores.fields, "name", "remark").twidth = 0;
                     if (!stores.fields.some(x => x.name == "innum") )
@@ -66,13 +72,9 @@
                         return data[field.name];
                     }));
                 });
+				$("#AddChild").hide();
             }
         });
-
-        function ImportData() {
-            var tpl_mat_import = doT.template(document.getElementById('tpl_mat_import').innerHTML);
-            (new cbDlg("导入材料", "width:610px", tpl_mat_import())).Show();
-        }
 
         function onNewProv() {
             var title = "新建 省区";
@@ -80,9 +82,9 @@
             var cnt = RenderForm4(u, g_matprovs.fields );
 
 			var dlg = new cbFormDlg(title, "width:610px", cnt);
-			dlg.urlsubmit = "/mat/whcreate";
+			dlg.urlsubmit = "/mat/matprovcreate";
 			dlg.closing = function (reason){if ( reason == "submit"){
-				g_focus.data = dlg.res.data;
+				g_focus = {"ls":"matprov","id":dlg.res.data[0].id,"data" :dlg.res.data,"fields":g_matprovs.fields};
 				g_matprovs.data = g_matprovs.data.concat(dlg.res.data);
 				g.xTree.addchild( "#xTree",g_focus );
 				$("#item_detail").html(RenderPane2(g_focus.data[0], g_focus.fields ));
@@ -93,69 +95,57 @@
         }
 
         function EditShow() {
-            if (g_curtri.type == "matprov") {
-                var cnt = RenderForm4(g_matprov, g_matprovs.fields);
-                (new cbDlg("编辑 省区", "width:610px", cnt)).Show();
-            }
-            else {
-                var cnt = RenderForm4(g_matwh, g_matwhs.fields, FieldToEdit);
-                (new cbDlg("编辑 仓库", "width:610px", cnt)).Show();
-            }
+            var title = "编辑 " + g_treebranch[g_focus.ls].name;
+            var cnt = RenderForm4( g_focus.data[0], g_focus.fields,f2e);
+
+			var dlg = new cbFormDlg(title, "width:610px", cnt);
+            dlg.urlsubmit = "/mat/{ls}modify?id={id}".format(g_focus);
+            dlg.urlremove = "/mat/{ls}remove?id={id}".format(g_focus);
+			dlg.closing = function (reason){
+				if ( reason == "remove"){
+					g.xTree.remove(g_focus);
+					$("#item_detail").html("");
+					$("#subitem_list").html("");
+				}
+                else if (reason == "submit") {
+                    g_focus.data = dlg.res.data;
+					g.xTree.update(g_focus);
+                    $("#item_detail").html(RenderPane2(g_focus.data[0], g_focus.fields, f2s));
+				}
+			}
+            dlg.Show();
+
         }
         function AddChild() {
-            if (g_curtbi.type == "matwh") {
-                var matwh = Create(g_matwhs.fields);
-                matwh.matprov_id = g_matprov.id;
-                var cnt = RenderForm4(matwh, g_matwhs.fields, FieldToEdit);
-                (new cbDlg("新建 仓库", "width:610px", cnt)).Show();
-            }
-            else if (g_curtbi.type == "mat") {
-            }
-        }
-        function EditChild() {
-            if (g_curtbi.type == "matwh") {
-                var matwh= GetSub(g_matwhs.data, "id", g_curtbi.id);
-                var cnt = RenderForm4(matwh, g_matwhs.fields, FieldToEdit);
-                (new cbDlg("编辑 仓库", "width:610px", cnt)).Show();
-            }
-            else if (g_curtbi.type == "mat") {
-            }
+            if (g_focus.ls != "matprov")
+				return;
+
+			var title = "新建 仓库";
+			var u = Create(g_matwhs.fields);
+			u.matprov_id = g_focus.id;
+			var cnt = RenderForm4(u, g_matwhs.fields,f2e );
+
+			var dlg = new cbFormDlg(title, "width:610px", cnt);
+			dlg.urlsubmit = "/mat/matwhcreate";
+			dlg.closing = function (reason){if ( reason == "submit"){
+				g_matwhs.data = g_matwhs.data.concat(dlg.res.data);
+				$("#subitem_list").html(RenderTable2(g_matwhs, "", f2s));
+			}}
+			dlg.Show();
         }
 
-        function FieldToShow(data, field) {
+        function f2s(data, field) {
             if (field.name == "scale") return GetSub(db_matwhscale, "id", data[field.name]).name;
-            else if (field.name == "matprov_id") return GetSub(g_matprovs.data, "id", data[field.name]).name;
+            else if (field.name == "matprov_id")
+				return GetSub(g_matprovs.data, "id", data[field.name]).name;
             else return data[field.name];
         }
-        function FieldToEdit(data, field) {
+        function f2e(data, field) {
             if (field.name == "scale") return RenderSelect(db_matwhscale, data[field.name]);
             else if (field.name == "matprov_id") return GetSub(g_matprovs.data, "id", data[field.name]).name;
             else return data[field.name];
         }
 
-        function uploadFile() {
-            var file = $("#upload_efan").get(0).files[0];
-            var formData = new FormData();
-            formData.append("file", file);
-            var req = new XMLHttpRequest();
-            req.upload.onprogress = onprogress;
-            req.onreadystatechange = function () {
-                if (req.readyState == 4 && req.status == 200) {
-                    alert(req.responseText);
-                }
-            };
-            req.open("POST", "/upload", true);
-            req.send(formData);
-        }
-        function onprogress(evt) {
-            var loaded = evt.loaded;     //已经上传大小情况
-            var tot = evt.total;      //附件总大小
-            var per = Math.floor(100 * loaded / tot);  //已经上传的百分比
-            $("#progress").html(per + "%");
-            $("#progress").css("width", per + "%");
-        }
-
-        // 表单验证的几种方法： http://www.jb51.net/article/92741.htm
     </script>
 </body>
 </html>

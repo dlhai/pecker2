@@ -8,7 +8,7 @@ function f2s(data, field) {
     else if (fn == "status") return data[fn] == "" ? "" :GetSub(status_dev, "id", data[fn]).name;
     else if (fn == "vender_id") return data[fn] == "" ? "" :GetSub(g_devvenders.data, "id", data[fn]).name;
     else if (fn == "driver_id") 
-		return data[fn] == "" ? "" :GetSub(g_driver.users, "id", data[fn]).name;
+		return data[fn] == "" ? "" :GetSub(g_drivers.users, "id", data[fn]).name;
     else return data[fn];
 }
 function f2e(data, field) {
@@ -16,7 +16,7 @@ function f2e(data, field) {
     else if (field.name == "devwh_id") return g_user.depart.name;
     else if (field.name == "status") return RenderSelect(status_dev, data[field.name]);
     else if (field.name == "vender_id") return RenderSelect(g_devvenders.data, data[field.name]);
-    else if (field.name == "driver_id") return RenderSelect(g_driver.data, data[field.name]);
+    else if (field.name == "driver_id") return RenderSelect(g_drivers.users, data[field.name]);
     else return data[field.name];
 }
 function devcheck(formdata) {
