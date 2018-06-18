@@ -182,6 +182,8 @@ def towhere(where):
 
 def toinsert(tbl,obj):
     if type(obj) == type([]):
+        if len(obj)== 0:
+            return
         [delattr(u,"id") for u in obj if hasattr(u,"id")]
         d = todict(obj[0])
         fields=",".join(map( lambda x: "'"+x+"'", d.keys()))
@@ -195,6 +197,10 @@ def toinsert(tbl,obj):
         values=",".join(map( lambda x: "'"+str(x)+"'", d.values()))
         sql = "insert into {0}({1}) values({2})".format(tbl, fields,values)
     return sql
+
+def insert(tbl,obj):
+    conn.execute(toinsert(tbl,obj))
+    return QueryObj("select * from "+tbl+" where id in (select max(id) from "+tbl+")")[0]
 
 
 def toupdate(tbl,values,where):

@@ -193,8 +193,9 @@ def casecreatefault():
     fmt = "./uploads/fault_image/fault_{id}_{idx}{ext}"
     for k,v in files.items(): 
         fname = fmt.format(id=u.id, idx=idx, ext=os.path.splitext(v.filename)[1] )
-        addits.append(obj(type="faultimage",ref_id=u.id,name=fname,user_id=current_user.id, date=now))
+        addits.append(obj(type="fault_image",ref_id=u.id,name=fname,user_id=current_user.id, date=now))
         v.save("./static/"+fname)
         idx += 1
-    conn.execute(toinsert("addit",addits))
+    if len(addits)>0:
+        conn.execute(toinsert("addit",addits))
     return toret(r,result=200)

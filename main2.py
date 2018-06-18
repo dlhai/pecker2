@@ -96,6 +96,7 @@ from main.vender import *
 from main.winder import *
 from main.dev import *
 from main.mat import *
+from main.matin import *
 
 class CLog:
     def write(data):
@@ -106,9 +107,8 @@ class CLog:
         pass
 
 if __name__ == "__main__":
-    newdir(["./static/uploads","./static/uploads/user_face","./static/uploads/user_idimg","./static/uploads/certif_image",
-            "./static/uploads/employ_image", "./static/uploads/edu_image1", "./static/uploads/edu_image2", 
-            "./static/uploads/fault_image","./static/uploads/dev_face","./static/uploads/dev_img"]);
+    ar = ["","user_face","user_idimg","certif_image", "employ_image", "edu_image1", "edu_image2", "fault_image","dev_face","dev_img", "matin_image"]
+    newdir(["./static/uploads/"+x for x in ar])
     app.config['JSON_AS_ASCII'] = False
     #app.config['DEBUG'] = True
 

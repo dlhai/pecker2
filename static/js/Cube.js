@@ -5,9 +5,8 @@
         var reader = new FileReader();
         reader.onload = function (e) { $(node).prev().attr("src", e.target.result); };
         reader.readAsDataURL(file);
-        var parent = $(node).parent().parent();
-        if (parent.next().length == 0) {
-            parent.append(xrimagelive(""));
+        if ($(node).parent().nextAll().length == 0) {
+            $(node).parent().parent().append(xrimagelive(""));
         }
     }
 });
@@ -463,7 +462,8 @@ $("html").on("click", function (event) {
             return;
 
         var tableid = tbody.parent().attr("id");
-		SetCurRow( tableid, node.index() );
+		if ( tableid != undefined)
+			SetCurRow( tableid, node.index() );
     }
 });
 
