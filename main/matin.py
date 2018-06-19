@@ -26,7 +26,8 @@ def matincards():
     recs= QueryObj(inrec)
     for x in r.matins:
         x.subs=[ y for y in recs if y.matin_id == x.id]
-    r.matinfields = QueryObj(select(base.sl).where(base.c.table=="matin"))
+    r.mfields = QueryObj(select(base.sl).where(base.c.table=="matin"))
+    r.sfields = QueryObj(select(base.sl).where(base.c.table=="matinrec"))
     return toret(r,result=200)
 
 
@@ -60,3 +61,91 @@ def matincreate():
         conn.execute(toinsert("addit",addits))
     r.data = [u]
     return toret(r,result=200)
+
+
+#/matin/modify?id=
+@app.route("/matin/modify",methods=['POST'])
+@login_required
+def matinmodify():
+    params = request.args.to_dict()
+    form =request.form.to_dict()
+    r = obj(result="404",fun="matin/modify")
+
+    if "id" not in params:
+        return toret(r,msg="缺少参数id")
+    if "code" not in form or form["code"]=="":
+        return toret(r,msg="code不正确")
+
+    id=params["id"]
+    conn.execute(toupdate("matin", form, obj(id=id)))
+    r.data = QueryObj("select * from matin where id=%s"%id)
+    return toret(r,result=200)
+
+#/matin/remove?id=
+@app.route("/matin/remove")
+@login_required
+def matinremove():
+    params = request.args.to_dict()
+    r = obj(result="404",fun="/matin/remove")
+    if "id" not in params:
+        return toret(r,msg="缺少参数id")
+
+    if querycount("xxx",obj(xxx="xxx",id=params["id"])) > 0:
+        return toret(r,msg="已xxx，不能删除")
+
+    id = params["id"]
+    conn.execute(todelete("matin", obj(id=id)))
+    return toret(r,result=200)
+
+
+
+
+#/matin/reccreate
+@app.route("/matin/reccreate",methods=['POST'])
+@login_required
+def matinreccreate():
+    params = request.args.to_dict()
+    form =request.form.to_dict()
+    r = obj(result="404",fun="matin/reccreate")
+
+    if "code" not in form or form["code"]=="":
+        return toret(r,msg="code不正确")
+
+    conn.execute(toinsert("matinrec",form))
+    r.data = QueryObj("select * from matinrec where id in (select max(id) from matinrec)")
+    return toret(r,result=200)
+
+#/matin/recmodify?id=
+@app.route("/matin/recmodify",methods=['POST'])
+@login_required
+def matinrecmodify():
+    params = request.args.to_dict()
+    form =request.form.to_dict()
+    r = obj(result="404",fun="matin/recmodify")
+
+    if "id" not in params:
+        return toret(r,msg="缺少参数id")
+    if "code" not in form or form["code"]=="":
+        return toret(r,msg="code不正确")
+
+    id=params["id"]
+    conn.execute(toupdate("matinrec", form, obj(id=id)))
+    r.data = QueryObj("select * from matinrec where id=%s"%id)
+    return toret(r,result=200)
+
+#/matin/recremove?id=
+@app.route("/matin/recremove")
+@login_required
+def matinrecremove():
+    params = request.args.to_dict()
+    r = obj(result="404",fun="/matin/recremove")
+    if "id" not in params:
+        return toret(r,msg="缺少参数id")
+
+    if querycount("xxx",obj(xxx="xxx",id=params["id"])) > 0:
+        return toret(r,msg="已xxx，不能删除")
+
+    id = params["id"]
+    conn.execute(todelete("matinrec", obj(id=id)))
+    return toret(r,result=200)
+

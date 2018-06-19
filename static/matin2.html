@@ -127,6 +127,12 @@
 
 
     <script type="text/javascript">
+        var g_recfields = [{ name: "code", title: "编号", ftype: "div", width: "90px" }, { name: "name", title: "材料名称", ftype: "select", width: "120px" },
+        { name: "type", title: "类型", ftype: "div", width: "80px" }, { name: "unit", title: "计量单位", ftype: "div", width: "40px" },
+        { name: "num", title: "数量", ftype: "input", width: "40px" }, { name: "specs", title: "规格", ftype: "input", width: "60px" },
+        { name: "vender_id", title: "生产厂家", ftype: "select", width: "80px" }, { name: "producedt", title: "生产日期", ftype: "date", width: "80px" },
+        { name: "expiredt", title: "失效日期", ftype: "date", width: "80px" }, { name: "remark", title: "备注", ftype: "input", width: "300px" }];
+
         var g_mats, g_users = [], g_clerks, g_matin, g_matins, g_matvenders;
 		var g_user = parent.g_user;
 		if (g_user == undefined) {
@@ -162,6 +168,7 @@
 			 $("#card_"+g_focus.id+" .header").addClass("focus");
              RenderMatin(g_focus);
         }
+
         function onNewMatin(This) {
             var u = Create(g_cards.mfields);
 			u.matwh_id = g_user.depart.id;
@@ -188,14 +195,42 @@
             dlg.Show();
         }
 
-		function onclickRow(node){
+        function onclickRow(node) {
+            var id = node.attr("data_id");
+            var u = id.indexOf("row") == 0 ? Create(g_cards.sfields) : GetSub(g_focus.subs, "id", id);
+            var mat = u.mat_id == undefined ? undefined : GetSub(g_mats.data, "id", id);
+            var cnt = RenderForm4(u, g_recfields, function (field, rec) {
+                if (field.name == "code") return mat.code;
+                else if (field.name == "name") return RenderSelect2(g_mats, mat.id);
+                else if (field.name == "type") return mat.type;
+                else if (field.name == "unit") return mat.unit;
+                else if (field.name == "num") return rec.num;
+                else if (field.name == "specs") return rec.specs;
+                else if (field.name == "vender_id") return RenderSelect2(g_matvenders, rec.vender_id);
+                else if (field.name == "producedt") return rec.producedt;
+                else if (field.name == "expiredt") return rec.expiredt;
+                else if (field.name == "remark") return mat.remark;
+            });
 
+            var dlg = new cbFormDlg("入库记录", "width:610px", cnt);
+            dlg.urlsubmit = "/matin/reccreate";
+            dlg.closing = function (reason) {
+                if (reason == "submit") {
+                    g_focus.subs.push(dlg.res.data);
+                    $("#recs_table").html(RenderTable2({ fields: g_recfields, data: g_focus.subs }, "", f2sRec));
+                    var rows = g_focus.subs.length;
+                    var ss = Array(10 - rows).fill(0).map((r, i) => '<tr data_id="row' + (int(rows) + i) + '">' + Array(10).fill(0).map(c => "<td>　</td>") + "</tr>");
+                    $("#recs_table>table>tbody").append(ss);
+                }
+            }
+            dlg.Show();
 		}
 
 		// 刷新所有入库单列表
 		function refresh(){
 			Reqdata("/matin/cards", "", function (cards) {
-				g_cards = {"matins":cards.matins, "mfields":cards.matinfields, "editing":new Array(),"checking":new Array(),"entering":new Array()};
+                g_cards = { "matins": cards.matins, "mfields": cards.mfields, "sfields": cards.sfields, 
+                            "editing":new Array(),"checking":new Array(),"entering":new Array()};
 				g_cards.matins.forEach((x,i)=>{
 					if (x.status == 0 || x.status == -1) g_cards.editing.push(x);
 					else if (x.status == 1) g_cards.checking.push(x);
@@ -210,17 +245,11 @@
 		}
 
         function RenderMatin(matin) {
-			var g_recfields = [{ name: "code", title: "编号", ftype: "div", width: "90px" }, { name: "name", title: "材料名称", ftype: "select", width: "120px" },
-			{ name: "type", title: "类型", ftype: "div", width: "80px" }, { name: "unit", title: "计量单位", ftype: "div", width: "40px" },
-			{ name: "num", title: "数量", ftype: "input", width: "40px" }, { name: "specs", title: "规格", ftype: "input", width: "60px" },
-			{ name: "vender_id", title: "生产厂家", ftype: "select", width: "80px" }, { name: "producedt", title: "生产日期", ftype: "date", width: "80px" },
-			{ name: "expiredt", title: "失效日期", ftype: "date", width: "80px" }, { name: "remark", title: "备注", ftype: "input", width: "300px" }];
-
 			var ar = ["source","code","courier","courier","courierdate","remark" ];
 			ar.forEach((x,i)=>$("#"+x).html(f2s(matin, x)));
 
 			$("#recs_table").html(RenderTable2({ fields: g_recfields, data: matin.subs }, "", f2sRec));
-			var rows =  $("#recs_table>table>tbody>tr").length;
+            var rows = matin.subs.length;
 			var ss = Array(10-rows).fill(0).map((r,i)=>'<tr data_id="row'+(int(rows)+i)+'">'+Array(10).fill(0).map(c=>"<td>　</td>")+"</tr>");
 			$("#recs_table>table>tbody").append(ss);
 
