@@ -83,7 +83,6 @@
                     <div id="sect_flow" class="x2Form" style="display:inline-block;">
                         <div><label>意见</label><input id="log" style="width:400px;"/></div>
                     </div>
-                    <button id="btn_save" type="button" class="btn btn-primary">保存</button>
                     <button id="btn_submit" type="button" class="btn btn-primary">提交</button>
                     <button id="btn_checkT" type="button" class="btn btn-primary">审核通过</button>
                     <button id="btn_checkF" type="button" class="btn btn-primary">审核不通过</button>
@@ -107,7 +106,7 @@
 				<div class="left">{%=f2s(x,"user_id")%}</div>
                 <div class="right">
                     <div>{%=x.courier%}</div>
-                    <div class="time">{%=f2s(x,"courierdate")%}</div>
+                    <div class="time">{%=f2s(x,"carddate")%}</div>
                 </div>
                 <div>
 					<div class="title">{%=f2s(x,"source")%}</div>
@@ -127,11 +126,11 @@
 
 
     <script type="text/javascript">
-        var g_recfields = [{ name: "code", title: "编号", ftype: "div", width: "90px" }, { name: "name", title: "材料名称", ftype: "select", width: "120px" },
-        { name: "type", title: "类型", ftype: "div", width: "80px" }, { name: "unit", title: "计量单位", ftype: "div", width: "40px" },
+        var g_recfields = [{ name: "code", title: "材料编号", ftype: "div", width: "90px" }, { name: "type", title: "型号", ftype: "div", width: "80px" }, 
+        { name: "mat_id", title: "材料名称", ftype: "select", width: "120px" },{ name: "unit", title: "计量单位", ftype: "div", width: "40px" },
         { name: "num", title: "数量", ftype: "input", width: "40px" }, { name: "specs", title: "规格", ftype: "input", width: "60px" },
-        { name: "vender_id", title: "生产厂家", ftype: "select", width: "80px" }, { name: "producedt", title: "生产日期", ftype: "date", width: "80px" },
-        { name: "expiredt", title: "失效日期", ftype: "date", width: "80px" }, { name: "remark", title: "备注", ftype: "input", width: "300px" }];
+        { name: "producedt", title: "生产日期", ftype: "date", width: "80px" },{ name: "expiredt", title: "失效日期", ftype: "date", width: "80px" }, 
+		{ name: "vender_id", title: "生产厂家", ftype: "select", width: "80px" },{ name: "remark", title: "备注", ftype: "input", width: "300px" }];
 
         var g_mats, g_users = [], g_clerks, g_matin, g_matins, g_matvenders;
 		var g_user = parent.g_user;
@@ -153,6 +152,20 @@
 					onclickRow($(node).parent());
 			});
 
+			$("html").on("change", function (event) {
+				var node = event.target;
+				if (node.tagName == "SELECT") {
+					onselchg(node);
+				}
+			});
+	   		$(".buttonarray").on("click", function (event) {
+				var node = event.target;
+				if (node.tagName == "BUTTON")
+					onclickbutton($(node));
+			});
+
+			
+
 			Reqdata("/rd?ls=mat", "", function (mats) {g_mats = mats;});
 			Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_matvenders = res; });
 			Reqdata("/rduser?depart_table=" + GetSub(db_tbl, "name", "matwh").id + "&depart_id=" + g_user.depart.id, "", function (res2) {
@@ -161,6 +174,25 @@
 			});
 			refresh();
 		}
+
+		// 刷新所有入库单列表
+		function refresh(){
+			Reqdata("/matin/cards", "", function (cards) {
+                g_cards = { "matins": cards.matins, "mfields": cards.mfields, "sfields": cards.sfields, 
+                            "editing":new Array(),"checking":new Array(),"entering":new Array()};
+				g_cards.matins.forEach((x,i)=>{
+					if (x.status == 0 || x.status == -1) g_cards.editing.push(x);
+					else if (x.status == 1) g_cards.checking.push(x);
+					else if (x.status == 2) g_cards.entering.push(x);
+				});
+
+				var tpl_matin_card = doT.template(document.getElementById('tpl_matin_card').innerHTML);
+				$("#g_matins_editing").html(tpl_matin_card(g_cards.editing));
+				$("#g_matins_checking").html(tpl_matin_card(g_cards.checking));
+				$("#g_matins_whin").html(tpl_matin_card(g_cards.entering));
+			});
+		}
+
 
         function onclickcard(This) {
              g_focus = GetSub(g_cards.matins, "id", $(This).attr("id").split("_")[1]);
@@ -187,6 +219,7 @@
 			dlg.urlsubmit = "/matin/create";
 			dlg.closing = function (reason){if ( reason == "submit"){
 				g_focus = dlg.res.data[0];
+				g_focus.subs = [];
 				RenderMatin(g_focus);
 				refresh();
 				$(".focus").removeClass("focus");
@@ -196,52 +229,95 @@
         }
 
         function onclickRow(node) {
+			if ( g_focus.status != "0" && g_focus.status != "-1" )
+				return;
             var id = node.attr("data_id");
-            var u = id.indexOf("row") == 0 ? Create(g_cards.sfields) : GetSub(g_focus.subs, "id", id);
-            var mat = u.mat_id == undefined ? undefined : GetSub(g_mats.data, "id", id);
-            var cnt = RenderForm4(u, g_recfields, function (field, rec) {
-                if (field.name == "code") return mat.code;
-                else if (field.name == "name") return RenderSelect2(g_mats, mat.id);
-                else if (field.name == "type") return mat.type;
-                else if (field.name == "unit") return mat.unit;
+            var rec = id.indexOf("row") == 0 ? Create(g_cards.sfields) : GetSub(g_focus.subs, "id", id);
+            var mat = rec.mat_id == "" ? undefined : GetSub(g_mats.data, "id", rec.mat_id);
+            var cnt = RenderForm4(rec, g_recfields, function (rec, field) {
+                if (field.name == "code") return mat == undefined ? "" : mat.code;
+                else if (field.name == "mat_id") return RenderSelect2(g_mats, mat == undefined ? "" : mat.id);
+                else if (field.name == "type") return mat == undefined ? "" : mat.type;
+                else if (field.name == "unit") return mat == undefined ? "" : mat.unit;
                 else if (field.name == "num") return rec.num;
                 else if (field.name == "specs") return rec.specs;
                 else if (field.name == "vender_id") return RenderSelect2(g_matvenders, rec.vender_id);
                 else if (field.name == "producedt") return rec.producedt;
                 else if (field.name == "expiredt") return rec.expiredt;
-                else if (field.name == "remark") return mat.remark;
+                else if (field.name == "remark") return rec.remark;
             });
 
             var dlg = new cbFormDlg("入库记录", "width:610px", cnt);
-            dlg.urlsubmit = "/matin/reccreate";
+			if ( id.indexOf("row") == 0 )
+				dlg.urlsubmit = "/matin/reccreate?matwh_id="+g_user.depart.id+"&matin_id="+g_focus.id;
+			else{
+				dlg.urlsubmit = "/matin/recmodify?id=" + rec.id;
+				dlg.urlremove = "/matin/recremove?id=" + rec.id;
+			}
             dlg.closing = function (reason) {
-                if (reason == "submit") {
+                if ( reason == "remove"){
+					var idx = GetIdx(g_focus.subs, "id", rec.id);
+					g_focus.subs.splice(idx, 1);
+				}
+				else if (reason == "submit") {
                     g_focus.subs.push(dlg.res.data);
+                }
+
+				if ( reason == "remove"||reason == "submit"){
                     $("#recs_table").html(RenderTable2({ fields: g_recfields, data: g_focus.subs }, "", f2sRec));
                     var rows = g_focus.subs.length;
                     var ss = Array(10 - rows).fill(0).map((r, i) => '<tr data_id="row' + (int(rows) + i) + '">' + Array(10).fill(0).map(c => "<td>　</td>") + "</tr>");
                     $("#recs_table>table>tbody").append(ss);
-                }
+				}
             }
             dlg.Show();
 		}
+		function onselchg(node){
+			if ($(node).attr("name") == "mat_id" ){
+				var idx = node.selectedIndex;
+				var mat_id = node.options[idx].value;
+				if (mat_id != "" ){
+					var mat = GetSub(g_mats.data, "id", mat_id);
+					$("[name=code]").next().html(mat.code);
+					$("[name=type]").next().html(mat.type);
+					$("[name=unit]").next().html(mat.unit);
+				}
+				else{
+					$("[name=code]").next().html("");
+					$("[name=type]").next().html("");
+					$("[name=unit]").next().html("");
+				}
+			}
+		}
 
-		// 刷新所有入库单列表
-		function refresh(){
-			Reqdata("/matin/cards", "", function (cards) {
-                g_cards = { "matins": cards.matins, "mfields": cards.mfields, "sfields": cards.sfields, 
-                            "editing":new Array(),"checking":new Array(),"entering":new Array()};
-				g_cards.matins.forEach((x,i)=>{
-					if (x.status == 0 || x.status == -1) g_cards.editing.push(x);
-					else if (x.status == 1) g_cards.checking.push(x);
-					else if (x.status == 2) g_cards.entering.push(x);
-				});
-
-				var tpl_matin_card = doT.template(document.getElementById('tpl_matin_card').innerHTML);
-				$("#g_matins_editing").html(tpl_matin_card(g_cards.editing));
-				$("#g_matins_checking").html(tpl_matin_card(g_cards.checking));
-				$("#g_matins_whin").html(tpl_matin_card(g_cards.entering));
-			});
+		function onclickbutton(node){
+			var btnid = $(node).attr("id");
+			if (btnid == "btn_remove" ){
+				if (confirm("要删除这个入库单吗？")){
+					Reqdata("/matin/remove?id=" + g_focus.id, "", function(res){
+						if (res.result == 200) { 
+							alert("删除成功！");
+							var u = Create(g_cards.mfields);
+							u.subs=[];
+							u.id = 0;
+							RenderMatin(u);
+							refresh();
+						}
+					});
+				}
+			}
+			else if (btnid == "btn_submit" ){
+			}
+			else if (btnid == "btn_recall" ){
+			}
+			else if (btnid == "btn_checkT" ){
+			}
+			else if (btnid == "btn_checkF" ){
+			}
+			else if (btnid == "btn_inwhT" ){
+			}
+			else if (btnid == "btn_inwhF" ){
+			}
 		}
 
         function RenderMatin(matin) {
@@ -269,10 +345,11 @@
             });
 
             var btnstatus={
-			   "-1":{ "remove": "s", "recall": "h", "save": "s", "submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 退回
-                "0":{ "remove": "s", "recall": "h", "save": "s", "submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 编辑
-                "1":{ "remove": "h", "recall": "s", "save": "h", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 提交
-                "2":{ "remove": "h", "recall": "h", "save": "h", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "s", "inwhF": "s", }};// 审核
+			     "":{ "remove": "h", "recall": "h","submit": "h", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 空白
+			   "-1":{ "remove": "s", "recall": "h","submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 退回
+                "0":{ "remove": "s", "recall": "h","submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 编辑
+                "1":{ "remove": "h", "recall": "s","submit": "h", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 提交
+                "2":{ "remove": "h", "recall": "h","submit": "h", "checkT": "h", "checkF": "h", "inwhT": "s", "inwhF": "s", }};// 审核
 			$.each(btnstatus[matin.status], (k, v)=>{v == "s" ? $("#btn_" + k).show() : $("#btn_" + k).hide()});
             if (matin.status == 1 && g_user.job == 8) {// 主管
 				$("#btn_checkT").show();$("#btn_checkF").show();
@@ -280,20 +357,24 @@
         }
 
         function f2s(data, field) {
+			if (data[field] == "" )
+				return "";
             if (field == "user_id") return GetSub(g_users, "id", data[field]).name;
             else if (field == "source") return GetSub(db_matsouce, "id", data[field]).name;
-            else if (field == "courierdate") return data[field].substr(5, 11);
-            else if (field == "mat_id") return GetSub(g_mats.data, "id", data[field]).name;
+			else if (field == "carddate") return data["courierdate"].substr(5, 11);
+            else if (field == "date") return data[field].substr(0, 19);
+			else if (field == "courierdate") return data[field].substr(0, 16);
+			else if (field == "mat_id") return GetSub(g_mats.data, "id", data[field]).name;
             else if (field == "unit") return GetSub(g_mats.data, "id", data["mat_id"]).unit;
             else return data[field];
         }
 
         function f2sRec(data, field) {
-            if (field.name == "code") return GetSub(g_mats.data, "id", data["mat_id"]).code;
-            else if (field.name == "name") return GetSub(g_mats.data, "id", data["mat_id"]).name;
-            else if (field.name == "type") return GetSub(g_mats.data, "id", data["mat_id"]).type;
-            else if (field.name == "unit") return GetSub(g_mats.data, "id", data["mat_id"]).unit;
-            else if (field.name == "vender_id") return GetSub(g_matvenders.data, "id", data["vender_id"]).name;
+            if (field.name == "code") return data["mat_id"] == "" ? "" : GetSub(g_mats.data, "id", data["mat_id"]).code;
+            else if (field.name == "mat_id") return data["mat_id"] == "" ? "" : GetSub(g_mats.data, "id", data["mat_id"]).name;
+            else if (field.name == "type") return data["mat_id"] == "" ? "" : GetSub(g_mats.data, "id", data["mat_id"]).type;
+            else if (field.name == "unit") return data["mat_id"] == "" ? "" : GetSub(g_mats.data, "id", data["mat_id"]).unit;
+            else if (field.name == "vender_id") return data["vender_id"] == "" ? "" : GetSub(g_matvenders.data, "id", data["vender_id"]).name;
             else return data[field.name];
         }
     </script>

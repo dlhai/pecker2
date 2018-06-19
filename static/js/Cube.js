@@ -38,13 +38,12 @@ function RenderSelect2(res, selid) {
         r += '<option selected></option>';
     else
         r += '<option></option>';
-    for (var i in res.data) {
-        var x = res.data[i];
+    res.data.forEach((x,i)=>{
         if (x["id"] == selid || x["name"] == selid)
             r += '<option value="' + x["id"] + '" selected>' + x["name"] + '</option>';
         else
             r += '<option value="' + x["id"] + '">' + x["name"] + '</option>';
-    }
+    });
     return r;
 }
 
