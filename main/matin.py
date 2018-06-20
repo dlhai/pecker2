@@ -19,7 +19,7 @@ def matincreate():
 
     [form.pop(k) for k in list(form.keys()) if k.startswith("img_") ] #去掉空的图片
     now = datetime.datetime.now()
-    u=insert("matin",form)
+    u=insert("matin",form)[0]
     conn.execute(toinsert("flow",obj(table_id=26,record_id=u.id,status=u.status,user_id=current_user.id,date=now, remark="创建入库单")))
 
     # 1. 保存附件
@@ -51,6 +51,7 @@ def matinmodify():
         return toret(r,msg="code不正确")
 
     id=params["id"]
+    [form.pop(k) for k in list(form.keys()) if k.startswith("img_") ] #去掉空的图片
     conn.execute(toupdate("matin", form, obj(id=id)))
     r.data = QueryObj("select * from matin where id=%s"%id)
     return toret(r,result=200)
@@ -153,17 +154,50 @@ def matincards():
     r.sfields = QueryObj(select(base.sl).where(base.c.table=="matinrec"))
     return toret(r,result=200)
 
+#更新matin状态，并产生flow记录
+def chgmatin( status, form, remark ):
+    toupdate( "matin", obj(status=status), obj(id=form["id"]))
+    now = datetime.datetime.now()
+    conn.execute(toinsert("flow",obj(table_id=26,record_id=u.id,status=status,user_id=current_user.id,date=now, remark=remark+" "+form["note"])))
+
 #/matin/chgstatus?id=
 @app.route("/matin/chgstatus")
 @login_required
 def matinchgstatus():
-    params = request.args.to_dict()
+    form =request.form.to_dict()
     r = obj(result="404",fun="/matin/chgstatus")
-    if "id" not in params:
+    if "id" not in form or form["id"]=="":
         return toret(r,msg="缺少参数id")
-
-    id = params["id"]
-    conn.execute(todelete("matin", obj(id=id)))
-    conn.execute(todelete("matinrec", obj(matin_id=id)))
-    conn.execute(todelete("flow", obj(table_id=26,record_id=id)))
+    if "status" not in form or form["status"]=="":
+        return toret(r,msg="缺少参数status")
+    
+    rs = QueryObj("matin", obj(id=form["id"]))
+    if (len(rs) == 0 ):
+        return toret(r,msg="id不存在")
+    if form["action"] == "submit":
+        if rs[0].status != 0 and rs[0].status != -1:
+            return toret(r,msg="入库单状态已变更")
+        chgmatin( 1, form, "提交审批 ")
+    elif form["action"] == "recall":
+        if rs[0].status != 1:
+            return toret(r,msg="入库单状态已变更")
+        chgmatin( 0, form, "撤回 ")
+    elif form["action"] == "checkT":
+        if rs[0].status != 1:
+            return toret(r,msg="入库单状态已变更")
+        chgmatin( 2, form, "审批通过 ")
+    elif form["action"] == "checkF":
+        if rs[0].status != 1:
+            return toret(r,msg="入库单状态已变更")
+        chgmatin( -1, form, "审批不通过 ")
+    elif form["action"] == "btn_inwhT":
+        if rs[0].status != 2:
+            return toret(r,msg="入库单状态已变更")
+        chgmatin( 3, form, "入库完成 ")
+    elif form["action"] == "btn_inwhT":
+        if rs[0].status != 2:
+            return toret(r,msg="入库单状态已变更")
+        chgmatin( -1, form, "入库不成功 ")
+    else:
+        return toret(r,msg="不认识的操作类型")
     return toret(r,result=200)

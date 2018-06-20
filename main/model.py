@@ -200,7 +200,7 @@ def toinsert(tbl,obj):
 
 def insert(tbl,obj):
     conn.execute(toinsert(tbl,obj))
-    return QueryObj("select * from "+tbl+" where id in (select max(id) from "+tbl+")")[0]
+    return QueryObj("select * from "+tbl+" where id in (select max(id) from "+tbl+")")
 
 
 def toupdate(tbl,values,where):

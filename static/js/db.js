@@ -326,7 +326,7 @@ function ReqdataP(url, jsn, ctx, cb) {
 }
 
 function Sendform(url, fd, ctx, cb) {
-	alert("调用了不严谨的方法Sendform()，请更换为Sendform");
+	alert("调用了不严谨的方法Sendform()，请更换为postform");
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4 && xhr.status == 200) { cb() }

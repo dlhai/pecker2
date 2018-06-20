@@ -77,12 +77,11 @@
                 </div>
             </footer>
             <div class="buttonarray" style="margin-top:20px;margin-right:20px;border-top:2px dashed #6a923d;padding-top:30px;">
-                <button id="btn_remove" type="button" class="btn btn-primary" style="color:#aaaaaa">删除</button>
-                <button id="btn_recall" type="button" class="btn btn-primary" style="color:#aaaaaa">撤回</button>
+                <button id="btn_recall" type="button" class="btn btn-default" style="color:#aaaaaa;display">撤回</button>
                 <button id="btn_modify" type="button" class="btn btn-primary">编辑</button>
                 <div style="float: right;">
                     <div id="sect_flow" class="x2Form" style="display:inline-block;">
-                        <div><label>意见</label><input id="log" style="width:400px;"/></div>
+                        <div><label>意见</label><input id="note" style="width:400px;"/></div>
                     </div>
                     <button id="btn_submit" type="button" class="btn btn-primary">提交</button>
                     <button id="btn_checkT" type="button" class="btn btn-primary">审核通过</button>
@@ -133,7 +132,7 @@
         { name: "producedt", title: "生产日期", ftype: "date", width: "80px" },{ name: "expiredt", title: "失效日期", ftype: "date", width: "80px" }, 
 		{ name: "vender_id", title: "生产厂家", ftype: "select", width: "80px" },{ name: "remark", title: "备注", ftype: "input", width: "300px" }];
 
-        var g_mats, g_users = [], g_clerks, g_matin, g_matins, g_matvenders;
+        var g_mats, g_users = [], g_clerks, g_matin, g_matins, g_matvenders, g_focus;
 		var g_user = parent.g_user;
 		if (g_user == undefined) {
 			Reqdata("/curuserinf", "", function (res) {
@@ -147,25 +146,22 @@
 		}
 
 		function init(){
-	   		$("#recs_table").on("click", function (event) {
+			$(".buttonarray button").hide();
+			$("#recs_table").on("click", function (event) {
 				var node = event.target;
 				if (node.tagName == "TD")
 					onclickRow($(node).parent());
 			});
-
 			$("html").on("change", function (event) {
 				var node = event.target;
-				if (node.tagName == "SELECT") {
+				if (node.tagName == "SELECT")
 					onselchg(node);
-				}
 			});
 	   		$(".buttonarray").on("click", function (event) {
 				var node = event.target;
 				if (node.tagName == "BUTTON")
 					onclickbutton($(node));
 			});
-
-			
 
 			Reqdata("/rd?ls=mat", "", function (mats) {g_mats = mats;});
 			Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_matvenders = res; });
@@ -191,6 +187,8 @@
 				$("#g_matins_editing").html(tpl_matin_card(g_cards.editing));
 				$("#g_matins_checking").html(tpl_matin_card(g_cards.checking));
 				$("#g_matins_whin").html(tpl_matin_card(g_cards.entering));
+				if ( g_focus != undefined )
+					$("#card_"+g_focus.id+" .header").addClass("focus");
 			});
 		}
 
@@ -223,13 +221,13 @@
 				g_focus.subs = [];
 				RenderMatin(g_focus);
 				refresh();
-				$(".focus").removeClass("focus");
-				$("#card_"+g_focus.id+" .header").addClass("focus");
 			}}
             dlg.Show();
         }
 
         function onclickRow(node) {
+			if ( g_focus == undefined )
+				return;
 			if ( g_focus.status != "0" && g_focus.status != "-1" )
 				return;
             var id = node.attr("data_id");
@@ -261,7 +259,12 @@
 					g_focus.subs.splice(idx, 1);
 				}
 				else if (reason == "submit") {
-                    g_focus.subs.push(dlg.res.data);
+					if (id.indexOf("row") == 0 )
+						g_focus.subs.push(dlg.res.data[0]);
+					else{
+						var idx = GetIdx(g_focus.subs, "id", rec.id);
+						g_focus.subs.splice(idx, 1, dlg.res.data[0] );
+					}
                 }
 
 				if ( reason == "remove"||reason == "submit"){
@@ -293,32 +296,77 @@
 
 		function onclickbutton(node){
 			var btnid = $(node).attr("id");
-			if (btnid == "btn_remove" ){
-				if (confirm("要删除这个入库单吗？")){
-					Reqdata("/matin/remove?id=" + g_focus.id, "", function(res){
-						if (res.result == 200) { 
-							alert("删除成功！");
-							var u = Create(g_cards.mfields);
-							u.subs=[];
-							u.id = 0;
-							RenderMatin(u);
-							refresh();
-						}
-					});
+			if (btnid == "btn_modify" ){
+				var cnt = RenderForm4(g_focus, g_cards.mfields, function(u, field) {
+					var fn = (typeof field == "string")?field:field.name;
+					if (fn == "matwh_id") return g_user.depart.name;
+					if (fn == "status") return u[fn]=="-1"? "退回":"正在签收";
+					if (fn == "source") return RenderSelect(db_matsouce, u.source);
+					return u[fn];
+				});
+
+				var dlg = new cbFormDlg("修改 入库单", "width:610px", cnt);
+				dlg.Add(xrimagelistlive([""]));
+				dlg.urlsubmit = "/matin/modify?id=" + g_focus.id;
+				dlg.urlremove = "/matin/remove?id=" + g_focus.id;
+				dlg.closing = function (reason){
+					if ( reason == "submit"){
+						dlg.res.data[0].subs = g_focus.subs;
+						g_focus = dlg.res.data[0];
+						RenderMatin(g_focus);
+						refresh();
+						$(".focus").removeClass("focus");
+						$("#card_"+g_focus.id+" .header").addClass("focus");
+					}
+					else if ( reason == "remove"){
+						g_focus = undefined;
+						var u = Create(g_cards.mfields);
+						u.subs=[];
+						u.id = 0;
+						RenderMatin(u);
+						refresh();
+						$(".focus").removeClass("focus");
+					}
 				}
+				dlg.Show();
 			}
 			else if (btnid == "btn_submit" ){
+				if (g_focus.subs.length == 0 ){
+					alert("材料不能为空");
+					return;
+				}
+				chgstatus("submit");
 			}
 			else if (btnid == "btn_recall" ){
+				if (!confirm("确定要撤回吗？"))
+					return;
+				chgstatus("recall");
 			}
 			else if (btnid == "btn_checkT" ){
+				chgstatus("checkT");
 			}
 			else if (btnid == "btn_checkF" ){
+				chgstatus("checkF");
 			}
 			else if (btnid == "btn_inwhT" ){
+				chgstatus("inwhT");
 			}
 			else if (btnid == "btn_inwhF" ){
+				chgstatus("inwhT");	
 			}
+		}
+
+		function chgstatus( action){
+			var fd = new FormData();
+			fd.append( "id", g_focus.id );
+			fd.append( "action", action );
+			fd.append( "note", $("#note")[0].value );
+			postform("/matin/chgstatus", fd,"", function (res) {
+				if ( res.result == "200"){
+					alert("操作成功！");
+					refresh();
+				}
+			});
 		}
 
         function RenderMatin(matin) {
@@ -332,7 +380,7 @@
 
             // 流水
             Reqdata("/rd?ls=flow&table_id=26&record_id=" + matin.id, "", function (flows) {
-                ["checker", "checkerdt", "inwh", "inwhdt"].map(x => $("#" + x).html("　"));
+                ["creater", "createrdt", "checker", "checkerdt", "inwh", "inwhdt"].map(x => $("#" + x).html("　"));
                 var loglist = "";
 
 				var dict = {"-1":{user:"xxxxxx", date:"xxxxxxxxx" }, "0":{user:"creater", date:"createrdt" }, 
@@ -346,11 +394,11 @@
             });
 
             var btnstatus={
-			     "":{ "remove": "h", "recall": "h","submit": "h", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 空白
-			   "-1":{ "remove": "s", "recall": "h","submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 退回
-                "0":{ "remove": "s", "recall": "h","submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 编辑
-                "1":{ "remove": "h", "recall": "s","submit": "h", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 提交
-                "2":{ "remove": "h", "recall": "h","submit": "h", "checkT": "h", "checkF": "h", "inwhT": "s", "inwhF": "s", }};// 审核
+			     "":{ "modify": "h", "recall": "h","submit": "h", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 空白
+			   "-1":{ "modify": "s", "recall": "h","submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 退回
+                "0":{ "modify": "s", "recall": "h","submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 编辑
+                "1":{ "modify": "h", "recall": "s","submit": "h", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 提交
+                "2":{ "modify": "h", "recall": "h","submit": "h", "checkT": "h", "checkF": "h", "inwhT": "s", "inwhF": "s", }};// 审核
 			$.each(btnstatus[matin.status], (k, v)=>{v == "s" ? $("#btn_" + k).show() : $("#btn_" + k).hide()});
             if (matin.status == 1 && g_user.job == 8) {// 主管
 				$("#btn_checkT").show();$("#btn_checkF").show();
