@@ -153,3 +153,17 @@ def matincards():
     r.sfields = QueryObj(select(base.sl).where(base.c.table=="matinrec"))
     return toret(r,result=200)
 
+#/matin/chgstatus?id=
+@app.route("/matin/chgstatus")
+@login_required
+def matinchgstatus():
+    params = request.args.to_dict()
+    r = obj(result="404",fun="/matin/chgstatus")
+    if "id" not in params:
+        return toret(r,msg="缺少参数id")
+
+    id = params["id"]
+    conn.execute(todelete("matin", obj(id=id)))
+    conn.execute(todelete("matinrec", obj(matin_id=id)))
+    conn.execute(todelete("flow", obj(table_id=26,record_id=id)))
+    return toret(r,result=200)
