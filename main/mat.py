@@ -57,7 +57,7 @@ def rdmatouts():
     else:
         return '{result:404,msg:"用户职业不对！"}'
 
-    return query4("rdmatouts",mfields=select(base.sl).where(base.c.table=="matoutview"),mdata = sqlmatout,
+    return query5("rdmatouts",mfields=select(base.sl).where(base.c.table=="matoutview"),mdata = sqlmatout,
                  rfields=select(base.sl).where(base.c.table=="matoutrecview"),rdata = sqlmatoutrec,)
 
 #读取库存列表(已被/mat/stare代替，二者除接口外完全相同)
@@ -92,7 +92,7 @@ def rdstoredetail():
         and flow.table_id=26 and flow.status=3 and matin_status >=3 and matwh_id={0} and mat_id={1} order by id'''
     outrecs='''select outrecview.*,flow.date as date from outrecview,flow where outrecview.matout_id=flow.record_id 
         and flow.table_id = 28 and flow.status=5 and matout_status >=5 and matwh_id={0} and mat_id={1} order by id'''
-    return query4("rdstoredetail",fields=select(base.sl).where(base.c.table=="inrecview"),\
+    return query5("rdstoredetail",fields=select(base.sl).where(base.c.table=="inrecview"),\
         inrecs = inrecs.format(user.depart_id,param["mat_id"]),outrecs = outrecs.format(user.depart_id,param["mat_id"]))
 
 

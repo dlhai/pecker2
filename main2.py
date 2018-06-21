@@ -193,9 +193,9 @@ if __name__ == "__main__":
 #    },
 #    {
 #        "id": "8", "type": "wh", "name": "仓库主管", modules: [
-#            { name: "地图", url: "matmap.html" },√
-#            { name: "入库", url: "matin.html" },
-#            { name: "出库", url: "matout.html" },
+#            { name: "地图", url: "matmap.html" },√ 
+#            { name: "入库", url: "matin.html" },√ 单据附图片还未实现
+#            { name: "出库", url: "matout.html" }, 1.从消息接受发货（来自案件）， 2.单据附图片还未实现 3.状态变更时，需要通知到调度
 #            { name: "查询", subs: [
 #               { name: "库存", url: "matquery.html" }, 
 #               { name: "入库", url: "matqueryin.html" }, 

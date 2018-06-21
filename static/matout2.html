@@ -42,15 +42,17 @@
         <div class="matin xScroll" style="padding: 5px;height:100px;flex-grow: 1;">
             <header class="xFCsrow">
                 <div id="sect_creater" class="xFIfixed x2Form" style="width:300px;margin-top:50px;">
-                    <div><label>备货人</label><div id="stocker">　</div>
-                    </div><div><label>备货时间</label><div id="stockdate">　</div></div>
+                    <div><label>备货人</label><div id="stocker_id">　</div>
+                    </div><div><label>备货时间</label><div id="stocker_dt">　</div></div>
                 </div>
                 <div style="text-align:center;">
-                    <div id="usage" ><div class="formtitle" value="">出库单</div></div>
-                    <div id="sect_code" class="x2Form" ><div><label>单号</label><input id="code"/></div></div>
+                    <div><div class="formtitle" id="usage">出库单</div></div>
+                    <div class="x2Form" ><div><label>单号</label><input id="code"/></div></div>
                 </div>
                 <div id="sect_request" class="xFIfixed x2Form" style="width:300px;margin-top:10px;">
-                    <div><label>故障单号</label><div>　</div></div><div><label>申请人</label><div id="creater">　</div></div><div><label>申请时间</label><div id="createdate">　</div></div>
+                    <div><label>故障单号</label><div id="fault_code">　</div></div>
+					<div><label>申请人</label><div id="creater_id">　</div></div>
+					<div><label>申请时间</label><div id="create_dt">　</div></div>
                 </div>
             </header>
             <div id="recs_table" style="margin:20px;">
@@ -73,11 +75,11 @@
             <footer class="xFCsrow" sstyle="margin-top:20px;">
                 <div id="sect_checker" class="xFIfixed x2Form" style="width:600px;">
                     <div><label>备注</label><input id="remark" style="width:490px;"/></div>
-                    <div><label>审核人</label><div id="checker">　</div></div><div><label>审核时间</label><div id="checkdate">　</div></div>
+                    <div><label>审核人</label><div id="checker_id">　</div></div><div><label>审核时间</label><div id="checker_dt">　</div></div>
                 </div>
                 <div></div>
                 <div id="sect_whout" class="xFIfixed x2Form" style="width:300px;">
-                    <div><label>发货人</label><div id="shipper">　</div></div><div><label>发货时间</label><div id="shipdate">　</div></div>
+                    <div><label>发货人</label><div id="shipper_id">　</div></div><div><label>发货时间</label><div id="shipper_dt">　</div></div>
                 </div>
             </footer>
             <div class="buttonarray" style="margin-top:20px;margin-right:20px;border-top:2px dashed #6a923d;padding-top:30px;">
@@ -111,13 +113,13 @@
 
     <script id="tpl_matout_card" type="text/template">
         {% it.forEach(x=>{ %}
-        <div id={%=x.id%} class="card" onclick="onclickcard(this)">
+        <div id=card_{%=x.id%} class="card" onclick="onclickcard(this)">
             <div class="header">
-                <div class="lefttop">{%=x.type%}</div>
+                <div class="lefttop">出库单</div>
                 <div class="left">{%=f2s(x,"stocker_id")%}</div>
                 <div class="right">
                     <div>{%=f2s(x,"creater_id")%}</div>
-                    <div class="time">{%=f2s(x,"createdate")%}</div>
+                    <div class="time">{%=f2s(x,"creater_dt")%}</div>
                 </div>
                 <div class="title">{%=f2s(x,"usage")%}</div>
             </div>
@@ -133,9 +135,26 @@
     </script>
 
     <script type="text/javascript">
-        var g_mats, g_users = [], g_clerks, g_guides, g_matout, g_matouts, g_matvenders,
-            g_matouts_editing = new Array(), g_matouts_checking = new Array(), g_matouts_outwh = new Array(), g_matouts_waitrecv = new Array();
+		/*材料编号	mat.code
+		型号		mat.type
+		材料名称	mat.name
+		数量		matoutrec.num
+		计量单位	mat.unit
+		规格		matinrec.specs
+		生产厂家	matinrec.vender_id
+		生产日期	matinrec.producedt
+		失效日期	matinrec.expiredt
+		备注		matoutrec.remark*/
+        var g_recfields = [{ name: "code", title: "材料编号", ftype: "div", width: "90px" }, { name: "type", title: "型号", ftype: "div", width: "80px" },
+        { name: "mat_id", title: "材料名称", ftype: "select", width: "120px" },{ name: "num", title: "数量", ftype: "input", width: "40px" }, 
+        { name: "unit", title: "计量单位", ftype: "div", width: "40px" },{ name: "specs", title: "规格", ftype: "input", width: "60px" },
+        { name: "vender_id", title: "生产厂家", ftype: "select", width: "80px" },{ name: "producedt", title: "生产日期", ftype: "date", width: "80px" },
+		{ name: "expiredt", title: "失效日期", ftype: "date", width: "80px" },{ name: "remark", title: "备注", ftype: "input", width: "300px" }];
 
+
+        var g_cards, g_focus, g_mats, g_users = [], g_clerks, g_guides, g_matvenders;
+
+		var g_user = parent.g_user;
         if (g_user == undefined) {
             Reqdata("/curuserinf", "", function (res) {
                 g_user = res.data;
@@ -167,18 +186,22 @@
 
             Reqdata("/rd?ls=mat", "", function (mats) { g_mats = mats; });
             Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_matvenders = res; });
-            Reqdata("/user/briefs?job=(8,9)&depart_id=" + g_user.depart.id, "", function (res) { g_users = g_users.concat(res.data); }); // 本仓库所有的人
-            Reqdata("/user/briefs?job=(11,12)", "", function (res) { g_users = g_users.concat(res.data); }); // 调度
+            Reqdata("/user/briefs?job=(8,9)&depart_id=" + g_user.depart.id, "", function (res) { 
+				g_users = g_users.concat(res.users); 
+			}); // 本仓库所有的人
+            Reqdata("/user/briefs?job=(11,12)", "", function (res) { 
+				g_users = g_users.concat(res.users); 
+			}); // 调度
             refresh();
         }
         // 查询所有的出库单
         function refresh() {
-            Reqdata("/matin/cards", "", function (cards) {
+            Reqdata("/matout/cards", "", function (cards) {
                 g_cards = {
                     "matouts": cards.matouts, "mfields": cards.mfields, "sfields": cards.sfields,
                     "editing": new Array(), "checking": new Array(), "outwhing": new Array(), "waitrecv": new Array()
                 };
-                g_cards.matins.forEach((x, i) => {
+                g_cards.matouts.forEach((x, i) => {
                     if (x.status == 2 || x.status == -1) g_cards.editing.push(x);
                     else if (x.status == 3) g_cards.checking.push(x);
                     else if (x.status == 4) g_cards.outwhing.push(x);
@@ -186,10 +209,10 @@
                 });
 
                 var tpl_matout_card = doT.template(document.getElementById('tpl_matout_card').innerHTML);
-                $("#g_matouts_editing").html(tpl_matout_card(g_matouts_editing));
-                $("#g_matouts_checking").html(tpl_matout_card(g_matouts_checking));
-                $("#g_matouts_outwh").html(tpl_matout_card(g_matouts_outwh));
-                $("#g_matouts_waitrecv").html(tpl_matout_card(g_matouts_waitrecv));
+                $("#g_matouts_editing").html(tpl_matout_card(g_cards.editing));
+                $("#g_matouts_checking").html(tpl_matout_card(g_cards.checking));
+                $("#g_matouts_outwh").html(tpl_matout_card(g_cards.outwhing));
+                $("#g_matouts_waitrecv").html(tpl_matout_card(g_cards.waitrecv));
             });
         }
 
@@ -373,43 +396,52 @@
             });*/
         }
 
-        function RenderMatout(matout) {
-            //var ar = ["source", "code", "courier", "courier", "courierdate", "remark"];
-            //ar.forEach((x, i) => $("#" + x).html(f2s(matin, x)));
+        function RenderMatout(bill) {
+			var ar = ["usage", "code", "fault_code", "remark"];
+			ar.forEach((x, i) => $("#" + x).html(f2s(bill, x)));
+			Reqdata( "/matin/recdetail"+bill.id, "", function(res){
+				$("#recs_table").html(RenderTable2({ fields: g_recfields, data: res.data }, "", f2sRec));
+				var rows = res.data.length;
+				var ss = Array(10 - rows).fill(0).map((r, i) => '<tr data_id="row' + (int(rows) + i) + '">' + Array(10).fill(0).map(c => "<td>　</td>") + "</tr>");
+				$("#recs_table>table>tbody").append(ss);
+			};
 
-            //$("#recs_table").html(RenderTable2({ fields: g_recfields, data: matin.subs }, "", f2sRec));
-            //var rows = matin.subs.length;
-            //var ss = Array(10 - rows).fill(0).map((r, i) => '<tr data_id="row' + (int(rows) + i) + '">' + Array(10).fill(0).map(c => "<td>　</td>") + "</tr>");
-            //$("#recs_table>table>tbody").append(ss);
+            // 流水
+            Reqdata("/rd?ls=flow&table_id=28&record_id=" + bill.id, "", function (flows) {
+                ["creater_id", "creater_dt", "stocker_id", "stocker_dt", "checker_id", "checker_dt", "shipper_id", "shipper_dt"].map(x => $("#" + x).html("　"));
 
-            //// 流水
-            //Reqdata("/rd?ls=flow&table_id=26&record_id=" + matin.id, "", function (flows) {
-            //    ["creater", "createrdt", "checker", "checkerdt", "inwh", "inwhdt"].map(x => $("#" + x).html("　"));
-            //    var loglist = "";
+                var dict = {
+                    "-1": { user: "_xxxxxxx_", date: "__xxxxxxx_" }, "0": { user: "creater_id", date: "creater_dt" },
+                    "1": { user: "__creater_", date: "__creater_" }, "2": { user: "stocker_id", date: "stocker_id" },
+					"3": { user: "__stocker_", date: "__stocker_" }, "4": { user: "checker_id", date: "checker_dt" },
+					"5": { user: "shipper_id", date: "shipper_dt" }
+                }
+                var loglist = "";
+                flows.data.forEach((x, i) => {
+					if ( x.status in [0,2,4,5]){
+						$("#" + dict[x.status].user).html(f2s(x, "user_id"));
+						$("#" + dict[x.status].date).html(f2s(x, "date"));
+					}
+                    loglist += "<div>{0} {1} {2}</div>".format(f2s(x, "date"), f2s(x, "user_id"), x.remark);
+                });
+                $("#sect_flowlist").html(loglist);
+            });
 
-            //    var dict = {
-            //        "-1": { user: "xxxxxx", date: "xxxxxxxxx" }, "0": { user: "creater", date: "createrdt" },
-            //        "1": { user: "checker", date: "checkerdt" }, "2": { user: "inwh", date: "inwhdt" }
-            //    }
-            //    flows.data.forEach((x, i) => {
-            //        $("#" + dict[x.status].user).html(f2s(x, "user_id"));
-            //        $("#" + dict[x.status].date).html(f2s(x, "date"));
-            //        loglist += "<div>{0} {1} {2}</div>".format(f2s(x, "date"), f2s(x, "user_id"), x.remark);
-            //    });
-            //    $("#sect_flowlist").html(loglist);
-            //});
-
-            //var btnstatus = {
-            //    "": { "modify": "h", "recall": "h", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 空白
-            //    "-1": { "modify": "s", "recall": "h", "submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 退回
-            //    "0": { "modify": "s", "recall": "h", "submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 编辑
-            //    "1": { "modify": "h", "recall": "s", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 提交
-            //    "2": { "modify": "h", "recall": "h", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "s", "inwhF": "s", }
-            //};// 审核
-            //$.each(btnstatus[matin.status], (k, v) => { v == "s" ? $("#btn_" + k).show() : $("#btn_" + k).hide() });
-            //if (matin.status == 1 && g_user.job == 8) {// 主管
-            //    $("#btn_checkT").show(); $("#btn_checkF").show();
-            //}
+			// ....这里的按钮状态还未完成
+            var btnstatus = {
+                "": { "modify": "h", "recall": "h", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 空白
+                "-1": { "modify": "s", "recall": "h", "submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 退回
+                "0": { "modify": "s", "recall": "h", "submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 编辑
+                "1": { "modify": "h", "recall": "s", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 编辑完成，提交备货
+                "2": { "modify": "h", "recall": "h", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "s", "inwhF": "s", }, // 备货人接单，开始备货
+                "3": { "modify": "h", "recall": "h", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "s", "inwhF": "s", }, // 备货完成，等待审核
+                "4": { "modify": "h", "recall": "h", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "s", "inwhF": "s", }, // 审核通过，等待发货
+                "5": { "modify": "h", "recall": "h", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "s", "inwhF": "s", }, // 发货完成，等待收货
+            };
+            $.each(btnstatus[bill.status], (k, v) => { v == "s" ? $("#btn_" + k).show() : $("#btn_" + k).hide() });
+            if (bill.status == 3 && g_user.job == 8) {// 主管
+                $("#btn_checkT").show(); $("#btn_checkF").show();
+            }
         }
 
         function RendermatoutDetail(matout) {
@@ -528,10 +560,8 @@
             if (typeof field != "string")
                 field = field.name;
             if (field == "stocker_id") return GetSub(g_users, "id", data[field]).name;
-         //   else if (field == "creater_id")
-		//	  return GetSub(g_users, "id", data[field]).name;
-         //   else if (field == "user_id")
-		//		return GetSub(g_users, "id", data[field]).name;
+			else if (field == "creater_id")	return GetSub(g_users, "id", data[field]).name;
+			else if (field == "user_id") return GetSub(g_users, "id", data[field]).name;
             else if (field == "mat_id")
 				return GetSub(g_mats.data, "id", data[field]).name;
             else if (field == "unit") return GetSub(g_mats.data, "id", data["mat_id"]).unit;

@@ -139,15 +139,30 @@ def matoutrecremove():
 @login_required
 def matoutcards():
     r = obj(result="404",fun="/matout/cards")
-    matout = "select matout.*,flow.user_id from matout,flow where matout.status in (-1,2,3,4,5) and matout.id=flow.record_id and flow.table_id=26 and flow.status=0 "
-    inrec = "select matoutrec.* from matoutrec, matout,flow where matout.status in (-1,2,3,4,5) and matout.id=flow.record_id and flow.table_id=26 and flow.status=0 and matout.id=matoutrec.matout_id "
+    #未完成的出库单且关联备货人的列（注意不是创建人）
+    matout = '''
+            select matout.*,
+                creater.user_id as creater_id, 
+                creater.date as creater_dt, 
+                stocker.user_id as stocker_id 
+            from matout,flow as creater, flow as stocker 
+            where matout.status in (-1,2,3,4,5) 
+                  and matout.id=creater.record_id and creater.table_id=28 and creater.status=0
+                  and matout.id=stocker.record_id and stocker.table_id=28 and stocker.status=2 '''
+    inrec = '''
+            select matoutrec.*, matinrec.mat_id 
+            from matoutrec, matout, matinrec,flow as stocker
+            where matout.status in (-1,2,3,4,5) 
+                and matout_id=matout.id
+                and matout_id=stocker.record_id and stocker.table_id=28 and stocker.status=2
+                and matinrec_id=matinrec.id '''
     #0编辑(正在签收) 1等待审批 2等待入库 3完成 -1退回
     if current_user.job==8: #仓库主管(查询所在仓库所有未完成的出库单)
         matout += "and matout.matwh_id=%d"%current_user.depart_id
         inrec += "and matout.matwh_id=%d"%current_user.depart_id
     elif current_user.job==9: #仓库管理员(查询创建者为自己，且未完成的出库单)
-        matout += "and matout.user_id=%d"%current_user.id
-        inrec += "and matout.user_id=%d"%current_user.id
+        matout += "and stocker.user_id=%d"%current_user.id
+        inrec += "and stocker.user_id=%d"%current_user.id
     else:
         return toret( r, msg="用户职业不对！")
     r.matouts= QueryObj(matout)
@@ -156,6 +171,18 @@ def matoutcards():
         x.subs=[ y for y in recs if y.matout_id == x.id]
     r.mfields = QueryObj(select(base.sl).where(base.c.table=="matout"))
     r.sfields = QueryObj(select(base.sl).where(base.c.table=="matoutrec"))
+    return toret(r,result=200)
+
+#读取出库单记录详细信息
+@app.route("/matout/recdetail")
+@login_required
+def matoutrecdetail():
+    params = request.args.to_dict()
+    r = obj(result="404",fun="/matout/recdetail")
+    if "id" not in params:
+        return toret(r,msg="缺少参数id")
+
+    r.data= QueryObj("select * from matoutrec,matinrec where matinrec_id=matinrec.id and matou_id="+params["id"])
     return toret(r,result=200)
 
 #更新matout状态，并产生flow记录
