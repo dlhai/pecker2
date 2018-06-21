@@ -108,7 +108,8 @@ class CLog:
         pass
 
 if __name__ == "__main__":
-    ar = ["","user_face","user_idimg","certif_image", "employ_image", "edu_image1", "edu_image2", "fault_image","dev_face","dev_img", "matin_image"]
+    ar = ["","user_face","user_idimg","certif_image", "employ_image", "edu_image1", "edu_image2", 
+          "fault_image","dev_face","dev_img", "matin_image", "matout_image"]
     newdir(["./static/uploads/"+x for x in ar])
     app.config['JSON_AS_ASCII'] = False
     #app.config['DEBUG'] = True

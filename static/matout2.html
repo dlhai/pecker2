@@ -13,13 +13,7 @@
     <script src="js/Cube.js"></script>
     <script src="js/db.js"></script>
     <script src="js/xpecker.js"></script>
-
     <script src="laydate/laydate.js"></script>
-    <style>/*为了解决BootStrap中css和layDate的css样式冲突*/
-        .laydate_box, .laydate_box * {box-sizing: content-box;}
-        .laydate_box th {text-align: center;}
-    </style>
-
     <link rel="stylesheet" href="css/matio.css" />
     <style>
         .formtitle {
@@ -30,8 +24,6 @@
             margin-left: 50px;
             text-align: center;
         }
-
-        .xTable input, .xTable select {border: 0px;}
     </style>
 </head>
 <body class="xFCsrow">
@@ -50,7 +42,8 @@
         <div class="matin xScroll" style="padding: 5px;height:100px;flex-grow: 1;">
             <header class="xFCsrow">
                 <div id="sect_creater" class="xFIfixed x2Form" style="width:300px;margin-top:50px;">
-                    <div><label>备货人</label><div id="stocker">　</div></div><div><label>备货时间</label><div id="stockdate">　</div></div>
+                    <div><label>备货人</label><div id="stocker">　</div>
+                    </div><div><label>备货时间</label><div id="stockdate">　</div></div>
                 </div>
                 <div style="text-align:center;">
                     <div id="usage" ><div class="formtitle" value="">出库单</div></div>
@@ -88,14 +81,12 @@
                 </div>
             </footer>
             <div class="buttonarray" style="margin-top:20px;margin-right:20px;border-top:2px dashed #6a923d;padding-top:30px;">
-                <button id="btn_remove" type="button" class="btn btn-primary">删除</button>
-                <button id="btn_goback" type="button" class="btn btn-primary">退回</button>
-                <button id="btn_recall" type="button" class="btn btn-primary">撤回</button>
+                <button id="btn_recall" type="button" class="btn btn-default" style="color:#aaaaaa;display">撤回</button>
+                <button id="btn_modify" type="button" class="btn btn-primary">编辑</button>
                 <div style="float: right;">
                     <div id="sect_flow" class="x2Form" style="display:inline-block;">
                         <div><label>意见</label><input id="log" style="width:400px;"/></div>
                     </div>
-                    <button id="btn_save" type="button" class="btn btn-primary">保存</button>
                     <button id="btn_submit" type="button" class="btn btn-primary">提交</button>
                     <button id="btn_checkT" type="button" class="btn btn-primary">审核通过</button>
                     <button id="btn_checkF" type="button" class="btn btn-primary">审核不通过</button>
@@ -142,57 +133,283 @@
     </script>
 
     <script type="text/javascript">
-        var g_user = parent.g_user, g_mats, g_users = [], g_clerks, g_guides, g_matout, g_matouts, g_matvenders,
+        var g_mats, g_users = [], g_clerks, g_guides, g_matout, g_matouts, g_matvenders,
             g_matouts_editing = new Array(), g_matouts_checking = new Array(), g_matouts_outwh = new Array(), g_matouts_waitrecv = new Array();
-        if (g_user == undefined)
-            g_user = GetRoleUser("仓库主管");
 
-        ReqdataS("/rd?ls=mat", "", function (mats) {g_mats = mats;});
-        Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_matvenders = res; });
-        Reqdata("/rduser?depart_table=" + GetSub(db_tbl, "name", "matwh").id + "&depart_id=" + g_user.depart.id, "", function (res2) {
-            g_clerks = res2;g_users = g_users.concat(res2.data);});
-        Reqdata("/rduser?job=" + GetSub(db_job, "name", "调度").id, "", function (res2) {
-            g_guides = res2;g_users = g_users.concat(res2.data);});
-        // 查询所有的出库单
-        Reqdata("/rdmatouts?user_id=" + g_user.id, "", function (matouts) {
-            g_matouts = matouts;
+        if (g_user == undefined) {
+            Reqdata("/curuserinf", "", function (res) {
+                g_user = res.data;
+                g_user.fields = res.fields;
+                init();
+            });
+        }
+        else {
+            init();
+        }
 
-            matouts.mdata.forEach( mdata=> {
-                // 添加到主表的子记录中
-                mdata.type = "出库单";
-				mdata.subs = matouts.rdata.fmap(rec=>{
-                    if (mdata.id == rec.matout_id)
-                        return rec;
-                });
-
-                //分类
-                if (mdata.status == 2)
-					g_matouts_editing.push(mdata);
-                else if (mdata.status == 3)
-					g_matouts_checking.push(mdata);
-                else if (mdata.status == 4) 
-					g_matouts_outwh.push(mdata);
-                else if (mdata.status == 5) 
-					g_matouts_waitrecv.push(mdata);
+        function init() {
+            $(".buttonarray button").hide();
+            $("#recs_table").on("click", function (event) {
+                var node = event.target;
+                if (node.tagName == "TD")
+                    onclickRow($(node).parent());
+            });
+            $("html").on("change", function (event) {
+                var node = event.target;
+                if (node.tagName == "SELECT")
+                    onselchg(node);
+            });
+            $(".buttonarray").on("click", function (event) {
+                var node = event.target;
+                if (node.tagName == "BUTTON")
+                    onclickbutton($(node));
             });
 
-            var tpl_matout_card = doT.template(document.getElementById('tpl_matout_card').innerHTML);
-            $("#g_matouts_editing").html(tpl_matout_card(g_matouts_editing));
-            $("#g_matouts_checking").html(tpl_matout_card(g_matouts_checking));
-            $("#g_matouts_outwh").html(tpl_matout_card(g_matouts_outwh));
-            $("#g_matouts_waitrecv").html(tpl_matout_card(g_matouts_waitrecv));
-        });
+            Reqdata("/rd?ls=mat", "", function (mats) { g_mats = mats; });
+            Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_matvenders = res; });
+            Reqdata("/user/briefs?job=(8,9)&depart_id=" + g_user.depart.id, "", function (res) { g_users = g_users.concat(res.data); }); // 本仓库所有的人
+            Reqdata("/user/briefs?job=(11,12)", "", function (res) { g_users = g_users.concat(res.data); }); // 调度
+            refresh();
+        }
+        // 查询所有的出库单
+        function refresh() {
+            Reqdata("/matin/cards", "", function (cards) {
+                g_cards = {
+                    "matouts": cards.matouts, "mfields": cards.mfields, "sfields": cards.sfields,
+                    "editing": new Array(), "checking": new Array(), "outwhing": new Array(), "waitrecv": new Array()
+                };
+                g_cards.matins.forEach((x, i) => {
+                    if (x.status == 2 || x.status == -1) g_cards.editing.push(x);
+                    else if (x.status == 3) g_cards.checking.push(x);
+                    else if (x.status == 4) g_cards.outwhing.push(x);
+                    else if (x.status == 5) g_cards.waitrecv.push(x);
+                });
+
+                var tpl_matout_card = doT.template(document.getElementById('tpl_matout_card').innerHTML);
+                $("#g_matouts_editing").html(tpl_matout_card(g_matouts_editing));
+                $("#g_matouts_checking").html(tpl_matout_card(g_matouts_checking));
+                $("#g_matouts_outwh").html(tpl_matout_card(g_matouts_outwh));
+                $("#g_matouts_waitrecv").html(tpl_matout_card(g_matouts_waitrecv));
+            });
+        }
 
         function onclickcard(This) {
-            g_matout = GetSub(g_matouts.mdata, "id", $(This).attr("id"));
-            RendermatoutDetail(g_matout);
+            g_focus = GetSub(g_cards.matouts, "id", $(This).attr("id").split("_")[1]);
+            $(".focus").removeClass("focus");
+            $("#card_" + g_focus.id + " .header").addClass("focus");
+            RenderMatout(g_focus);
         }
+
         function onNewmatout(This) {
-            g_matout = Create(g_matouts.mfields);
-            g_matout.id = 0;
-            g_matout.status = 0;
-            g_matout.subs = Array(10).fill(0).map(v => Create(g_matouts.rfields));
-            RendermatoutDetail(g_matout);
+            var u = Create(g_matouts.mfields);
+            u.matwh_id = g_user.depart.id;
+            u.status = 2;
+
+            var cnt = RenderForm4(u, g_cards.mfields, function (u, field) {
+                var fn = (typeof field == "string") ? field : field.name;
+                if (fn == "matwh_id") return g_user.depart.name;
+                if (fn == "status") return "正在备货";
+                if (fn == "source") return RenderSelect(db_matsouce, u.source);
+                return u[fn];
+            });
+
+            var dlg = new cbFormDlg("新建 出库单", "width:610px", cnt);
+            dlg.Add(xrimagelistlive([""]));
+            dlg.urlsubmit = "/matout/create";
+            dlg.closing = function (reason) {
+                if (reason == "submit") {
+                    g_focus = dlg.res.data[0];
+                    g_focus.subs = [];
+                    RenderMatin(g_focus);
+                    refresh();
+                }
+            }
+            dlg.Show();
+        }
+
+        function onclickRow(node) {
+            if (g_focus == undefined)
+                return;
+            if (g_focus.status != "2" && g_focus.status != "-1")
+                return;
+            var id = node.attr("data_id");
+            var rec = id.indexOf("row") == 0 ? Create(g_cards.sfields) : GetSub(g_focus.subs, "id", id);
+            var mat = rec.mat_id == "" ? undefined : GetSub(g_mats.data, "id", rec.mat_id);
+            var cnt = RenderForm4(rec, g_recfields, function (rec, field) {
+/*                if (field.name == "code") return mat == undefined ? "" : mat.code;
+                else if (field.name == "mat_id") return RenderSelect2(g_mats, mat == undefined ? "" : mat.id);
+                else if (field.name == "type") return mat == undefined ? "" : mat.type;
+                else if (field.name == "unit") return mat == undefined ? "" : mat.unit;
+                else if (field.name == "num") return rec.num;
+                else if (field.name == "specs") return rec.specs;
+                else if (field.name == "vender_id") return RenderSelect2(g_matvenders, rec.vender_id);
+                else if (field.name == "producedt") return rec.producedt;
+                else if (field.name == "expiredt") return rec.expiredt;
+                else if (field.name == "remark") return rec.remark;*/
+            });
+
+            var dlg = new cbFormDlg("出库记录", "width:610px", cnt);
+            if (id.indexOf("row") == 0)
+                dlg.urlsubmit = "/matout/reccreate?matwh_id=" + g_user.depart.id + "&matout_id=" + g_focus.id;
+            else {
+                dlg.urlsubmit = "/matout/recmodify?id=" + rec.id;
+                dlg.urlremove = "/matout/recremove?id=" + rec.id;
+            }
+            dlg.closing = function (reason) {
+                if (reason == "remove") {
+                    var idx = GetIdx(g_focus.subs, "id", rec.id);
+                    g_focus.subs.splice(idx, 1);
+                }
+                else if (reason == "submit") {
+                    if (id.indexOf("row") == 0)
+                        g_focus.subs.push(dlg.res.data[0]);
+                    else {
+                        var idx = GetIdx(g_focus.subs, "id", rec.id);
+                        g_focus.subs.splice(idx, 1, dlg.res.data[0]);
+                    }
+                }
+
+                if (reason == "remove" || reason == "submit") {
+                    $("#recs_table").html(RenderTable2({ fields: g_recfields, data: g_focus.subs }, "", f2sRec));
+                    var rows = g_focus.subs.length;
+                    var ss = Array(10 - rows).fill(0).map((r, i) => '<tr data_id="row' + (int(rows) + i) + '">' + Array(10).fill(0).map(c => "<td>　</td>") + "</tr>");
+                    $("#recs_table>table>tbody").append(ss);
+                }
+            }
+            dlg.Show();
+        }
+
+        function onselchg(node) {
+ /*           if ($(node).attr("name") == "mat_id") {
+                var idx = node.selectedIndex;
+                var mat_id = node.options[idx].value;
+                if (mat_id != "") {
+                    var mat = GetSub(g_mats.data, "id", mat_id);
+                    $("[name=code]").next().html(mat.code);
+                    $("[name=type]").next().html(mat.type);
+                    $("[name=unit]").next().html(mat.unit);
+                }
+                else {
+                    $("[name=code]").next().html("");
+                    $("[name=type]").next().html("");
+                    $("[name=unit]").next().html("");
+                }
+            }*/
+        }
+
+        function onclickbutton(node) {
+        /*    var btnid = $(node).attr("id");
+            if (btnid == "btn_modify") {
+                var cnt = RenderForm4(g_focus, g_cards.mfields, function (u, field) {
+                    var fn = (typeof field == "string") ? field : field.name;
+                    if (fn == "matwh_id") return g_user.depart.name;
+                    if (fn == "status") return u[fn] == "-1" ? "退回" : "正在签收";
+                    if (fn == "source") return RenderSelect(db_matsouce, u.source);
+                    return u[fn];
+                });
+
+                var dlg = new cbFormDlg("修改 入库单", "width:610px", cnt);
+                dlg.Add(xrimagelistlive([""]));
+                dlg.urlsubmit = "/matin/modify?id=" + g_focus.id;
+                dlg.urlremove = "/matin/remove?id=" + g_focus.id;
+                dlg.closing = function (reason) {
+                    if (reason == "submit") {
+                        dlg.res.data[0].subs = g_focus.subs;
+                        g_focus = dlg.res.data[0];
+                        RenderMatin(g_focus);
+                        refresh();
+                        $(".focus").removeClass("focus");
+                        $("#card_" + g_focus.id + " .header").addClass("focus");
+                    }
+                    else if (reason == "remove") {
+                        g_focus = undefined;
+                        var u = Create(g_cards.mfields);
+                        u.subs = [];
+                        u.id = 0;
+                        RenderMatin(u);
+                        refresh();
+                        $(".focus").removeClass("focus");
+                    }
+                }
+                dlg.Show();
+            }
+            else if (btnid == "btn_submit") {
+                if (g_focus.subs.length == 0) {
+                    alert("材料不能为空");
+                    return;
+                }
+                chgstatus("submit");
+            }
+            else if (btnid == "btn_recall") {
+                if (!confirm("确定要撤回吗？"))
+                    return;
+                chgstatus("recall");
+            }
+            else if (btnid == "btn_checkT") {
+                chgstatus("checkT");
+            }
+            else if (btnid == "btn_checkF") {
+                chgstatus("checkF");
+            }
+            else if (btnid == "btn_inwhT") {
+                chgstatus("inwhT");
+            }
+            else if (btnid == "btn_inwhF") {
+                chgstatus("inwhF");
+            }*/
+        }
+
+        function chgstatus(action) {
+           /* var fd = new FormData();
+            fd.append("id", g_focus.id);
+            fd.append("action", action);
+            fd.append("status", g_focus.status);
+            fd.append("note", $("#note")[0].value);
+            postform("/matin/chgstatus", fd, "", function (res) {
+                if (res.result == "200") {
+                    alert("操作成功！");
+                    refresh();
+                }
+            });*/
+        }
+
+        function RenderMatout(matout) {
+            //var ar = ["source", "code", "courier", "courier", "courierdate", "remark"];
+            //ar.forEach((x, i) => $("#" + x).html(f2s(matin, x)));
+
+            //$("#recs_table").html(RenderTable2({ fields: g_recfields, data: matin.subs }, "", f2sRec));
+            //var rows = matin.subs.length;
+            //var ss = Array(10 - rows).fill(0).map((r, i) => '<tr data_id="row' + (int(rows) + i) + '">' + Array(10).fill(0).map(c => "<td>　</td>") + "</tr>");
+            //$("#recs_table>table>tbody").append(ss);
+
+            //// 流水
+            //Reqdata("/rd?ls=flow&table_id=26&record_id=" + matin.id, "", function (flows) {
+            //    ["creater", "createrdt", "checker", "checkerdt", "inwh", "inwhdt"].map(x => $("#" + x).html("　"));
+            //    var loglist = "";
+
+            //    var dict = {
+            //        "-1": { user: "xxxxxx", date: "xxxxxxxxx" }, "0": { user: "creater", date: "createrdt" },
+            //        "1": { user: "checker", date: "checkerdt" }, "2": { user: "inwh", date: "inwhdt" }
+            //    }
+            //    flows.data.forEach((x, i) => {
+            //        $("#" + dict[x.status].user).html(f2s(x, "user_id"));
+            //        $("#" + dict[x.status].date).html(f2s(x, "date"));
+            //        loglist += "<div>{0} {1} {2}</div>".format(f2s(x, "date"), f2s(x, "user_id"), x.remark);
+            //    });
+            //    $("#sect_flowlist").html(loglist);
+            //});
+
+            //var btnstatus = {
+            //    "": { "modify": "h", "recall": "h", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 空白
+            //    "-1": { "modify": "s", "recall": "h", "submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 退回
+            //    "0": { "modify": "s", "recall": "h", "submit": "s", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 编辑
+            //    "1": { "modify": "h", "recall": "s", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "h", "inwhF": "h", }, // 提交
+            //    "2": { "modify": "h", "recall": "h", "submit": "h", "checkT": "h", "checkF": "h", "inwhT": "s", "inwhF": "s", }
+            //};// 审核
+            //$.each(btnstatus[matin.status], (k, v) => { v == "s" ? $("#btn_" + k).show() : $("#btn_" + k).hide() });
+            //if (matin.status == 1 && g_user.job == 8) {// 主管
+            //    $("#btn_checkT").show(); $("#btn_checkF").show();
+            //}
         }
 
         function RendermatoutDetail(matout) {

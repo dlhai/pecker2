@@ -16,9 +16,6 @@
     <script src="js/xpecker.js"></script>
     <script src="laydate/laydate.js"></script>
     <link rel="stylesheet" href="css/matio.css" />
-    <style>
-        .xTable input, .xTable select {border: 0px;}
-    </style>
 </head>
 <body class="xFCsrow">
     <div id="curitem" class="xFCscol xFIfixed" style="width: 300px;">
@@ -126,13 +123,13 @@
 
 
     <script type="text/javascript">
-        var g_recfields = [{ name: "code", title: "材料编号", ftype: "div", width: "90px" }, { name: "type", title: "型号", ftype: "div", width: "80px" }, 
+        var g_recfields = [{ name: "code", title: "材料编号", ftype: "div", width: "90px" }, { name: "type", title: "型号", ftype: "div", width: "80px" },
         { name: "mat_id", title: "材料名称", ftype: "select", width: "120px" },{ name: "unit", title: "计量单位", ftype: "div", width: "40px" },
         { name: "num", title: "数量", ftype: "input", width: "40px" }, { name: "specs", title: "规格", ftype: "input", width: "60px" },
-        { name: "producedt", title: "生产日期", ftype: "date", width: "80px" },{ name: "expiredt", title: "失效日期", ftype: "date", width: "80px" }, 
+        { name: "producedt", title: "生产日期", ftype: "date", width: "80px" },{ name: "expiredt", title: "失效日期", ftype: "date", width: "80px" },
 		{ name: "vender_id", title: "生产厂家", ftype: "select", width: "80px" },{ name: "remark", title: "备注", ftype: "input", width: "300px" }];
 
-        var g_mats, g_users = [], g_clerks, g_matin, g_matins, g_matvenders, g_focus;
+        var g_mats, g_users = [], g_matins, g_matvenders, g_focus;
 		var g_user = parent.g_user;
 		if (g_user == undefined) {
 			Reqdata("/curuserinf", "", function (res) {
@@ -164,18 +161,15 @@
 			});
 
 			Reqdata("/rd?ls=mat", "", function (mats) {g_mats = mats;});
-			Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_matvenders = res; });
-			Reqdata("/rduser?depart_table=" + GetSub(db_tbl, "name", "matwh").id + "&depart_id=" + g_user.depart.id, "", function (res2) {
-				g_clerks = res2;
-				g_users = g_users.concat(res2.data);
-			});
+            Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_matvenders = res; });
+            Reqdata("/user/briefs?job=(8,9)&depart_id=" + g_user.depart.id, "", function (res) { g_users = res; });
 			refresh();
 		}
 
 		// 刷新所有入库单列表
 		function refresh(){
 			Reqdata("/matin/cards", "", function (cards) {
-                g_cards = { "matins": cards.matins, "mfields": cards.mfields, "sfields": cards.sfields, 
+                g_cards = { "matins": cards.matins, "mfields": cards.mfields, "sfields": cards.sfields,
                             "editing":new Array(),"checking":new Array(),"entering":new Array()};
 				g_cards.matins.forEach((x,i)=>{
 					if (x.status == 0 || x.status == -1) g_cards.editing.push(x);
@@ -275,7 +269,8 @@
 				}
             }
             dlg.Show();
-		}
+        }
+
 		function onselchg(node){
 			if ($(node).attr("name") == "mat_id" ){
 				var idx = node.selectedIndex;
@@ -352,14 +347,15 @@
 				chgstatus("inwhT");
 			}
 			else if (btnid == "btn_inwhF" ){
-				chgstatus("inwhT");	
+				chgstatus("inwhF");
 			}
 		}
 
 		function chgstatus( action){
 			var fd = new FormData();
 			fd.append( "id", g_focus.id );
-			fd.append( "action", action );
+            fd.append("action", action);
+            fd.append("status", g_focus.status);
 			fd.append( "note", $("#note")[0].value );
 			postform("/matin/chgstatus", fd,"", function (res) {
 				if ( res.result == "200"){
@@ -383,10 +379,10 @@
                 ["creater", "createrdt", "checker", "checkerdt", "inwh", "inwhdt"].map(x => $("#" + x).html("　"));
                 var loglist = "";
 
-				var dict = {"-1":{user:"xxxxxx", date:"xxxxxxxxx" }, "0":{user:"creater", date:"createrdt" }, 
+				var dict = {"-1":{user:"xxxxxx", date:"xxxxxxxxx" }, "0":{user:"creater", date:"createrdt" },
 							"1":{user:"checker", date:"checkerdt" }, "2":{user:"inwh", date:"inwhdt" }}
                 flows.data.forEach((x,i) =>{
-                    $("#"+dict[x.status].user).html(f2s(x, "user_id")); 
+                    $("#"+dict[x.status].user).html(f2s(x, "user_id"));
 					$("#"+dict[x.status].date).html(f2s(x, "date"));
                     loglist += "<div>{0} {1} {2}</div>".format( f2s(x, "date"), f2s(x, "user_id"), x.remark );
                 });

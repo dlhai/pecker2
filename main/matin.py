@@ -80,6 +80,10 @@ def matinreccreate():
     form =request.form.to_dict()
     r = obj(result="404",fun="matin/reccreate")
 
+    if "matwh_id" not in params or params["matwh_id"]=="":
+        return toret(r,msg="matwh_id不能为空")
+    if "matin_id" not in params or params["matin_id"]=="":
+        return toret(r,msg="matin_id不能为空")
     if "mat_id" not in form or form["mat_id"]=="":
         return toret(r,msg="材料不能为空")
     if "num" not in form or form["num"]=="" or form["num"]=="0":
@@ -142,8 +146,8 @@ def matincards():
         matin += "and matin.matwh_id=%d"%current_user.depart_id
         inrec += "and matin.matwh_id=%d"%current_user.depart_id
     elif current_user.job==9: #仓库管理员(查询创建者为自己，且未完成的入库单)
-        matin += "and matin.matwh_id=%d"%current_user.id
-        inrec += "and matin.matwh_id=%d"%current_user.id
+        matin += "and flow.user_id=%d"%current_user.id
+        inrec += "and flow.user_id=%d"%current_user.id
     else:
         return toret( r, msg="用户职业不对！")
     r.matins= QueryObj(matin)
@@ -156,12 +160,12 @@ def matincards():
 
 #更新matin状态，并产生flow记录
 def chgmatin( status, form, remark ):
-    toupdate( "matin", obj(status=status), obj(id=form["id"]))
+    conn.execute(toupdate( "matin", obj(status=status), obj(id=form["id"])))
     now = datetime.datetime.now()
-    conn.execute(toinsert("flow",obj(table_id=26,record_id=u.id,status=status,user_id=current_user.id,date=now, remark=remark+" "+form["note"])))
+    conn.execute(toinsert("flow",obj(table_id=26,record_id=form["id"],status=status,user_id=current_user.id,date=now, remark=remark+" "+form["note"])))
 
 #/matin/chgstatus?id=
-@app.route("/matin/chgstatus")
+@app.route("/matin/chgstatus",methods=['POST'])
 @login_required
 def matinchgstatus():
     form =request.form.to_dict()
@@ -171,7 +175,7 @@ def matinchgstatus():
     if "status" not in form or form["status"]=="":
         return toret(r,msg="缺少参数status")
     
-    rs = QueryObj("matin", obj(id=form["id"]))
+    rs = QueryObj("select * from matin where id="+ form["id"])
     if (len(rs) == 0 ):
         return toret(r,msg="id不存在")
     if form["action"] == "submit":
@@ -190,11 +194,11 @@ def matinchgstatus():
         if rs[0].status != 1:
             return toret(r,msg="入库单状态已变更")
         chgmatin( -1, form, "审批不通过 ")
-    elif form["action"] == "btn_inwhT":
+    elif form["action"] == "inwhT":
         if rs[0].status != 2:
             return toret(r,msg="入库单状态已变更")
         chgmatin( 3, form, "入库完成 ")
-    elif form["action"] == "btn_inwhT":
+    elif form["action"] == "inwhF":
         if rs[0].status != 2:
             return toret(r,msg="入库单状态已变更")
         chgmatin( -1, form, "入库不成功 ")
