@@ -133,8 +133,13 @@
 				var m = GetSub(ar,"name",text);
 				if (m.subs!=undefined){
 					$("#modulelist2").html(m.subs.map(x=>`<div data_url="static/{url}">{name}</div>`.format(x)).join(""));
-					$("#modulelist2").children(":first-child").addClass("active");
 					$("#modulelist2").attr("data_pid", node.attr("id") );
+					$('#mainframe').attr('src', `static/`+m.subs[0].url );
+
+					$('.active').removeClass("active");
+					$("#modulelist2").children(":first-child").addClass("active");
+					node.addClass("active");
+					return;
 				}
 				else if ( (g_user.job == "2" || g_user.job == "3")&& m.name=="设备"){
 					var tpl= `<div data_url="static/`+m.url+`?id={id}">{name}</div>`;

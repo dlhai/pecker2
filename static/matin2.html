@@ -310,8 +310,6 @@
 						g_focus = dlg.res.data[0];
 						RenderMatin(g_focus);
 						refresh();
-						$(".focus").removeClass("focus");
-						$("#card_"+g_focus.id+" .header").addClass("focus");
 					}
 					else if ( reason == "remove"){
 						g_focus = undefined;
@@ -320,7 +318,6 @@
 						u.id = 0;
 						RenderMatin(u);
 						refresh();
-						$(".focus").removeClass("focus");
 					}
 				}
 				dlg.Show();
@@ -360,6 +357,11 @@
 			postform("/matin/chgstatus", fd,"", function (res) {
 				if ( res.result == "200"){
 					alert("操作成功！");
+					g_focus = undefined;
+					var u = Create(g_cards.mfields);
+					u.subs=[];
+					u.id = 0;
+					RenderMatin(u);
 					refresh();
 				}
 			});
@@ -404,7 +406,7 @@
         function f2s(data, field) {
 			if (data[field] == "" )
 				return "";
-            if (field == "user_id") return GetSub(g_users, "id", data[field]).name;
+            if (field == "user_id") return GetSub(g_users.users, "id", data[field]).name;
             else if (field == "source") return GetSub(db_matsouce, "id", data[field]).name;
 			else if (field == "carddate") return data["courierdate"].substr(5, 11);
             else if (field == "date") return data[field].substr(0, 19);

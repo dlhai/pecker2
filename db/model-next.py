@@ -115,21 +115,13 @@ def gen_matout(): #0编辑(正在签收) 1等待审批 2等待入库 3完成 -1�
     guide = GetUser("调度")
 
     #找到已完成的入库记录，并将每条随机切分
-    global matos,index;
+    global matos,index,matoutcount;
     mats = QueryObj( "select matinrec.id as id,mat_id,num from matinrec,matin where matinrec.matin_id==matin.id and matin.status==3")
     matos=[obj2(matinrec_id=x.id,mat_id=x.mat_id,num=y) for x in mats for y in rndsplit(x.num, 2,6)]
     index= [x for x in range(len(matos))]
 
     tbl_id=gettbl("matout").id
     matouts = []    #0编辑(调度创建) 1调度提交等待备货 2库管正在备货或库管创建) 3库管提交等待审批 4主管审批通过等待出库 5出库完成 -1退回
-    for i in range(rndnum(3,6)): # 为guide创建3-6个正在备货的出库单
-        matout = obj2()
-        matout.main = obj2(fault_id=10000, fault_code="10000",matwh_id=matwh.id, status=2,usage="维修用料")
-        matout.recs = [obj2(matwh_id=matwh.id,matout_id=len(matouts)+1,mat_id=x.mat_id,num=x.num, matinrec_id=x.matinrec_id) for x in rndpick(matos,index, rndnum(3,6))]
-        matout.flows = [obj2(table_id=tbl_id,record_id=len(matouts)+1,status=0,user_id=guide.id,remark="调度创建出库单"),
-                        obj2(table_id=tbl_id,record_id=len(matouts)+1,status=1,user_id=guide.id,remark="调度提交出库单"),
-                        obj2(table_id=tbl_id,record_id=len(matouts)+1,status=2,user_id=clerk.id,remark="备货出库单")]
-        matouts.append(matout)
     for i in range(rndnum(3,6)): # 为clerk创建3-6个等待备货的出库单
         matout = obj2()
         matout.main = obj2(fault_id=0, fault_code="",matwh_id=matwh.id, status=2,usage="调货")
@@ -226,8 +218,8 @@ class gen_case():
         tbl_id=gettbl("matout").id
         stocker_id = random.choice(self.matwh.clerks).id
         flows = [
-            obj2(table_id=tbl_id,record_id=matoutcount,status=0,user_id=fault.guide_id,remark="库管创建出库单"),
-            obj2(table_id=tbl_id,record_id=matoutcount,status=1,user_id=fault.guide_id,remark="库管创建出库单"),
+            obj2(table_id=tbl_id,record_id=matoutcount,status=0,user_id=fault.guide_id,remark="调度创建出库单"),
+            obj2(table_id=tbl_id,record_id=matoutcount,status=1,user_id=fault.guide_id,remark="调度提交出库单"),
             obj2(table_id=tbl_id,record_id=matoutcount,status=2,user_id=stocker_id,remark="库管开始备货"),
             obj2(table_id=tbl_id,record_id=matoutcount,status=3,user_id=stocker_id,remark="提交审批出库单"),
             obj2(table_id=tbl_id,record_id=matoutcount,status=4,user_id=self.matwh.leader.id,remark="审批通过出库单"),

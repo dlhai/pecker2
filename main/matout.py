@@ -20,7 +20,7 @@ def matoutcreate():
     [form.pop(k) for k in list(form.keys()) if k.startswith("img_") ] #去掉空的图片
     now = datetime.datetime.now()
     u=insert("matout",form)[0]
-    conn.execute(toinsert("flow",obj(table_id=26,record_id=u.id,status=u.status,user_id=current_user.id,date=now, remark="创建出库单")))
+    conn.execute(toinsert("flow",obj(table_id=28,record_id=u.id,status=u.status,user_id=current_user.id,date=now, remark="创建出库单")))
 
     # 1. 保存附件
     addits = []
@@ -68,7 +68,7 @@ def matoutremove():
     id = params["id"]
     conn.execute(todelete("matout", obj(id=id)))
     conn.execute(todelete("matoutrec", obj(matout_id=id)))
-    conn.execute(todelete("flow", obj(table_id=26,record_id=id)))
+    conn.execute(todelete("flow", obj(table_id=28,record_id=id)))
     return toret(r,result=200)
 
 
@@ -80,8 +80,6 @@ def matoutreccreate():
     form =request.form.to_dict()
     r = obj(result="404",fun="matout/reccreate")
 
-    if "matwh_id" not in params or params["matwh_id"]=="":
-        return toret(r,msg="matwh_id不能为空")
     if "matout_id" not in params or params["matout_id"]=="":
         return toret(r,msg="matout_id不能为空")
     if "matinrec_id" not in form or form["matinrec_id"]=="":
@@ -89,10 +87,14 @@ def matoutreccreate():
     if "num" not in form or form["num"]=="" or form["num"]=="0":
         return toret(r,msg="数量不能为空")
 
+    num_in = QueryObj("SELECT num FROM matinrec where id="+form["matinrec_id"])[0].num
+    num_out = QueryObj("SELECT sum(num) as num FROM matoutrec where matinrec_id="+form["matinrec_id"])[0].num
+    if atoi(form["num"])+atoi(num_out) > num_in:
+        return toret(r,msg="出库数量不能大于可用数量")
+
     #del form["code"]
     #del form["type"]
     #del form["unit"]
-    form["matwh_id"]=params["matwh_id"]
     form["matout_id"]=params["matout_id"]
     r.data = insert("matoutrec",form)
     return toret(r,result=200)
@@ -112,10 +114,15 @@ def matoutrecmodify():
     if "num" not in form or form["num"]=="" or form["num"]=="0":
         return toret(r,msg="数量不能为空")
 
+    id=params["id"]
+    num_in = QueryObj("SELECT num FROM matinrec where id="+form["matinrec_id"])[0].num
+    num_out = QueryObj("SELECT sum(num) as num FROM matoutrec where id!={0} and matinrec_id={1}".format( id,form["matinrec_id"]))[0].num
+    if atoi(form["num"])+atoi(num_out) > num_in:
+        return toret(r,msg="出库数量不能大于可用数量")
+
     #del form["code"]
     #del form["type"]
     #del form["unit"]
-    id=params["id"]
     conn.execute(toupdate("matoutrec", form, obj(id=id)))
     r.data = QueryObj("select * from matoutrec where id=%s"%id)
     return toret(r,result=200)
@@ -131,6 +138,7 @@ def matoutrecremove():
 
     id = params["id"]
     conn.execute(todelete("matoutrec", obj(id=id)))
+
     return toret(r,result=200)
 
 
@@ -145,14 +153,14 @@ def matoutcards():
                 creater.user_id as creater_id, 
                 creater.date as creater_dt, 
                 stocker.user_id as stocker_id 
-            from matout,flow as creater, flow as stocker 
-            where matout.status in (-1,2,3,4,5) 
-                  and matout.id=creater.record_id and creater.table_id=28 and creater.status=0
-                  and matout.id=stocker.record_id and stocker.table_id=28 and stocker.status=2 '''
+            from matout 
+                left join flow as creater on (matout.id=creater.record_id and creater.table_id=28 and creater.status=0) 
+                left join flow as stocker on (matout.id=stocker.record_id and stocker.table_id=28 and stocker.status=2)
+            where matout.status <6 '''
     inrec = '''
             select matoutrec.*, matinrec.mat_id 
             from matoutrec, matout, matinrec,flow as stocker
-            where matout.status in (-1,2,3,4,5) 
+            where matout.status <6
                 and matout_id=matout.id
                 and matout_id=stocker.record_id and stocker.table_id=28 and stocker.status=2
                 and matinrec_id=matinrec.id '''
@@ -182,17 +190,25 @@ def matoutrecdetail():
     if "id" not in params:
         return toret(r,msg="缺少参数id")
 
-    r.data= QueryObj("select * from matoutrec,matinrec where matinrec_id=matinrec.id and matou_id="+params["id"])
+    r.data= QueryObj('''
+                    select matoutrec.*,matinrec.mat_id, 
+                        matinrec.specs as in_specs, 
+                        matinrec.vender_id as in_vender_id,
+                        matinrec.producedt as in_producedt,
+                        matinrec.expiredt as in_expiredt,
+                        matinrec.remark as in_remark 
+                    from matoutrec,matinrec 
+                    where matinrec_id=matinrec.id and matout_id='''+params["id"])
     return toret(r,result=200)
 
 #更新matout状态，并产生flow记录
 def chgmatout( status, form, remark ):
-    toupdate( "matout", obj(status=status), obj(id=form["id"]))
+    conn.execute(toupdate( "matout", obj(status=status), obj(id=form["id"])))
     now = datetime.datetime.now()
-    conn.execute(toinsert("flow",obj(table_id=26,record_id=u.id,status=status,user_id=current_user.id,date=now, remark=remark+" "+form["note"])))
+    conn.execute(toinsert("flow",obj(table_id=28,record_id=form["id"],status=status,user_id=current_user.id,date=now, remark=remark+" "+form["note"])))
 
 #/matout/chgstatus?id=
-@app.route("/matout/chgstatus")
+@app.route("/matout/chgstatus",methods=['POST'])
 @login_required
 def matoutchgstatus():
     form =request.form.to_dict()
@@ -202,33 +218,49 @@ def matoutchgstatus():
     if "status" not in form or form["status"]=="":
         return toret(r,msg="缺少参数status")
     
-    rs = QueryObj("matout", obj(id=form["id"]))
+    rs = QueryObj("select * from matout where id="+ form["id"])
     if (len(rs) == 0 ):
         return toret(r,msg="id不存在")
     if form["action"] == "submit":
-    #    if rs[0].status != 0 and rs[0].status != -1:
-    #        return toret(r,msg="出库单状态已变更")
-    #    chgmatout( 1, form, "提交审批 ")
-    #elif form["action"] == "recall":
-    #    if rs[0].status != 1:
-    #        return toret(r,msg="出库单状态已变更")
-    #    chgmatout( 0, form, "撤回 ")
-    #elif form["action"] == "checkT":
-    #    if rs[0].status != 1:
-    #        return toret(r,msg="出库单状态已变更")
-    #    chgmatout( 2, form, "审批通过 ")
-    #elif form["action"] == "checkF":
-    #    if rs[0].status != 1:
-    #        return toret(r,msg="出库单状态已变更")
-    #    chgmatout( -1, form, "审批不通过 ")
-    #elif form["action"] == "btn_inwhT":
-    #    if rs[0].status != 2:
-    #        return toret(r,msg="出库单状态已变更")
-    #    chgmatout( 3, form, "入库完成 ")
-    #elif form["action"] == "btn_inwhT":
-    #    if rs[0].status != 2:
-    #        return toret(r,msg="出库单状态已变更")
-    #    chgmatout( -1, form, "入库不成功 ")
-    #else:
+        if rs[0].status != 0 and rs[0].status != -1:
+            return toret(r,msg="出库单状态已变更")
+        chgmatout( 1, form, "提交备货 ")
+    elif form["action"] == "store":
+        if rs[0].status != 1:
+            return toret(r,msg="出库单状态已变更")
+        chgmatout( 2, form, "开始备货 ")
+    elif form["action"] == "storeT":
+        if rs[0].status != 2:
+            return toret(r,msg="出库单状态已变更")
+        chgmatout( 3, form, "备货完成 ")
+    elif form["action"] == "storeF":
+        if rs[0].status != 2:
+            return toret(r,msg="出库单状态已变更")
+        chgmatout( -1, form, "备货不成功 ")
+    elif form["action"] == "recall":
+        if rs[0].status != 3:
+            return toret(r,msg="出库单状态已变更")
+        chgmatout( 2, form, "撤回 ")
+    elif form["action"] == "checkT":
+        if rs[0].status != 3:
+            return toret(r,msg="出库单状态已变更")
+        chgmatout( 4, form, "审批通过 ")
+    elif form["action"] == "checkF":
+        if rs[0].status != 3:
+            return toret(r,msg="出库单状态已变更")
+        chgmatout( -1, form, "审批不通过 ")
+    elif form["action"] == "outwhT":
+        if rs[0].status != 4:
+            return toret(r,msg="出库单状态已变更")
+        chgmatout( 5, form, "出库完成 ")
+    elif form["action"] == "outwhT":
+        if rs[0].status != 4:
+            return toret(r,msg="出库单状态已变更")
+        chgmatout( -1, form, "出库不成功 ")
+    elif form["action"] == "confirm":
+        if rs[0].status != 5:
+            return toret(r,msg="出库单状态已变更")
+        chgmatout( 6, form, "确认收货 ")
+    else:
         return toret(r,msg="不认识的操作类型")
     return toret(r,result=200)

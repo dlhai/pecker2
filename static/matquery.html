@@ -44,22 +44,46 @@
     </section>
 
     <script type="text/javascript">
-        var g_user = parent.g_user, g_mats, g_store, g_recs, g_venders;
-        if (g_user == undefined)
-            g_user = GetRoleUser("仓库主管");
+        var g_mats, g_store, g_focus, g_recs, g_venders;
+		var g_user = parent.g_user;
+        if (g_user == undefined) {
+            Reqdata("/curuserinf", "", function (res) {
+                g_user = res.data;
+                g_user.fields = res.fields;
+                init();
+            });
+        }
+        else {
+            init();
+        }
 
-        ReqdataS("/rd?ls=mat", "", function (mats) { g_mats = mats; });
-        Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_venders = res; });
-        Reqdata("/rdstore?matwh_id=" + g_user.depart_id, "", function (store) {
-            g_store = store;
-            g_store.fields.push({ title: "库存数量", name: "innum", twidth: "80" });
-            $("#mat_list").html(RenderTable2(g_store, "", (data, field) => {
-                if (field.name == "innum")
-                    return int(data.innum) - int(data.outnum);
-                return data[field.name];
-            }));
-            TableBindClick3(g_store.ls, onClickMatTable);
+		function init(){
+			Reqdata("/rd?ls=mat", "", function (mats) { g_mats = mats; });
+			Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_venders = res; });
+			Reqdata("/mat/store?matwh_id=" + g_user.depart_id, "", function (stores) {
+				g_store = stores;
+				GetSub(stores.fields, "name", "remark").twidth = 0;
+				GetSub(stores.fields, "name", "usage").twidth = 0;
+				GetSub(stores.fields, "name", "unit").twidth = 0;
+				stores.fields.insertaftername("unit", { title: "库存数量", name: "innum", twidth: "80" });
+				$("#mat_list").html(RenderTable2(stores, "", (data, field) => {
+					if (field.name == "innum")
+						return (int(data.allin) - int(data.allout))+data["unit"];
+					return data[field.name];
+				}));
+			});
+		}
+        $("html").on("click", function (event) {
+            var td = $(event.target);
+            if (td[0].localName == "td" && td.parents(".xTable").length > 0) {
+                var tr = td.parent();
+                g_focus = GetSub(g_store.data, "id", tr.attr("data_id"));
+                showdetail(g_focus);
+            }
         });
+
+
+
         function onClickMatTable( mat_id ){
             Reqdata("/rdstoredetail?user_id=" + g_user.id + "&mat_id=" + mat_id, "", function (storedetail) {
                 g_storedetail = storedetail;

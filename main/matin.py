@@ -133,7 +133,6 @@ def matinrecremove():
     conn.execute(todelete("matinrec", obj(id=id)))
     return toret(r,result=200)
 
-
 #读取用户的未完成入库单列表
 @app.route("/matin/cards")
 @login_required

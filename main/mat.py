@@ -69,7 +69,7 @@ def rdstore():
         return '{result:404,msg:"缺少参数 matwh_id"}'
     sql='''select * from mat left join ( select mat_id, sum(num) as allin, sum(outnum) as allout from store_view 
         where matwh_id={0} group by mat_id ) as store on mat.id = store.mat_id order by mat_id '''
-    return query4("rdstore",fields=select(base.sl).where(base.c.table=="mat"),data = sql.format(param["matwh_id"]))
+    return query5("rdstore",fields=select(base.sl).where(base.c.table=="mat"),data = sql.format(param["matwh_id"]))
 
 
 
@@ -104,8 +104,8 @@ def matstore():
     if "matwh_id" not in param:
         return '{result:404,msg:"缺少参数 matwh_id"}'
     sql='''select * from mat left join ( select mat_id, sum(num) as allin, sum(outnum) as allout from store_view 
-        where matwh_id={0} group by mat_id ) as store on mat.id = store.mat_id order by mat_id '''
-    return query5("rdstore",fields=select(base.sl).where(base.c.table=="mat"),data = sql.format(param["matwh_id"]))
+        where matwh_id={0} group by mat_id ) as store on mat.id = store.mat_id order by mat_id '''.format(param["matwh_id"])
+    return query5("rdstore",fields=select(base.sl).where(base.c.table=="mat"),data = sql)
 
 #/mat/provcreate
 @app.route("/mat/matprovcreate",methods=['POST'])
@@ -259,3 +259,54 @@ def matremove():
     conn.execute(todelete("mat", obj(id=id)))
     return toret(r,result=200)
 
+#查询某材料的库存情况（新建出库记录时用作参考）
+#/mat/store?matwh_id=&mat_id=&matinrec_id=
+#matinrec_id参数是当前行引用的入库记录，计算时要特别考虑
+#r.mat_recs 入库记录清单（由于sqlite不能处理null数据，需要在外部对确定）
+#r.mat_num_in #入库总数量，仅包含已完成的
+#r.mat_num_out #出库总数量，退回状态除外，但包含未完成的
+@app.route("/mat/storedetail")
+@login_required
+def matstoredetail():
+    params = request.args.to_dict()
+    r = obj(result="404",fun="/mat/remove")
+    if "mat_id" not in params or params["mat_id"]=="":
+        return toret(r,msg="code不正确")
+    if "matwh_id" not in params or params["matwh_id"]=="":
+        return toret(r,msg="name不正确")
+
+    matoutrec_id ="" if "matoutrec_id" not in params or params["matoutrec_id"]=="" else "and matoutrec.id!="+ params["matoutrec_id"]
+    sql_recs='''
+        SELECT *
+          FROM (
+                   SELECT matinrec.*,matin.source as matin_source, matin.code as matin_code
+                     FROM matinrec,
+                          matin
+                    WHERE matinrec.matin_id = matin.id AND 
+                          matin.status = 3 and matin.matwh_id={matwh_id} and matinrec.mat_id={mat_id}
+               )
+               AS inrec
+               LEFT JOIN
+               (
+                   SELECT matinrec_id,
+                          sum(num) AS outnum
+                     FROM matoutrec,
+                          matout
+                    WHERE matoutrec.matout_id = matout.id AND 
+                          matout.status != -1 {matoutrec_id}
+                    GROUP BY matinrec_id
+               )
+               AS outrec ON inrec.id = outrec.matinrec_id;'''.format(matwh_id=params["matwh_id"], mat_id=params["mat_id"], matoutrec_id=matoutrec_id)
+
+    sql_in='''select sum(num) as mat_num_in from matin,matinrec where matin.id = matinrec.matin_id 
+            and matin.status=3 and mat_id={mat_id} and matin.matwh_id={matwh_id}'''.format(matwh_id=params["matwh_id"], mat_id=params["mat_id"])
+    sql_out='''select sum(matoutrec.num) as mat_num_out from matoutrec,matout, matinrec 
+        where matout.id = matoutrec.matout_id and matinrec_id = matinrec.id 
+        and matout.status!=-1 and mat_id={mat_id} and matout.matwh_id={matwh_id} {matoutrec_id}
+        '''.format(matwh_id=params["matwh_id"], mat_id=params["mat_id"],matoutrec_id=matoutrec_id)
+
+    r.mat_recs = QueryObj(sql_recs)
+    r.mat_recs = list(filter(lambda x: x.num > atoi(x.outnum), r.mat_recs) )
+    r.mat_num_in = QueryObj(sql_in)[0].mat_num_in 
+    r.mat_num_out = QueryObj(sql_out)[0].mat_num_out 
+    return toret(r,result=200)
