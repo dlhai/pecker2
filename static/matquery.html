@@ -14,6 +14,12 @@
     <script src="js/Cube.js"></script>
     <script src="js/xpecker.js"></script>
     <style>
+		.in_table{padding:2px 40px 10px 40px; color:#A9A9A9;}
+		.in_table th{font-weight: normal;}
+
+    .stable>div {display: table-row;}
+	.stable>div>div{display: table-cell;padding:5px;border:1px solid black;}
+
     /*表格，需要js配合，xTable-hover是附助*/
     .xStoreTable {width: 100%;}
     .xStoreTable thead > tr > th {
@@ -40,11 +46,33 @@
     </section>
     <section class="xPanel2" style="width:100px;">
         <header class="heading">流水</header>
-        <div id="vender_list" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
+        <div id="rec_list" class="xScroll" style="padding:5px;height:100px;flex-grow: 1;"></div>
     </section>
 
     <script type="text/javascript">
-        var g_mats, g_store, g_focus, g_recs, g_venders;
+		var g_infields = [
+			{ name: "code", title: "单号"}, 
+			{ name: "source", title: "标题"},
+			{ name: "num", title: "入库数量"},
+			{ name: "store_num", title: "现存数量"},
+			{ name: "specs", title: "规格"},
+			{ name: "creater_dt", title: "填单时间"},
+			{ name: "expiredt", title: "过期时间"},
+			{ name: "vender_id", title: "供应商"},
+			{ name: "creater_id", title: "建单人"},
+		];
+		var g_outfields = [
+			{ name: "code", title: "单号"},
+			{ name: "usage", title: "标题"},
+			{ name: "num", title: "数量"},
+			{ name: "creater_dt", title: "填单时间"},
+			{ name: "recver", title: "收货人"},
+			{ name: "status", title: "状态"},
+			{ name: "creater_id", title: "建单人"},
+		];
+
+
+        var g_mats, g_store, g_focus, g_recs, g_venders, g_users;
 		var g_user = parent.g_user;
         if (g_user == undefined) {
             Reqdata("/curuserinf", "", function (res) {
@@ -59,6 +87,9 @@
 
 		function init(){
 			Reqdata("/rd?ls=mat", "", function (mats) { g_mats = mats; });
+			Reqdata("/user/briefs?job=(8,9)&depart_id=" + g_user.depart.id, "", function (res) { 
+				g_users = res.users; 
+			}); // 本仓库所有的人
 			Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_venders = res; });
 			Reqdata("/mat/store?matwh_id=" + g_user.depart_id, "", function (stores) {
 				g_store = stores;
@@ -69,58 +100,104 @@
 				$("#mat_list").html(RenderTable2(stores, "", (data, field) => {
 					if (field.name == "innum")
 						return (int(data.allin) - int(data.allout))+data["unit"];
+					else if (field.name == "alarm")
+						return data[field.name]+"天";
+					else if (field.name == "essential")
+						return data[field.name] == "1"? "是":"否";
 					return data[field.name];
 				}));
 			});
 		}
         $("html").on("click", function (event) {
             var td = $(event.target);
-            if (td[0].localName == "td" && td.parents(".xTable").length > 0) {
-                var tr = td.parent();
+			var table = td.parents(".xTable");
+            if (td[0].localName == "td" && table.length > 0 && table.attr("id")=="matstore" ) {
+			    var tr = td.parent();
                 g_focus = GetSub(g_store.data, "id", tr.attr("data_id"));
                 showdetail(g_focus);
             }
         });
 
+		function showdetail(g_focus){
+            Reqdata("/mat/storedetail?mat_id="+g_focus.mat_id, "", function (res) {
+				res.inrecs.forEach(x=>{
+					x.store_num = int(x.num)-int(res.outrecs.filter(y=>y.matinrec_id==x.id).reduce((t, y)=>int(t)+int(y.num), 0));
+				});
 
+				var html = StoreTable({"ls":"in", "data":res.inrecs, "fields":g_infields, "outrecs":res.outrecs}, "", f2s);
+			    $("#rec_list").html(html);
+            });
+		}
 
-        function onClickMatTable( mat_id ){
-            Reqdata("/rdstoredetail?user_id=" + g_user.id + "&mat_id=" + mat_id, "", function (storedetail) {
-                g_storedetail = storedetail;
-                if (g_storedetail.fields[0].name != "date")
-                    g_storedetail.fields.splice(0, 0, { title: "发生日期", name: "date", twidth: "80" });
-                var recs = new Array();
-                storedetail.inrecs.forEach(x => {
-                    recs.push(x);
-                    storedetail.outrecs.forEach(y=>{if (y.matinrec_id == x.id) recs.push(y);});
-                });
-                $("#vender_list").html(StoreRenderTable("storedetail", storedetail.fields, recs));
-            });
+		function StoreTable(res, style, fun) {
+			var attr = style == "" ? "" : ` style="`+style+`"`;
+			attr += res.ls == "" ? "" : ` id="`+res.ls+`"`;
+			attr += ` freeze="true"`;
+			var r = `<table class="xTable" ` + attr + `"><thead><tr>`;
+			res.fields.forEach(field => {
+				if (!field.hasOwnProperty("twidth"))
+					field.twidth = -1;
+				if (typeof field.twidth == "string") {
+					if (field.twidth.length > 0)
+						field.twidth = parseInt(field.twidth);
+					else
+						field.twidth = -1;
+				}
+
+				if (field.twidth == -1)
+					r += "<th>" + field.title + "</th>";
+				else if (field.twidth > 0)
+					r += "<th width=\"" + field.twidth + "\">" + field.title + "</th>";
+			});
+			r += "</tr></thead>\n";
+
+			r += "<tbody>";
+			res.data.forEach(x => {
+				r += "<tr data_id=in_\"" + x.id + "\">"; // chg
+				res.fields.forEach(field => {
+					var val = x[field.name];
+					if (field.twidth != 0) {
+						if (field.tstyle)
+							r += "<td style=\"" + field.tstyle + "\">" + (fun ? fun(x, field) : val) + "</td>";
+						else
+							r += "<td>" + (fun ? fun(x, field) : val) + "</td>";
+					}
+				});
+				r += "</tr>";
+				// chg
+				var outrecs = res.outrecs.filter(y=>y.matinrec_id==x.id);
+				if ( outrecs.length>0){
+					r+= `<tr><td colspan="`+res.fields.length+`" class="in_table">`+
+						RenderTable3({"ls":"out", "data":outrecs, "fields":g_outfields}, "", true, f2sout)+`</td></tr>`;
+				}
+			});
+			r += "</tbody></table>";
+
+			if (res.ls == "dev")
+				console.log("tableid=" + res.ls + ",idx=(" + g_TableCurRow[res.ls] + "=>-1)")
+			g_TableCurRow[res.ls] = -1;
+			return r;
+		}
+        function f2s(data, fd) {
+			fd = fd.name;
+            if (fd == "source") return GetSub(db_matsouce, "id", data[fd]).name;
+            else if (fd == "num") return data[fd]+g_focus.unit;
+			else if (fd == "store_num") return data[fd]+g_focus.unit;
+			else if (fd == "expiredt") return data[fd].substr(0, 16);
+			else if (fd == "creater_dt") return data[fd].substr(0, 16);
+            else if (fd == "vender_id") return data["vender_id"] == "" ? "" : GetSub(g_venders.data, "id", data["vender_id"]).name;
+			else if (fd == "creater_id") return data["creater_id"] == "" ? "" : GetSub(g_users, "id", data["creater_id"]).name;
+            else return data[fd];
         }
-        // 渲染表格
-        // twidth:0不显示，无此属性或为-1表示默认宽度
-        function StoreRenderTable(id, fields,recs) {
-            var r = "<table id=\"" + id + "\" class=\"xStoreTable\"><thead><tr>";
-            r += fields.map(x => {if (!x.hasOwnProperty("twidth")) x.twidth = "-1";
-                if (x.twidth == "-1") return "<th>" + x.title + "</th>";
-                else if (int(x.twidth) == 0) return "";
-                else return '<th style="width:' + x.twidth+'px">' + x.title + "</th>"
-            }).join("") +"</tr></thead>\n<tbody>";
-            recs.forEach(data => {
-                var isin = !data.hasOwnProperty("matout_id");
-                var row = '<tr class="{0}" data_id="{1}">'.format(isin ? "inrow" :"outrow",data.id);
-                row += fields.map(field => {
-                    if (int(field.twidth) == 0) return "";
-                    if (field.name == "matin_code") return "<td>" + (isin ? data["matin_code"] : data["matout_code"]) + "</td>";
-                    else if (field.name == "source") return "<td>" + (isin ? GetSub(db_matsouce, data["source"]).name : data["usage"]) + "</td>";
-                    else if (field.name == "vender_id") return "<td>" + GetSub(g_venders.data, data["vender_id"]).name + "</td>";
-                    else return "<td>" + data[field.name] + "</td>";
-                }).join("") + "</tr>";
-                r += row;
-            });
-            r += "</tbody></table>";
-            return r;
+        function f2sout(data, fd) {
+			fd = fd.name;
+            if (fd == "num") return data[fd]+g_focus.unit;
+			else if (fd == "status") return GetSub(status_matout, "id", data["status"]).name;
+			else if (fd == "creater_dt") return data[fd].substr(0, 16);
+        	else if (fd == "creater_id") return data["creater_id"] == "" ? "" : GetSub(g_users, "id", data["creater_id"]).name;
+            else return data[fd];
         }
+		
     </script>
 </body>
 </html>

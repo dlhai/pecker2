@@ -60,7 +60,7 @@ def rdmatouts():
     return query5("rdmatouts",mfields=select(base.sl).where(base.c.table=="matoutview"),mdata = sqlmatout,
                  rfields=select(base.sl).where(base.c.table=="matoutrecview"),rdata = sqlmatoutrec,)
 
-#读取库存列表(已被/mat/stare代替，二者除接口外完全相同)
+#读取库存列表(已被/mat/store代替，二者除接口外完全相同)
 #测试链接 http://127.0.0.1:5000/rdstore?matwh_id=?
 @app.route("/rdstore")
 def rdstore():
@@ -95,17 +95,6 @@ def rdstoredetail():
     return query5("rdstoredetail",fields=select(base.sl).where(base.c.table=="inrecview"),\
         inrecs = inrecs.format(user.depart_id,param["mat_id"]),outrecs = outrecs.format(user.depart_id,param["mat_id"]))
 
-
-#读取库存列表
-#测试链接 http://127.0.0.1:5000//mat/store?matwh_id=?
-@app.route("/mat/store")
-def matstore():
-    param = request.args.to_dict()
-    if "matwh_id" not in param:
-        return '{result:404,msg:"缺少参数 matwh_id"}'
-    sql='''select * from mat left join ( select mat_id, sum(num) as allin, sum(outnum) as allout from store_view 
-        where matwh_id={0} group by mat_id ) as store on mat.id = store.mat_id order by mat_id '''.format(param["matwh_id"])
-    return query5("rdstore",fields=select(base.sl).where(base.c.table=="mat"),data = sql)
 
 #/mat/provcreate
 @app.route("/mat/matprovcreate",methods=['POST'])
@@ -259,15 +248,15 @@ def matremove():
     conn.execute(todelete("mat", obj(id=id)))
     return toret(r,result=200)
 
-#查询某材料的库存情况（新建出库记录时用作参考）
-#/mat/store?matwh_id=&mat_id=&matinrec_id=
-#matinrec_id参数是当前行引用的入库记录，计算时要特别考虑
+#查询某材料的库存情况（新建、编辑出库记录时用作参考）
+#/mat/store?matwh_id=&mat_id=&matoutrec_id=
+#matoutrec_id参数是要忽略的出库记录，在出库单编辑时，当前行占用的数量也应计算为可用数量，不应统计为占用数量
 #r.mat_recs 入库记录清单（由于sqlite不能处理null数据，需要在外部对确定）
 #r.mat_num_in #入库总数量，仅包含已完成的
 #r.mat_num_out #出库总数量，退回状态除外，但包含未完成的
-@app.route("/mat/storedetail")
+@app.route("/mat/storeavailable")
 @login_required
-def matstoredetail():
+def matstoreavailable():
     params = request.args.to_dict()
     r = obj(result="404",fun="/mat/remove")
     if "mat_id" not in params or params["mat_id"]=="":
@@ -310,3 +299,37 @@ def matstoredetail():
     r.mat_num_in = QueryObj(sql_in)[0].mat_num_in 
     r.mat_num_out = QueryObj(sql_out)[0].mat_num_out 
     return toret(r,result=200)
+
+#读取库存列表
+#测试链接 http://127.0.0.1:5000/mat/store?matwh_id=?
+@app.route("/mat/store")
+def matstore():
+    param = request.args.to_dict()
+    if "matwh_id" not in param:
+        return '{result:404,msg:"缺少参数 matwh_id"}'
+    sql='''select * from mat left join ( select mat_id, sum(num) as allin, sum(outnum) as allout from store_view 
+        where matwh_id={0} group by mat_id ) as store on mat.id = store.mat_id order by mat_id '''.format(param["matwh_id"])
+    return query5("matstore",fields=select(base.sl).where(base.c.table=="mat"),data = sql)
+
+#读取库存明细
+#测试链接 http://127.0.0.1:5000/mat/storedetail?mat_id=?
+@app.route("/mat/storedetail")
+def matstoredetail():
+    param = request.args.to_dict()
+    if "mat_id" not in param:
+        return '{result:404,msg:"缺少参数 mat_id"}'
+
+    #查询入库记录的、查询出库记录的
+    inrecs='''select matinrec.*, matin.code,matin.source, flow.date as creater_dt, flow.user_id as creater_id 
+              from matinrec,matin,flow 
+              where matinrec.matin_id=matin.id and matin.status >=3
+                and matinrec.matin_id=flow.record_id and flow.table_id=26 and flow.status=0
+                and matin.matwh_id={0} and mat_id={1} order by id'''.format(current_user.depart_id,param["mat_id"])
+
+    outrecs='''select matoutrec.*, matout.code,matout.usage, matout.recver,matout.status, flow.date as creater_dt, flow.user_id as creater_id
+                from matoutrec,matinrec,matout,flow 
+                where matoutrec.matout_id=matout.id and matout.status >=5
+                    and matoutrec.matinrec_id=matinrec.id
+                    and matoutrec.matout_id=flow.record_id and flow.table_id=28 and flow.status=0 
+                    and matout.matwh_id={0} and mat_id={1} order by id'''.format(current_user.depart_id,param["mat_id"])
+    return query5("storedetail",fields=select(base.sl).where(base.c.table=="inrecview"),inrecs = inrecs,outrecs = outrecs)

@@ -197,9 +197,9 @@ if __name__ == "__main__":
 #            { name: "入库", url: "matin.html" },√ 单据附图片还未实现
 #            { name: "出库", url: "matout.html" },√ 1.从消息接受发货（来自案件）， 2.单据附图片还未实现 3.状态变更时，需要通知到调度,4.单据长时间不处理，自动设置为退回（例如出库单不退回则会占用库存）
 #            { name: "查询", subs: [
-#               { name: "库存", url: "matquery.html" }, 
-#               { name: "入库", url: "matqueryin.html" }, 
-#               { name: "出库", url: "matqueryout.html" }]},
+#               { name: "库存", url: "matquery.html" }, √ 1.出入库单状态暂未考虑
+#               { name: "入库", url: "matqueryin.html" }, √ 1.入库单状态暂未考虑
+#               { name: "出库", url: "matqueryout.html" }]},√ 1.出库单状态暂未考虑
 #            { name: "人员", url: "user_list2.html" }]
 #    },
 #    {
@@ -208,8 +208,8 @@ if __name__ == "__main__":
 #            { name: "入库", url: "matin.html" },√
 #            { name: "出库", url: "matout.html" },√
 #            { name: "查询", subs: [
-#               { name: "库存", url: "matquery.html" }, 
-#               { name: "入库", url: "matqueryin.html" },
+#               { name: "库存", url: "matquery.html" }, √
+#               { name: "入库", url: "matqueryin.html" },√
 #               { name: "出库", url: "matqueryout.html" }] }],
 #    },
 #    { "id": "10", "type": "coord", "name": "调度超级帐号", modules: [

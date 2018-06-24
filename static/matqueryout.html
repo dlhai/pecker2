@@ -37,21 +37,24 @@
 <body class="xFCsrow">
     <section class="xPanel2 xFIfixed" style="width: 600px;">
         <header>出库单列表</header>
-        <div id="g_matouts_whin" class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"></div>
+        <div id="g_listbill" class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"></div>
     </section>
     <section class="xPanel2">
         <header>出库单</header>
         <div class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;">
             <header class="xFCsrow">
                 <div id="sect_creater" class="xFIfixed x2Form" style="width:300px;margin-top:50px;">
-                    <div><label>备货人</label><div id="stocker">　</div></div><div><label>备货时间</label><div id="stockdate">　</div></div>
+                    <div><label>备货人</label><div id="stocker_id">　</div>
+                    </div><div><label>备货时间</label><div id="stocker_dt">　</div></div>
                 </div>
                 <div style="text-align:center;">
-                    <div id="usage"><div class="formtitle" value="">出库单</div></div>
-                    <div id="sect_code" class="x2Form"><div><label>单号</label><input id="code" /></div></div>
+                    <div><div class="formtitle" id="usage">出库单</div></div>
+                    <div class="x2Form" ><div><label>单号</label><div id="code"></div></div></div>
                 </div>
                 <div id="sect_request" class="xFIfixed x2Form" style="width:300px;margin-top:10px;">
-                    <div><label>故障单号</label><div>　</div></div><div><label>申请人</label><div id="creater">　</div></div><div><label>申请时间</label><div id="createdate">　</div></div>
+                    <div><label>故障单号</label><div id="fault_code">　</div></div>
+					<div><label>申请人</label><div id="creater_id">　</div></div>
+					<div><label>申请时间</label><div id="creater_dt">　</div></div>
                 </div>
             </header>
             <div id="recs_table" style="margin:20px;">
@@ -73,125 +76,147 @@
             </div>
             <footer class="xFCsrow" sstyle="margin-top:20px;">
                 <div id="sect_checker" class="xFIfixed x2Form" style="width:600px;">
-                    <div><label>备注</label><input id="remark" style="width:490px;" /></div>
-                    <div><label>审核人</label><div id="checker">　</div></div><div><label>审核时间</label><div id="checkdate">　</div></div>
+                    <div><label>备注</label><div id="remark" style="width:490px;"></div></div>
+                    <div><label>审核人</label><div id="checker_id">　</div></div><div><label>审核时间</label><div id="checker_dt">　</div></div>
                 </div>
                 <div></div>
                 <div id="sect_whout" class="xFIfixed x2Form" style="width:300px;">
-                    <div><label>发货人</label><div id="shipper">　</div></div><div><label>发货时间</label><div id="shipdate">　</div></div>
+                    <div><label>发货人</label><div id="shipper_id">　</div></div><div><label>发货时间</label><div id="shipper_dt">　</div></div>
                 </div>
             </footer>
+            <div class="buttonarray" style="margin-top:20px;margin-right:20px;border-top:2px dashed #6a923d;padding-top:30px;">
+                <button id="btn_recall" type="button" class="btn btn-default" style="color:#aaaaaa;display">撤回</button>
+                <button id="btn_modify" type="button" class="btn btn-primary">编辑</button>
+                <div style="float: right;">
+                    <div id="sect_flow" class="x2Form" style="display:inline-block;">
+                        <div><label>意见</label><input id="note" style="width:400px;"/></div>
+                    </div>
+                    <button id="btn_submit" type="button" class="btn btn-primary">完成</button>
+					<button id="btn_store"  type="button" class="btn btn-primary">开始备货</button>
+                    <button id="btn_storeT" type="button" class="btn btn-primary">备货完成</button>
+                    <button id="btn_storeF" type="button" class="btn btn-primary">备货不成功</button>
+                    <button id="btn_checkT" type="button" class="btn btn-primary">审核通过</button>
+                    <button id="btn_checkF" type="button" class="btn btn-primary">审核不通过</button>
+                    <button id="btn_outwhT" type="button" class="btn btn-primary">出库</button>
+                    <button id="btn_outwhF" type="button" class="btn btn-primary">出库不成功</button>
+                    <button id="btn_confirm" type="button" class="btn btn-primary">收货完成</button>
+                </div>
+            </div>
             <div id="sect_flowlist" style="margin-top:50px;"></div>
         </div>
     </section>
 
     <script type="text/javascript">
-        var g_user = parent.g_user, g_mats, g_users = [], g_clerks, g_guides, g_matin, g_matins;
-        if (g_user == undefined)
-            g_user = GetRoleUser("仓库主管");
+        var g_recfields = [{ name: "code", title: "材料编号", ftype: "div", width: "90px" }, { name: "type", title: "型号", ftype: "div", width: "80px" },
+			{ name: "mat_id", title: "材料名称", ftype: "select", width: "120px" },{ name: "num", title: "数量", ftype: "input", width: "40px" }, 
+			{ name: "matinrec_id", title: "规格", ftype: "none", width: "60px", twidth:"0px;" },
+			{ name: "in_specs", title: "规格", ftype: "input", width: "60px" },{ name: "in_vender_id", title: "生产厂家", ftype: "select", width: "80px" },
+			{ name: "in_producedt", title: "生产日期", ftype: "date", width: "80px" },{ name: "in_expiredt", title: "失效日期", ftype: "date", width: "80px" },
+			{ name: "in_remark", title: "备注", ftype: "div", width: "80px", twidth:"0px" },{ name: "remark", title: "备注", ftype: "input", width: "300px" }];
 
-        var g_recfields = [{ name: "code", title: "编号", ftype: "div", width: "90px" }, { name: "name", title: "材料名称", ftype: "select", width: "120px" },
-        { name: "type", title: "类型", ftype: "div", width: "80px" }, { name: "unit", title: "计量单位", ftype: "div", width: "40px" },
-        { name: "num", title: "数量", ftype: "input", width: "40px" }, { name: "specs", title: "规格", ftype: "input", width: "60px" },
-        { name: "vender_id", title: "生产厂家", ftype: "select", width: "80px" }, { name: "producedt", title: "生产日期", ftype: "date", width: "80px" },
-        { name: "expiredt", title: "失效日期", ftype: "date", width: "80px" }, { name: "remark", title: "备注", ftype: "input", width: "300px" }];
-
-
-        ReqdataS("/rd?ls=mat", "", function (mats) {g_mats = mats;});
-        Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_matvenders = res; });
-        Reqdata("/rduser?depart_table=" + GetSub(db_tbl, "name", "matwh").id + "&depart_id=" + g_user.depart.id, "", function (res2) {
-            g_clerks = res2;
-            g_users = g_users.concat(res2.data);
-        });
-        Reqdata("/rduser?job=" + GetSub(db_job, "name", "调度").id, "", function (res2) {
-            g_guides = res2;
-            g_users = g_users.concat(res2.data);
-        });
-        // 查询所有的出库单
-        Reqdata("/rd?ls=matout&matwh_id=" + g_user.depart.id, "", function (matouts) {
-            g_matouts = matouts;
-            $("#g_matouts_whin").html(RenderTable2(matouts, "", (data, field) => {
-                if (field.name == "source") return GetSub(db_matsouce, "id",data["source"]).name;
-                else return data[field.name];
-            }));
-            TableBindClick3(g_matouts.ls, onclickmatout);
-        });
-
-        function onclickmatout(matout_id) {
-            var matout = GetSub(g_matouts.data, "id", matout_id);
-            Reqdata("/rd?ls=outrecview&matout_id=" + matout_id, "", function (matoutrecs) {
-                
-                $("#usage").html('<div class="formtitle">{0}</div>'.format(f2s(matout, "usage")));
-                $("#sect_code").html(RenderPaneIn(matout, [GetSub(g_matouts.fields, "name", "code")]));
-                $("#recs_table").html(RenderTable2({ fields: g_recfields, data: matoutrecs.data }, "", f2sRec));
-
-                var remark = '<label>备注</label><div id="remark" style="width:490px;" >{0}</div>'
-                $("#remark").parent().html(remark.format(matout.remark));
+        var g_mats, g_users = [], g_matouts;
+		var g_user = parent.g_user;
+        if (g_user == undefined) {
+            Reqdata("/curuserinf", "", function (res) {
+                g_user = res.data;
+                g_user.fields = res.fields;
+                init();
             });
+        }
+        else {
+            init();
+        }
 
-            var request = `<div><label>故障单号</label><div>{fault_id}</div></div><div><label>申请人</label>
-                    <div id="creater">{creater}</div></div><div><label>申请时间</label><div id="createdate">{createdate}</div></div>`
-            if (matout.fault_code == "")
-                $("#sect_request").html(request.format({ fault_id: '　', creater: '　', createdate: '　', }));
-            else {
-                $("#sect_request").html(request.format({
-                    fault_id: matout.fault_id, creater: '　', createdate: '　'}));
-            }
+		function init() {
+			$(".buttonarray button").hide();
+
+			Reqdata("/rd?ls=mat", "", function (mats) {g_mats = mats;});
+			Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_matvenders = res; });
+			Reqdata("/user/briefs?job=(8,9)&depart_id=" + g_user.depart.id, "", function (res) { 
+				g_users = g_users.concat(res.users); 
+			}); // 本仓库所有的人
+            Reqdata("/user/briefs?job=(11,12)", "", function (res) { 
+				g_users = g_users.concat(res.users); 
+			}); // 调度
+
+			// 查询所有的出库单
+			Reqdata("/rd?ls=matout&matwh_id=" + g_user.depart.id, "", function (matouts) {
+				g_matouts = matouts;
+				$("#g_listbill").html(RenderTable2(matouts, "", (data, field) => {
+					if (field.name == "source") return GetSub(db_matsouce, "id",data["source"]).name;
+					else return data[field.name];
+				}));
+			});
+			$("#g_listbill").on("click", function (event) {
+				var node = event.target;
+				if (node.tagName == "TD"){
+					g_focus = GetSub(g_matouts.data, "id", $(node).parent().attr("data_id"));				
+					RenderMatout(g_focus);
+				}
+			});
+		}
+        function RenderMatout(bill) {
+			var ar = ["usage", "code", "fault_code", "remark"];
+			ar.forEach((x, i) => $("#" + x).html(f2s(bill, x)));
+			Reqdata( "/matout/recdetail?id="+bill.id, "", function(res){
+				bill.subs=res.data;
+				$("#recs_table").html(RenderTable2({ fields: g_recfields, data: res.data }, "", f2sRec));
+				var rows = res.data.length;
+				var ss = Array(10 - rows).fill(0).map((r, i) => '<tr data_id="row' + (int(rows) + i) + '">' + Array(9).fill(0).map(c => "<td>　</td>") + "</tr>");
+				$("#recs_table>table>tbody").append(ss);
+			});
 
             // 流水
-            Reqdata("/rd?ls=flow&table_id=" + GetTbl("matout").id + "&record_id=" + matout.id, "", function (flows) {
-                // 填流表单上的四项操作员、操作日期
-                var oper = [{ status: "0", name: "creater", date: "createdate" },{ status: "2", name: "stocker", date: "stockdate" },
-                { status: "4", name: "checker", date: "checkdate" }, { status: "5", name: "shipper", date: "shipdate" }];
-                oper.map(x => { $("#" + x.name).html("　"); $("#" + x.date).html("　"); });
+            Reqdata("/rd?ls=flow&table_id=28&record_id=" + bill.id, "", function (flows) {
+                ["creater_id", "creater_dt", "stocker_id", "stocker_dt", "checker_id", "checker_dt", "shipper_id", "shipper_dt"].map(x => $("#" + x).html("　"));
+
+                var dict = {
+                    "-1": { user: "_xxxxxxx_", date: "__xxxxxxx_" }, "0": { user: "creater_id", date: "creater_dt" },
+                    "1": { user: "__creater_", date: "__creater_" }, "2": { user: "stocker_id", date: "stocker_dt" },
+					"3": { user: "__stocker_", date: "__stocker_" }, "4": { user: "checker_id", date: "checker_dt" },
+					"5": { user: "shipper_id", date: "shipper_dt" }
+                }
                 var loglist = "";
-                $.each(flows.data, (i, x) => {
-                    $.each(oper, (j, y) => {
-                        if (x.status == 0 && matout.fault_code =="")
-                            return;
-                        if (x.status == y.status) { $("#" + y.name).html(f2s(x, "user_id")); $("#" + y.date).html(x.date); }
-                    });
-                    loglist += "<div>" + x.date + " " + f2s(x, "user_id") + " " + x.remark + "</div>";
+                flows.data.forEach((x, i) => {
+					if ( $.inArray( x.status, [0,2,4,5])){
+						$("#" + dict[x.status].user).html(f2s(x, "user_id"));
+						$("#" + dict[x.status].date).html(f2s(x, "date"));
+					}
+                    loglist += "<div>{3} {0} {1} {2}</div>".format(f2s(x, "date"), f2s(x, "user_id"), x.remark, x.status);
                 });
                 $("#sect_flowlist").html(loglist);
             });
         }
 
-        function RenderPaneIn(data, fields) {
-            var r = "";
-            for (var i = 0, field = fields[0]; i < fields.length; i++ , field = fields[i]) {
-                var attr = "";
-                if (field.ftype == "input_long")
-                    attr += 'style="width:490px;"';
-                else if (field.ftype == "textarea")
-                    attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
-
-                r += "<div><label>" + field.title + "</label><div " + attr + ">" + data[field.name] + "</div></div>";
-            }
-            return r;
-        }
-
-        function f2s(data, field) {
+        function f2s(data, field, at) {
             if (typeof field != "string")
                 field = field.name;
+			if (data[field] == "")
+				return "";
             if (field == "stocker_id") return GetSub(g_users, "id", data[field]).name;
-            else if (field == "creater_id") return GetSub(g_users, "id", data[field]).name;
-            else if (field == "user_id") return GetSub(g_users, "id", data[field]).name;
+			else if (field == "creater_id")	return GetSub(g_users, "id", data[field]).name;
+			else if (field == "user_id") return GetSub(g_users, "id", data[field]).name;
             else if (field == "mat_id") return GetSub(g_mats.data, "id", data[field]).name;
             else if (field == "unit") return GetSub(g_mats.data, "id", data["mat_id"]).unit;
+			else if (field == "date"|| field.endWith("dt")){
+				if (at == "card" )
+					return data[field].substr(0, 11);
+				else
+					return data[field].substr(0, 19);
+			}
+			
             else return data[field];
         }
 
         function f2sRec(data, field) {
-            if (field.name == "code") return GetSub(g_mats.data, "id", data["mat_id"]).code;
-            else if (field.name == "name") return GetSub(g_mats.data, "id", data["mat_id"]).name;
-            else if (field.name == "type") return GetSub(g_mats.data, "id", data["mat_id"]).type;
-            else if (field.name == "unit") return GetSub(g_mats.data, "id", data["mat_id"]).unit;
-            else if (field.name == "vender_id") return GetSub(g_matvenders.data, "id", data["vender_id"]).name;
+            if (field.name == "in_vender_id") return data["in_vender_id"] == "" ? "" : GetSub(g_matvenders.data, "id", data["in_vender_id"]).name;
+			else if (field.name == "mat_id") return data["mat_id"] == "" ? "" : GetSub(g_mats.data, "id", data["mat_id"]).name;
+			else if (field.name == "code") return data["mat_id"] == "" ? "" : GetSub(g_mats.data, "id", data["mat_id"]).code;
+            else if (field.name == "type") return data["mat_id"] == "" ? "" : GetSub(g_mats.data, "id", data["mat_id"]).type;
+            else if (field.name == "num") return data["num"]+(data["mat_id"] == "" ? "" : GetSub(g_mats.data, "id", data["mat_id"]).unit);
+			if (field.name == "date"|| field.name.endWith("dt")) return data[field.name] == "" ? "" : data[field.name].substr(0,11);
             else return data[field.name];
         }
-
-        // 表单验证的几种方法： http://www.jb51.net/article/92741.htm
     </script>
 </body>
 </html>

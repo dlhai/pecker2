@@ -318,7 +318,7 @@
                 $("#mat_type").html(mat.type);
 				$("#mat_num").html("waiting");
 				$("#in_matinrec_id").html("<option selected>waiting</option>");
-				Reqdata( "/mat/storedetail?mat_id="+ mat.id +"&matwh_id="+g_user.depart.id+"&matoutrec_id="+rec.id, "", function( res){
+				Reqdata( "/mat/storeavailable?mat_id="+ mat.id +"&matwh_id="+g_user.depart.id+"&matoutrec_id="+rec.id, "", function( res){
 					g_storerecs = res.mat_recs;
 					g_storerecs.forEach((x,i)=>x.name=GetSub(db_matsouce, "id", x.matin_source).name+"("+x.matin_code+")");
 
@@ -347,7 +347,7 @@
 					$("#mat_num").html("waiting");
 					$("#in_matinrec_id").html("<option selected>waiting</option>");
 					
-					Reqdata( "/mat/storedetail?mat_id="+ mat_id +"&matwh_id="+g_user.depart.id+"&matinrec_id="+g_focus_rec.id, "", function( res){
+					Reqdata( "/mat/storeavailable?mat_id="+ mat_id +"&matwh_id="+g_user.depart.id+"&matinrec_id="+g_focus_rec.id, "", function( res){
 						g_storerecs = res.mat_recs;
 						g_storerecs.forEach((x,i)=>x.name=GetSub(db_matsouce, "id", x.matin_source).name+"("+x.matin_code+")");
 

@@ -13,6 +13,14 @@ function xrusershow(user, fields) {
                         <img style="width:100%;height:100%;" {idimg} >
                     </div>
                 </div>`;
+	if (user.job == ) // 专家
+	{
+	
+	}
+	else{
+	
+	}
+
 
     return ui2.format({"account": user.account, face: (user.face == "" ? "" : 'src="' + user.face + '"'),
             idimg: (user.idimg == "" ? "" : 'src="' + user.idimg + '"')})

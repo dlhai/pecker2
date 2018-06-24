@@ -429,6 +429,55 @@ function RenderTable2(res, style, fun) {
     return r;
 }
 
+// 与第2版区别如下：
+// 1.增加参数freeze
+// 2.tr的data_id属性加了前缀，当页面中有多个表时，以进行区别
+// 3.重写了函数开头部分
+function RenderTable3(res, style, freeze, fun) {
+	var attr = style == "" ? "" : ` style="`+style+`"`;
+	attr += res.ls == "" ? "" : ` id="`+res.ls+`"`;
+	attr += !freeze ? "" : ` freeze="true"`;
+    var r = `<table class="xTable" ` + attr + `"><thead><tr>`;
+    res.fields.forEach(field => {
+        if (!field.hasOwnProperty("twidth"))
+            field.twidth = -1;
+        if (typeof field.twidth == "string") {
+            if (field.twidth.length > 0)
+                field.twidth = parseInt(field.twidth);
+            else
+                field.twidth = -1;
+        }
+
+        if (field.twidth == -1)
+            r += "<th>" + field.title + "</th>";
+        else if (field.twidth > 0)
+            r += "<th width=\"" + field.twidth + "\">" + field.title + "</th>";
+    });
+    r += "</tr></thead>\n";
+
+    r += "<tbody>";
+    res.data.forEach(x => {
+        r += "<tr data_id=\"" +res.ls+"_"+ x.id + "\">";
+        res.fields.forEach(field => {
+            var val = x[field.name];
+            if (field.twidth != 0) {
+                if (field.tstyle)
+                    r += "<td style=\"" + field.tstyle + "\">" + (fun ? fun(x, field) : val) + "</td>";
+                else
+                    r += "<td>" + (fun ? fun(x, field) : val) + "</td>";
+            }
+        });
+        r += "</tr>";
+    });
+    r += "</tbody></table>";
+
+    if (res.ls == "dev")
+        console.log("tableid=" + res.ls + ",idx=(" + g_TableCurRow[res.ls] + "=>-1)")
+    g_TableCurRow[res.ls] = -1;
+    return r;
+}
+
+
 function GetCurRowDataID( tableid ){
 	var row = g_TableCurRow[tableid];
 	if ( row == -1 )
@@ -453,7 +502,8 @@ function SetCurRow(tableid, idx) {
 //点击反色
 $("html").on("click", function (event) {
     var node = $(event.target);
-    if (node[0].localName == "td" && node.parents(".xTable").length > 0) {
+	var table = node.parents(".xTable");
+    if (node[0].localName == "td" && table.length > 0  && table.attr("freeze")==undefined ) {
         node = node.parent();
         var tbody = node.parent();
         var tag = tbody[0].localName;
