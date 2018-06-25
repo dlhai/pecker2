@@ -13,15 +13,6 @@ function xrusershow(user, fields) {
                         <img style="width:100%;height:100%;" {idimg} >
                     </div>
                 </div>`;
-	if (user.job == ) // 专家
-	{
-	
-	}
-	else{
-	
-	}
-
-
     return ui2.format({"account": user.account, face: (user.face == "" ? "" : 'src="' + user.face + '"'),
             idimg: (user.idimg == "" ? "" : 'src="' + user.idimg + '"')})
         + RenderPane3(user, fields, ValToView);
@@ -31,7 +22,7 @@ function ValToView(user, field) {
     var name = field.name ? field.name : field;
     if (name == "sex") return GetSub(db_sex, "id", user.sex).name;
     else if (name == "job") return GetSub(db_job, "id", user.job).name;
-    else if (name == "depart_id") return GetSub(g_departs.data, "id", user.depart_id).name;
+    else if (name == "depart_id") return user.depart_id == "0" || user.depart_id == "" ? "" : GetSub(g_departs.data, "id", user.depart_id).name;
     else return user[name];
 }
 
@@ -187,7 +178,7 @@ function onuseradd() {
         newuser.depart_id = g_user.depart_id;
         newuser.depart_table = g_user.depart_table;
         var dlg2 = new cbDlg("新建 用户", "width:900px");
-        dlg2.Add(`<form id="form_useredit" style="height:350px;">` + xruserlive(newuser, g_user.fields) + `</form>`);
+        dlg2.Add(`<form id="form_useredit" style="height:350px;">` + xruserlive(newuser, g_users.fields) + `</form>`);
         dlg2.Show();
 		dlg2.user = newuser;
         dlg2.submit = function (dlg) {
@@ -202,7 +193,7 @@ function onuseradd() {
 function onuseredit() {
     var dlg = new cbDlg("编辑 用户", "width:900px");
     dlg.btndel = true;
-	dlg.Add(`<form id="form_useredit" style="height:350px;">` + xruserlive(g_focus, g_user.fields) + `</form>`);
+	dlg.Add(`<form id="form_useredit" style="height:350px;">` + xruserlive(g_focus, g_users.fields) + `</form>`);
     dlg.Show();
 	dlg.user = g_focus;
     dlg.submit = function (dlg) {

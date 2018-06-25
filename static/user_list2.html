@@ -66,8 +66,8 @@
 		function init() {
 			Reqdata("/rd?ls=config&type=ethnic", "", function (res) { g_ethnic = res.data; });
 			if (isInArray(["1", "4", "7"], g_user.job))
-				Reqdata("/rd?ls=" + { "1": "winder", "4": "devwh", "7": "matwh" }[g_user.job], "", function (res) { g_departs = res; });
-			
+                Reqdata("/rd?ls=" + { "1": "winder", "4": "devwh", "7": "matwh" }[g_user.job], "", function (res) { g_departs = res; });
+
 			refresh();
 			onclickpane($(".live")[0]);
 		};
@@ -75,7 +75,36 @@
 		function refresh(){
 			Reqdata("/user/staff", "", function (res) {
 				g_users = res;
-				g_users.ls="usertable"
+                g_users.ls = "usertable"
+
+                // 如果是三类超级用户(风场、仓库、驻地)
+                if (isInArray(["1", "4", "7"], g_user.job)) {// 所在单位可编辑
+                    var fd = GetSub(g_users.fields, "name", "depart_id");
+                    fd.twidth = "100px";
+                    fd.ftype = "selecttree";
+                }
+                else if (g_user.job <= 9) {// 所在单位只读
+                    var fd = GetSub(g_users.fields, "name", "depart_id");
+                    fd.twidth = "100px";
+                    fd.ftype = "div";
+                }
+                else {// 隐藏所在单位	
+                    var fd = GetSub(g_users.fields, "name", "depart_id");
+                    fd.twidth = 0;
+                    fd.ftype = "none";
+                }
+
+                if (g_user.job == 13) {// 专家超级帐号，打开专长
+                    var fd = GetSub(g_users.fields, "name", "skill");
+                    fd.twidth = "100px";
+                    fd.ftype = "multiselect";
+                }
+                else {
+                    var fd = GetSub(g_users.fields, "name", "skill");
+                    fd.twidth = "0";
+                    fd.ftype = "none";
+                }
+
 				$("#userlist").html(RenderTable2(g_users, undefined, ValToView));
 				if ( g_focus != undefined){
 					var select = "#{tid}>tbody>[data_id={id}]".format({tid:g_users.ls, id:g_focus.id});
