@@ -151,40 +151,31 @@ def publish():
     rec = obj()
     r = obj(result="404",fun="publish")
 
-    if "board" not in params:
-        r.msg="缺少参数 board"
+    if "board" not in params or params["board"]=="":
+        r.msg="板块不能为空"
         return tojson(r)
     rec.board = params["board"]
 
     htm = form["body"]
     rec.body = htm.replace("'", "''") #sql字符串边界转义
-    if rec.board != "4":
-        if "title" not in form:
-            r.msg="缺少参数 title"
-            return tojson(r)
+    if rec.board != "4": #4是什么板块？
+        if "title" not in form or form["title"]=="":
+            return toret(r, msg="标题不能为空")
+        if "label" not in form or form["label"]=="":
+            return toret(r, msg="标签不能为空")
+        if "brief" not in form or form["brief"]=="":
+            return toret(r, msg="摘要不能为空")
         rec.title = form["title"]
-        if rec.title == "":
-            r.msg="标题不能为空"
-            return tojson(r)
-
-        if "label" not in form:
-            r.msg="缺少参数 label"
-            return tojson(r)
         rec.label = form["label"]
-        if rec.label == "":
-            r.msg="缺少参数 label"
-            return tojson(r)
+        rec.brief = form["brief"]
+
         if len(rec.body) < 50:
             r.msg="内容不能少于50字节"
             return tojson(r)
     else:
-        if "writing_id" not in form:
-            r.msg="缺少参数 writing_id"
-            return tojson(r)
+        if "writing_id" not in form or  form["writing_id"]=="":
+            return toret(r, msg="缺少参数 writing_id")
         rec.writing_id = form["writing_id"]
-        if rec.writing_id == "":
-            r.msg="writing_id不能为空"
-            return tojson(r)
         if len(rec.body) < 20:
             r.msg="内容不能少于20字节"
             return tojson(r)

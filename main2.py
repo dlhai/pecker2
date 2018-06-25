@@ -240,3 +240,12 @@ if __name__ == "__main__":
 #       { name: "记录", url: "repairlog.html" }] },
 #];
 
+#chglog:
+#2018/6/25
+#1.main2.py:首行utf8 改为utf-8，utf8好似系统不认。在某些情况下，可能引起导入的库函数不能被识别，例如sqlalchemy的create_engine
+#2.cube.css的x4Tree少点错误，问题现象：在coorddlg弹出树时，宽度不能随内容扩展问题
+#3.修改list_writings.html、view_user.html显示brief
+#4.在发表文章处，增加brief输入框
+#5.发表文章成功时，刷新当前页面(即：location.reload())
+#6.修正blog.js多处提示框"xx成功"未加result="200"判断
+#7.在db.xlsx中，摘要生成改为choice(data("_songci").data)，这是为了避免采用rnditem:_songci长度被截断，再次生成数据时，需要验证是否有效。

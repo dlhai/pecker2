@@ -57,8 +57,10 @@ function f_message(user_id,user_name) {
 		fd.append( "body", value_content );
 
 		postform('/msgto?type=0&user_id='+user_id, fd, "", function(res){
-			alert('留言成功');
-		    thisdlg.closedlg();
+			if (res.result == "200"){
+				alert('留言成功');
+				thisdlg.closedlg();
+			}
 		});
     };
 }
@@ -72,8 +74,10 @@ function f_replay(writing_id) {
 	fd.append( "body", value_content );
 
 	postform('/publish?board=4', fd, "",function(res){
-		alert('评论成功');
-		location.reload();
+		if (res.result == "200"){
+			alert('评论成功');
+			location.reload();
+		}
 	});
 }
 
@@ -86,6 +90,7 @@ function f_writing() {
 		<div><label>标题</label><input id="title" style="width:500px;"/></div>
 		<div><label>分类</label><div id="board">`+ board+`</div></div>
 		<div><label>标签</label><div id="label">`+ label+`</div></div>
+		<div><label>摘要</label><input id="brief" style="width:500px;"/></div>
 		</form><textarea id="kewriting" style="width:100%;height:400px;"></textarea></div>
 		`
 	dlg.Add(content);
@@ -103,6 +108,7 @@ function f_writing() {
 
 
         fd.append("title", $("#title").val());
+        fd.append("brief", $("#brief").val());
         var board = "";
         $("#board").find("input").each(function () {
             if ($(this).prop("checked") == true)
@@ -123,8 +129,11 @@ function f_writing() {
 		fd.append( "body", value_content );
 
 		postform('/publish?board='+board, fd, "",function(res){
-			alert('发表成功');
-		    thisdlg.closedlg();
+			if (res.result == "200") {
+				alert('发表成功');
+				thisdlg.closedlg();
+				location.reload();
+			}
 		});
     };
 }

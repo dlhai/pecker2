@@ -543,23 +543,39 @@ $("html").on("click", function (event) {
 });
 
 //按钮下拉菜单，css  .xCombox .xMenu
+//<div class="xCombox">
+//    <span>msg to show</span>
+//    <div class="xMenu" multi>
+//        <div>a</div>
+//        <div>b</div>
+//        <div class="selected">c</div>
+//        <div>d</div>
+//    </div>
+//</div>
 $("html").on("click", function (event) {
     var node = $(event.target);
-    if (node.hasClass("xCombox")) { // 先看是否自己
+    if (node.hasClass("xCombox")) { // 在xCombox上
         var pop = node.children(".xMenu");
         pop.toggle();
         $(".xMenu").each((i, n) => { if (pop[0] != n) $(n).hide(); });// 关闭其它菜单
     }
     else if (node.parents(".xCombox").length > 0) {
-        if (node.hasClass(".xMenu")) { //点在菜单背景上  
+        if (node.hasClass(".xMenu")) { //点在菜单背景上
         }
         else if (node.parents(".xMenu").length > 0) { //点在菜单子项上
+			var menu = node.parents(".xMenu");
             var span = node.parents(".xCombox").children("span");
-            span.html(node.html());
-            span.attr("id", node.attr("id"));
+			if (menu.attr("multi") == undefined ){
+				span.html(node.html());
+				span.attr("id", node.attr("id"));
+			}
+			else{
+				node.toggleClass( "selected" );
+				span.html(menu.children( ".selected" ).toArray().map(x=>$(x).html()).join(","));
+			}
             node.parents(".xMenu").hide();
         }
-        else { //点在xCombox的其他子项上
+        else { //在xCombox的子项上（不包括xMenu）,例如span
             var cbx = node.parents(".xCombox");
             var pop = cbx.children(".xMenu");
             pop.toggle();
@@ -567,7 +583,7 @@ $("html").on("click", function (event) {
         }
     }
     else {
-        $(".xMenu").each((i, n) => { $(n).hide(); }); // 关闭所有菜单
+        $(".xMenu").each((i, n) => { $(n).hide(); }); // 不在xCombox内，关闭所有菜单
     }
 });
 
