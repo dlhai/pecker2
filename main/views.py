@@ -129,8 +129,7 @@ def rdfault():
     if "guide_id" not in param:
         return '{result:404,msg:"缺少参数 guide_id"}'
 
-    #查询入库记录的、查询出库记录的
     sql='''select fault.*,user.name as report_name, winder.name as winder_name from fault,winder,user 
         where fault.report_id= user.id and fault.winder_id=winder.id and guide_id='''+param["guide_id"]
-    return query4("rdfault",fields=select(base.sl).where(base.c.table=="fault"), data = sql)
+    return query5("rdfault",fields=select(base.sl).where(base.c.table=="fault"), data = sql)
 

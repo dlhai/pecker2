@@ -24,15 +24,20 @@
 </head>
 <body class="xFCsrow">
     <section class="xPanel2 xFIfixed" style="width:300px;">
-        <header>任务列表<div style="float: right;"><a href="#">添加</a></div></header>
+        <header>任务列表<div style="float: right;"></header>
         <div id="troublelist" class="xScroll" style="height:100px;flex-grow: 1;"></div>
     </section>
     <section class="xPanel2" style="width: 700px; max-width:900px;">
         <header>案件处理</header>
         <div style="height:100px;flex-grow: 1;padding:0px;">
-            <details id="fault" open class="xDetail"><summary style="border-top:0px;">报修</summary>
-            </details>
-            <details open class="xDetail"><summary>准备</summary><div id="prepare"></div></details>
+            <details open class="xDetail"><summary style="border-top:0px;">报修<div id="faultedit" style="float: right;"><a href="onclickfaultedit()">编辑</a><a href="onclickfaultsubmit()">提交</a></div></summary><div id="fault"></div></details>
+            <details open class="xDetail"><summary>准备</summary><div id="prepare" style="width:100%;display:table;">
+			<div style="display:table-column-group"><div style="display:table-column;width:100px;"></div><div style="display:table-column"></div></div>
+	  		<div style="display:table-row"><div style="display:table-cell;">00</div><div style="display:table-cell">01</div></div>
+			<div style="display:table-row"><div style="display:table-cell;">10</div><div style="display:table-cell">11</div></div>
+			<div style="display:table-row"><div style="display:table-cell;">20</div><div style="display:table-cell">21</div></div>
+			<div style="display:table-row"><div style="display:table-cell;">30</div><div style="display:table-cell">31</div></div>
+			</div></details>
             <details open class="xDetail"><summary>维修<div style="float: right;"><a href="#">添加</a></div></summary><div id="repair_log"></div></details>
             <details open class="xDetail"><summary>完工</summary><div id="complete"></div></details>
         </div>
@@ -52,7 +57,7 @@
 
 <script type="text/javascript">
     function crd_card(obj) {
-        var tpl = `<div class="card" code="{code}">
+        var tpl = `<div class="card" data_id="{id}">
                 <div class="header">
                     <div class="type">报修单</div>
                     <div class="title">{type}</div>
@@ -67,39 +72,58 @@
         return tpl.format(obj);
     }
 
-    function crd_render_fault(obj, fields) {
-        var r = '<div class="x2Form narrow">' + RenderPane2(obj, fields) +'</div>';
-        var tpl_remark = `<div id="remark" class="xRndAngle" style="margin:10px;margin-top:5px; padding:5px 10px;">{0}</div>`
-        r += tpl_remark.format(obj.remark);
+    function crd_render_fault(fault, fields) {
+        var r = '<div class="x2Form narrow">' + RenderPane2(fault, fields) +'</div>';
+		if ( fault.imgs.length == 0 )
+			fault.imgs =[{"name":"img/blank.png"}];
+        r+= `<div class="xHImgList" style="margin:10px;">`+fault.imgs.map(x=>`<img src="`+x.name+`"/>`)+`</div>`;
+        r+= `<div id="remark" class="xRndAngle" style="margin:10px;margin-top:5px; padding:5px 10px;">{0}</div>`.format(fault.remark);
         return r;
     }
 </script>
 
 <script type="text/javascript">
-    var g_cursel = -1;
-    var g_user = parent.g_user, faultlist = [];
-    if (g_user == undefined)
-        g_user = GetRoleUser("调度");
+    var card, g_focus, g_faults;
+	var g_user = parent.g_user;
+	if (g_user == undefined) {
+		Reqdata("/curuserinf", "", function (res) {
+			g_user = res.data;
+			g_user.fields = res.fields;
+			init();
+		});
+	}
+	else{
+		init();
+	}
 
-    Reqdata("/rdfault?guide_id=" + g_user.id, "", function (res) {
-        faultlist = res;
-        faultlist.fieldsshow = Clone(faultlist.fields);
-        GetSub(faultlist.fieldsshow, "name", "report_id").name = "report_name";
-        GetSub(faultlist.fieldsshow, "name", "winder_id").name = "winder_name";
-        faultlist.fieldsshow.splice(GetIdx(faultlist.fieldsshow, "name", "remark" ),1);
-        $("#troublelist").html((faultlist.data.map(x => crd_card(x)).join("")));
-        $(".card").click(renderdetail);
-    });
+	function init(){
+		Reqdata("/rdfault?guide_id=" + g_user.id, "", function (res) {
+			g_faults = res;
+			GetSub(g_faults.fields, "name", "remark").ftype="none";
+			$("#troublelist").html((g_faults.data.map(x => crd_card(x)).join("")));
+			$(".card").on("click", onclickcard);
+		});
+	}
 
-    function renderdetail()
+    function onclickcard(event)
     {
-        if (g_cursel != -1)
-            $(this).parent().children(":nth-child(" + g_cursel + ")").children(".header").css("background", "linear-gradient(to bottom, rgba(192,215,140,1) 0%,rgba(118,170,73,1) 100%)");
-        g_cursel = $(this).index()+1;
-        $(this).children(".header").css("background", "linear-gradient(to bottom, rgba(233,209,154,1) 0%,rgba(208,157,80,1) 100%)");
+		// 切换焦点
+        if (card != undefined)
+            card.children(".header").css("background", "linear-gradient(to bottom, rgba(192,215,140,1) 0%,rgba(118,170,73,1) 100%)");
+		card = $(event.target).parents(".card");
+        card.children(".header").css("background", "linear-gradient(to bottom, rgba(233,209,154,1) 0%,rgba(208,157,80,1) 100%)");
+		g_focus=GetSub( g_faults.data, "id", card.attr("data_id") );
+		if (g_focus.status == 0 )
 
-        var fault = faultlist.data[g_cursel];
-        $("#fault").html(crd_render_fault(fault, faultlist.fieldsshow));
+		// 案件信息
+		Reqdata("/rd?ls=addit&type=fault_image&ref_id=" + g_focus.id, "", function (res) {
+			g_focus.imgs = res.data;
+	        $("#fault").html(crd_render_fault(g_focus, g_faults.fields));
+		});
+
+
+		return;
+
         //Reqdata("/rd?ls=addit&type=faultspot&ref_id=" + fault.id, "", function (res) { renderimagelist() }
         Reqdata("/rd?ls=link&type=f_experts&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });
         Reqdata("/rd?ls=addit&type=eval1rep&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });
@@ -139,6 +163,14 @@
             $(this).siblings(".x3Doc-menu").addClass("x3Doc-click");
         });
     }
+
+	function onclickfaultedit(){
+
+	}
+
+	function onclickfaultsubmit(){
+
+	}
 
     function GenDoc( name, auther, lband, rband )
     {
