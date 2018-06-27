@@ -20,6 +20,42 @@
     <style type="text/css">
         .narrow{}
         .narrow>div>div:first-of-type{width: 165px;}
+
+		.frozenleft{
+			display: flex;
+			flex-direction: row;
+			align-items: baseline;
+		}
+		.frozenleft>label {
+			flex-shrink: 0;
+			flex-grow: 0;
+			margin:5px;
+			margin-left:10px;
+			width:56px;
+		}
+		.frozenleft>div {
+			flex-grow: 1;
+			margin: 5px;
+			padding: 5px 10px;
+		}
+		.buttonright{
+			display: flex;
+			flex-direction: row;
+			align-items: flex-start;
+			
+		}
+		.buttonright>div{border:1px solid #dddddd;border-radius: 4px;padding: 5px;}
+		.buttonright>div:first-of-type {
+			flex-grow: 1;
+			min-height:30px;
+		}
+		.buttonright>div:last-of-type {
+			flex-shrink: 0;
+			flex-grow: 0;
+			width: 35px;
+			text-align:center;
+		}
+		
     </style> 
 </head>
 <body class="xFCsrow">
@@ -31,13 +67,7 @@
         <header>案件处理</header>
         <div style="height:100px;flex-grow: 1;padding:0px;">
             <details open class="xDetail"><summary style="border-top:0px;">报修<div id="faultedit" style="float: right;"><a href="onclickfaultedit()">编辑</a><a href="onclickfaultsubmit()">提交</a></div></summary><div id="fault"></div></details>
-            <details open class="xDetail"><summary>准备</summary><div id="prepare" style="width:100%;display:table;">
-			<div style="display:table-column-group"><div style="display:table-column;width:100px;"></div><div style="display:table-column"></div></div>
-	  		<div style="display:table-row"><div style="display:table-cell;">00</div><div style="display:table-cell">01</div></div>
-			<div style="display:table-row"><div style="display:table-cell;">10</div><div style="display:table-cell">11</div></div>
-			<div style="display:table-row"><div style="display:table-cell;">20</div><div style="display:table-cell">21</div></div>
-			<div style="display:table-row"><div style="display:table-cell;">30</div><div style="display:table-cell">31</div></div>
-			</div></details>
+            <details open class="xDetail" id="prepare" ><summary>准备</summary></details>
             <details open class="xDetail"><summary>维修<div style="float: right;"><a href="#">添加</a></div></summary><div id="repair_log"></div></details>
             <details open class="xDetail"><summary>完工</summary><div id="complete"></div></details>
         </div>
@@ -80,6 +110,14 @@
         r+= `<div id="remark" class="xRndAngle" style="margin:10px;margin-top:5px; padding:5px 10px;">{0}</div>`.format(fault.remark);
         return r;
     }
+    function rd_bottle(id, cnt) {
+        var r = `<div id="`+id+`"class="buttonright"><div>` + cnt +`</div><div>•••</div></div>`;
+        return r;
+    }
+    function rd_usernail(user) {
+		var tpl = `<div class="SmallHead xNail2" style="display: inline-block"><img src="{face}"/>【{prof}】{name}</div>`;
+        return tpl.format(user);
+    }
 </script>
 
 <script type="text/javascript">
@@ -100,6 +138,7 @@
 		Reqdata("/rdfault?guide_id=" + g_user.id, "", function (res) {
 			g_faults = res;
 			GetSub(g_faults.fields, "name", "remark").ftype="none";
+			GetSub(g_faults.fields, "name", "winder_id").name="winder_name";
 			$("#troublelist").html((g_faults.data.map(x => crd_card(x)).join("")));
 			$(".card").on("click", onclickcard);
 		});
@@ -113,7 +152,10 @@
 		card = $(event.target).parents(".card");
         card.children(".header").css("background", "linear-gradient(to bottom, rgba(233,209,154,1) 0%,rgba(208,157,80,1) 100%)");
 		g_focus=GetSub( g_faults.data, "id", card.attr("data_id") );
-		if (g_focus.status == 0 )
+		$("#prepare").children("div").remove();
+		if (g_focus.status == 0 ){
+		
+		}
 
 		// 案件信息
 		Reqdata("/rd?ls=addit&type=fault_image&ref_id=" + g_focus.id, "", function (res) {
@@ -121,11 +163,22 @@
 	        $("#fault").html(crd_render_fault(g_focus, g_faults.fields));
 		});
 
+        Reqdata("/case/listexpert?fault_id=" + g_focus.id, "", function (res) {
+			res.users.forEach(x=>x.prof=GetSub(db_job, "id", x.job).name);
+			var html = `<div class="frozenleft"><label>专家组</label><div>`+rd_bottle("expert_list", res.users.map(x=>rd_usernail(x)).join(""))+"</div></div>"
+			$("#prepare").append(html);
+			return ;
+		});
+
+        Reqdata("/case/listengneer?fault_id=" + g_focus.id, "", function (res) {
+			res.users.forEach(x=>x.prof=GetSub(db_job, "id", x.job).name);
+			var html = `<div class="frozenleft"><label>维修队</label><div>`+rd_bottle("engneer_list", res.users.map(x=>rd_usernail(x)).join(""))+"</div></div>"
+			$("#prepare").append(html);
+			return ;
+		});
 
 		return;
 
-        //Reqdata("/rd?ls=addit&type=faultspot&ref_id=" + fault.id, "", function (res) { renderimagelist() }
-        Reqdata("/rd?ls=link&type=f_experts&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });
         Reqdata("/rd?ls=addit&type=eval1rep&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });
         Reqdata("/rd?ls=addit&type=eval2rep&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });
         Reqdata("/rd?ls=addit&type=repairprog&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });

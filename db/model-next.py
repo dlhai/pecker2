@@ -342,7 +342,7 @@ class gen_case():
                 cols[ "status"] = 3  #3正在维修（维修方案完成）
         
             if i>=14:#维修队
-                self.add_data("link", [ obj2(type="repairteam",a_id=fault.id, b_id=x.id, name="", remark="", date=rnddatespan(fault.reporttime,10,14) ) for x in repairteam])
+                self.add_data("link", [ obj2(type="f_team",a_id=fault.id, b_id=x.id, name="", remark="", date=rnddatespan(fault.reporttime,10,14) ) for x in repairteam])
             if i>=15:#维修用料单（8种状态各一个）
                 matouts = [self.create_matout( fault, status) for status in [0,1,2,3,-1,4,5,6]]
                 conn.execute(tbl_matout.insert(),[dict_matout(x.main) for x in matouts])

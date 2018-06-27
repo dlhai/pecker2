@@ -98,6 +98,7 @@ from main.dev import *
 from main.mat import *
 from main.matin import *
 from main.matout import *
+from main.case import *
 
 class CLog:
     def write(data):

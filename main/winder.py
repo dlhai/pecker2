@@ -163,39 +163,3 @@ def efanremove():
     conn.execute(todelete("leaf", obj(efan_id=id)))
     return toret(r,result=200)
 
-#/case/createfault
-@app.route("/case/createfault",methods=['POST'])
-@login_required
-def casecreatefault():
-    params = request.args.to_dict()
-    form =request.form.to_dict()
-    files = request.files.to_dict()
-
-    r = obj(result="404",fun="/case/createfault")
-    if "code" not in form or form["code"]=="":
-        return toret(r,msg="缺少参数code")
-
-    if "devices" not in form or form["devices"]=="":
-        return toret(r,msg="报修设备不能为空")
-
-    now = datetime.datetime.now()
-    devices = [obj( type="faultefan",b_id=x,date=now) for x in form["devices"].split(",")]
-    del form["devices"]
-    [form.pop(k) for k in list(form.keys()) if k.startswith("img_") ]
-
-    conn.execute(toinsert("fault",form))
-    u = QueryObj("select * from fault where id in (select max(id) from fault)")[0]
-    conn.execute(toinsert("link",[obj( x, a_id=u.id) for x in devices]))
-
-    # 1. 保存附件
-    addits = []
-    idx = 0
-    fmt = "./uploads/fault_image/fault_{id}_{idx}{ext}"
-    for k,v in files.items(): 
-        fname = fmt.format(id=u.id, idx=idx, ext=os.path.splitext(v.filename)[1] )
-        addits.append(obj(type="fault_image",ref_id=u.id,name=fname,user_id=current_user.id, date=now))
-        v.save("./static/"+fname)
-        idx += 1
-    if len(addits)>0:
-        conn.execute(toinsert("addit",addits))
-    return toret(r,result=200)
