@@ -262,6 +262,17 @@ var status_matout = [
     { "id": "-1", "name": "退回" },
 ]
 
+var status_matout = [
+    { "id": "0", "name": "新建" },
+    { "id": "1", "name": "调度提交" },
+    { "id": "2", "name": "库管备货" },
+    { "id": "3", "name": "等待审批" },
+    { "id": "4", "name": "等待发货" },
+    { "id": "5", "name": "等待确认" },
+    { "id": "6", "name": "对方已收" },
+    { "id": "-1", "name": "退回" },
+]
+
 var db_tbl = [
     { "id": "1", "name": "base", "title": "定义" },
     { "id": "2", "name": "link", "title": "一对多引用" },

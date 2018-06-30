@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="css/bootstrap.css"/>
     <script src="js/bootstrap.js"></script>
     <script type="text/javascript" src="js/doTe.js"></script>
+    <script charset="utf-8" src="kindedit/kindeditor-all.js"></script>
+    <script charset="utf-8" src="kindedit/lang/zh-CN.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/db.js"></script>
     <link rel="stylesheet" href="css/xpecker.css" />
@@ -17,10 +19,116 @@
     <link rel="StyleSheet" href="css/coord_card.css" type="text/css" />
     <link rel="StyleSheet" href="css/coord_style.css" type="text/css" />
     <script src="js/coord.js"></script>
+
     <style type="text/css">
+        .lspeech, .rspeech {
+            margin: 2px;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+        }
+
+        .lspeech {
+            justify-content: flex-start;
+            padding-right: 20px;
+        }
+
+        .rspeech {
+            justify-content: flex-end;
+            padding-left: 20px;
+            text-align: right;
+        }
+
+        .lspeech > div, .rspeech > div {
+            margin: 5px;
+        }
+
+        .lspeech > div > img, .rspeech > div > img {
+            border-radius: 4px;
+            border: 1px solid #d0d0d0;
+            width: 48px;
+            height: 48px;
+        }
+
+        .lspeech > div > div, .rspeech > div > div {
+            background-color: rgb(255, 253, 247);
+            border: 1px solid rgba(252, 185, 8, 0.35);
+            border-radius: 4px;
+            position: relative;
+            padding: 5px 10px;
+        }
+
+        .lspeech > div > div:before {
+            content: '';
+            width: 0px;
+            height: 0px;
+            position: absolute;
+            top: 6px;
+            left: -6px;
+            border-left: 0px;
+            border-top: 6px solid transparent;
+            border-right: 6px solid rgba(252, 185, 8, 0.35);
+            border-bottom: 6px solid transparent;
+        }
+
+        .lspeech > div > div:after {
+            content: '';
+            width: 0px;
+            height: 0px;
+            position: absolute;
+            top: 7px;
+            left: -5px;
+            border-left: 0px;
+            border-top: 5px solid transparent;
+            border-right: 5px solid rgb(255, 253, 247);
+            border-bottom: 5px solid transparent;
+        }
+
+        .rspeech > div > div:before {
+            content: '';
+            width: 0px;
+            height: 0px;
+            position: absolute;
+            top: 6px;
+            right: -6px;
+            border-left: 6px solid rgba(252, 185, 8, 0.35);
+            border-top: 6px solid transparent;
+            border-right: 0px;
+            border-bottom: 6px solid transparent;
+        }
+
+        .rspeech > div > div:after {
+            content: '';
+            width: 0px;
+            height: 0px;
+            position: absolute;
+            top: 7px;
+            right: -5px;
+            border-left: 5px solid rgb(255, 253, 247);
+            border-top: 5px solid transparent;
+            border-right: 0px;
+            border-bottom: 5px solid transparent;
+        }
+    </style>
+    <style type="text/css">
+		.xDetail2 {
+		}
+		.xDetail2>summary {
+			padding: 5px 10px;
+			width: 100%;
+			background: #f0f0f0;
+			border-bottom: 1px solid #dddddd;
+			border-top: 1px solid #dddddd;
+		}
+		.xDetail2>div{
+			padding: 5px;
+		}
+
         .narrow{}
+		.narrow>div>label{margin: 5px 2px;}
         .narrow>div>div:first-of-type{width: 165px;}
 
+		/*左侧宽度固定的行*/
 		.frozenleft{
 			display: flex;
 			flex-direction: row;
@@ -35,25 +143,64 @@
 		}
 		.frozenleft>div {
 			flex-grow: 1;
-			margin: 5px;
-			padding: 5px 10px;
+			padding: 5px;
 		}
 		.buttonright{
 			display: flex;
 			flex-direction: row;
 			align-items: flex-start;
-			
 		}
+
+		/*右侧有按钮的*/
 		.buttonright>div{border:1px solid #dddddd;border-radius: 4px;padding: 5px;}
 		.buttonright>div:first-of-type {
 			flex-grow: 1;
-			min-height:30px;
+			min-height:32px;
 		}
 		.buttonright>div:last-of-type {
 			flex-shrink: 0;
 			flex-grow: 0;
-			width: 35px;
+			width: 45px;
 			text-align:center;
+			color:#337ab7;
+		}
+
+		/*人物带头像、职业、名称的*/
+		.brief{
+			padding:0px 5px;
+		}
+		.brief img, .sign img {
+			border-radius: 10px;
+			width: 20px;
+			height: 20px;
+		}
+
+		/*维修材料、设备带状态*/
+		.statusright{
+			display:inline-block;
+			border:1px solid #dddddd;
+			border-radius: 4px;
+			margin: 2px;
+		}
+		.statusright div {
+			display:inline-block;
+			padding: 5px;
+		}
+		.statusright>div:last-of-type {
+			border-left:1px solid #dddddd;
+		}
+
+		.xdoclist{}
+		.xdoclist>div{
+			width:100%;
+		}
+		.xdoclist>div>span{
+			margin:0px 5px;
+		}
+		.xdoclist> div:hover {
+			background-color: #357ebd;
+			color: #ffffff;
+			text-decoration: none;
 		}
 		
     </style> 
@@ -65,23 +212,23 @@
     </section>
     <section class="xPanel2" style="width: 700px; max-width:900px;">
         <header>案件处理</header>
-        <div style="height:100px;flex-grow: 1;padding:0px;">
-            <details open class="xDetail"><summary style="border-top:0px;">报修<div id="faultedit" style="float: right;"><a href="onclickfaultedit()">编辑</a><a href="onclickfaultsubmit()">提交</a></div></summary><div id="fault"></div></details>
-            <details open class="xDetail" id="prepare" ><summary>准备</summary></details>
-            <details open class="xDetail"><summary>维修<div style="float: right;"><a href="#">添加</a></div></summary><div id="repair_log"></div></details>
-            <details open class="xDetail"><summary>完工</summary><div id="complete"></div></details>
+        <div class="xScroll" style="height:100px;flex-grow: 1;padding:0px;">
+            <details open class="xDetail2"><summary style="border-top:0px;">报修<div id="faultedit" style="float: right;"><a href="onclickfaultedit()">编辑</a> <a href="onclickfaultsubmit()">提交</a></div></summary><div id="fault"></div></details>
+            <details open class="xDetail2"><summary>准备</summary><div id="prepare" ></div></details>
+            <details open class="xDetail2"><summary>维修<div style="float: right;"><a href="#">添加</a></div></summary><div id="repair_log"></div></details>
+            <details open class="xDetail2"><summary>完工</summary><div id="complete"></div></details>
         </div>
     </section>
     <section class="xPanel2 xFIfixed" style="width:200px;min-width:160px;">
         <header>参与人员<div style="float: right;"><a href="#">管理</a></div></header>
-        <div id="userlist" class="xScroll" style="height:100px;flex-grow: 1;"><div>asdfasldkjf;lasdkjfasjdfjasdlfjlk</div><div>asdfasldkjf;lasdkjfasjdfjasdlfjlk</div><div>asdfasldkjf;lasdkjfasjdfjasdlfjlk</div></div>
+        <div id="chatman" class="xScroll" style="height:100px;flex-grow: 1;"></div>
     </section>
     <section class="xPanel2" style="width: 450px; min-width: 300px;">
         <header>对话</header>
         <div id="speechlist" class="xScroll" style="height:100px;flex-grow: 1;"></div>
-        <footer class="xFCsrow" style="padding:10px; height: 120px; width: 100%; align-items: flex-end;">
-            <textarea class="xrAngle" style="margin-right:10px; padding:5px 10px; height:100px;width:100px;resize:none;"></textarea>
-            <div class="xFIfixed"><button>发送</button></div>
+        <footer class="xFCsrow xFIfixed" style="padding:0px 10px 10px 0px; height: 200px; width: 100%; align-items: flex-end;">
+            <textarea id="kereplay" class="xrAngle" style="margin-right:10px; padding:5px 10px; height:188px;width:100px;resize:none;"></textarea>
+            <div class="xFIfixed"><button onclick="onsend()">发送</button></div>
         </footer>
     </section>
 
@@ -106,18 +253,139 @@
         var r = '<div class="x2Form narrow">' + RenderPane2(fault, fields) +'</div>';
 		if ( fault.imgs.length == 0 )
 			fault.imgs =[{"name":"img/blank.png"}];
-        r+= `<div class="xHImgList" style="margin:10px;">`+fault.imgs.map(x=>`<img src="`+x.name+`"/>`)+`</div>`;
+        r+= `<div class="xHImgList" style="margin:10px;">`+fault.imgs.map(x=>`<img src="`+x.name+`"/>`).join("")+`</div>`;
         r+= `<div id="remark" class="xRndAngle" style="margin:10px;margin-top:5px; padding:5px 10px;">{0}</div>`.format(fault.remark);
         return r;
     }
-    function rd_bottle(id, cnt) {
-        var r = `<div id="`+id+`"class="buttonright"><div>` + cnt +`</div><div>•••</div></div>`;
+
+    function rd_frozenleft(title, cnt) {
+        var r = `<div class="frozenleft"><label>`+title+`</label>`+cnt+"</div>";
         return r;
     }
-    function rd_usernail(user) {
-		var tpl = `<div class="SmallHead xNail2" style="display: inline-block"><img src="{face}"/>【{prof}】{name}</div>`;
+
+    function rd_buttonright(id, cnt) {
+        var r = `<div id="`+id+`"class="buttonright"><div>` + cnt +`</div><div>编辑</div></div>`;
+        return r;
+    }
+
+    function rd_buttonright(id, cnt) {
+        var r = `<div id="`+id+`"class="buttonright"><div>` + cnt +`</div><div>编辑</div></div>`;
+        return r;
+    }
+
+	// 文档组合框
+    function rd_doc(id, docs,signs ) {
+        var r = `<div id="`+id+`" class="buttonright" style="width:100px;"><div class="xCombox"><span>`
+				+ ( docs.length > 0 ? docs[0].name :"　")
+				+ `</span><div class="xPopWnd xdoclist">`
+				+ docs.map(x=>"<div>"+x.name+"</div>").join("")
+				+ `</div></div><div>上传</div></div>`;
+        return r;
+    }
+
+	// 带签字的文档组合框
+    function rd_doc2(id, docs, signs, signers) {
+		var img = {"2":"img/风场.png","3":"img/驻场.png","11":"img/调度长.png","16":"img/队长.png"};
+        var doc = `<div id="`+id+`" class="buttonright" style="width:100px;"><div class="xCombox"><span>`
+				+ ( docs.length > 0 ? docs[0].name :"　")
+				+ `</span><div class="xPopWnd xdoclist">`
+				+ docs.map(x=>"<div>"+x.name//+`<div style="float:right;">`
+				+ signs.filter(y=>y.a_id==x.id).map(y=>{
+					var u = GetSub( signers, "id", y.b_id);
+					return `<span class="sign"><img src="`+img[u.job]+`">`+u.name+`</span>`
+					}).join(" ")
+				+ "</div>").join("")
+				+ `</div></div><div>上传</div></div>`;
+		var sign = `<div id=`+id+`_sign" class="buttonright" style="width:100px;"><div>`
+					+ ( signs.length == 0 ? "　":signs.map(y=>{
+						var u = GetSub( signers, "id", y.b_id);
+						return `<span class="sign"><img src="`+img[u.job]+`">`+u.name+`</span>`
+					}).join(" "))+`</div><div style="width:70px;">我要签字</div></div>`; // 签字
+        return doc + sign;
+    }
+
+    function rd_brief(user) {
+		var tpl = `<div class="brief" style="display: inline-block"><img src="{face}"/>【{prof}】{name}</div>`;
         return tpl.format(user);
     }
+
+	function rd_statusright(html,status) {
+		return `<div class="statusright"><div>`+html+`</div><div>`+status+`</div></div>`;
+	}
+
+	// 维修用料
+    function rd_matrec( matoutrec ) {
+		var status = {"": "未指派","0": "未提交" ,"1": "已提交" ,"2": "正在备货" ,"3": "等待审批" ,
+					 "4": "等待发货" ,"5": "等待收货" ,"6": "风场已收" ,"-1": "退回" }
+		var mat = GetSub(g_mats.data, "id", matoutrec.mat_id);
+		return rd_statusright(mat.name+"("+mat.type+")", status[matoutrec.status]);
+    }
+
+	// 维修设备
+    function rd_device( devwork ) {
+		var status = { "": "未指派" ,"0": "编辑" ,"1": "已提交" ,"2": "已指派" ,
+					"3": "前往现场" ,"4": "工作中" ,"5": "完成" ,"-1": "退回" };
+		var clss = GetSub(db_devclss, "id", devwork.clss).name;
+		return rd_statusright(clss+"("+devwork.type+")", status[devwork.status]);
+    }
+
+	// 维修记录
+    function rd_repairlog( logs,imgs,users ) {
+		logs.forEach((x,i)=>{
+			x.imgs = imgs.filter(y=>y.ref_id==x.id);
+			x.user = users.filter(y=>y.id==x.user_id)[0];
+		});
+
+		var tpl = doT.template(`<table class="xTable">
+		<thead><tr><th>现场图片</th><th>说明</th><th>发表人</th></tr></thead>
+		{% it.forEach((x,i)=>{ %}
+		<tr>
+			<td>
+				<div class="xHImgList" style="border:0px;">
+				{% x.imgs.forEach((y,i)=>{ %}
+				<img src="{%=y.name%}"/>
+				{% }); %}
+				</div>
+			</td>
+			<td  style="max-width: 250px;">{%=x.remark%}</td>
+			<td>
+				<div><span class="SmallHead"><img src="{%=x.user.face%}"/>【{%=x.user.prof%}】{%=x.user.name%}</span></div>
+				<div>{%=x.date%}</div>
+			</td>
+		</tr>
+		{% }); %}
+		</table>`);
+		return tpl(logs);
+	}
+
+    function rd_speech(speech) {
+        if (speech.src != g_user.id) {
+            var user=GetSub(g_focus.chatmen,"id",speech.user_id);
+
+			tpl=`<div class="lspeech">
+					<div><img src="{face}" /></div>
+					<div>
+						<span>【{prof}】{name}</span>
+						{date}
+						<div>{say}</div>
+					</div>
+				</div>`
+            r = tpl.format(mix(speech,user))
+        }
+        else {
+            r =`<div class="rspeech">
+					<div>
+						{date}
+						<span>【{prof}】{name}</span>
+						<div>{say}</div>
+					</div>
+					<div><img src="{face}" /></div>
+            </div>`.format(mix(speech,g_user))
+        }
+        return r;
+    }
+
+
 </script>
 
 <script type="text/javascript">
@@ -134,7 +402,19 @@
 		init();
 	}
 
+		var kereplay;
+		KindEditor.ready(function (K) {
+			kereplay = K.create('#kereplay', {
+				uploadJson: '/cr', resizeMode:0,items: ['cut', 'copy', 'paste', '|', 'formatblock', 'fontname', 'fontsize', 'forecolor', 'hilitecolor', 'bold', 'italic',
+					'underline', 'removeformat', '|', 'link', 'unlink', '|', 'fullscreen',]
+			});
+		});
+
+
+
 	function init(){
+
+		Reqdata("/rd?ls=mat", "", function (mats) {g_mats = mats;});
 		Reqdata("/rdfault?guide_id=" + g_user.id, "", function (res) {
 			g_faults = res;
 			GetSub(g_faults.fields, "name", "remark").ftype="none";
@@ -142,6 +422,7 @@
 			$("#troublelist").html((g_faults.data.map(x => crd_card(x)).join("")));
 			$(".card").on("click", onclickcard);
 		});
+
 	}
 
     function onclickcard(event)
@@ -152,69 +433,35 @@
 		card = $(event.target).parents(".card");
         card.children(".header").css("background", "linear-gradient(to bottom, rgba(233,209,154,1) 0%,rgba(208,157,80,1) 100%)");
 		g_focus=GetSub( g_faults.data, "id", card.attr("data_id") );
-		$("#prepare").children("div").remove();
 		if (g_focus.status == 0 ){
 		
 		}
 
-		// 案件信息
-		Reqdata("/rd?ls=addit&type=fault_image&ref_id=" + g_focus.id, "", function (res) {
-			g_focus.imgs = res.data;
-	        $("#fault").html(crd_render_fault(g_focus, g_faults.fields));
+		Reqdata("/case/detail?id=" + g_focus.id, "", function (res) {
+			g_focus = res;
+			g_focus.fault=GetSub( g_faults.data, "id", card.attr("data_id") );
+			g_focus.fault.imgs=g_focus.fault_imgs;
+			g_focus.experts.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
+			g_focus.engineers.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
+			g_focus.repairlog_users.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
+			g_focus.chatmen.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
+
+	        $("#fault").html(crd_render_fault(g_focus.fault, g_faults.fields));
+
+			var html="";
+			html += rd_frozenleft("专家组",rd_buttonright("expert_list", g_focus.experts.map(x=>rd_brief(x)).join("")));
+			html += rd_frozenleft("评估报告",rd_doc("eval1rep",g_focus.eval1rep)+rd_doc("eval2rep",g_focus.eval2rep));
+			html += rd_frozenleft("维修方案",rd_doc2("repairplan",g_focus.repairplan,g_focus.repairplan_sign,g_focus.repairplan_signers));
+			html += rd_frozenleft("维修队",rd_buttonright("engneer_list", g_focus.engineers.map(x=>rd_brief(x)).join("")));
+			html += rd_frozenleft("维修用料",rd_buttonright("matoutrecs", g_focus.matoutrecs.map(x=>rd_matrec(x)).join("")));
+			html += rd_frozenleft("维修设备",rd_buttonright("devworks", g_focus.devworks.map(x=>rd_device(x)).join("")));
+			$("#prepare").html(html);
+
+			$("#repair_log").html(rd_repairlog(g_focus.repairlog, g_focus.repairlog_imgs, g_focus.repairlog_users));
+			$("#complete").html(rd_frozenleft("维修报告",rd_doc2("repairrep",g_focus.repairrep,g_focus.repairrep_sign,g_focus.repairrep_signers)));
+			$("#chatman").html(g_focus.chatmen.map(x=>rd_brief(x)).join(""));
+			$("#speechlist").html(g_focus.speechlist.map(x=>rd_speech(x)).join(""));
 		});
-
-        Reqdata("/case/listexpert?fault_id=" + g_focus.id, "", function (res) {
-			res.users.forEach(x=>x.prof=GetSub(db_job, "id", x.job).name);
-			var html = `<div class="frozenleft"><label>专家组</label><div>`+rd_bottle("expert_list", res.users.map(x=>rd_usernail(x)).join(""))+"</div></div>"
-			$("#prepare").append(html);
-			return ;
-		});
-
-        Reqdata("/case/listengneer?fault_id=" + g_focus.id, "", function (res) {
-			res.users.forEach(x=>x.prof=GetSub(db_job, "id", x.job).name);
-			var html = `<div class="frozenleft"><label>维修队</label><div>`+rd_bottle("engneer_list", res.users.map(x=>rd_usernail(x)).join(""))+"</div></div>"
-			$("#prepare").append(html);
-			return ;
-		});
-
-		return;
-
-        Reqdata("/rd?ls=addit&type=eval1rep&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });
-        Reqdata("/rd?ls=addit&type=eval2rep&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });
-        Reqdata("/rd?ls=addit&type=repairprog&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });
-        //Reqdata("/rd?ls=link&type=conform&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });
-        Reqdata("/rd?ls=link&type=repairteam&ref_id=" + fault.id, "", function (res) { xxxrenderimagelist() });
-        
-
-
-        $("#prepare_expert").html(tpl_users(cur.prepare_expert));
-        $("#prepare_report").html(tpl_doc(cur.prepare_report));
-        $("#prepare_report2").html(tpl_doc(cur.prepare_report2));
-        $("#prepare_scheme").html(tpl_scheme(cur.prepare_scheme));
-        $("#prepare_windermastersign").html(cur.prepare_windermastersign.who.name);
-        $("#prepare_windermastersign").css("background-image","url(img/yin/C_200.png)");
-        $("#prepare_winderclerksign").html(cur.prepare_winderclerksign.who.name);
-        $("#prepare_winderclerksign").css("background-image", "url(img/yin/C_47.png)");
-        $("#prepare_coordmastersign").html(cur.prepare_coordmastersign.who.name);
-        $("#prepare_coordmastersign").css("background-image", "url(img/yin/C_123.png)");
-
-        $("#repair_team").html(tpl_users(cur.repair_team));
-        $("#repair_mat").html(tpl_nails(cur.repair_mat));
-        $("#repair_dev").html(tpl_nails(cur.repair_dev));
-        $("#repair_log").html(tpl_repair_log(cur.repair_log));
-
-        $("#complete_report").html(tpl_repairreport(cur.complete_report));
-        $("#complete_winderclerksign").html(cur.complete_winderclerksign.who.name);
-        $("#complete_winderclerksign").css("background-image", "url(img/yin/C_47.png)");
-        $("#complete_repairteamldrsign").html(cur.complete_repairteamldrsign.who.name);
-        $("#complete_repairteamldrsign").css("background-image", "url(img/yin/C_98.png)");
-        $("#userlist").html(tpl_userlist(cur.userlist));
-        $("#speechlist").html(tpl_speech(cur.userlist));
-
-        $(".x3Doc>.x3Doc-handle").on("click", function () {
-                $(this).siblings(".x3Doc-menu").css("display", "block");
-            $(this).siblings(".x3Doc-menu").addClass("x3Doc-click");
-        });
     }
 
 	function onclickfaultedit(){
@@ -225,26 +472,7 @@
 
 	}
 
-    function GenDoc( name, auther, lband, rband )
-    {
-        var r = [];
-        var start = new Date(new Date() - 86400000*rndrange(30,60));
-        var c = rndrange(lband,rband);
-        for (var j = 0; j < c; j++)
-        {
-            var x = {};
-            x.name = name;
-            x.auther = rnditem(auther);
-            x.time = new Date(start + (c - j) * 86400000);
-            x.stime = x.time.format("yy-MM-dd");
-            r.push(x);
-        }
-
-        return r;
-    }
-
-    </script>
-
+</script>
 </body>
 </html>
 

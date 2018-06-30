@@ -43,26 +43,59 @@ def casecreatefault():
         conn.execute(toinsert("addit",addits))
     return toret(r,result=200)
 
-#/case/listexpert
-@app.route("/case/listexpert")
+#/case/detail
+@app.route("/case/detail")
 @login_required
-def listexpert():
-    r = obj(result="404",fun="/case/listexpert")
+def casedetail():
+    r = obj(result="404",fun="/case/detail")
     params = request.args.to_dict()
-    if "fault_id" not in params or params["fault_id"]=="":
+    if "id" not in params or params["id"]=="":
         return toret(r,msg="案件不能为空")
 
-    r.users = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ( select b_id from link where type='f_experts' and a_id="+params["fault_id"]+")")
-    return toret(r,result=200)
+    id = params["id"]
+    r.fault_imgs = QueryObj("select * from addit where type='fault_img' and ref_id="+id)
+    r.experts = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ( select b_id from link where type='f_experts' and a_id="+id+")")
+    r.eval1rep = QueryObj("select * from addit where type='eval1rep' and ref_id="+id)
+    r.eval2rep = QueryObj("select * from addit where type='eval2rep' and ref_id="+id)
+    r.repairplan = QueryObj("select * from addit where type='repairplan' and ref_id="+id)
+    if len(r.repairplan)>0:
+        r.repairplan_sign = QueryObj("select * from link where type='sign' and a_id in("+",".join(map(lambda x:str(x.id),r.repairplan))+")")
+        if len(r.repairplan_sign)>0:
+            r.repairplan_signers = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ("+",".join(map(lambda x:str(x.b_id),r.repairplan_sign))+")")
+        else:
+            r.repairplan_signers = []
+    else:
+        r.repairplan_sign = []
+        r.repairplan_signers = []
+    r.engineers = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ( select b_id from link where type='f_team' and a_id="+id+")")
 
-#/case/listengneer
-@app.route("/case/listengneer")
-@login_required
-def listengneer():
-    r = obj(result="404",fun="/case/listengneer")
-    params = request.args.to_dict()
-    if "fault_id" not in params or params["fault_id"]=="":
-        return toret(r,msg="案件不能为空")
+    r.matoutrecs = QueryObj('''
+        select matoutrec.*, matinrec.mat_id, matout.matwh_id, matout.status
+        from matoutrec, matout, matinrec
+        where matoutrec.matout_id = matout.id and matoutrec.matinrec_id=matinrec.id 
+        and matout.fault_id='''+id)
+    r.devworks = QueryObj("select * from devwork where fault_id="+id)
 
-    r.users = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ( select b_id from link where type='f_team' and a_id="+params["fault_id"]+")")
+    r.repairlog = QueryObj("select * from addit where type='repairlog' and ref_id="+id)
+    if len(r.repairlog)>0:
+        r.repairlog_imgs = QueryObj("select * from addit where type='repairpic' and ref_id in("+",".join(map(lambda x:str(x.id),r.repairlog))+")")
+        r.repairlog_users = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ("+",".join(map(lambda x:str(x.user_id),r.repairlog))+")")
+    else:
+        r.repairlog_imgs =[]
+        r.repairlog_users = []
+
+    r.repairrep = QueryObj("select * from addit where type='repairrep' and ref_id="+id)
+    if len(r.repairrep)>0:
+        r.repairrep_sign = QueryObj("select * from link where type='conform' and a_id in("+",".join(map(lambda x:str(x.id),r.repairrep))+")")
+        if len(r.repairrep_sign)>0:
+            r.repairrep_signers = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ("+",".join(map(lambda x:str(x.b_id),r.repairrep_sign))+")")
+        else:
+            r.repairrep_sign = []
+    else:
+        r.repairrep_sign = []
+        r.repairrep_signers = []
+
+    r.chatmen= QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ( select b_id from link where type='chatman' and a_id="+id+")")
+    r.speechlist= QueryObj("select * from chat where fault_id="+id)
+
     return toret(r,result=200)

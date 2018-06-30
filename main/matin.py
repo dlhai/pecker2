@@ -28,7 +28,7 @@ def matincreate():
     fmt = "./uploads/matin_image/matin_{id}_{idx}{ext}"
     for k,v in files.items(): 
         fname = fmt.format(id=u.id, idx=idx, ext=os.path.splitext(v.filename)[1] )
-        addits.append(obj(type="matin_image",ref_id=u.id,name=fname,user_id=current_user.id, date=now))
+        addits.append(obj(type="matin_img",ref_id=u.id,name=fname,user_id=current_user.id, date=now))
         v.save("./static/"+fname)
         idx += 1
     if len(addits)>0:

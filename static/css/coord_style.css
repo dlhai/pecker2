@@ -159,12 +159,11 @@
 /* 水平方向上的图片列表 */
 .xHImgList{
     border-radius: 4px;border: 1px solid #dddddd;
-    margin:5px;
-    padding:5px;
 }
 .xHImgList > img {
     width: 120px;
     height: 80px;
+	margin: 0 1px;
 }
 
 .xDoc {

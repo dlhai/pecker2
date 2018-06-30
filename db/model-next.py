@@ -285,7 +285,7 @@ class gen_case():
             repairteam = random.sample(self.teams, teamsize)
             eval1reps = [] #评估报告
             eval2reps = [] #二评报告
-            repairprogs = [] #维修方案
+            repairplans = [] #维修方案
             repairreps =[] #维修报告
 
             #报告哪些设备要维修
@@ -325,17 +325,17 @@ class gen_case():
                     user = random.choice([guideleader,guider])
                     date = rnddatespan(fault.reporttime,8,10)
                     name = "维修方案_"+user.name+"_" + date.strftime("%m-%d %H:%M")
-                    repairprogs.append( obj2(type="repairprog",ref_id=fault.id, name=name, remark="", user_id=user.id, date=date ))
-                self.add_data("addit",repairprogs)
-                repairprogs = QueryObj( "select * from addit where type='repairprog' and ref_id="+intstr(fault.id) )
+                    repairplans.append( obj2(type="repairplan",ref_id=fault.id, name=name, remark="", user_id=user.id, date=date ))
+                self.add_data("addit",repairplans)
+                repairplans = QueryObj( "select * from addit where type='repairplan' and ref_id="+intstr(fault.id) )
             if i>=11:#维修方案（调度主管签字）
-                conn.execute(tbl_link.insert(),dict_link(obj2(type="conform",a_id=random.choice(repairprogs).id, \
+                conn.execute(tbl_link.insert(),dict_link(obj2(type="sign",a_id=random.choice(repairplans).id, \
                     b_id=guideleader.id, name="", remark="", date=rnddatespan(fault.reporttime,11,12) )))
             if i>=12:#维修方案（驻场签字）
-                conn.execute(tbl_link.insert(),dict_link(obj2(type="conform",a_id=random.choice(repairprogs).id, 
+                conn.execute(tbl_link.insert(),dict_link(obj2(type="sign",a_id=random.choice(repairplans).id, 
                     b_id=random.choice(self.winder.clerks).id, name="", remark="", date=rnddatespan(fault.reporttime,12,13) )))
             if i>=13:#维修方案（风场主管签字）
-                conn.execute(tbl_link.insert(),dict_link(obj2(type="conform",a_id=random.choice(repairprogs).id, 
+                conn.execute(tbl_link.insert(),dict_link(obj2(type="sign",a_id=random.choice(repairplans).id, 
                     b_id=self.winder.leader.id, name="", remark="", date=rnddatespan(fault.reporttime,13,14) )))
     
             if 14<=i<=17:
@@ -355,7 +355,7 @@ class gen_case():
                 for x in range(2,5):
                     mender = random.choice(repairteam)
                     date = rnddatespan(fault.reporttime,15,18)
-                    repairlogs.append( obj2(type="repairlog",ref_id=fault.id, name="", remark="", user_id=mender.id, date=date ))
+                    repairlogs.append( obj2(type="repairlog",ref_id=fault.id, name="", remark=rnditem("_songci"), user_id=mender.id, date=date ))
                 self.add_data("addit",repairlogs)
 
             if 18<=i<=19:
@@ -386,7 +386,7 @@ class gen_case():
             #为所有的维修记录增加图片
             repairlogs = QueryObj( "select * from addit where type='repairlog' and ref_id="+intstr(fault.id))
             if len(repairlogs)>0:
-                self.add_data("addit", [obj2(type="repairrep",ref_id=x.id, name=random.choice(damageimg), remark="", user_id=random.choice(repairteam).id, date=datetime.datetime.strptime(x.date,"%Y-%m-%d") ) for x in repairlogs for y in range(3,5)])
+                self.add_data("addit", [obj2(type="repairpic",ref_id=x.id, name=random.choice(damageimg), remark="", user_id=random.choice(repairteam).id, date=datetime.datetime.strptime(x.date,"%Y-%m-%d") ) for x in repairlogs for y in range(3,5)])
             
             #聊天成员
             chatmans=[guideleader,guider,teamleader]+experts +repairteam+ self.winder.clerks
@@ -395,7 +395,7 @@ class gen_case():
             conn.execute(tbl_chat.insert(),[dict_chat(obj2(fault_id=fault.id,user_id=random.choice(chatmans).id, say=rnditem("_songci"),date=rnddatespan(fault.reporttime,3,20))) for i in range(rndnum(30,50))])
 
             #更新报修单
-            self.add_data("addit", [obj2(type="faultspot",ref_id=fault.id, name=random.choice(damageimg), remark="", user_id=random.choice(repairteam).id, date=datetime.datetime.strptime(fault.reporttime,'%Y-%m-%d') ) for x in range(3,5)])
+            self.add_data("addit", [obj2(type="fault_img",ref_id=fault.id, name=random.choice(damageimg), remark="", user_id=random.choice(repairteam).id, date=datetime.datetime.strptime(fault.reporttime,'%Y-%m-%d') ) for x in range(3,5)])
             sql = "update fault set " + ",".join([k+"='"+str(v)+"'" for k,v in cols.items()])+ " where id="+ intstr(fault.id)
             conn.execute(sql)
 
