@@ -19,7 +19,7 @@ def matincreate():
 
     [form.pop(k) for k in list(form.keys()) if k.startswith("img_") ] #去掉空的图片
     now = datetime.datetime.now()
-    u=insert("matin",form)[0]
+    u=insertq("matin",form)[0]
     conn.execute(toinsert("flow",obj(table_id=26,record_id=u.id,status=u.status,user_id=current_user.id,date=now, remark="创建入库单")))
 
     # 1. 保存附件
@@ -94,7 +94,7 @@ def matinreccreate():
     del form["unit"]
     form["matwh_id"]=params["matwh_id"]
     form["matin_id"]=params["matin_id"]
-    r.data = insert("matinrec",form)
+    r.data = insertq("matinrec",form)
     return toret(r,result=200)
 
 #/matin/recmodify?id=

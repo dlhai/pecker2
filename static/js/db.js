@@ -10,7 +10,7 @@
         "id": "2", "type": "winder", "name": "风场主管", modules: [
             { name: "地图", url: "windermap.html" },
             { name: "设备", url: "winder2.html" },
-            { name: "案件", url: "coord.html" },
+            { name: "案件", url: "coord2.html" },
             { name: "记录", url: "repairlog.html" },
             { name: "人员", url: "user_list2.html" }]
     },
@@ -18,7 +18,7 @@
         "id": "3", "type": "winder", "name": "驻场", modules: [
             { name: "地图", url: "windermap.html" },
             { name: "设备", url: "winder2.html" },
-            { name: "案件", url: "coord.html" },
+            { name: "案件", url: "coord2.html" },
             { name: "记录", url: "repairlog.html" }]
     },
     {
@@ -61,22 +61,22 @@
             { name: "记录", subs: [{ name: "库存", url: "matquery.html" }, { name: "入库", url: "matqueryin.html" }, { name: "出库", url: "matqueryout.html" }] }],
     },
     { "id": "10", "type": "coord", "name": "调度超级帐号", modules: [{ name: "调度", url: "user_list2.html" }] },
-    { "id": "11", "type": "coord", "name": "调度主管", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
-    { "id": "12", "type": "coord", "name": "调度", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
+    { "id": "11", "type": "coord", "name": "调度主管", modules: [{ name: "案件", url: "coord2.html" }, { name: "记录", url: "repairlog.html" }] },
+    { "id": "12", "type": "coord", "name": "调度", modules: [{ name: "案件", url: "coord2.html" }, { name: "记录", url: "repairlog.html" }] },
     {"id": "13", "type": "expert", "name": "专家超级帐号", modules: [{ name: "专家", url: "user_list2.html" }]},
     {
         "id": "14", "type": "expert", "name": "专家", modules: [
-            { name: "案件", url: "coord.html" },
+            { name: "案件", url: "coord2.html" },
             { name: "记录", url: "repairlog.html" }]
     },
     { "id": "15", "type": "repair", "name": "技工超级帐号", modules: [{ name: "技工", url: "user_list2.html" }] },
     {
         "id": "16", "type": "repair", "name": "维修队长", modules: [
-            { name: "案件", url: "coord.html" },
+            { name: "案件", url: "coord2.html" },
             { name: "记录", url: "repairlog.html" },
             { name: "人员", url: "user_list2.html" }]
     },
-    { "id": "17", "name": "技工", modules: [{ name: "案件", url: "coord.html" }, { name: "记录", url: "repairlog.html" }] },
+    { "id": "17", "name": "技工", modules: [{ name: "案件", url: "coord2.html" }, { name: "记录", url: "repairlog.html" }] },
     { "id": "18", "name": "博客超级帐号", modules: []},
     { "id": "19", "name": "公众", modules: []},
 ];

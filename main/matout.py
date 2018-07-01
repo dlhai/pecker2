@@ -19,7 +19,7 @@ def matoutcreate():
 
     [form.pop(k) for k in list(form.keys()) if k.startswith("img_") ] #去掉空的图片
     now = datetime.datetime.now()
-    u=insert("matout",form)[0]
+    u=insertq("matout",form)[0]
     conn.execute(toinsert("flow",obj(table_id=28,record_id=u.id,status=u.status,user_id=current_user.id,date=now, remark="创建出库单")))
 
     # 1. 保存附件

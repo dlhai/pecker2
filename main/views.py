@@ -122,14 +122,3 @@ def rd():
         sql += " where "+" and ".join([ To(k,v) for k,v in d.items()])
     return query5(ls,fields=select(base.sl).where(base.c.table==ls),data = sql)
 
-#测试链接 http://127.0.0.1:5000/rdstoredetail?user_id=?
-@app.route("/rdfault")
-def rdfault():
-    param = request.args.to_dict()
-    if "guide_id" not in param:
-        return '{result:404,msg:"缺少参数 guide_id"}'
-
-    sql='''select fault.*,user.name as report_name, winder.name as winder_name from fault,winder,user 
-        where fault.report_id= user.id and fault.winder_id=winder.id and guide_id='''+param["guide_id"]
-    return query5("rdfault",fields=select(base.sl).where(base.c.table=="fault"), data = sql)
-

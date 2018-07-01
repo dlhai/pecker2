@@ -15,195 +15,10 @@
     <script src="js/xpecker.js"></script>
     <link rel="stylesheet" href="css/Cube.css" />
     <script src="js/Cube.js"></script>
-
-    <link rel="StyleSheet" href="css/coord_card.css" type="text/css" />
-    <link rel="StyleSheet" href="css/coord_style.css" type="text/css" />
+	<link rel="stylesheet" href="css/speech.css" />
+    <link rel="StyleSheet" href="css/case.css" type="text/css" />
     <script src="js/coord.js"></script>
 
-    <style type="text/css">
-        .lspeech, .rspeech {
-            margin: 2px;
-            display: flex;
-            flex-direction: row;
-            align-items: flex-start;
-        }
-
-        .lspeech {
-            justify-content: flex-start;
-            padding-right: 20px;
-        }
-
-        .rspeech {
-            justify-content: flex-end;
-            padding-left: 20px;
-            text-align: right;
-        }
-
-        .lspeech > div, .rspeech > div {
-            margin: 5px;
-        }
-
-        .lspeech > div > img, .rspeech > div > img {
-            border-radius: 4px;
-            border: 1px solid #d0d0d0;
-            width: 48px;
-            height: 48px;
-        }
-
-        .lspeech > div > div, .rspeech > div > div {
-            background-color: rgb(255, 253, 247);
-            border: 1px solid rgba(252, 185, 8, 0.35);
-            border-radius: 4px;
-            position: relative;
-            padding: 5px 10px;
-        }
-
-        .lspeech > div > div:before {
-            content: '';
-            width: 0px;
-            height: 0px;
-            position: absolute;
-            top: 6px;
-            left: -6px;
-            border-left: 0px;
-            border-top: 6px solid transparent;
-            border-right: 6px solid rgba(252, 185, 8, 0.35);
-            border-bottom: 6px solid transparent;
-        }
-
-        .lspeech > div > div:after {
-            content: '';
-            width: 0px;
-            height: 0px;
-            position: absolute;
-            top: 7px;
-            left: -5px;
-            border-left: 0px;
-            border-top: 5px solid transparent;
-            border-right: 5px solid rgb(255, 253, 247);
-            border-bottom: 5px solid transparent;
-        }
-
-        .rspeech > div > div:before {
-            content: '';
-            width: 0px;
-            height: 0px;
-            position: absolute;
-            top: 6px;
-            right: -6px;
-            border-left: 6px solid rgba(252, 185, 8, 0.35);
-            border-top: 6px solid transparent;
-            border-right: 0px;
-            border-bottom: 6px solid transparent;
-        }
-
-        .rspeech > div > div:after {
-            content: '';
-            width: 0px;
-            height: 0px;
-            position: absolute;
-            top: 7px;
-            right: -5px;
-            border-left: 5px solid rgb(255, 253, 247);
-            border-top: 5px solid transparent;
-            border-right: 0px;
-            border-bottom: 5px solid transparent;
-        }
-    </style>
-    <style type="text/css">
-		.xDetail2 {
-		}
-		.xDetail2>summary {
-			padding: 5px 10px;
-			width: 100%;
-			background: #f0f0f0;
-			border-bottom: 1px solid #dddddd;
-			border-top: 1px solid #dddddd;
-		}
-		.xDetail2>div{
-			padding: 5px;
-		}
-
-        .narrow{}
-		.narrow>div>label{margin: 5px 2px;}
-        .narrow>div>div:first-of-type{width: 165px;}
-
-		/*左侧宽度固定的行*/
-		.frozenleft{
-			display: flex;
-			flex-direction: row;
-			align-items: baseline;
-		}
-		.frozenleft>label {
-			flex-shrink: 0;
-			flex-grow: 0;
-			margin:5px;
-			margin-left:10px;
-			width:56px;
-		}
-		.frozenleft>div {
-			flex-grow: 1;
-			padding: 5px;
-		}
-		.buttonright{
-			display: flex;
-			flex-direction: row;
-			align-items: flex-start;
-		}
-
-		/*右侧有按钮的*/
-		.buttonright>div{border:1px solid #dddddd;border-radius: 4px;padding: 5px;}
-		.buttonright>div:first-of-type {
-			flex-grow: 1;
-			min-height:32px;
-		}
-		.buttonright>div:last-of-type {
-			flex-shrink: 0;
-			flex-grow: 0;
-			width: 45px;
-			text-align:center;
-			color:#337ab7;
-		}
-
-		/*人物带头像、职业、名称的*/
-		.brief{
-			padding:0px 5px;
-		}
-		.brief img, .sign img {
-			border-radius: 10px;
-			width: 20px;
-			height: 20px;
-		}
-
-		/*维修材料、设备带状态*/
-		.statusright{
-			display:inline-block;
-			border:1px solid #dddddd;
-			border-radius: 4px;
-			margin: 2px;
-		}
-		.statusright div {
-			display:inline-block;
-			padding: 5px;
-		}
-		.statusright>div:last-of-type {
-			border-left:1px solid #dddddd;
-		}
-
-		.xdoclist{}
-		.xdoclist>div{
-			width:100%;
-		}
-		.xdoclist>div>span{
-			margin:0px 5px;
-		}
-		.xdoclist> div:hover {
-			background-color: #357ebd;
-			color: #ffffff;
-			text-decoration: none;
-		}
-		
-    </style> 
 </head>
 <body class="xFCsrow">
     <section class="xPanel2 xFIfixed" style="width:300px;">
@@ -212,11 +27,7 @@
     </section>
     <section class="xPanel2" style="width: 700px; max-width:900px;">
         <header>案件处理</header>
-        <div class="xScroll" style="height:100px;flex-grow: 1;padding:0px;">
-            <details open class="xDetail2"><summary style="border-top:0px;">报修<div id="faultedit" style="float: right;"><a href="onclickfaultedit()">编辑</a> <a href="onclickfaultsubmit()">提交</a></div></summary><div id="fault"></div></details>
-            <details open class="xDetail2"><summary>准备</summary><div id="prepare" ></div></details>
-            <details open class="xDetail2"><summary>维修<div style="float: right;"><a href="#">添加</a></div></summary><div id="repair_log"></div></details>
-            <details open class="xDetail2"><summary>完工</summary><div id="complete"></div></details>
+        <div id="case" class="xScroll" style="height:100px;flex-grow: 1;padding:0px;">
         </div>
     </section>
     <section class="xPanel2 xFIfixed" style="width:200px;min-width:160px;">
@@ -225,11 +36,11 @@
     </section>
     <section class="xPanel2" style="width: 450px; min-width: 300px;">
         <header>对话</header>
-        <div id="speechlist" class="xScroll" style="height:100px;flex-grow: 1;"></div>
-        <footer class="xFCsrow xFIfixed" style="padding:0px 10px 10px 0px; height: 200px; width: 100%; align-items: flex-end;">
-            <textarea id="kereplay" class="xrAngle" style="margin-right:10px; padding:5px 10px; height:188px;width:100px;resize:none;"></textarea>
-            <div class="xFIfixed"><button onclick="onsend()">发送</button></div>
-        </footer>
+		<div id="speechlist" class="xScroll" style="height:100px;flex-grow: 1;"></div>
+		<footer id="speechinput" class="xFCsrow xFIfixed" style="padding:0px 10px 10px 0px; height: 200px; width: 100%; align-items: flex-end;">
+			<textarea id="kereplay" class="xrAngle" style="margin-right:10px; padding:5px 10px; height:188px;width:100px;resize:none;"></textarea>
+			<div class="xFIfixed"><button onclick="onsend()">发送</button></div>
+		</footer>
     </section>
 
 <script type="text/javascript">
@@ -250,11 +61,13 @@
     }
 
     function crd_render_fault(fault, fields) {
-        var r = '<div class="x2Form narrow">' + RenderPane2(fault, fields) +'</div>';
+		var r =`<details open class="xDetail2"><summary style="border-top:0px;">报修</summary><div>`
+        r += '<div class="x2Form narrow">' + RenderPane2(fault, fields) +'</div>';
 		if ( fault.imgs.length == 0 )
 			fault.imgs =[{"name":"img/blank.png"}];
         r+= `<div class="xHImgList" style="margin:10px;">`+fault.imgs.map(x=>`<img src="`+x.name+`"/>`).join("")+`</div>`;
         r+= `<div id="remark" class="xRndAngle" style="margin:10px;margin-top:5px; padding:5px 10px;">{0}</div>`.format(fault.remark);
+		r+=`</div></details>`;
         return r;
     }
 
@@ -264,22 +77,17 @@
     }
 
     function rd_buttonright(id, cnt) {
-        var r = `<div id="`+id+`"class="buttonright"><div>` + cnt +`</div><div>编辑</div></div>`;
-        return r;
-    }
-
-    function rd_buttonright(id, cnt) {
-        var r = `<div id="`+id+`"class="buttonright"><div>` + cnt +`</div><div>编辑</div></div>`;
+        var r = `<div id="`+id+`"class="buttonright"><div>` + cnt +`</div><div id="btn_`+id+`" >编辑</div></div>`;
         return r;
     }
 
 	// 文档组合框
-    function rd_doc(id, docs,signs ) {
+    function rd_doc(id, docs ) {
         var r = `<div id="`+id+`" class="buttonright" style="width:100px;"><div class="xCombox"><span>`
 				+ ( docs.length > 0 ? docs[0].name :"　")
 				+ `</span><div class="xPopWnd xdoclist">`
 				+ docs.map(x=>"<div>"+x.name+"</div>").join("")
-				+ `</div></div><div>上传</div></div>`;
+				+ `</div></div><div id="btn_`+id+`">上传</div></div>`;
         return r;
     }
 
@@ -295,12 +103,12 @@
 					return `<span class="sign"><img src="`+img[u.job]+`">`+u.name+`</span>`
 					}).join(" ")
 				+ "</div>").join("")
-				+ `</div></div><div>上传</div></div>`;
+				+ `</div></div><div id="btn_`+id+`">上传</div></div>`;
 		var sign = `<div id=`+id+`_sign" class="buttonright" style="width:100px;"><div>`
 					+ ( signs.length == 0 ? "　":signs.map(y=>{
 						var u = GetSub( signers, "id", y.b_id);
 						return `<span class="sign"><img src="`+img[u.job]+`">`+u.name+`</span>`
-					}).join(" "))+`</div><div style="width:70px;">我要签字</div></div>`; // 签字
+					}).join(" "))+`</div><div id="btn_`+id+`sign" style="width:70px;">我要签字</div></div>`; // 签字
         return doc + sign;
     }
 
@@ -385,11 +193,10 @@
         return r;
     }
 
-
 </script>
 
 <script type="text/javascript">
-    var card, g_focus, g_faults;
+    var g_focus_card, g_focus, g_faults;
 	var g_user = parent.g_user;
 	if (g_user == undefined) {
 		Reqdata("/curuserinf", "", function (res) {
@@ -401,66 +208,142 @@
 	else{
 		init();
 	}
-
-		var kereplay;
-		KindEditor.ready(function (K) {
-			kereplay = K.create('#kereplay', {
-				uploadJson: '/cr', resizeMode:0,items: ['cut', 'copy', 'paste', '|', 'formatblock', 'fontname', 'fontsize', 'forecolor', 'hilitecolor', 'bold', 'italic',
-					'underline', 'removeformat', '|', 'link', 'unlink', '|', 'fullscreen',]
-			});
-		});
-
-
-
 	function init(){
-
 		Reqdata("/rd?ls=mat", "", function (mats) {g_mats = mats;});
-		Reqdata("/rdfault?guide_id=" + g_user.id, "", function (res) {
+		var int=self.setInterval( checkchange,10000);
+		checkchange();
+	}
+
+	var kereplay;
+	KindEditor.ready(function (K) {
+		kereplay = K.create('#kereplay', {
+			uploadJson: '/cr', resizeMode:0,items: ['cut', 'copy', 'paste', '|', 'formatblock', 'fontname', 'fontsize', 'forecolor', 'hilitecolor', 'bold', 'italic',
+				'underline', 'removeformat', '|', 'link', 'unlink', '|', 'fullscreen',]
+		});
+	});
+
+	function checkchange(){
+		Reqdata("/case/rdfault"+ (g_faults == undefined? "":"?maxid="+g_faults.maxid), "", function (res) {
+			if (g_faults != undefined && g_faults.maxid == res.maxid)
+				return; // 没有新数据
+
 			g_faults = res;
 			GetSub(g_faults.fields, "name", "remark").ftype="none";
 			GetSub(g_faults.fields, "name", "winder_id").name="winder_name";
 			$("#troublelist").html((g_faults.data.map(x => crd_card(x)).join("")));
 			$(".card").on("click", onclickcard);
-		});
 
+			if ( g_focus != undefined){ // 恢复之前的选中状态
+				$("[data_id="+g_focus.fault.id+"]").children(".header").css("background", "linear-gradient(to bottom, rgba(233,209,154,1) 0%,rgba(208,157,80,1) 100%)");
+			}
+		});
 	}
 
     function onclickcard(event)
     {
 		// 切换焦点
-        if (card != undefined)
-            card.children(".header").css("background", "linear-gradient(to bottom, rgba(192,215,140,1) 0%,rgba(118,170,73,1) 100%)");
-		card = $(event.target).parents(".card");
-        card.children(".header").css("background", "linear-gradient(to bottom, rgba(233,209,154,1) 0%,rgba(208,157,80,1) 100%)");
-		g_focus=GetSub( g_faults.data, "id", card.attr("data_id") );
-		if (g_focus.status == 0 ){
-		
-		}
+        if (g_focus_card != undefined)
+            g_focus_card.children(".header").css("background", "linear-gradient(to bottom, rgba(192,215,140,1) 0%,rgba(118,170,73,1) 100%)");
+		g_focus_card = $(event.target).parents(".card");
+        g_focus_card.children(".header").css("background", "linear-gradient(to bottom, rgba(233,209,154,1) 0%,rgba(208,157,80,1) 100%)");
+		g_focus=GetSub( g_faults.data, "id", g_focus_card.attr("data_id") );
 
 		Reqdata("/case/detail?id=" + g_focus.id, "", function (res) {
 			g_focus = res;
-			g_focus.fault=GetSub( g_faults.data, "id", card.attr("data_id") );
+			g_focus.fault=GetSub( g_faults.data, "id", g_focus_card.attr("data_id") );
 			g_focus.fault.imgs=g_focus.fault_imgs;
 			g_focus.experts.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
 			g_focus.engineers.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
 			g_focus.repairlog_users.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
 			g_focus.chatmen.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
 
-	        $("#fault").html(crd_render_fault(g_focus.fault, g_faults.fields));
+	        var html = crd_render_fault(g_focus.fault, g_faults.fields);
 
-			var html="";
-			html += rd_frozenleft("专家组",rd_buttonright("expert_list", g_focus.experts.map(x=>rd_brief(x)).join("")));
-			html += rd_frozenleft("评估报告",rd_doc("eval1rep",g_focus.eval1rep)+rd_doc("eval2rep",g_focus.eval2rep));
-			html += rd_frozenleft("维修方案",rd_doc2("repairplan",g_focus.repairplan,g_focus.repairplan_sign,g_focus.repairplan_signers));
-			html += rd_frozenleft("维修队",rd_buttonright("engneer_list", g_focus.engineers.map(x=>rd_brief(x)).join("")));
-			html += rd_frozenleft("维修用料",rd_buttonright("matoutrecs", g_focus.matoutrecs.map(x=>rd_matrec(x)).join("")));
-			html += rd_frozenleft("维修设备",rd_buttonright("devworks", g_focus.devworks.map(x=>rd_device(x)).join("")));
-			$("#prepare").html(html);
+			if (g_focus.fault.status == 0 ){
+				html += `<div style="margin:20px;border-top:2px dashed #6a923d;padding-top:30px;">
+							<button id="btn_modify" type="button" class="btn btn-primary">编辑</button>
+							<div style="float: right;">
+								<button id="btn_submit" type="button" class="btn btn-primary">提交</button>
+							</div>
+						</div>`;//工具条
+				$("#case").html(html);
+				$("#chatman").html("");
+				$("#speechlist").hide();
+				$("#speechinput").hide();
+			}
+			else if (g_focus.fault.status == 1 ){
+				if (g_user.job == 2 || g_user.job == 3){ // 风场长或驻场
+					html += `<div style="margin:20px;border-top:2px dashed #6a923d;padding-top:30px;">
+								<button id="btn_recall" type="button" class="btn btn-default" style="color:#aaaaaa;display">撤回</button>
+							 </div>`;//工具条
+				}
+				else if (g_user.job == 11 || g_user.job == 12){ // 调度长或调度
+					html += `<div style="margin:20px;border-top:2px dashed #6a923d;padding-top:30px;">
+								<div style="float: right;">
+									<div id="sect_flow" class="x2Form" style="display:inline-block;">
+										<div><label>意见</label><input id="note" style="width:400px;"/></div>
+									</div>
+									<button id="btn_submit" type="button" class="btn btn-primary">接单</button>
+									<button id="btn_confirm" type="button" class="btn btn-primary">退回</button>
+								</div>
+							</div>`;//工具条
+				}
+				$("#case").html(html);
+				$("#chatman").html("");
+				$("#speechlist").html("");
+				$("#speechlist").hide();
+				$("#speechinput").hide();
+			}
+			else{
+				$("#speechlist").show();
+				$("#speechinput").show();
+				html += `<details open class="xDetail2"><summary>准备</summary><div>`;
+				html += rd_frozenleft("专家组",rd_buttonright("experts", g_focus.experts.map(x=>rd_brief(x)).join("")));
+				html += rd_frozenleft("评估报告",rd_doc("eval1",g_focus.eval1rep)+rd_doc("eval2",g_focus.eval2rep));
+				html += rd_frozenleft("维修方案",rd_doc2("plan",g_focus.repairplan,g_focus.repairplan_sign,g_focus.repairplan_signers));
+				html += rd_frozenleft("维修队",rd_buttonright("works", g_focus.engineers.map(x=>rd_brief(x)).join("")));
+				html += rd_frozenleft("维修用料",rd_buttonright("mats", g_focus.matoutrecs.map(x=>rd_matrec(x)).join("")));
+				html += rd_frozenleft("维修设备",rd_buttonright("devs", g_focus.devworks.map(x=>rd_device(x)).join("")));
+				html += `</div></details>`;
+	
+				if (g_focus.repairlog.length>0 || g_user.job == 16|| g_user.job == 17){ // 队长或技工
+					html += `<details open class="xDetail2"><summary>维修<div style="float: right;"><a id="btn_log" href="#">添加</a></div></summary><div id="repair_log">`;
+					html += rd_repairlog(g_focus.repairlog, g_focus.repairlog_imgs, g_focus.repairlog_users);
+					html += `</div></details>`;
+				}
+				if (g_focus.repairrep.length>0 || g_user.job == 16){ // 队长
+					html += `<details open class="xDetail2"><summary>完工</summary><div>`
+					html += rd_frozenleft("维修报告",rd_doc2("report",g_focus.repairrep,g_focus.repairrep_sign,g_focus.repairrep_signers));
+					html += `</div></details>`;
+				}
 
-			$("#repair_log").html(rd_repairlog(g_focus.repairlog, g_focus.repairlog_imgs, g_focus.repairlog_users));
-			$("#complete").html(rd_frozenleft("维修报告",rd_doc2("repairrep",g_focus.repairrep,g_focus.repairrep_sign,g_focus.repairrep_signers)));
-			$("#chatman").html(g_focus.chatmen.map(x=>rd_brief(x)).join(""));
-			$("#speechlist").html(g_focus.speechlist.map(x=>rd_speech(x)).join(""));
+				if (g_user.job == 11 || g_user.job == 12){ // 调度长或调度
+					html += `<div style="margin:20px;border-top:2px dashed #6a923d;padding-top:30px;">
+								<div style="float: right;">
+									<div id="sect_flow" class="x2Form" style="display:inline-block;">
+										<div><label>意见</label><input id="note" style="width:400px;"/></div>
+									</div>
+									<button id="btn_submit" type="button" class="btn btn-primary">完工</button>
+								</div>
+							</div>`;//工具条
+				}
+				
+				$("#case").html(html);
+
+				var btnstatus = {// 功能按钮分角色控制
+					/*风场长*/  "2": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "s",  "works": "h", "mats": "h", "devs": "h",  "log": "s", "report": "h", "reportsign": "s",},
+					/*驻场*/    "3": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "s",  "works": "h", "mats": "h", "devs": "h",  "log": "s", "report": "h", "reportsign": "s",},
+					/*调度长*/ "11": { "experts": "s","eval1": "h", "eval2": "h", "plan": "s", "plansign": "s",  "works": "s", "mats": "s", "devs": "s",  "log": "h", "report": "h", "reportsign": "h",},
+					/*调度*/   "12": { "experts": "h","eval1": "h", "eval2": "h", "plan": "s", "plansign": "h",  "works": "s", "mats": "s", "devs": "s",  "log": "h", "report": "h", "reportsign": "h",},
+					/*专家*/   "14": { "experts": "h","eval1": "s", "eval2": "s", "plan": "h", "plansign": "h",  "works": "h", "mats": "h", "devs": "h",  "log": "h", "report": "h", "reportsign": "h",},
+					/*队长*/   "16": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "h",  "works": "h", "mats": "h", "devs": "h",  "log": "s", "report": "s", "reportsign": "h",},
+					/*技工*/   "17": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "h",  "works": "h", "mats": "h", "devs": "h",  "log": "s", "report": "h", "reportsign": "h",},
+				};
+				$.each(btnstatus[g_user.job], (k, v) => { v == "s" ? $("#btn_"+k).show() : $("#btn_"+k).hide() });
+				
+				$("#chatman").html(g_focus.chatmen.map(x=>rd_brief(x)).join(""));
+				$("#speechlist").html(g_focus.speechlist.map(x=>rd_speech(x)).join(""));
+			}
 		});
     }
 

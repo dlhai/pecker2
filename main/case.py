@@ -25,10 +25,15 @@ def casecreatefault():
     devices = [obj( type="faultefan",b_id=x,date=now) for x in form["devices"].split(",")]
     del form["devices"]
     [form.pop(k) for k in list(form.keys()) if k.startswith("img_") ]
+    form["status"]=0
 
-    conn.execute(toinsert("fault",form))
-    u = QueryObj("select * from fault where id in (select max(id) from fault)")[0]
+    u = insertq("fault",form)[0]
+    insert("link",obj(type="chatman", a_id=u.id,b_id=current_user.id)) #将自己加入到聊天列表中
+    if current_user.job == 3: #将风场长加入到聊天列表中
+        mgr=QueryObj("select id from user where job=2 and depart_id="+str(current_user.depart_id))[0]
+        insert("link",obj(type="chatman", a_id=u.id,b_id=mgr.id)) 
     conn.execute(toinsert("link",[obj( x, a_id=u.id) for x in devices]))
+    #insert("msg",obj(type=6,src=current_user.id,dst=1000,table_id=19,row_id=u.id))
 
     # 1. 保存附件
     addits = []
@@ -43,6 +48,42 @@ def casecreatefault():
         conn.execute(toinsert("addit",addits))
     return toret(r,result=200)
 
+# 驻场：取参与聊天成员包含自己的未完成的案件列表
+# 风场长：取本风场所有未完成的案件列表
+# 调度：取参与聊天成员包含自己的未完成的案件列表
+# 调度长：取所有未完成的案件列表
+# 专家：取参与聊天成员包含自己的未完成的案件列表
+# 队长：取参与聊天成员包含自己的未完成的案件列表
+# 技工：取参与聊天成员包含自己的未完成的案件列表
+# 为了统一起见，使所有人都“取参与聊天成员包含自己的未完成的案件列表”，做如下设定：
+#   1.驻场创建后就自动添加自己和风场长在列表中
+#   2.调度在接收案件时，自动添加自己和调度长在列表中
+# 这样做还有以下好处：
+#   1.驻场可以邀请其他驻场进入列表协助工作
+#   2.调度可以邀请其他调度进入列表协助工作
+# 也就是避免了对创建的驻场和接收的调度产生完全的依赖。
+@app.route("/case/rdfault")
+def rdfault():
+    r = obj(result="404",fun="/case/rdfault")
+    params = request.args.to_dict()
+    sql='''select fault.*,user.name as report_name, winder.name as winder_name 
+           from fault,winder,user 
+           where fault.report_id=user.id and fault.winder_id=winder.id and fault.status<5 
+           and (fault.id in (select a_id from link where type="chatman" and b_id='''+str(current_user.id)+")"
+    if current_user.job == 11 or current_user.job == 11:#调度长和调度可以看到已提交的
+        sql += " or fault.status=1"
+    sql += ") order by fault.status,reporttime desc" # 越接近处理完成，排序越靠后
+    r.data=QueryObj(sql)
+    r.maxid = atoi(QueryObj("select max(id) as maxid from flow where table_id=19 and record_id in("+",".join([str(x.id) for x in r.data])+")")[0].maxid)
+    if "maxid" in params:
+        if r.maxid == atoi(params["maxid"]):
+            r.data=[]
+            return toret(r,result=200,msg="没有新数据")
+    r.fields=QueryObj(select(base.sl).where(base.c.table=="fault"))
+    r.ls="fault"
+    r.result=200
+    return Response(tojson(r), mimetype='application/json')
+
 #/case/detail
 @app.route("/case/detail")
 @login_required
@@ -53,7 +94,7 @@ def casedetail():
         return toret(r,msg="案件不能为空")
 
     id = params["id"]
-    r.fault_imgs = QueryObj("select * from addit where type='fault_img' and ref_id="+id)
+    r.fault_imgs = QueryObj("select * from addit where type='fault_image' and ref_id="+id)
     r.experts = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ( select b_id from link where type='f_experts' and a_id="+id+")")
     r.eval1rep = QueryObj("select * from addit where type='eval1rep' and ref_id="+id)
     r.eval2rep = QueryObj("select * from addit where type='eval2rep' and ref_id="+id)
