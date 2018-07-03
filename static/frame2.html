@@ -103,6 +103,7 @@
 				}
 				else{
 					g_user = res.data;
+					g_user.prof=GetSub(db_job, "id", g_user.job).sname
 					g_user.fields = res.fields;
 					$("#user").html(renderuser());
 					var ar = GetSub(db_roles,"id", g_user.job ).modules;
@@ -190,7 +191,7 @@
 				</div>
 				<div class="dropdown" style="padding:7px;" >
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding: 7px 15px;">
-						<span id="usr_name" class="hidden-sm-only">{name}</span>
+						<span id="usr_name" class="hidden-sm-only">【{prof}】{name}</span>
 						<span class="thumb-small avatar inline"><img id="usr_face" src="static/{face}" alt="用户头像" class="img-circle"></span>
 						<b class="caret hidden-sm-only"></b>
 					</a>

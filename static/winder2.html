@@ -113,16 +113,16 @@
         function onCreateCase() {
             Reqdata("/rd?ls=fault&id=0", "", res => { // 为了获得fields
                 if (!res.fields.some(x => x.name == "devices")) //devices在link表内
-                    res.fields.push({ "title": "报修设备", "name": "devices", "forder": "5", "ftype": "div_long" });
+                    res.fields.push({ "title": "报修风机", "name": "devices", "forder": "5", "ftype": "div_long" });
                 xfieldsort(res.fields);
                 var data = Create(res.fields);
                 data.devices = $("#item_list input").toArray().fmap(function(x){if($(x).prop('checked'))return $(x).attr("data_id")});
                 data.winder_id = g_user.depart_id;
                 data.report_id = g_user.id;
-				data.reporttime = (new Date()).format("yyyy-MM-dd");
+				data.reporttime = (new Date()).format("yyyy-MM-dd hh:mm:ss");
 
                 var dlg = new cbFormDlg();
-                dlg.title = "报修";
+                dlg.title = "报修单";
                 dlg.css = "width:610px";
                 dlg.Add(RenderForm4(data, res.fields, function(u, field) {
 					var fn = field;
@@ -133,8 +133,8 @@
 					else if (fn=="devices") return u["devices"].map(x=>GetSub( g_efans.data, "id", x ).code).join(",");
 					return u[fn];
 				}));
-                dlg.Add(xrimagelistlive([""]));
-				dlg.urlsubmit = "/case/createfault";
+                dlg.Add(xrimagelistlive2("image",[""]));
+				dlg.urlsubmit = "/case/faultcreate";
 				dlg.Show();
             });
         }

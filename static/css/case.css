@@ -93,10 +93,18 @@
 	text-align:center;
 	color:#337ab7;
 }
+.buttonright>div:last-of-type>label {
+	font-weight:normal;
+	margin:0px;
+}
+.buttonright>div:last-of-type>label>input {
+	display:none;
+}
 
 /*人物带头像、职业、名称的*/
 .brief{
 	padding:0px 5px;
+	display: inline-block;
 }
 .brief img, .sign img {
 	border-radius: 10px;
@@ -143,6 +151,7 @@
 }
 
 .SmallHead {
+	display: inline-block;
 }
 .SmallHead img {
 	border-radius: 10px;

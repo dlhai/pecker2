@@ -20,7 +20,7 @@ def rdteam():
 
     #查询入库记录的、查询出库记录的
     sql='''select * from user where id in ( select b_id from link where type ='team' and a_id = {0})'''
-    return query4("rdteam",fields=select(base.sl).where(base.c.table=="user"),data = sql.format(user.id))
+    return query5("rdteam",fields=select(base.sl).where(base.c.table=="user"),data = sql.format(user.id))
 
 #查询用户
 #测试链接 http://127.0.0.1:5000/rduser?type=winder&key1=val1&key2=val2....
@@ -81,7 +81,7 @@ def userbrief():
         r.msg = "缺少参数 id"
         return tojson(r)
 
-    r.user = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id=%s"%params["id"])
+    r.user = QueryObj("select id,name,face,profile,sex,job,depart_id,skill from user where id=%s"%params["id"])
     if len(r.user)==0:
         r.msg = "id不存在"
         return tojson(r)
@@ -99,7 +99,7 @@ def userbrief():
 def userbriefs():
     params = request.args.to_dict()
     r = obj(result="404",fun="userbrief")
-    r.users = QueryObj("select id,name,face,profile,sex,job,depart_id from user where %s"%towhere(params))
+    r.users = QueryObj("select id,name,face,profile,sex,job,depart_id,skill from user where %s"%towhere(params))
     for user in r.users:
         user.prof = getjob(user.job)["sname"]
         verifyface(user)

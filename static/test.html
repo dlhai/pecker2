@@ -13,7 +13,7 @@
     <script src="js/xpecker.js"></script>
 </head>
 <body>
-
+	
 <p>点击按钮循环对象属性。</p>
 <div class="x2Form" style="width:500px;height:200px;padding:100px;" >
 <div class="xCombox">
@@ -28,9 +28,55 @@
 </div>
 
 
+<script id="tpl_efan_import" type="text/template">
+        <div style="margin: 10px 15px;">
+			<label><div>选择文件</div><input type="file" id="upload_efan" name="upload_efan" style="display:none" /></label>
+
+        </div>
+    </script>
+
+
 
 <script>
-	var c1 = ["a","a","a","a"];
+$("html").on("change", function (event) {
+    var node = event.target;
+    if (node.tagName == "INPUT" && node.type == "file") { // 可点击换图的图片列表
+		var tt = 0;
+    }
+});
+
+
+		onImport();
+
+	    function onImport() {
+            var tpl_efan_list = doT.template(document.getElementById('tpl_efan_import').innerHTML);
+            var dlg = new cbDlg();
+            dlg.title = "导入 风电机";
+            dlg.css = "width:620px";
+            dlg.Add(tpl_efan_list());
+            dlg.Show();
+        }
+
+        function uploadFile() {
+            var file = $("#upload_efan").get(0).files[0];
+            var formData = new FormData();
+            formData.append("file", file);
+            var req = new XMLHttpRequest();
+            req.upload.onprogress = function (evt) {
+                var loaded = evt.loaded;     //已经上传大小情况   
+                var tot = evt.total;      //附件总大小   
+                var per = Math.floor(100 * loaded / tot);  //已经上传的百分比   
+                $("#progress").html(per + "%");
+                $("#progress").css("width", per + "%");
+            };
+            req.onreadystatechange = function () {
+                if (req.readyState == 4 && req.status == 200) {
+                    alert(req.responseText);
+                }
+            };
+            req.open("POST", "/upload", true);
+            req.send(formData);
+        }
 </script>
 
 </body>

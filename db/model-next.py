@@ -289,7 +289,7 @@ class gen_case():
             repairreps =[] #维修报告
 
             #报告哪些设备要维修
-            conn.execute(tbl_link.insert(),[ dict_link(obj2(type="f_devices",a_id=fault.id, b_id=random.choice(self.winder.efans).id,remark="",date=rnddate(30,60))) for x in range(3,8)])
+            conn.execute(tbl_link.insert(),[ dict_link(obj2(type="faultefan",a_id=fault.id, b_id=random.choice(self.winder.efans).id,remark="",date=rnddate(30,60))) for x in range(3,8)])
             if i < 5:#前5个作为未提交状态
                 continue
     

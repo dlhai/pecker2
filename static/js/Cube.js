@@ -1,12 +1,19 @@
 ﻿$("html").on("change", function (event) {
     var node = event.target;
-    if (node.tagName == "INPUT" && node.type == "file") {
-        var file = node.files[0];
-        var reader = new FileReader();
-        reader.onload = function (e) { $(node).prev().attr("src", e.target.result); };
-        reader.readAsDataURL(file);
-        if ($(node).parent().nextAll().length == 0) {
-            $(node).parent().parent().append(xrimagelive(""));
+    if (node.tagName == "INPUT" && node.type == "file") { // 可点击换图的图片列表
+        if ($(node).parent().parent().hasClass("imagelistlive") && $(node).parent().nextAll().length == 0) {
+			var file = node.files[0];
+			var reader = new FileReader();
+			reader.onload = function (e) { $(node).prev().attr("src", e.target.result); };
+			reader.readAsDataURL(file);
+			imgls = $(node).parent().parent();
+			var id=imgls.attr("data_id");
+			if ( id == undefined )
+				imgls.append(xrimagelive2("")); // 列表情况下，保证尾部有空白图
+			else{
+				var name = id+"_"+imgls.children().length
+				imgls.append(xrimagelive2("", "", name)); // 列表情况下，保证尾部有空白图
+			}
         }
     }
 });
@@ -59,7 +66,7 @@ function xrimagelist(img) {
     return tpl.format({ id: "img_"+rndstr(8), img: (img == "" ? "" : 'src="' + img + '"') });
 }
 
-//背景带十字，点击可换图
+//背景带十字，点击可换图（换图处理在开头的$("html").on("change", function (event)）
 function xrimagelive(img) {
     var image = img == "" ? "" : 'src="' + img + '"';
     var clss = arguments[1] ? 'class="' + arguments[1] + '"' : "";
@@ -69,22 +76,29 @@ function xrimagelive(img) {
                         <input type="file" id="{id}" name="{id}" accept="image/*"></label>`;
     return tpl.format({ id: "img_"+rndstr(8), clss: clss, image: image, width: width, heigh: heigh });
 }
+//背景带十字，点击可换图的列表（换图处理在开头的$("html").on("change", function (event)）
+function xrimagelistlive(imglist) {
+	if (imglist[imglist.length-1]!="")
+		imglist.push("");
+    return `<div class="imagelistlive">` + imglist.map(x => xrimagelive(x)) + `</div>`;
+}
 
-//背景带十字，点击可换图(第2版，参数多)
+//背景带十字，点击可换图(第2版，参数多)（换图处理在开头的$("html").on("change", function (event)）
 function xrimagelive2(img, id, name, clss, style) {
     var image = img == "" ? "" : 'src="' + img + '"';
     id = id ? id : "img_"+rndstr(8);
-    name = name ? 'name="' + name + '"' : '';
+    name = 'name="' + (name ? name :id)+'"';
     clss = clss ? clss : "";
     style = style ? 'style="' + style + '"': "";
     var tpl = `<label class="imagelive {clss}" {style} for="{id}"><img style="width:100%;height:100%;" {image} />
                         <input type="file" id="{id}" {name} accept="image/*"></label>`;
     return tpl.format({ id:id, name:name, clss: clss, image: image, style: style });
 }
-
-//背景带十字，点击可换图的列表
-function xrimagelistlive(imglist) {
-    return `<div class="imagelistlive">` + imglist.map(x => xrimagelive(x)) + `</div>`;
+//背景带十字，点击可换图的列表(第2版，参数多)（换图处理在开头的$("html").on("change", function (event)）
+function xrimagelistlive2(id, imglist) {
+	if (imglist[imglist.length-1]!="") // 空白图是最后的十字架
+		imglist.push("");
+    return `<div data_id="`+id+`" class="imagelistlive">` + imglist.map((x,i) => xrimagelive2(x,"",id+"_"+i)).join("") + `</div>`;
 }
 
 //菜单项
@@ -263,7 +277,7 @@ function RenderPane(ar, idx, fun) {
         if (field.name.indexOf("_") != -1)
             attr = 'id="' + field.name + "_" + val + '" ';
 
-        if (field.ftype == "input_long")
+        if (field.ftype == "input_long" || field.ftype == "div_long")
             attr += 'style="width:490px;"';
         else if (field.ftype == "textarea")
             attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
@@ -280,7 +294,7 @@ function RenderPane2(entity, fields, fun) {
         if (field.forder == -1 || field.ftype == "none")
             continue;
         var attr = "";
-        if (field.ftype == "input_long")
+        if (field.ftype == "input_long" || field.ftype == "div_long")
             attr += 'style="width:490px;"';
         else if (field.ftype == "textarea")
             attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
@@ -298,7 +312,7 @@ function RenderPane3(entity, fields, fun) {
         if (field.forder == -1 || field.ftype == "none")
             continue;
         var attr = "";
-        if (field.ftype == "input_long")
+        if (field.ftype == "input_long"|| field.ftype == "div_long")
             attr += 'style="width:490px;"';
         else if (field.ftype == "textarea")
             attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
