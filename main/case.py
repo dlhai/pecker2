@@ -6,9 +6,9 @@ from main2 import app,login_manager,check
 from main.model import *
 from main.tools import *
 
-def additinsert(tbl,field, id, files):
+def additappend(tbl,field, id, files):
     addits = []
-    idx = 0
+    idx = QueryObj("select count(*) as count from addit where type='{tbl}_{field}' and ref_id={id}".format(tbl=tbl,field=field,id=id))[0].count
     now = datetime.datetime.now()
     fmt = "uploads/{tbl}_{field}/{tbl}{id}_{field}{idx}{ext}"
     for k,v in files.items(): 
@@ -66,7 +66,7 @@ def casecreatefault():
     u = insertq("fault",form)[0]
     conn.execute(toinsert("link",[obj( x, a_id=u.id) for x in devices]))
     insert("flow",obj(table_id=19,record_id=u.id,status=0,user_id=current_user.id,date=now, remark="创建报修单"))
-    additinsert("fault", "image", u.id, files);
+    additappend("fault", "image", u.id, files);
 
     return toret(r,result=200)
 
@@ -170,9 +170,9 @@ def casedetail():
     r.fault.leafs = QueryObj("select * from leaf where id in( select b_id from link where type='faultleaf' and a_id="+id+")")
     r.fault.imgs = QueryObj("select * from addit where type='fault_image' and ref_id="+id)
     r.experts = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ( select b_id from link where type='f_experts' and a_id="+id+")")
-    r.eval1rep = QueryObj("select * from addit where type='eval1rep' and ref_id="+id)
-    r.eval2rep = QueryObj("select * from addit where type='eval2rep' and ref_id="+id)
-    r.repairplan = QueryObj("select * from addit where type='repairplan' and ref_id="+id)
+    r.eval1rep = QueryObj("select * from addit where type='fault_eval1' and ref_id="+id)
+    r.eval2rep = QueryObj("select * from addit where type='fault_eval2' and ref_id="+id)
+    r.repairplan = QueryObj("select * from addit where type='fault_plan' and ref_id="+id)
     if len(r.repairplan)>0:
         r.repairplan_sign = QueryObj("select * from link where type='sign' and a_id in("+",".join(map(lambda x:str(x.id),r.repairplan))+")")
         if len(r.repairplan_sign)>0:
@@ -191,17 +191,17 @@ def casedetail():
         and matout.fault_id='''+id)
     r.devworks = QueryObj("select * from devwork where fault_id="+id)
 
-    r.repairlog = QueryObj("select * from addit where type='repairlog' and ref_id="+id)
+    r.repairlog = QueryObj("select * from addit where type='fault_log' and ref_id="+id)
     if len(r.repairlog)>0:
-        r.repairlog_imgs = QueryObj("select * from addit where type='repairpic' and ref_id in("+",".join(map(lambda x:str(x.id),r.repairlog))+")")
+        r.repairlog_imgs = QueryObj("select * from addit where type='fault_logimg' and ref_id in("+",".join(map(lambda x:str(x.id),r.repairlog))+")")
         r.repairlog_users = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ("+",".join(map(lambda x:str(x.user_id),r.repairlog))+")")
     else:
         r.repairlog_imgs =[]
         r.repairlog_users = []
 
-    r.repairrep = QueryObj("select * from addit where type='repairrep' and ref_id="+id)
+    r.repairrep = QueryObj("select * from addit where type='fault_report' and ref_id="+id)
     if len(r.repairrep)>0:
-        r.repairrep_sign = QueryObj("select * from link where type='conform' and a_id in("+",".join(map(lambda x:str(x.id),r.repairrep))+")")
+        r.repairrep_sign = QueryObj("select * from link where type='sign' and a_id in("+",".join(map(lambda x:str(x.id),r.repairrep))+")")
         if len(r.repairrep_sign)>0:
             r.repairrep_signers = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ("+",".join(map(lambda x:str(x.b_id),r.repairrep_sign))+")")
         else:
@@ -213,10 +213,11 @@ def casedetail():
     #组件聊天数据
     sql = "select id,name,face,profile,sex,job,depart_id from user where"
     sql += " (depart_table=15 and depart_id="+str(r.fault.winder_id)+")" #风场所有人
-    sql += " or job=11" #11调度长
-    if r.fault.guide_id != "": #接单调度
-        sql += " or id="+str(r.fault.guide_id)
-    sql += " or id in ( select b_id from link where type='chatman' and a_id="+id+")" #聊天列表
+    if r.fault.status>=2:
+        sql += " or job=11" #11调度长
+        if r.fault.guide_id != "": #接单调度
+            sql += " or id="+str(r.fault.guide_id)
+        sql += " or id in ( select b_id from link where type='chatman' and a_id="+id+")" #聊天列表
     r.chatmen = QueryObj(sql)+r.experts+r.engineers
     r.speechlist= QueryObj("select * from chat where fault_id="+id)
 
@@ -237,7 +238,7 @@ def casechgstatus():
     
     maxid = atoi(QueryObj("select max(id) as maxid from flow where table_id=19 and record_id="+form["id"])[0].maxid)
     if maxid != atoi(form["maxid"]):
-        return toret(r,result="405",msg="报修单状态已变更")
+        return toret(r,result="405",msg="报修单已变更")
 
     #更新matout状态，并产生flow记录
     def chgstatus( status, form, remark ):
@@ -311,7 +312,7 @@ def casesetexpert():
 @login_required
 def casesetteam():
     form =request.form.to_dict()
-    r = obj(result="404",fun="/case/setexpert")
+    r = obj(result="404",fun="/case/setteam")
     if "id" not in form or form["id"]=="":
         return toret(r,msg="缺少参数id")
     if "leader" not in form or form["leader"]=="":
@@ -326,3 +327,106 @@ def casesetteam():
     insert("link",[obj(type="f_team", a_id=id,b_id=x,date=now) for x in team ])
     insert("flow",obj(table_id=19,record_id=id,user_id=current_user.id,date=now, remark="更新施工队列表"))
     return toret(r,result=200)
+
+@app.route("/case/adddoc",methods=['POST'])
+@login_required
+def caseadddoc():
+    form =request.form.to_dict()
+    files = request.files.to_dict()
+    r = obj(result="404",fun="/case/adddoc")
+    if "id" not in form or form["id"]=="":
+        return toret(r,msg="缺少参数id")
+    if "doctype" not in form or form["doctype"] not in ["eval1","eval2","plan","report"]:
+        return toret(r,msg="缺少参数doctype或doctype不正确")
+    if len(files)==0:
+        return toret(r,msg="没有文档")
+
+    now = datetime.datetime.now()
+    additappend("fault",form["doctype"], form["id"], files)
+    insert("flow",obj(table_id=19,record_id=id,user_id=current_user.id,date=now, remark="添加文档"+form["doctype"]))
+    return toret(r,result=200)
+
+@app.route("/case/sign",methods=['POST'])
+@login_required
+def casesign():
+    form =request.form.to_dict()
+    r = obj(result="404",fun="/case/sign")
+    if "id" not in form or form["id"]=="":
+        return toret(r,msg="缺少参数id")
+    if "type" not in form or form["type"] not in ["btn_plansign","btn_reportsign"]:
+        return toret(r,msg="缺少参数type或type不正确")
+    type={"btn_plansign":"fault_plan","btn_reportsign":"fault_report"}
+
+    docs = [x.id for x in QueryObj("select id from addit where type='{type}' and ref_id={id} order by date desc".format(id=form["id"],type=type[form["type"]]))]
+    if len(docs) == 0:
+        return toret(r,msg="还没有文档")
+    signs = [x.b_id for x in QueryObj("select b_id from link where type='sign' and a_id in("+",".join(map(lambda x:str(x),docs))+")")]
+    if current_user.id in signs:
+        return toret(r,msg="不能重复签字")
+
+    now = datetime.datetime.now()
+    insert("link",obj(type="sign", a_id=docs[0],b_id=current_user.id,remark=current_user.job,date=now))
+    insert("flow",obj(table_id=19,record_id=id,user_id=current_user.id,date=now, remark="签字在"+type[form["type"]]+":"+str(docs[0])))
+    return toret(r,result=200)
+
+#/case/addlog
+@app.route("/case/addlog",methods=['POST'])
+@login_required
+def caseaddlog():
+    params = request.args.to_dict()
+    form =request.form.to_dict()
+    files = request.files.to_dict()
+
+    r = obj(result="404",fun="/case/createfault")
+    if "id" not in params or params["id"]=="":
+        return toret(r,msg="缺少参数id")
+    if len(files)==0:
+        return toret(r,msg="没有图片")
+
+    now = datetime.datetime.now()
+    id = params["id"]
+    u = insertq("addit",obj(type="fault_log",ref_id=id,remark=form["remark"], user_id=current_user.id, date=now))[0]
+    additappend("fault", "logimg", u.id, files)
+
+    return toret(r,result=200)
+
+#/case/setchatmen
+@app.route("/case/setchatmen",methods=['POST'])
+@login_required
+def casesetchatmen():
+    params = request.args.to_dict()
+    form =request.form.to_dict()
+
+    r = obj(result="404",fun="/case/setchatmen")
+    if "id" not in form or form["id"]=="":
+        return toret(r,msg="缺少参数id")
+    
+    id = form["id"]
+    now = datetime.datetime.now()
+
+    fault=QueryObj('''select * from fault where id='''+id)
+    if len(fault) == 0:
+        return toret(r,msg="id不正确")
+    fault=fault[0]
+    sql1 = "select id from user where (depart_table=15 and depart_id="+str(fault.winder_id)+")" #风场所有人
+    if fault.status>=2:
+        sql1 += " or job=11" #11调度长
+        if fault.guide_id != "": #接单调度
+            sql1 += " or id="+str(r.fault.guide_id)
+    sql2 = "select b_id from link where (type='f_experts' or type='f_team' or type='chatman' ) and a_id="+id
+    faultmen= QueryObj(sql1)
+    chatmen= QueryObj(sql2)
+
+    if "reset" in form:
+        news = [ x for x in form["reset"].split(",") if x not in faultmen]
+        conn.execute("delete from link where type='chatman' and a_id="+id)
+        if len(news):
+            insert("link",[obj(type="chatman", a_id=id,b_id=x,date=now) for x in news ])
+        return toret(r,result=200)
+    elif "append" in form:
+        news = [ x for x in form["append"].split(",") if x not in faultmen and x not in chatmen]
+        if len(news):
+            insert("link",[obj(type="chatman", a_id=id,b_id=x,date=now) for x in news ])
+        return toret(r,result=200)
+    else:
+        return toret(r,msg="缺少参数reset或append")

@@ -195,11 +195,17 @@ tbl_writing=Table('writing', metadata,
 	Column('title',String(64)),
 	Column('brief',String(512)),
 	Column('body',String(10240)))
-
-
 def dict_writing(x):
     writing_id=choice([0,randint(1,x) if x>1 else 0 ])
-    return dict(writing_id=writing_id,board=rndnum(1,3),section="",label=xsample("_keyword",3,5),user_id=rndnum(50,59),date=rnddate(0,2*365),title=rnditem("_quiz"),brief=rnditem("_songci"),body="\r\n".join(["<p>"+x[0]+"</p>" for x in sample(data("_songci").data,10 if writing_id==0 else 1)]))
+    return dict(writing_id=writing_id,
+                board=rndnum(1,3),
+                section="",
+                label=xsample("_keyword",3,5),
+                user_id=rndnum(50,59),
+                date=rnddate(0,2*365),
+                title=rnditem("_quiz"),
+                brief=choice(data("_songci").data)[0],
+                body="\r\n".join(["<p>"+x[0]+"</p>" for x in sample(data("_songci").data,10 if writing_id==0 else 1)]))
 
 tbl_follow=Table('follow', metadata,
 	Column('id',Integer,primary_key=True),
@@ -335,6 +341,7 @@ tbl_devwork=Table('devwork', metadata,
 	Column('guide_id',Integer),
 	Column('guidedt',Date),
 	Column('clss',Integer),
+	Column('type',String(32)),
 	Column('devwh_id',Integer),
 	Column('timelen',Integer),
 	Column('winder_id',Integer),
@@ -345,7 +352,7 @@ tbl_devwork=Table('devwork', metadata,
 	Column('dev_id',Integer),
 	Column('driver_id',Integer))
 def dict_devwork():
-    return dict(status="0",fault_id="0",guide_id="0",guidedt="0",clss="0",devwh_id="0",timelen="0",winder_id="0",addr="0",remark="0",deal_id="0",dealdt="0",dev_id="0",driver_id="0")
+    return dict(status="0",fault_id="0",guide_id="0",guidedt="0",clss="0",type=rnditem("_devtype"),devwh_id="0",timelen="0",winder_id="0",addr="0",remark="0",deal_id="0",dealdt="0",dev_id="0",driver_id="0")
 
 tbl_matprov=Table('matprov', metadata,
 	Column('id',Integer,primary_key=True),
@@ -419,9 +426,13 @@ tbl_matout=Table('matout', metadata,
 	Column('recver',String(32)),
 	Column('recvdate',Date),
 	Column('remark',String(2048)),
-	Column('img',String(32)))
+	Column('img',String(32)),
+	Column('creater_id',Integer),
+	Column('creater_dt',Date),
+	Column('stocker_id',Integer),
+	Column('stocker_dt',Date))
 def dict_matout(x):
-    return dict(fault_id=x.fault_id,fault_code=x.fault_code,matwh_id=x.matwh_id,status=x.status,code=rndqq(),usage=x.usage,recver=rnditem2("_person").name,recvdate=rnddate(30,60),remark=rnditem2("_songci"),img="")
+    return dict(fault_id=x.fault_id,fault_code=x.fault_code,matwh_id=x.matwh_id,status=x.status,code=rndqq(),usage=x.usage,recver=rnditem2("_person").name,recvdate=rnddate(30,60),remark=rnditem2("_songci"),img="",creater_id=x.creater_id,creater_dt=rnddate(30,60),stocker_id=x.stocker_id,stocker_dt=rnddate(30,60))
 
 tbl_matoutrec=Table('matoutrec', metadata,
 	Column('id',Integer,primary_key=True),

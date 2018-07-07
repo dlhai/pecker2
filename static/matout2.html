@@ -173,7 +173,7 @@
 		备注		matoutrec.remark*/
         var g_recfields = [{ name: "code", title: "材料编号", ftype: "div", width: "90px" }, { name: "type", title: "型号", ftype: "div", width: "80px" },
         { name: "mat_id", title: "材料名称", ftype: "select", width: "120px" },{ name: "num", title: "数量", ftype: "input", width: "40px" }, 
-        { name: "matinrec_id", title: "规格", ftype: "none", width: "60px", twidth:"0px;" },
+        { name: "matinrec_id", title: "入库记录", ftype: "none", width: "60px", twidth:"0px;" },
 		{ name: "in_specs", title: "规格", ftype: "input", width: "60px" },{ name: "in_vender_id", title: "生产厂家", ftype: "select", width: "80px" },
 		{ name: "in_producedt", title: "生产日期", ftype: "date", width: "80px" },{ name: "in_expiredt", title: "失效日期", ftype: "date", width: "80px" },
 		{ name: "in_remark", title: "备注", ftype: "div", width: "80px", twidth:"0px" },{ name: "remark", title: "备注", ftype: "input", width: "300px" }];
@@ -303,6 +303,7 @@
                 if (reason == "remove" || reason == "submit") {
 					Reqdata( "/matout/recdetail?id="+g_focus.id, "", function(res){
 						g_focus.subs=res.data;
+						g_focus.maxid=res.maxid;
 						$("#recs_table").html(RenderTable2({ fields: g_recfields, data: res.data }, "", f2sRec));
 						var rows = res.data.length;
 						var ss = Array(10 - rows).fill(0).map((r, i) => '<tr data_id="row' + (int(rows) + i) + '">' + Array(9).fill(0).map(c => "<td>　</td>") + "</tr>");
@@ -436,6 +437,7 @@
             fd.append("id", g_focus.id);
             fd.append("action", action);
             fd.append("status", g_focus.status);
+			fd.append("maxid", g_focus.maxid);
             fd.append("note", $("#note")[0].value);
             postform("/matout/chgstatus", fd, "", function (res) {
                 if (res.result == "200") {
@@ -456,6 +458,7 @@
 			ar.forEach((x, i) => $("#" + x).html(f2s(bill, x)));
 			Reqdata( "/matout/recdetail?id="+bill.id, "", function(res){
 				bill.subs=res.data;
+				bill.maxid=res.maxid;
 				$("#recs_table").html(RenderTable2({ fields: g_recfields, data: res.data }, "", f2sRec));
 				var rows = res.data.length;
 				var ss = Array(10 - rows).fill(0).map((r, i) => '<tr data_id="row' + (int(rows) + i) + '">' + Array(9).fill(0).map(c => "<td>　</td>") + "</tr>");

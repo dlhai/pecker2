@@ -53,6 +53,21 @@ function RenderSelect2(res, selid) {
     });
     return r;
 }
+// 使用data采用这一版
+function RenderSelectMat(res, selid) {
+    var r = "";
+    if (selid=="")
+        r += '<option selected></option>';
+    else
+        r += '<option></option>';
+    res.data.forEach((x,i)=>{
+        if (x["id"] == selid || x["name"] == selid)
+            r += '<option value="' + x["id"] + '" selected>' + x["name"] +"("+x["type"] +')</option>';
+        else
+            r += '<option value="' + x["id"] + '">' + x["name"] +"("+x["type"] +')</option>';
+    });
+    return r;
+}
 
 function RenderSelectSkill(val) {
     if (val == "") val = "　";
@@ -156,6 +171,9 @@ function cbDlg(title, css, subs) {
     if (subs)
         this.subs.push(subs);
     this.btndel = false;
+	this.btnsave = false;
+	this.btncreate = false;
+	this.btndiscard= false;
 }
 cbDlg.prototype.Add = function (sub) {
     this.subs.push(sub);
@@ -168,22 +186,28 @@ cbDlg.prototype.Show = function () {
         + '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>'
         + '        <h4 class="modal-title" id="ModalDlgTitle">' + this.title + '</h4>'
         + '   </div>'
-        + '    <div id="ModalDlgContent" class="modal-body" style="padding:5px">';
+        + '    <div class="modal-body" style="padding:5px">';
     this.subs.forEach(x => { html += x.toString() });
     html += '    </div>'
         + ` <div class="modal-footer">
                 <div style="float:left;">`+
                     (this.btndel ? `<button type="button" class="btn btn-default" style="color:#aaaaaa">删除</button>` : "") +
                     `<div id="msg" style="display:inline-block;"></div>
-                </div>
-                <button type="button" class="btn btn-primary">提交</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>`+
+				(this.btncreate ? `<button type="button" class="btn btn-primary" style="margin:0 5px;">新建</button>` : "") +
+				(this.btndiscard ? `<button type="button" class="btn btn-primary" style="margin:0 5px;">撤销</button>` : "") +
+				(this.btnsave ? `<button type="button" class="btn btn-primary" style="margin:0 5px;">保存</button>` : "") +
+                `<button type="button" class="btn btn-primary" style="margin:0 5px;">提交</button>
+				<button type="button" class="btn btn-default" data-dismiss="modal" style="margin:0 5px;">关闭</button>
             </div>
         </div><!-- /.modal-content -->
         </div><!-- /.modal -->`;
     $("body").append(html);
     $('#' + this.id).find("button").on("click", '', { This: this }, function (ev) {
         if (ev.target.innerText == "提交") ev.data.This.submit(ev.data.This);
+		else if (ev.target.innerText == "保存") ev.data.This.save(ev.data.This);
+		else if (ev.target.innerText == "新建") ev.data.This.create(ev.data.This);
+		else if (ev.target.innerText == "撤销") ev.data.This.discard(ev.data.This);
         else if (ev.target.innerText == "关闭") ev.data.This.closedlg(ev.data.This);
         else if (ev.target.innerText == "删除") ev.data.This.remove(ev.data.This);
     });
@@ -215,7 +239,7 @@ cbFormDlg.prototype.Show = function (cls) {
         + '        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>'
         + '        <h4 class="modal-title" id="ModalDlgTitle">' + this.title + '</h4>'
         + '   </div>'
-        + '   <form id="ModalDlgContent" class="modal-body '+cls+'" style="padding:5px">';
+        + '   <form class="modal-body '+cls+'" style="padding:5px">';
     this.subs.forEach(x => { html += x.toString() });
     html += '    </form>'
         + ` <div class="modal-footer">
@@ -244,7 +268,7 @@ cbFormDlg.prototype.closedlg = function (reason) {
     $('#' + this.id).remove();
 }
 cbFormDlg.prototype.submit = function () {
-    var fd = new FormData(document.getElementById("ModalDlgContent"));
+    var fd = new FormData($('#' + this.id+" form")[0]);
 	if ( this.check && !this.check(fd) )
 		return;
 	postform( this.urlsubmit, fd, this, function(res, ctx){
@@ -339,6 +363,8 @@ function RenderFormItem(type, attr, val )
         r += '<input ' + attr + ' style="width:490px;" value="' + val + '" />';
     else if (type == "textarea")
         r += '<textarea ' + attr + ' style="resize:none;width:490px;max-height:45px;">' + val + '</textarea>';
+    else if (type == "text_01")
+        r += '<textarea ' + attr + ' style="resize:none;height:80px;">' + val + '</textarea>';
     else if (type == "select")
         r += '<select ' + attr + '>' + val + '</select>';
     else if (type == "date")
@@ -354,20 +380,23 @@ function RenderFormIn(entity, fields, cb) {
         if (field.ftype == "none")
             return;
 
-        var val = entity[field.name];
-        var attr = 'name="' + field.name+'" ';
-        if (field.name.indexOf("_") != -1)
-            attr += 'id="' + field.name + "_" + val + '"';
+		var val = entity[field.name];
+		if (field.ftype == "hide")
+			r += `<input type="hidden" name="`+field.name+`" value="`+val+`">`;
+		else{
+			var attr = 'name="' + field.name+'" ';
+			if (field.name.indexOf("_") != -1)
+				attr += 'id="' + field.name + "_" + val + '"';
 
-        var val = cb != undefined ? cb(entity, field) : val;
-
-        r += "<div><label>" + field.title + "</label>";
-		if ( field.ftype=="div" || field.ftype=="div_long" ){
-			r += `<input type="hidden" name="`+field.name+`" value="`+entity[field.name]+`">`;
-			attr = ""; // 清空避免name重复
+			val = cb != undefined ? cb(entity, field) : val;
+			r += "<div><label>" + field.title + "</label>";
+			if ( field.ftype=="div" || field.ftype=="div_long" ){
+				r += `<input type="hidden" name="`+field.name+`" value="`+entity[field.name]+`">`; // 这里不能用val
+				attr = ""; // 清空避免name重复
+			}
+			r += RenderFormItem(field.ftype, attr, val);
+			r += "</div>";
 		}
-        r += RenderFormItem(field.ftype, attr, val);
-        r += "</div>";
     });
     return r;
 }
@@ -379,7 +408,7 @@ function RenderForm4(entity, fields, cb) {
     return r;
 }
 
-//与第4版区别是外包idv改成了form，并增加参数表单的id
+//与第4版区别是外包div改成了form，并增加参数表单的id
 function RenderForm5(id, entity, fields, cb) {
     var r = '<form id="{0}" class="x2Form">'.format(id);
     r +=RenderFormIn(entity, fields, cb);
@@ -401,9 +430,9 @@ function xCreateNode(param) {
 // twidth:0不显示，无此属性或为-1表示默认宽度
 g_TableCurRow = new Object();
 function RenderTable2(res, style, fun) {
-    var r = "<table id=\"" + res.ls + "\" class=\"xTable\"><thead><tr>";
-    if (style)
-        r = "<table id=\"" + res.ls + "\" class=\"xTable\" style=\"" + style + "\"><thead><tr>";
+	var attr = style == "" ? "" : ` style="`+style+`"`;
+	attr += res.ls == "" ? "" : ` id="`+res.ls+`"`;
+    var r = `<table class="xTable" ` + attr + `"><thead><tr>`;
     res.fields.forEach(field => {
         if (!field.hasOwnProperty("twidth"))
             field.twidth = -1;
@@ -501,7 +530,6 @@ function GetCurRowDataID( tableid ){
 
 function SetCurRow(tableid, idx) {
 	idx++;
-    console.log("tableid=" + tableid + ",idx=(" + g_TableCurRow[tableid] + "=>" + idx + ")")
     var currow = g_TableCurRow[tableid];
     if (currow != -1) {
         if (currow % 2 == 0)
@@ -513,11 +541,11 @@ function SetCurRow(tableid, idx) {
     g_TableCurRow[tableid] = idx;
 }
 
-//点击反色
+//点击反色 表格无id则不支持反色
 $("html").on("click", function (event) {
     var node = $(event.target);
 	var table = node.parents(".xTable");
-    if (node[0].localName == "td" && table.length > 0  && table.attr("freeze")==undefined ) {
+    if (node[0].localName == "td" && table.length > 0 ) {
         node = node.parent();
         var tbody = node.parent();
         var tag = tbody[0].localName;

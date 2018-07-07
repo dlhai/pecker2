@@ -251,9 +251,9 @@ def matremove():
 #查询某材料的库存情况（新建、编辑出库记录时用作参考）
 #/mat/store?matwh_id=&mat_id=&matoutrec_id=
 #matoutrec_id参数是要忽略的出库记录，在出库单编辑时，当前行占用的数量也应计算为可用数量，不应统计为占用数量
-#r.mat_recs 入库记录清单（由于sqlite不能处理null数据，需要在外部对确定）
+#r.mat_recs 入库记录清单
 #r.mat_num_in #入库总数量，仅包含已完成的
-#r.mat_num_out #出库总数量，退回状态除外，但包含未完成的
+#r.mat_num_out #出库总数量，退回状态除外，但包含未提交的
 @app.route("/mat/storeavailable")
 @login_required
 def matstoreavailable():
@@ -295,7 +295,7 @@ def matstoreavailable():
         '''.format(matwh_id=params["matwh_id"], mat_id=params["mat_id"],matoutrec_id=matoutrec_id)
 
     r.mat_recs = QueryObj(sql_recs)
-    r.mat_recs = list(filter(lambda x: x.num > atoi(x.outnum), r.mat_recs) )
+    r.mat_recs = list(filter(lambda x: x.num > atoi(x.outnum), r.mat_recs) ) #由于sqlite不能处理null数据，需要在外部对确定
     r.mat_num_in = QueryObj(sql_in)[0].mat_num_in 
     r.mat_num_out = QueryObj(sql_out)[0].mat_num_out 
     return toret(r,result=200)

@@ -204,7 +204,6 @@ def insertq(tbl,obj):
     conn.execute(toinsert(tbl,obj))
     return QueryObj("select * from "+tbl+" where id in (select max(id) from "+tbl+")")
 
-
 def toupdate(tbl,values,where):
     dvals = todict(values)
     if "id" in dvals:

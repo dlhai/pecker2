@@ -2,7 +2,7 @@
 .card {
     display: inline-block;
     margin: 10px;
-    width: 230px;
+    width: 200px;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     text-align: center;
     border-radius: 5px;
@@ -87,3 +87,5 @@
 .card table tr:nth-child(2n) {background-color: #eeffee;}
 /* .card table tr:first-child {width: 200px;text-align: left;}*/
 .card table td, .card table th {white-space: nowrap;overflow: hidden;word-break: keep-all;}
+#recs_table table {width: 100%;table-layout: fixed;}
+#recs_table td, #recs_table table th {white-space: nowrap;overflow: hidden;word-break: keep-all;}

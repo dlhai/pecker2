@@ -1,0 +1,570 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <script src="js/jquery.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.css"/>
+    <script src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/doTe.js"></script>
+	<script src="laydate/laydate.js"></script>
+    <script charset="utf-8" src="kindedit/kindeditor-all.js"></script>
+    <script charset="utf-8" src="kindedit/lang/zh-CN.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/xpecker.js"></script>
+    <link rel="stylesheet" href="css/Cube.css" />
+    <script src="js/Cube.js"></script>
+	<link rel="stylesheet" href="css/speech.css" />
+    <link rel="StyleSheet" href="css/case.css" type="text/css" />
+	<script src="js/coord.js"></script>
+
+</head>
+<body class="xFCsrow">
+    <section class="xPanel2 xFIfixed" style="width:300px;">
+        <header>任务列表<div style="float: right;"></header>
+        <div id="troublelist" class="xScroll" style="height:100px;flex-grow: 1;"></div>
+    </section>
+    <section class="xPanel2" style="width: 700px; max-width:900px;">
+        <header>案件处理</header>
+        <div id="case" class="xScroll" style="height:100px;flex-grow: 1;padding:0px;">
+        </div>
+    </section>
+    <section class="xPanel2 xFIfixed" style="width:200px;min-width:160px;">
+        <header>参与人员<div style="float: right;"><a id="btn_chatmen">管理</a></div></header>
+        <div id="chatman" class="xScroll" style="height:100px;flex-grow: 1;"></div>
+    </section>
+    <section class="xPanel2" style="width: 450px; min-width: 300px;">
+        <header>对话</header>
+		<div id="speechlist" class="xScroll" style="height:100px;flex-grow: 1;"></div>
+		<footer id="speechinput" class="xFCsrow xFIfixed" style="padding:0px 10px 10px 0px; height: 200px; width: 100%; align-items: flex-end;">
+			<textarea id="kereplay" class="xrAngle" style="margin-right:10px; padding:5px 10px; height:188px;width:100px;resize:none;"></textarea>
+			<div class="xFIfixed"><button onclick="onsend()">发送</button></div>
+		</footer>
+    </section>
+
+<script type="text/javascript">
+	var g_matfields = [{ name: "mat_id", title: "材料", ftype: "select" }, 
+		{ name: "num", title: "需要数量", ftype: "input" }, 
+		{ name: "matwh_id", title: "发货仓库", ftype: "select" },
+		{ name: "status", title: "状态", ftype: "none" },
+		{ name: "matinrec_id", title: "库存批次", ftype: "select",twidth:"0px;"},
+		{ name: "stocknum", title: "库存情况", ftype: "div",twidth:"0px;"},
+		{ name: "remark", title: "备注", ftype: "text_01",twidth:"0px;"}]
+
+
+    var g_focus_card, g_focus, g_faults, g_focus_matrec;
+	var g_user = parent.g_user;
+	if (g_user == undefined) {
+		Reqdata("/curuserinf", "", function (res) {
+			g_user = res.data;
+			g_user.fields = res.fields;
+			init();
+		});
+	}
+	else{
+		init();
+	}
+	function init(){
+		$("body").on("click", function (event) { // 按钮事件
+			var node = $(event.target);
+			var id = node.attr("id");
+			if ( id != undefined && id.indexOf("btn_") == 0 ){
+				onclickButton(node);
+			}
+		});
+		$("body").on("change", function (event) { // 文件上传
+			var node = event.target;
+			if (node.tagName == "INPUT" && node.type == "file") {
+				var doctype = $(node).parents(".buttonright").attr("id");
+				if (doctype != undefined){ // 躲开现场记录中的图片列表
+					var file = $(node).get(0).files[0];
+					var formData = new FormData();
+					formData.append("id", g_focus.fault.id);
+					formData.append("doctype", doctype);
+					formData.append("file", file);
+					postform("/case/adddoc", formData, "", function (res) {RenderCase(g_focus.fault.id);});
+				}
+			}
+		});
+
+		Reqdata("/rd?ls=mat", "", function (mats) {g_mats = mats;});
+		Reqdata("/rd?ls=matwh", "", function (res) {g_matwhs = res;});
+		Reqdata("/rd?ls=devwh", "", function (res) {g_devwhs = res;});
+
+		var int=self.setInterval( checkchange,10000);
+		checkchange();
+	}
+
+	var kereplay;
+	KindEditor.ready(function (K) {
+		kereplay = K.create('#kereplay', {
+			uploadJson: '/cr', resizeMode:0,items: ['cut', 'copy', 'paste', '|', 'formatblock', 'fontname', 'fontsize', 'forecolor', 'hilitecolor', 'bold', 'italic',
+				'underline', 'removeformat', '|', 'link', 'unlink', '|', 'fullscreen',]
+		});
+	});
+
+	function checkchange(){
+		Reqdata("/case/rdfault"+ (g_faults == undefined? "":"?maxid="+g_faults.maxid), "", function (res) {
+			if (g_faults != undefined && g_faults.maxid == res.maxid)
+				return; // 没有新数据
+			g_faults = res;
+            res.fields.push({ "title": "报修风机", "name": "devices", "forder": "5", "ftype": "div_long" });
+            xfieldsort(res.fields);
+			$("#troublelist").html((g_faults.data.map(x => crd_card(x)).join("")));
+			$(".card").on("click", onclickcard);
+
+			if ( g_focus != undefined){ // 恢复之前的选中状态
+				$("[data_id="+g_focus.fault.id+"]").children(".header").css("background", "linear-gradient(to bottom, rgba(233,209,154,1) 0%,rgba(208,157,80,1) 100%)");
+			}
+		});
+	}
+
+    function onclickcard(event)
+    {
+		// 切换焦点
+        if (g_focus_card != undefined)
+            g_focus_card.children(".header").css("background", "linear-gradient(to bottom, rgba(192,215,140,1) 0%,rgba(118,170,73,1) 100%)");
+		g_focus_card = $(event.target).parents(".card");
+        g_focus_card.children(".header").css("background", "linear-gradient(to bottom, rgba(233,209,154,1) 0%,rgba(208,157,80,1) 100%)");
+		RenderCase(g_focus_card.attr("data_id"));
+	}
+	function RenderCase(id){
+		Reqdata("/case/detail?id=" + id, "", function (res) {
+			if (!g_faults.data.some(x=>x.id==id)){ // 在fault列表产生变动的情况下，如删除，退回、完工等，会出现id不在fault列表中
+				$("#case").html("");
+				$("#chatman").html("");
+				$("#speechlist").hide();
+				$("#speechinput").hide();
+				return;
+			}
+
+			g_focus = res;
+			g_focus.experts.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
+			g_focus.engineers.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
+			g_focus.repairlog_users.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
+			g_focus.chatmen.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
+
+	        var html = crd_render_fault(g_focus.fault, g_faults.fields);
+
+			if (g_focus.fault.status == 0 ){
+				html += `<div style="margin:20px;border-top:2px dashed #6a923d;padding-top:30px;">
+							<button id="btn_modify" type="button" class="btn btn-primary">编辑</button>
+							<div style="float: right;">
+								<div id="sect_flow" class="x2Form" style="display:inline-block;">
+									<div><label>意见</label><input id="note" style="width:400px;"/></div>
+								</div>
+								<button id="btn_submit" type="button" class="btn btn-primary">提交</button>
+							</div>
+						</div>`;//工具条
+				$("#case").html(html);
+				$("#chatman").html("");
+				$("#speechlist").hide();
+				$("#speechinput").hide();
+			}
+			else if (g_focus.fault.status == 1 ){
+				if (g_user.job == 2 || g_user.job == 3){ // 风场长或驻场
+					html += `<div style="margin:20px;border-top:2px dashed #6a923d;padding-top:30px;">
+								<button id="btn_recall" type="button" class="btn btn-default" style="color:#aaaaaa;display">撤回</button>
+							 </div>`;//工具条
+				}
+				else if (g_user.job == 11 || g_user.job == 12){ // 调度长或调度
+					html += `<div style="margin:20px;border-top:2px dashed #6a923d;padding-top:30px;">
+								<div style="float: right;">
+									<div id="sect_flow" class="x2Form" style="display:inline-block;">
+										<div><label>意见</label><input id="note" style="width:400px;"/></div>
+									</div>
+									<button id="btn_accept" type="button" class="btn btn-primary">接单</button>
+									<button id="btn_decline" type="button" class="btn btn-primary">退回</button>
+								</div>
+							</div>`;//工具条
+				}
+				$("#case").html(html);
+				$("#chatman").html("");
+				$("#speechlist").html("");
+				$("#speechlist").hide();
+				$("#speechinput").hide();
+			}
+			else{
+				$("#speechlist").show();
+				$("#speechinput").show();
+				html += `<details open class="xDetail2"><summary>准备</summary><div>`;
+				html += rd_frozenleft("专家组",rd_buttonright("experts", g_focus.experts.map(x=>rd_brief(x)).join("")));
+				html += rd_frozenleft("评估报告",rd_doc("eval1",g_focus.eval1rep)+rd_doc("eval2",g_focus.eval2rep));
+				html += rd_frozenleft("维修方案",rd_doc2("plan",g_focus.repairplan,g_focus.repairplan_sign,g_focus.repairplan_signers));
+				html += rd_frozenleft("维修队",rd_buttonright("works", g_focus.engineers.map(x=>rd_brief(x)).join("")));
+				html += rd_frozenleft("维修用料",rd_buttonright("mats", g_focus.matoutrecs.map(x=>rd_matrec(x)).join("")));
+				html += rd_frozenleft("维修设备",rd_buttonright("devs", g_focus.devworks.map(x=>rd_device(x)).join("")));
+				html += `</div></details>`;
+	
+				if (g_focus.repairlog.length>0 || g_user.job == 16|| g_user.job == 17||g_user.job == 2 || g_user.job == 3){ // 队长或技工、风场长或驻场
+					html += `<details open class="xDetail2"><summary>维修<div style="float: right;"><a id="btn_log" href="#">添加</a></div></summary><div id="repair_log">`;
+					html += rd_repairlog(g_focus.repairlog, g_focus.repairlog_imgs, g_focus.repairlog_users);
+					html += `</div></details>`;
+				}
+				if (g_focus.repairrep.length>0 || g_user.job == 16){ // 队长
+					html += `<details open class="xDetail2"><summary>完工</summary><div>`
+					html += rd_frozenleft("维修报告",rd_doc2("report",g_focus.repairrep,g_focus.repairrep_sign,g_focus.repairrep_signers));
+					html += `</div></details>`;
+				}
+
+				if (g_user.job == 11 || g_user.job == 12){ // 调度长或调度
+					html += `<div style="margin:20px;border-top:2px dashed #6a923d;padding-top:30px;">
+								<div style="float: right;">
+									<div id="sect_flow" class="x2Form" style="display:inline-block;">
+										<div><label>意见</label><input id="note" style="width:400px;"/></div>
+									</div>
+									<button id="btn_finish" type="button" class="btn btn-primary">完工</button>
+								</div>
+							</div>`;//工具条
+				}
+				
+				$("#case").html(html);
+				var btnstatus = {// 功能按钮分角色控制
+					/*风场长*/  "2": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "s",  "works": "h", "mats": "h", "devs": "h",  "log": "s", "report": "h", "reportsign": "s", "btn_chatmen": "h",},
+					/*驻场*/    "3": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "s",  "works": "h", "mats": "h", "devs": "h",  "log": "s", "report": "h", "reportsign": "s", "btn_chatmen": "h",},
+					/*调度长*/ "11": { "experts": "s","eval1": "h", "eval2": "h", "plan": "s", "plansign": "s",  "works": "s", "mats": "s", "devs": "s",  "log": "h", "report": "h", "reportsign": "h", "btn_chatmen": "s",},
+					/*调度*/   "12": { "experts": "h","eval1": "h", "eval2": "h", "plan": "s", "plansign": "h",  "works": "s", "mats": "s", "devs": "s",  "log": "h", "report": "h", "reportsign": "h", "btn_chatmen": "s",},
+					/*专家*/   "14": { "experts": "h","eval1": "s", "eval2": "s", "plan": "h", "plansign": "h",  "works": "h", "mats": "h", "devs": "h",  "log": "h", "report": "h", "reportsign": "h", "btn_chatmen": "h",},
+					/*队长*/   "16": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "h",  "works": "s", "mats": "h", "devs": "h",  "log": "s", "report": "s", "reportsign": "h", "btn_chatmen": "h",},
+					/*技工*/   "17": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "h",  "works": "h", "mats": "h", "devs": "h",  "log": "s", "report": "h", "reportsign": "h", "btn_chatmen": "h",},
+				};
+				$.each(btnstatus[g_user.job], (k, v) => { v == "s" ? $("#btn_"+k).show() : $("#btn_"+k).hide() });
+				
+				$("#chatman").html(g_focus.chatmen.map(x=>rd_brief(x)).join(""));
+				$("#speechlist").html(g_focus.speechlist.map(x=>rd_speech(x)).join(""));
+			}
+		});
+    }
+
+	function onclickButton(node){
+		var id = node.attr("id");
+		if ( id == "btn_modify" ){
+            var dlg = new cbFormDlg();
+            dlg.title = "报修单";
+            dlg.css = "width:610px";
+            dlg.Add(RenderForm4(g_focus.fault, g_faults.fields, f2s));
+            dlg.Add(xrimagelistlive2("image", g_focus.fault.imgs.map(x=>x.name)));
+			dlg.urlremove = "/case/faultremove?id=" + g_focus.fault.id;
+			dlg.urlsubmit = "/case/faultmodify?id="+g_focus.fault.id;
+			dlg.closing = function (reason){
+				if ( reason == "remove"){
+					g_focus = undefined;
+					g_faults = undefined;
+					checkchange();
+				}
+				else if (reason == "submit"){
+					RenderCase(g_focus.fault.id)
+					checkchange();
+				}
+			}
+			dlg.Show();
+		}
+		else if ( isInArray(["btn_submit","btn_recall","btn_accept","btn_decline","btn_finish"],id )){
+			chgstatus(id);
+		}
+		else if ( id == "btn_experts" ){
+			ud_userdlg(["专家"], "", g_focus.experts, function(ar){
+				if (ar.length == 0){
+					alert("至少选一个专家");
+					return;
+				}
+				var fd = new FormData();
+				fd.append("id", g_focus.fault.id);
+				fd.append("expert", ar);
+				postform("/case/setexpert", fd, "", function (res) {RenderCase(g_focus.fault.id);});
+				return true;
+			});
+		}
+		else if ( id == "btn_plansign" || id == "btn_reportsign" ){
+			var fd = new FormData();
+			fd.append("id", g_focus.fault.id);
+			fd.append("type", id);
+			postform("/case/sign", fd, "", function (res) {RenderCase(g_focus.fault.id);});
+		}
+		else if ( id == "btn_works" ){
+			if (g_user.job ==11 || g_user.job ==12 ) {// 调度或调度长，指定队长
+				ud_userdlg(["维修人员"],"队长",g_focus.engineers, function(ar){
+					if (ar.length != 1){
+						alert("要求有且仅有一个队长");
+						return;
+					}
+					else if ( g_focus.engineers.length > 0 ){
+						if ( !confirm("更换队长将更换整个施工队，要继续吗？"))
+							return;
+					}
+					var fd = new FormData();
+					fd.append("id", g_focus.fault.id);
+					fd.append("leader", ar[0]);
+					postform("/case/setteam", fd, "", function (res) {RenderCase(g_focus.fault.id);});
+					return true;
+				});
+			}
+			else if (g_user.job ==16 ) {// 队长，添加队员
+				ud_userdlg(["维修队"],g_user.id,g_focus.engineers, function(ar){
+					var fd = new FormData();
+					fd.append("id", g_focus.fault.id);
+					fd.append("leader", g_user.id);
+					fd.append("engineers", ar);
+					postform("/case/setteam", fd, "", function (res) {RenderCase(g_focus.fault.id);});
+					return true;
+				});
+			}
+		}
+		else if ( id == "btn_mats" ){
+			onclickmats();
+		}
+		else if ( id == "btn_devs" ){
+			var dlg = new cbDlg("设备调用","width:900px" );
+			dlg.Show();
+		}
+		else if ( id == "btn_log" ){
+			var fields = [
+				{ "title": "发表人", "name": "user_id", "forder": "5", "ftype": "div" },
+				{ "title": "发表时间", "name": "date", "forder": "5", "ftype": "div" },
+				{ "title": "说明", "name": "remark", "forder": "5", "ftype": "input_long" },
+			];
+            var data = Create(fields);
+			data.date = (new Date()).format("yyyy-MM-dd hh:mm:ss");
+
+            var dlg = new cbFormDlg();
+            dlg.title = "现场记录";
+            dlg.css = "width:610px";
+            dlg.Add(RenderForm4(data, fields, function(u, f) {
+				var f = (typeof f == "string"?f:f.name);
+				if (f == "user_id") return g_user.name;
+				return u[f];
+			}));
+            dlg.Add(xrimagelistlive2("image",[""]));
+			dlg.urlsubmit = "/case/addlog?id="+g_focus.fault.id;
+			dlg.Show();
+		}
+		else if ( id == "btn_chatmen" ){
+			var expert_ids = g_focus.experts.map(x=>x.id);
+			var engineer_ids = g_focus.engineers.map(x=>x.id);
+			var chatmen = g_focus.chatmen.filter(x=> {
+				if ( x.job==11|| x.id==g_focus.fault.guide_id )// 调度长和接单调度
+					return false;
+				if((x.job=="2" ||x.job=="3" ) && x.depart_id == g_focus.fault.winder_id)// 风场长和驻场
+					return false;
+				if( isInArray( expert_ids, x.id) || isInArray( engineer_ids, x.id))// 施工队
+					return false;
+				return true;
+			});
+			ud_chats = chatmen;
+			ud_userdlg(["当前","调度人员","专家","维修队","维修人员"],"",g_focus.chatmen, function(ar){
+		        var fd = new FormData();
+				fd.append("id", g_focus.fault.id);
+				if ( $("#rolelist span").html() == "当前")
+					fd.append("reset", ar);
+				else
+					fd.append("append", ar);
+				postform("/case/setchatmen", fd, "", function (res) {RenderCase(g_focus.fault.id);});
+				return true;
+			});
+		}
+		else{
+			alert("click "+id);
+		}
+	}
+
+    function chgstatus(action) {
+        var fd = new FormData();
+        fd.append("id", g_focus.fault.id);
+        fd.append("action", action);
+        fd.append("status", g_focus.fault.status);
+		fd.append("maxid", g_focus.maxid);
+		var note =$("#note");
+		if (note.length != 0 )
+			fd.append("note", note[0].value);
+		else
+			fd.append("note", "");
+        postform("/case/chgstatus", fd, "", function (res) {
+            if (res.result == "200") {
+				checkchange();
+				RenderCase(g_focus.fault.id);
+                alert("操作成功！");
+            }
+			else if (res.result == "405") {
+				checkchange();
+				RenderCase(g_focus.fault.id);
+			}
+        });
+    }
+
+	function f2s(u,f){
+		var f = (typeof f == "string"?f:f.name);
+		if (f=="devices"){
+			var h = "";
+			if ( u.efans.length >0 )
+					h+="风机："+u.efans.map(x=>x.code).join(",");
+			if ( u.leafs.length >0 )
+					h+="叶片："+u.leafs.map(x=>x.code).join(",");
+			return h;
+		}
+		else if ( f == "report_id") return u["report_name"];
+		else if ( f == "winder_id") return u["winder_name"];
+		return u[f];
+	}
+	function f2s_mat(u,f){
+		var f = (typeof f == "string"?f:f.name);
+		var val = u.chg != undefined  && u.chg[f] != undefined ? u.chg[f]:u[f];
+
+		var mat = GetSub(g_mats.data, "id", u.chg != undefined  && u.chg.mat_id != undefined ? u.chg.mat_id:u.mat_id);
+		if ( f == "mat_id") return mat.name+"("+mat.type+")";
+		else if ( f == "num") return val+mat.unit;
+		else if ( f == "matwh_id") return GetSub(g_matwhs.data, "id", val).name;
+		else if ( f == "status") return fault_matstatus[val];
+		return val;
+	}
+	function f2s_dev(u,f){
+		var f = (typeof f == "string"?f:f.name);
+		if (f=="devices"){
+			var h = "";
+			if ( u.efans.length >0 )
+					h+="风机："+u.efans.map(x=>x.code).join(",");
+			if ( u.leafs.length >0 )
+					h+="叶片："+u.leafs.map(x=>x.code).join(",");
+			return h;
+		}
+		else if ( f == "report_id") return u["report_name"];
+		else if ( f == "winder_id") return u["winder_name"];
+		return u[f];
+	}
+
+	function onclickmats(){
+		var  html= `<div style="display:table-cell;width:100%;vertical-align:top;">
+						<div id="matreclist" class="xScroll" style="max-height:350px;">`
+							+RenderTable2({ "data":g_focus.matoutrecs, "fields":g_matfields},"", f2s_mat)+`
+						</div>
+					</div>
+					<div style="display:table-cell;min-width:300px;">
+						<div id="tip" style="color:red;margin-left:20px;">　</div>
+						<div id="matrecdetail"></div>
+					</div>`;
+		var dlg = new cbDlg("维修材料","width:1000px", html );
+		dlg.btndiscard=true;
+		dlg.btnsave=true;
+		dlg.btncreate=true;
+		dlg.Show();
+
+		g_focus_matrec = undefined;
+		dlg.create = function(dlg){
+							
+		}
+		dlg.save = function(dlg){
+				
+		}
+		dlg.discard = function(dlg){
+		}
+		dlg.submit = function(dlg){
+			
+		}
+
+		// 点击表格行
+		$("#matreclist").on("click", function (event) {
+			var node = $(event.target);
+			if ( node[0].tagName != "TD")
+				return;
+			var tr = $(event.target).parent();
+			onclickmattable(tr);
+		});
+
+		// 表单内容变更
+		$("#matrecdetail").on("change", function (event) {
+			var node = $(event.target);
+			onchgmatform(node);
+		});
+	}
+
+	function onclickmattable(tr){
+		if (g_focus_matrec!= undefined){
+			if (g_focus_matrec.mat_id == ""){
+				$("#tip").html("材料不能为空");
+				return;
+			}
+			if (g_focus_matrec.matwh_id == ""){
+				$("#tip").html("发货仓库不能为空");
+				return;
+			}
+			if (g_focus_matrec.matinrec_id == ""){
+				$("#tip").html("库存批次不能为空");
+				return;
+			}
+			if (g_focus_matrec.num == "" || g_focus_matrec.num == "0"){
+				$("#tip").html("数量不能为空");
+				return;
+			}
+			$("#tip").html("　");
+			if (g_focus_matrec.chg ){
+				// 保存
+				
+			}
+
+			var lasttr = $("#matreclist tr[data_id="+g_focus_matrec.id+"]");
+			if (lasttr.index() % 2 == 0)
+				lasttr.children().css("background-color", "#ffffff");
+			else
+				lasttr.children().css("background-color", "#f5f5f5");
+		}
+		tr.children().css("background-color", "#00f0f5");
+
+		g_focus_matrec = GetSub(g_focus.matoutrecs, "id", tr.attr("data_id"));
+		var mat = GetSub(g_mats.data, "id", g_focus_matrec.mat_id);
+		if ( g_focus_matrec.status == "" ||  g_focus_matrec.status == "0"){
+			$("#matrecdetail").html(RenderForm5(`form_mat`, g_focus_matrec,g_matfields, function(u,f){
+				var f = (typeof f == "string"?f:f.name);
+				val = u.chg != undefined  && u.chg[f] != undefined ? u.chg[f]:u[f];
+				if (f == "mat_id")		return RenderSelectMat(g_mats, val == "" ? "" : val);
+				else if (f == "num")	return val == "" ? "" : val+mat.unit;
+				else if (f == "matwh_id")return RenderSelect2(g_matwhs, val == "" ? "" : val);
+				else if (f == "inrec_id")	return "<option selected>waiting</option>";
+				else if (f == "stocknum")	return "waiting";
+				return val;
+			}));
+		}
+		showstock(g_focus_matrec);// 显示库存
+	}
+
+	function onchgmatform(node){
+		var name = node.attr("name");
+		g_focus_matrec[name]=node.val();
+		if (name == "mat_id" || name =="matwh_id"  ){ 
+			showstock(g_focus_matrec);// 显示库存
+			g_focus_matrec.chg=true;
+			g_focus_matrec.matinrec_id="";
+			g_focus_matrec.num = "";
+		}
+		else if ( name == "matinrec_id" ){
+			var mat = GetSub(g_mats.data, "id", g_focus_matrec.mat_id);
+			var inrec = GetSub(g_focus_matrec.stores.mat_recs, "id", node.val());
+			var aa = inrec == null?"":"批次余量"+(inrec.num-inrec.outnum )+mat.unit+"<br/>";
+			var bb = "库存总量"+(g_focus_matrec.stores.mat_num_in-g_focus_matrec.stores.mat_num_out )+mat.unit;
+			$("#form_mat [name=stocknum]").next().html(aa+bb);
+		}
+		$("#matreclist").html(RenderTable2({ "data":g_focus.matoutrecs, "fields":g_matfields},"", f2s_mat));
+		$("#matreclist tr[data_id="+g_focus_matrec.id+"] td").css("background-color", "#00f0f5");
+	}
+
+	function showstock(matrec){
+		if (matrec.mat_id != "" && matrec.matwh_id != ""){
+			Reqdata( "/mat/storeavailable?mat_id="+ matrec.mat_id +"&matwh_id="+matrec.matwh_id+"&matoutrec_id="+matrec.id, "", function( res){
+				matrec.stores = res;
+				res.mat_recs.forEach((x,i)=>x.name=GetSub(db_matsouce, "id", x.matin_source).name+"("+x.matin_code+")");
+				
+				var mat = GetSub(g_mats.data, "id", matrec.mat_id);
+				$("#form_mat [name=matinrec_id]").html(RenderSelect(res.mat_recs, matrec.matinrec_id ));
+				$("#form_mat [name=stocknum]").next().html("库存总量"+(res.mat_num_in-res.mat_num_out )+mat.unit);
+			});
+		}
+		else{
+			matrec.stores = undefined;
+			$("#form_mat [name=matinrec_id]").html("");
+			$("#form_mat [name=stocknum]").next().html("");
+		}
+	}
+</script>
+</body>
+</html>
+

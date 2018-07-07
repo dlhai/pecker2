@@ -18,213 +18,7 @@
     <script src="js/Cube.js"></script>
 	<link rel="stylesheet" href="css/speech.css" />
     <link rel="StyleSheet" href="css/case.css" type="text/css" />
-	<script>
-// 案件界面，用于调度、专家、风场场主、驻场、队长等，当前仅含案件编辑功能的内容，后面会加入案件显示的内容。
-function crd_showuserselectdlg() {
-    var us = `<div id="rolelist" class="xCombox xRndAngle" style="margin-top:5px; display:inline-block;"><span>调度人员</span><div class="xMenu">
-                <div class="selected">调度人员</div><div>风场人员</div><div>设备人员</div><div>仓库人员</div><div>专家</div><div>维修人员</div>
-            </div></div>
-            <div id="userfilter" class="xCombox xRndAngle" style="margin-top:5px; display:inline-block;">
-                <span>所有</span><div id="userfiltertree" class="xMenu" style="max-height:600px;overflow-y:auto;"><div class="selected">调度人员</div></div>
-            </div>
-            <div id="filteruserlist" class="xRndAngle xScroll" style="margin-top:5px; width:590px;height:250px;padding:5px;"></div>`
-
-    var dlg = new cbDlg("人员选择", "width:610px");
-    dlg.Add(us);
-    dlg.Show();
-}
-
-var ud_sels=[] // 当前已选中的人员列表
-var ud_filter2 = "";
-function ud_userdlg( filter1, filter2, sels, cb) {
-	ud_sels = sels;
-	ud_filter2 = filter2
-    var us = 
-			`<div id="rolelist" class="xCombox xRndAngle" style="margin-top:5px; display:inline-block;">
-				<span></span>
-				<div class="xMenu"></div>
-			</div>
-            <div id="userfilter" class="xCombox xRndAngle" style="margin-top:5px; display:inline-block;">
-                <span></span>
-				<div id="userfiltertree" class="xMenu" style="max-height:600px;overflow-y:auto;">
-				</div>
-            </div>
-            <div id="filteruserlist" class="xRndAngle xScroll" style="margin-top:5px; width:590px;height:250px;padding:5px;"></div>`
-    var dlg = new cbDlg("人员选择", "width:610px");
-    dlg.Add(us);
-    dlg.Show();
-	dlg.submit = function(thedlg){
-		var ar = $("#filteruserlist input").toArray().filter(x=>$(x).prop('checked')).map(x=>$(x).attr("data_id"));
-		if ( cb(ar) ){
-			thedlg.closedlg();
-		}
-	}
-
-	var roles = filter1 != "" ? filter1: ["调度人员","风场人员","设备人员","仓库人员","专家","维修队"];
-	ud_cbx("rolelist",roles, roles[0] );
-	onclkrole(roles[0],filter2);
-}
-
-function ud_cbx(id, items, dft ) {
-	$("#"+id+" span").html(dft);
-	if (typeof items[0] == "string")
-		$("#"+id+" div").html(items.map(x=>"<div>"+x+"</div>").join(""));
-	else
-		$("#"+id+" div").html(items.map(x=>`<div data_id="{id}" >{name}</div>`.format(x)).join(""));
-}
-
-//点在菜单项上
-$("html").on("click", function (event) {
-    var node = $(event.target);
-    if (node.parent().hasClass("xMenu")) { //点在菜单背景上
-        var parentid = node.parent().parent().attr("id");
-        if (parentid == "rolelist") {
-           onclkrole($(node).html(),ud_filter2);
-        }
-        else if (parentid == "userfilter") {
-			var filter2 = node.attr("data_id");
-			if ( filter2 == undefined )
-				filter2 = node.html();
-			onclkfilter(filter2);
-        }
-    }
-});
-
-function rd_checkuser(user) {
-    var tpl = `<label style="margin-right:10px;font-weight:normal;"><input data_id="{0}" type="checkbox" {2} >{1}</label>`;
-    return tpl.format(user.id,rd_brief(user), ud_sels.some(x=>x.id==user.id)? "checked":"");
-}
-
-function onclkrole(text, filter2){
-	if (text == "调度人员") {
-        $("#userfilter span").html('所有　　');
-        $("#userfiltertree").addClass('xMenu');
-        $("#userfiltertree").removeClass('xPopWnd');
-        $("#userfiltertree").html('<div class="selected">所有　　</div>');
-        Reqdata("/user/briefs?job=" + GetsubJob(GetSub(db_job, "name", "调度超级帐号").id, "string"), "", function (res) {
-			res.users.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
-            $("#filteruserlist").html(res.users.map(x => rd_checkuser(x)));
-        });
-    }
-    else if (text == "风场人员") {
-        $("#userfilter span").html('　　　　　　');
-        $("#userfiltertree").html('');
-        $("#userfiltertree").addClass('xPopWnd');
-        $("#userfiltertree").removeClass('xMenu');
-        $("#filteruserlist").html("");
-        g.userfiltertree = new x4Tree("#userfiltertree", "winderco", "", "winder", function (type, id, node) {
-            if (type == "winder") {
-                $("#userfilter>span").html(node.html());
-                $("#userfilter .xPopWnd").toggle();
-                Reqdata("/user/briefs?depart_id=" + id + "&depart_table=" + GetTbl("winder").id, "", function (res) {
-					res.users.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
-                    $("#filteruserlist").html(res.users.map(x => rd_checkuser(x)));
-                });
-            }
-            else {
-                g.userfiltertree.Extend("#" + type + "_" + id);
-            }
-        });
-    }
-    else if (text == "设备人员") {
-        $("#userfilter span").html('　　　　　　');
-        $("#userfiltertree").addClass('xPopWnd');
-        $("#userfiltertree").removeClass('xMenu');
-        $("#userfiltertree").html('');
-        $("#filteruserlist").html('');
-        g.userfiltertree = new x4Tree("#userfiltertree", "devwh", "", "devwh", function (type, id, node) {
-            if (type == "devwh") {
-                $("#userfilter>span").html(node.html());
-                $("#userfilter .xPopWnd").toggle();
-                Reqdata("/user/briefs?depart_id=" + id + "&depart_table=" + GetTbl("devwh").id, "", function (res) {
-					res.users.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
-                    $("#filteruserlist").html(res.users.map(x => rd_checkuser(x)));
-                });
-            }
-            else {
-                g.userfiltertree.Extend("#" + type + "_" + id);
-            }
-        });
-    }
-    else if (text == "仓库人员") {
-        $("#userfilter span").html('　　　　　　');
-        $("#userfiltertree").addClass('xPopWnd');
-        $("#userfiltertree").removeClass('xMenu');
-        $("#userfiltertree").html('');
-        $("#filteruserlist").html('');
-        g.userfiltertree = new x4Tree("#userfiltertree", "matprov", "", "matwh", function (type, id, node) {
-            if (type == "matwh") {
-                $("#userfilter>span").html(node.html());
-                $("#userfilter .xPopWnd").toggle();
-                Reqdata("/user/briefs?depart_id=" + id + "&depart_table=" + GetTbl("matwh").id, "", function (res) {
-					res.users.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
-                    $("#filteruserlist").html(res.users.map(x => rd_checkuser(x)));
-                });
-            }
-            else {
-                g.userfiltertree.Extend("#" + type + "_" + id);
-            }
-        });
-    }
-    else if (text == "专家") {
-        $("#userfilter span").html('所有　　　　');
-        $("#userfiltertree").addClass('xMenu');
-        $("#userfiltertree").removeClass('xPopWnd');
-        $("#userfiltertree").html('<div id="user_0">所有</div>' + xrmenuin(db_skill, "skill_"));
-        Reqdata("/user/briefs?job=14", "", function (res) {
-			res.users.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
-            $("#filteruserlist").html(res.users.map(x => rd_checkuser(x)));
-        });
-    }
-    else if (text == "维修队") {
-        $("#userfiltertree").addClass('xMenu');
-        $("#userfiltertree").removeClass('xPopWnd');
-        Reqdata("/user/briefs?job=16", "", function (res) {
-			if (filter2 != "")
-				res.users = res.users.filter(x=>x.id==filter2);
-			if (res.users.length == 1){
-				ud_cbx("userfilter",res.users, res.users[0].name );
-				onclkfilter(res.users[0].id);
-			}
-			else
-				ud_cbx("userfilter",res.users, "　　　　" );
-        });
-    }
-    else if (text == "维修人员") {
-        $("#userfiltertree").addClass('xMenu');
-        $("#userfiltertree").removeClass('xPopWnd');
-
-		var ar = filter2 != "" ? filter2: ["所有","队长","技工"];
-		ud_cbx("userfilter",ar, ar[0] );
-		onclkfilter(ar[0]);
-    }
-}
-
-	function onclkfilter(filter2){
-        var role = $("#rolelist span").html();
-        if (role == "专家") {
-            Reqdata("/user/briefs?job=14", "", function (res) {
-				if (filter2 != "所有")
-					res.users = res.users.filter(x=>x.skill.indexOf(filter2)!= -1);
-				res.users.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
-                $("#filteruserlist").html(res.users.map(x => rd_checkuser(x)));
-            });
-        }
-        else if (role == "维修队") {
-            Reqdata("/rdteam?user_id=" + filter2, "", function (res) {
-				res.data.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
-                $("#filteruserlist").html(res.data.map(x => rd_checkuser(x)));
-            });
-        }
-        else if (role == "维修人员") {
-			var job = filter2=="队长"?16:filter2=="技工"?17:"(16,17)";
-            Reqdata("/user/briefs?job=" + job, "", function (res) {
-				res.users.forEach(x=>x.prof=GetSub(db_job, "id", x.job).sname);
-                $("#filteruserlist").html(res.users.map(x => rd_checkuser(x)));
-            });
-        }
-	}
-	</script>
+	<script src="js/coord.js"></script>
 
 </head>
 <body class="xFCsrow">
@@ -238,7 +32,7 @@ function onclkrole(text, filter2){
         </div>
     </section>
     <section class="xPanel2 xFIfixed" style="width:200px;min-width:160px;">
-        <header>参与人员<div style="float: right;"><a href="#">管理</a></div></header>
+        <header>参与人员<div style="float: right;"><a id="btn_chatmen">管理</a></div></header>
         <div id="chatman" class="xScroll" style="height:100px;flex-grow: 1;"></div>
     </section>
     <section class="xPanel2" style="width: 450px; min-width: 300px;">
@@ -249,157 +43,6 @@ function onclkrole(text, filter2){
 			<div class="xFIfixed"><button onclick="onsend()">发送</button></div>
 		</footer>
     </section>
-
-<script type="text/javascript">
-    function crd_card(obj) {
-        var tpl = `<div class="card" data_id="{id}">
-                <div class="header">
-                    <div class="type">报修单</div>
-                    <div class="title">{type}</div>
-                </div>
-                <div class="body" style="text-align:left;">
-                    <div><strong>单号：</strong>{code}</div>
-                    <div><strong>报修人：</strong>{report_name}</div>
-                    <div><strong>联系电话：</strong>{phone}</div>
-                    <div><strong>单位：</strong>{winder_name}</div>
-                </div>
-            </div>`
-        return tpl.format(obj);
-    }
-
-    function crd_render_fault(fault, fields) {
-		var r =`<details open class="xDetail2"><summary style="border-top:0px;">报修</summary><div>`
-        r += '<div class="x2Form narrow">' + RenderPane2(fault, fields, f2s) +'</div>';
-		if ( fault.imgs.length == 0 )
-			fault.imgs =[{"name":"img/blank.png"}];
-        r+= `<div class="xHImgList" style="margin:10px;">`+fault.imgs.map(x=>`<img src="`+x.name+`"/>`).join("")+`</div>`;
-		r+=`</div></details>`;
-        return r;
-    }
-
-    function rd_frozenleft(title, cnt) {
-        var r = `<div class="frozenleft"><label>`+title+`</label>`+cnt+"</div>";
-        return r;
-    }
-
-    function rd_buttonright(id, cnt) {
-        var r = `<div id="`+id+`"class="buttonright"><div>` + cnt +`</div><div id="btn_`+id+`" >编辑</div></div>`;
-        return r;
-    }
-
-	// 文档组合框
-    function rd_doc(id, docs ) {
-        var r = `<div id="`+id+`" class="buttonright" style="width:100px;"><div class="xCombox"><span>`
-				+ ( docs.length > 0 ? docs[0].name :"　")
-				+ `</span><div class="xPopWnd xdoclist">`
-				+ docs.map(x=>"<div>"+x.name+"</div>").join("")
-				+ `</div></div><div id="btn_`+id+`"><label>上传<input type="file"/></label></div></div>`;
-        return r;
-    }
-
-	// 带签字的文档组合框
-    function rd_doc2(id, docs, signs, signers) {
-		var img = {"2":"img/风场.png","3":"img/驻场.png","11":"img/调度长.png","16":"img/队长.png"};
-        var doc = `<div id="`+id+`" class="buttonright" style="width:100px;"><div class="xCombox"><span>`
-				+ ( docs.length > 0 ? docs[0].name :"　")
-				+ `</span><div class="xPopWnd xdoclist">`
-				+ docs.map(x=>"<div>"+x.name//+`<div style="float:right;">`
-				+ signs.filter(y=>y.a_id==x.id).map(y=>{
-					var u = GetSub( signers, "id", y.b_id);
-					return `<span class="sign"><img src="`+img[y.remark]+`">`+u.name+`</span>` // y.remark是签字时的职业
-					}).join(" ")
-				+ "</div>").join("")
-				+ `</div></div><div id="btn_`+id+`"><label>上传<input type="file"  /></label></div></div>`;
-		var sign = `<div id=`+id+`_sign" class="buttonright" style="width:100px;"><div>`
-					+ ( signs.length == 0 ? "　":signs.map(y=>{
-						var u = GetSub( signers, "id", y.b_id);
-						return `<span class="sign"><img src="`+img[y.remark]+`">`+u.name+`</span>` // y.remark是签字时的职业
-					}).join(" "))+`</div><div id="btn_`+id+`sign" style="width:70px;">我要签字</div></div>`; // 签字
-        return doc + sign;
-    }
-
-    function rd_brief(user) {
-		var tpl = `<div class="brief"><img src="{face}"/>【{prof}】{name}</div>`;
-        return tpl.format(user);
-    }
-
-	function rd_statusright(html,status) {
-		return `<div class="statusright"><div>`+html+`</div><div>`+status+`</div></div>`;
-	}
-
-	// 维修用料
-    function rd_matrec( matoutrec ) {
-		var status = {"": "未指派","0": "未提交" ,"1": "已提交" ,"2": "正在备货" ,"3": "等待审批" ,
-					 "4": "等待发货" ,"5": "等待收货" ,"6": "风场已收" ,"-1": "退回" }
-		var mat = GetSub(g_mats.data, "id", matoutrec.mat_id);
-		return rd_statusright(mat.name+"("+mat.type+")", status[matoutrec.status]);
-    }
-
-	// 维修设备
-    function rd_device( devwork ) {
-		var status = { "": "未指派" ,"0": "编辑" ,"1": "已提交" ,"2": "已指派" ,
-					"3": "前往现场" ,"4": "工作中" ,"5": "完成" ,"-1": "退回" };
-		var clss = GetSub(db_devclss, "id", devwork.clss).name;
-		return rd_statusright(clss+"("+devwork.type+")", status[devwork.status]);
-    }
-
-	// 维修记录
-    function rd_repairlog( logs,imgs,users ) {
-		logs.forEach((x,i)=>{
-			x.imgs = imgs.filter(y=>y.ref_id==x.id);
-			x.user = users.filter(y=>y.id==x.user_id)[0];
-		});
-
-		var tpl = doT.template(`<table class="xTable">
-		<thead><tr><th>现场图片</th><th>说明</th><th>发表人</th></tr></thead>
-		{% it.forEach((x,i)=>{ %}
-		<tr>
-			<td>
-				<div class="xHImgList" style="border:0px;">
-				{% x.imgs.forEach((y,i)=>{ %}
-				<img src="{%=y.name%}"/>
-				{% }); %}
-				</div>
-			</td>
-			<td  style="max-width: 250px;">{%=x.remark%}</td>
-			<td>
-				<div><span class="SmallHead"><img src="{%=x.user.face%}"/>【{%=x.user.prof%}】{%=x.user.name%}</span></div>
-				<div>{%=x.date%}</div>
-			</td>
-		</tr>
-		{% }); %}
-		</table>`);
-		return tpl(logs);
-	}
-
-    function rd_speech(speech) {
-        if (speech.src != g_user.id) {
-            var user=GetSub(g_focus.chatmen,"id",speech.user_id);
-
-			tpl=`<div class="lspeech">
-					<div><img src="{face}" /></div>
-					<div>
-						<span>【{prof}】{name}</span>
-						{date}
-						<div>{say}</div>
-					</div>
-				</div>`
-            r = tpl.format(mix(speech,user))
-        }
-        else {
-            r =`<div class="rspeech">
-					<div>
-						{date}
-						<span>【{prof}】{name}</span>
-						<div>{say}</div>
-					</div>
-					<div><img src="{face}" /></div>
-            </div>`.format(mix(speech,g_user))
-        }
-        return r;
-    }
-
-</script>
 
 <script type="text/javascript">
     var g_focus_card, g_focus, g_faults;
@@ -415,15 +58,32 @@ function onclkrole(text, filter2){
 		init();
 	}
 	function init(){
-    $("body").on("click", function (event) {
-        var node = $(event.target);
-		var id = node.attr("id");
-		if ( id != undefined && id.indexOf("btn_") == 0 ){
-			onclickButton(node);
-		}
-    });
+		$("body").on("click", function (event) { // 按钮事件
+			var node = $(event.target);
+			var id = node.attr("id");
+			if ( id != undefined && id.indexOf("btn_") == 0 ){
+				onclickButton(node);
+			}
+		});
+		$("body").on("change", function (event) { // 文件上传
+			var node = event.target;
+			if (node.tagName == "INPUT" && node.type == "file") {
+				var doctype = $(node).parents(".buttonright").attr("id");
+				if (doctype != undefined){ // 躲开现场记录中的图片列表
+					var file = $(node).get(0).files[0];
+					var formData = new FormData();
+					formData.append("id", g_focus.fault.id);
+					formData.append("doctype", doctype);
+					formData.append("file", file);
+					postform("/case/adddoc", formData, "", function (res) {RenderCase(g_focus.fault.id);});
+				}
+			}
+		});
 
 		Reqdata("/rd?ls=mat", "", function (mats) {g_mats = mats;});
+		Reqdata("/rd?ls=matwh", "", function (res) {g_matwhs = res;});
+		Reqdata("/rd?ls=devwh", "", function (res) {g_devwhs = res;});
+
 		var int=self.setInterval( checkchange,10000);
 		checkchange();
 	}
@@ -529,7 +189,7 @@ function onclkrole(text, filter2){
 				html += rd_frozenleft("维修设备",rd_buttonright("devs", g_focus.devworks.map(x=>rd_device(x)).join("")));
 				html += `</div></details>`;
 	
-				if (g_focus.repairlog.length>0 || g_user.job == 16|| g_user.job == 17){ // 队长或技工
+				if (g_focus.repairlog.length>0 || g_user.job == 16|| g_user.job == 17||g_user.job == 2 || g_user.job == 3){ // 队长或技工、风场长或驻场
 					html += `<details open class="xDetail2"><summary>维修<div style="float: right;"><a id="btn_log" href="#">添加</a></div></summary><div id="repair_log">`;
 					html += rd_repairlog(g_focus.repairlog, g_focus.repairlog_imgs, g_focus.repairlog_users);
 					html += `</div></details>`;
@@ -552,15 +212,14 @@ function onclkrole(text, filter2){
 				}
 				
 				$("#case").html(html);
-
 				var btnstatus = {// 功能按钮分角色控制
-					/*风场长*/  "2": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "s",  "works": "h", "mats": "h", "devs": "h",  "log": "s", "report": "h", "reportsign": "s",},
-					/*驻场*/    "3": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "s",  "works": "h", "mats": "h", "devs": "h",  "log": "s", "report": "h", "reportsign": "s",},
-					/*调度长*/ "11": { "experts": "s","eval1": "h", "eval2": "h", "plan": "s", "plansign": "s",  "works": "s", "mats": "s", "devs": "s",  "log": "h", "report": "h", "reportsign": "h",},
-					/*调度*/   "12": { "experts": "h","eval1": "h", "eval2": "h", "plan": "s", "plansign": "h",  "works": "s", "mats": "s", "devs": "s",  "log": "h", "report": "h", "reportsign": "h",},
-					/*专家*/   "14": { "experts": "h","eval1": "s", "eval2": "s", "plan": "h", "plansign": "h",  "works": "h", "mats": "h", "devs": "h",  "log": "h", "report": "h", "reportsign": "h",},
-					/*队长*/   "16": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "h",  "works": "s", "mats": "h", "devs": "h",  "log": "s", "report": "s", "reportsign": "h",},
-					/*技工*/   "17": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "h",  "works": "h", "mats": "h", "devs": "h",  "log": "s", "report": "h", "reportsign": "h",},
+					/*风场长*/  "2": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "s",  "works": "h", "mats": "h", "devs": "h",  "log": "s", "report": "h", "reportsign": "s", "btn_chatmen": "h",},
+					/*驻场*/    "3": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "s",  "works": "h", "mats": "h", "devs": "h",  "log": "s", "report": "h", "reportsign": "s", "btn_chatmen": "h",},
+					/*调度长*/ "11": { "experts": "s","eval1": "h", "eval2": "h", "plan": "s", "plansign": "s",  "works": "s", "mats": "s", "devs": "s",  "log": "h", "report": "h", "reportsign": "h", "btn_chatmen": "s",},
+					/*调度*/   "12": { "experts": "h","eval1": "h", "eval2": "h", "plan": "s", "plansign": "h",  "works": "s", "mats": "s", "devs": "s",  "log": "h", "report": "h", "reportsign": "h", "btn_chatmen": "s",},
+					/*专家*/   "14": { "experts": "h","eval1": "s", "eval2": "s", "plan": "h", "plansign": "h",  "works": "h", "mats": "h", "devs": "h",  "log": "h", "report": "h", "reportsign": "h", "btn_chatmen": "h",},
+					/*队长*/   "16": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "h",  "works": "s", "mats": "h", "devs": "h",  "log": "s", "report": "s", "reportsign": "h", "btn_chatmen": "h",},
+					/*技工*/   "17": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "h",  "works": "h", "mats": "h", "devs": "h",  "log": "s", "report": "h", "reportsign": "h", "btn_chatmen": "h",},
 				};
 				$.each(btnstatus[g_user.job], (k, v) => { v == "s" ? $("#btn_"+k).show() : $("#btn_"+k).hide() });
 				
@@ -593,20 +252,8 @@ function onclkrole(text, filter2){
 			}
 			dlg.Show();
 		}
-		else if ( id == "btn_submit" ){
-			chgstatus("btn_submit");
-		}
-		else if ( id == "btn_recall" ){
-			chgstatus("btn_recall");
-		}
-		else if ( id == "btn_accept" ){
-			chgstatus("btn_accept");
-		}
-		else if ( id == "btn_decline" ){
-			chgstatus("btn_decline");
-		}
-		else if ( id == "btn_finish" ){
-			chgstatus("btn_finish");
+		else if ( isInArray(["btn_submit","btn_recall","btn_accept","btn_decline","btn_finish"],id )){
+			chgstatus(id);
 		}
 		else if ( id == "btn_experts" ){
 			ud_userdlg(["专家"], "", g_focus.experts, function(ar){
@@ -621,17 +268,11 @@ function onclkrole(text, filter2){
 				return true;
 			});
 		}
-		else if ( id == "btn_eval1" ){
-		
-		}
-		else if ( id == "btn_eval2" ){
-		
-		}
-		else if ( id == "btn_plan" ){
-			
-		}
-		else if ( id == "btn_plansign" ){
-		
+		else if ( id == "btn_plansign" || id == "btn_reportsign" ){
+			var fd = new FormData();
+			fd.append("id", g_focus.fault.id);
+			fd.append("type", id);
+			postform("/case/sign", fd, "", function (res) {RenderCase(g_focus.fault.id);});
 		}
 		else if ( id == "btn_works" ){
 			if (g_user.job ==11 || g_user.job ==12 ) {// 调度或调度长，指定队长
@@ -663,19 +304,160 @@ function onclkrole(text, filter2){
 			}
 		}
 		else if ( id == "btn_mats" ){
-		
+			var matfields = [{ name: "mat_id", title: "材料", ftype: "select" }, 
+				{ name: "num", title: "需要数量", ftype: "input" }, 
+				{ name: "matwh_id", title: "发货仓库", ftype: "select" },
+				{ name: "status", title: "状态", ftype: "none" },
+				{ name: "matinrec_id", title: "库存批次", ftype: "select",twidth:"0px;"},
+				{ name: "stocknum", title: "库存情况", ftype: "div",twidth:"0px;"},
+				{ name: "remark", title: "备注", ftype: "text_01",twidth:"0px;"}]
+
+			var  html= `<div style="display:table-cell;width:100%;vertical-align:top;">
+							<div id="matreclist" class="xScroll" style="max-height:350px;">`
+								+RenderTable2({ "data":g_focus.matoutrecs, "fields":matfields},"", f2s_mat)+`
+							</div>
+						</div>
+						<div id="matrecdetail" style="display:table-cell;min-width:300px;">　</div>`;
+			var dlg = new cbDlg("维修材料","width:800px", html );
+			dlg.btndiscard=true;
+			dlg.btnsave=true;
+			dlg.btncreate=true;
+			dlg.Show();
+
+			// 点击行
+			var matrec, lasttr;
+			dlg.create = function(dlg){
+							
+			}
+			dlg.save = function(dlg){
+				
+			}
+			dlg.discard = function(dlg){
+				if (matrec.chg !=undefined){
+					delete matrec.chg;
+					$("#matreclist").html(RenderTable2({"data":g_focus.matoutrecs, "fields":matfields},"", f2s_mat));
+					lasttr = $("#matreclist tr[data_id="+matrec.id+"]");
+					lasttr.children().css("background-color", "#00f0f5");
+				}
+			}
+			dlg.submit = function(dlg){
+			
+			}
+
+			// 点击表格行
+			$("#matreclist").on("click", function (event) {
+				var node = $(event.target);
+				if ( node[0].tagName != "TD")
+					return;
+				var tr = $(event.target).parent();
+				if (lasttr!= undefined){
+					var matrec = GetSub(g_focus.matoutrecs, "id", lasttr.attr("data_id"));
+					if ( matrec.chg!=undefined){
+						if (matrec.chg.mat_id!=undefined && matrec.chg.mat_id == "")
+							return;
+						if (matrec.chg.matwh_id!=undefined && matrec.chg.matwh_id == "")
+							return;
+						if (matrec.chg.inrec_id!=undefined && matrec.chg.inrec_id == "")
+							return;
+						if (matrec.chg.num!=undefined && matrec.chg.num == "")
+							return;
+					}
+					if (lasttr.index() % 2 == 0)
+						lasttr.children().css("background-color", "#ffffff");
+					else
+						lasttr.children().css("background-color", "#f5f5f5");
+				}
+				tr.children().css("background-color", "#00f0f5");
+				lasttr = tr;
+				matrec = GetSub(g_focus.matoutrecs, "id", tr.attr("data_id"));
+				var mat = GetSub(g_mats.data, "id", matrec.mat_id);
+				if ( matrec.status == "" ||  matrec.status == "0"){
+					$("#matrecdetail").html(RenderForm5(`form_mat" style="padding:15px 0;`, matrec,matfields, function(u,f){
+						var f = (typeof f == "string"?f:f.name);
+						val = u.chg != undefined  && u.chg[f] != undefined ? u.chg[f]:u[f];
+						if (f == "mat_id")		return RenderSelectMat(g_mats, val == "" ? "" : val);
+						else if (f == "num")	return val == "" ? "" : val+mat.unit;
+						else if (f == "matwh_id")return RenderSelect2(g_matwhs, val == "" ? "" : val);
+						else if (f == "inrec_id")	return "<option selected>waiting</option>";
+						else if (f == "stocknum")	return "waiting";
+						return val;
+					}));
+				}
+				showstock(matrec);// 显示库存
+			});
+			// 表单内容变更
+			$("#matrecdetail").on("change", function (event) {
+				var node = $(event.target);
+				var matrec = GetSub(g_focus.matoutrecs, "id", lasttr.attr("data_id"));
+				if (matrec.chg==undefined)
+					matrec.chg = new Object();
+				var name = node.attr("name");
+				matrec.chg[name]=node.val();
+				if (name == "mat_id" || name =="matwh_id"  ){ 
+					showstock(matrec);// 显示库存
+				}
+				else if ( name == "inrec_id" ){
+					var mat = GetSub(g_mats.data, "id", matrec.mat_id);
+					var recin = GetSub(matrec.stores.mat_recs, "id", node.val());
+					var aa = "批次余量"+(recin.num-recin.outnum )+mat.unit;
+					var bb = "<br/>库存总量"+(matrec.stores.mat_num_in-matrec.stores.mat_num_out )+mat.unit;
+					$("#form_mat [name=stocknum]").next().html(aa+bb);
+				}
+				// 刷新表格
+				$("#matreclist").html(RenderTable2({"data":g_focus.matoutrecs, "fields":matfields},"", f2s_mat));
+				lasttr = $("#matreclist tr[data_id="+matrec.id+"]");
+				lasttr.children().css("background-color", "#00f0f5");
+			});
+
 		}
 		else if ( id == "btn_devs" ){
-		
+			var dlg = new cbDlg("设备调用","width:900px" );
+			dlg.Show();
 		}
 		else if ( id == "btn_log" ){
-		
+			var fields = [
+				{ "title": "发表人", "name": "user_id", "forder": "5", "ftype": "div" },
+				{ "title": "发表时间", "name": "date", "forder": "5", "ftype": "div" },
+				{ "title": "说明", "name": "remark", "forder": "5", "ftype": "input_long" },
+			];
+            var data = Create(fields);
+			data.date = (new Date()).format("yyyy-MM-dd hh:mm:ss");
+
+            var dlg = new cbFormDlg();
+            dlg.title = "现场记录";
+            dlg.css = "width:610px";
+            dlg.Add(RenderForm4(data, fields, function(u, f) {
+				var f = (typeof f == "string"?f:f.name);
+				if (f == "user_id") return g_user.name;
+				return u[f];
+			}));
+            dlg.Add(xrimagelistlive2("image",[""]));
+			dlg.urlsubmit = "/case/addlog?id="+g_focus.fault.id;
+			dlg.Show();
 		}
-		else if ( id == "btn_report" ){
-		
-		}
-		else if ( id == "btn_reportsign" ){
-		
+		else if ( id == "btn_chatmen" ){
+			var expert_ids = g_focus.experts.map(x=>x.id);
+			var engineer_ids = g_focus.engineers.map(x=>x.id);
+			var chatmen = g_focus.chatmen.filter(x=> {
+				if ( x.job==11|| x.id==g_focus.fault.guide_id )// 调度长和接单调度
+					return false;
+				if((x.job=="2" ||x.job=="3" ) && x.depart_id == g_focus.fault.winder_id)// 风场长和驻场
+					return false;
+				if( isInArray( expert_ids, x.id) || isInArray( engineer_ids, x.id))// 施工队
+					return false;
+				return true;
+			});
+			ud_chats = chatmen;
+			ud_userdlg(["当前","调度人员","专家","维修队","维修人员"],"",g_focus.chatmen, function(ar){
+		        var fd = new FormData();
+				fd.append("id", g_focus.fault.id);
+				if ( $("#rolelist span").html() == "当前")
+					fd.append("reset", ar);
+				else
+					fd.append("append", ar);
+				postform("/case/setchatmen", fd, "", function (res) {RenderCase(g_focus.fault.id);});
+				return true;
+			});
 		}
 		else{
 			alert("click "+id);
@@ -720,14 +502,53 @@ function onclkrole(text, filter2){
 		else if ( f == "winder_id") return u["winder_name"];
 		return u[f];
 	}
+	function f2s_mat(u,f){
+		var f = (typeof f == "string"?f:f.name);
+		var val = u.chg != undefined  && u.chg[f] != undefined ? u.chg[f]:u[f];
 
-$("html").on("change", function (event) {
-    var node = event.target;
-    if (node.tagName == "INPUT" && node.type == "file") { // 可点击换图的图片列表
-		alert($(node).parents(".buttonright").attr("id"));
-    }
-});
-    
+		var mat = GetSub(g_mats.data, "id", u.chg != undefined  && u.chg.mat_id != undefined ? u.chg.mat_id:u.mat_id);
+		if ( f == "mat_id") return mat.name+"("+mat.type+")";
+		else if ( f == "num") return val+mat.unit;
+		else if ( f == "matwh_id") return GetSub(g_matwhs.data, "id", val).name;
+		else if ( f == "status") return fault_matstatus[val];
+		return val;
+	}
+	function f2s_dev(u,f){
+		var f = (typeof f == "string"?f:f.name);
+		if (f=="devices"){
+			var h = "";
+			if ( u.efans.length >0 )
+					h+="风机："+u.efans.map(x=>x.code).join(",");
+			if ( u.leafs.length >0 )
+					h+="叶片："+u.leafs.map(x=>x.code).join(",");
+			return h;
+		}
+		else if ( f == "report_id") return u["report_name"];
+		else if ( f == "winder_id") return u["winder_name"];
+		return u[f];
+	}
+
+	function showstock(matrec){
+		var mat_id = matrec.chg!=undefined && matrec.chg.mat_id!=undefined?matrec.chg.mat_id :matrec.mat_id;
+		var matwh_id = matrec.chg!=undefined && matrec.chg.matwh_id!=undefined?matrec.chg.matwh_id:matrec.matwh_id;
+		if (mat_id != "" && matwh_id != ""){
+			Reqdata( "/mat/storeavailable?mat_id="+ mat_id +"&matwh_id="+matwh_id+"&matinrec_id="+matrec.id, "", function( res){
+				matrec.stores = res;
+				matrec.stores.mat_recs.forEach((x,i)=>x.name=GetSub(db_matsouce, "id", x.matin_source).name+"("+x.matin_code+")");
+				
+				var inrec_id = matrec.chg!=undefined && matrec.chg.matinrec_id!=undefined?matrec.chg.matinrec_id:matrec.matinrec_id;
+				var mat = GetSub(g_mats.data, "id", mat_id);
+				$("#form_mat [name=matinrec_id]").html(RenderSelect(matrec.stores.mat_recs,inrec_id ));
+				$("#form_mat [name=stocknum]").next().html("库存总量"+(res.mat_num_in-res.mat_num_out )+mat.unit);
+			});
+		}
+		else{
+			matrec.stores = undefined;
+			$("#form_mat [name=matinrec_id]").html("");
+			$("#form_mat [name=stocknum]").next().html("");
+		}
+	}
+
 
 </script>
 </body>

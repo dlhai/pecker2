@@ -124,14 +124,14 @@ def gen_matout(): #0编辑(正在签收) 1等待审批 2等待入库 3完成 -1�
     matouts = []    #0编辑(调度创建) 1调度提交等待备货 2库管正在备货或库管创建) 3库管提交等待审批 4主管审批通过等待出库 5出库完成 -1退回
     for i in range(rndnum(3,6)): # 为clerk创建3-6个等待备货的出库单
         matout = obj2()
-        matout.main = obj2(fault_id=0, fault_code="",matwh_id=matwh.id, status=2,usage="调货")
+        matout.main = obj2(fault_id=0, fault_code="",matwh_id=matwh.id, status=2,usage="调货",creater_id=clerk.id,stocker_id=clerk.id)
         matout.recs = [obj2(matwh_id=matwh.id,matout_id=len(matouts)+1,mat_id=x.mat_id,num=x.num, matinrec_id=x.matinrec_id) for x in rndpick(matos,index, rndnum(3,6))]
         matout.flows = [obj2(table_id=tbl_id,record_id=len(matouts)+1,status=0,user_id=clerk.id,remark="库管创建出库单"),
                         obj2(table_id=tbl_id,record_id=len(matouts)+1,status=2,user_id=clerk.id,remark="库管开始备货")]
         matouts.append(matout)
     for i in range(rndnum(3,6)): # 为clerk创建3-6个等待审批的出库单
         matout = obj2()
-        matout.main = obj2(fault_id=0, fault_code="",matwh_id=matwh.id, status=3,usage="调货")
+        matout.main = obj2(fault_id=0, fault_code="",matwh_id=matwh.id, status=3,usage="调货",creater_id=clerk.id,stocker_id=clerk.id)
         matout.recs = [obj2(matwh_id=matwh.id,matout_id=len(matouts)+1,mat_id=x.mat_id,num=x.num, matinrec_id=x.matinrec_id) for x in rndpick(matos,index, rndnum(3,6))]
         matout.flows = [obj2(table_id=tbl_id,record_id=len(matouts)+1,status=0,user_id=clerk.id,remark="库管创建出库单"),
                         obj2(table_id=tbl_id,record_id=len(matouts)+1,status=2,user_id=clerk.id,remark="库管开始备货"),
@@ -139,7 +139,7 @@ def gen_matout(): #0编辑(正在签收) 1等待审批 2等待入库 3完成 -1�
         matouts.append(matout)
     for i in range(rndnum(3,6)): # 为clerk创建3-6个审批退回的出库单
         matout = obj2()
-        matout.main = obj2(fault_id=0, fault_code="",matwh_id=matwh.id, status=-1,usage="调货")
+        matout.main = obj2(fault_id=0, fault_code="",matwh_id=matwh.id, status=-1,usage="调货",creater_id=clerk.id,stocker_id=clerk.id)
         matout.recs = [obj2(matwh_id=matwh.id,matout_id=len(matouts)+1,mat_id=x.mat_id,num=x.num, matinrec_id=x.matinrec_id) for x in rndpick(matos,index, rndnum(3,6))]
         matout.flows = [obj2(table_id=tbl_id,record_id=len(matouts)+1,status=0,user_id=clerk.id,remark="库管创建出库单"),
                         obj2(table_id=tbl_id,record_id=len(matouts)+1,status=2,user_id=clerk.id,remark="库管开始备货"),
@@ -148,7 +148,7 @@ def gen_matout(): #0编辑(正在签收) 1等待审批 2等待入库 3完成 -1�
         matouts.append(matout)
     for i in range(rndnum(3,6)): # 为clerk创建3-6个审批通过的出库单
         matout = obj2()
-        matout.main = obj2(fault_id=0, fault_code="",matwh_id=matwh.id, status=4,usage="调货")
+        matout.main = obj2(fault_id=0, fault_code="",matwh_id=matwh.id, status=4,usage="调货",creater_id=clerk.id,stocker_id=clerk.id)
         matout.recs = [obj2(matwh_id=matwh.id,matout_id=len(matouts)+1,mat_id=x.mat_id,num=x.num, matinrec_id=x.matinrec_id) for x in rndpick(matos,index, rndnum(3,6))]
         matout.flows = [obj2(table_id=tbl_id,record_id=len(matouts)+1,status=0,user_id=clerk.id,remark="库管创建出库单"),
                         obj2(table_id=tbl_id,record_id=len(matouts)+1,status=2,user_id=clerk.id,remark="库管开始备货"),
@@ -157,7 +157,7 @@ def gen_matout(): #0编辑(正在签收) 1等待审批 2等待入库 3完成 -1�
         matouts.append(matout)
     for i in range(rndnum(3,6)): # 为clerk创建3-6个出库完成的出库单
         matout = obj2()
-        matout.main = obj2(fault_id=0, fault_code="",matwh_id=matwh.id, status=5,usage="调货")
+        matout.main = obj2(fault_id=0, fault_code="",matwh_id=matwh.id, status=5,usage="调货",creater_id=clerk.id,stocker_id=clerk.id)
         matout.recs = [obj2(matwh_id=matwh.id,matout_id=len(matouts)+1,mat_id=x.mat_id,num=x.num, matinrec_id=x.matinrec_id) for x in rndpick(matos,index, rndnum(3,6))]
         matout.flows = [obj2(table_id=tbl_id,record_id=len(matouts)+1,status=0,user_id=clerk.id,remark="库管创建出库单"),
                         obj2(table_id=tbl_id,record_id=len(matouts)+1,status=2,user_id=clerk.id,remark="库管开始备货"),
@@ -167,7 +167,7 @@ def gen_matout(): #0编辑(正在签收) 1等待审批 2等待入库 3完成 -1�
         matouts.append(matout)
     for i in range(rndnum(3,6)): # 为clerk创建3-6个已确认收货的出库单
         matout = obj2()
-        matout.main = obj2(fault_id=0, fault_code="",matwh_id=matwh.id, status=6,usage="调货")
+        matout.main = obj2(fault_id=0, fault_code="",matwh_id=matwh.id, status=6,usage="调货",creater_id=clerk.id,stocker_id=clerk.id)
         matout.recs = [obj2(matwh_id=matwh.id,matout_id=len(matouts)+1,mat_id=x.mat_id,num=x.num, matinrec_id=x.matinrec_id) for x in rndpick(matos,index, rndnum(3,6))]
         matout.flows = [obj2(table_id=tbl_id,record_id=len(matouts)+1,status=0,user_id=clerk.id,remark="库管创建出库单"),
                         obj2(table_id=tbl_id,record_id=len(matouts)+1,status=2,user_id=clerk.id,remark="库管开始备货"),
@@ -228,8 +228,8 @@ class gen_case():
         rej = obj2(table_id=tbl_id,record_id=matoutcount,status=-1,user_id=self.matwh.leader.id,remark="审批退回出库单")
 
         matout = obj2()
-        matout.main = obj2(fault_id=fault.id, fault_code=fault.code,matwh_id=self.matwh.id, status=0,usage="维修用料")
-        matout.recs = [obj2(matwh_id=self.matwh.id,matout_id=matoutcount,mat_id=x.mat_id,num=x.num, matinrec_id=x.matinrec_id) for x in rndpick(matos,index, rndnum(3,6))]
+        matout.main = obj2(fault_id=fault.id, fault_code=fault.code,matwh_id=self.matwh.id, status=status,usage="维修用料",creater_id=fault.guide_id,stocker_id=stocker_id)
+        matout.recs = [obj2(matwh_id=self.matwh.id,matout_id=matoutcount,mat_id=x.mat_id,num=x.num, matinrec_id=x.matinrec_id) for x in rndpick(matos,index, rndnum(2,4))]
         if status == -1:
             matout.flows = flows[0:4]
             matout.flows.append(rej)
@@ -311,32 +311,32 @@ class gen_case():
                     expert = random.choice(experts)
                     date = rnddatespan(fault.reporttime,2,4)
                     name = "评估报告_"+expert.name+"_" + date.strftime("%m-%d %H:%M")
-                    eval1reps.append( obj2(type="eval1rep",ref_id=fault.id, name=name, remark="", user_id=expert.id, date=date ))
+                    eval1reps.append( obj2(type="fault_eval1",ref_id=fault.id, name=name, remark="", user_id=expert.id, date=date ))
                 self.add_data("addit",eval1reps)
                 if i%2 == 0:
                     for x in range(2,5):
                         expert = random.choice(experts)
                         date = rnddatespan(fault.reporttime,5,8)
                         name = "二评报告_"+expert.name+"_" + date.strftime("%m-%d %H:%M")
-                        eval2reps.append( obj2(type="eval2rep",ref_id=fault.id, name=name, remark="", user_id=expert.id, date=date ))
+                        eval2reps.append( obj2(type="fault_eval2",ref_id=fault.id, name=name, remark="", user_id=expert.id, date=date ))
                     self.add_data("addit",eval2reps)
             if i>=10:#维修方案（0人签字）
                 for x in range(2,5):
                     user = random.choice([guideleader,guider])
                     date = rnddatespan(fault.reporttime,8,10)
                     name = "维修方案_"+user.name+"_" + date.strftime("%m-%d %H:%M")
-                    repairplans.append( obj2(type="repairplan",ref_id=fault.id, name=name, remark="", user_id=user.id, date=date ))
+                    repairplans.append( obj2(type="fault_plan",ref_id=fault.id, name=name, remark="", user_id=user.id, date=date ))
                 self.add_data("addit",repairplans)
-                repairplans = QueryObj( "select * from addit where type='repairplan' and ref_id="+intstr(fault.id) )
+                repairplans = QueryObj( "select * from addit where type='fault_plan' and ref_id="+intstr(fault.id) )
             if i>=11:#维修方案（调度主管签字）
                 conn.execute(tbl_link.insert(),dict_link(obj2(type="sign",a_id=random.choice(repairplans).id, \
-                    b_id=guideleader.id, name="", remark="", date=rnddatespan(fault.reporttime,11,12) )))
+                    b_id=guideleader.id, name="", remark=str(guideleader.job), date=rnddatespan(fault.reporttime,11,12) )))
             if i>=12:#维修方案（驻场签字）
                 conn.execute(tbl_link.insert(),dict_link(obj2(type="sign",a_id=random.choice(repairplans).id, 
-                    b_id=random.choice(self.winder.clerks).id, name="", remark="", date=rnddatespan(fault.reporttime,12,13) )))
+                    b_id=random.choice(self.winder.clerks).id, name="", remark="3", date=rnddatespan(fault.reporttime,12,13) )))
             if i>=13:#维修方案（风场主管签字）
                 conn.execute(tbl_link.insert(),dict_link(obj2(type="sign",a_id=random.choice(repairplans).id, 
-                    b_id=self.winder.leader.id, name="", remark="", date=rnddatespan(fault.reporttime,13,14) )))
+                    b_id=self.winder.leader.id, name="", remark=str(self.winder.leader.job), date=rnddatespan(fault.reporttime,13,14) )))
     
             if 14<=i<=17:
                 cols[ "status"] = 3  #3正在维修（维修方案完成）
@@ -355,7 +355,7 @@ class gen_case():
                 for x in range(2,5):
                     mender = random.choice(repairteam)
                     date = rnddatespan(fault.reporttime,15,18)
-                    repairlogs.append( obj2(type="repairlog",ref_id=fault.id, name="", remark=rnditem("_songci"), user_id=mender.id, date=date ))
+                    repairlogs.append( obj2(type="fault_log",ref_id=fault.id, name="", remark=rnditem("_songci"), user_id=mender.id, date=date ))
                 self.add_data("addit",repairlogs)
 
             if 18<=i<=19:
@@ -365,16 +365,16 @@ class gen_case():
                     user = random.choice([guideleader,guider])
                     date = rnddatespan(fault.reporttime,19,20)
                     name = "维修报告_"+user.name+"_" + date.strftime("%m-%d %H:%M")
-                    repairreps.append( obj2(type="repairrep",ref_id=fault.id, name=name, remark="", user_id=teamleader.id, date=date ))
+                    repairreps.append( obj2(type="fault_report",ref_id=fault.id, name=name, remark="", user_id=teamleader.id, date=date ))
                 self.add_data("addit",repairreps)
-                repairreps = QueryObj( "select * from addit where type='repairrep' and ref_id="+intstr(fault.id) )
+                repairreps = QueryObj( "select * from addit where type='fault_report' and ref_id="+intstr(fault.id) )
 
                 #维修队长签字
-                conn.execute(tbl_link.insert(),dict_link(obj2(type="conform",a_id=random.choice(repairreps).id, 
-                    b_id=teamleader.id, name="", remark="", date=rnddatespan(fault.reporttime,21,22) )))
+                conn.execute(tbl_link.insert(),dict_link(obj2(type="sign",a_id=random.choice(repairreps).id, 
+                    b_id=teamleader.id, name="", remark=str(teamleader.job), date=rnddatespan(fault.reporttime,21,22) )))
             if i>=19:#维修报告（驻场签字）
-                conn.execute(tbl_link.insert(),dict_link(obj2(type="conform",a_id=random.choice(repairreps).id, 
-                    b_id=random.choice(self.winder.clerks).id, name="", remark="", date=rnddatespan(fault.reporttime,21,22) )))
+                conn.execute(tbl_link.insert(),dict_link(obj2(type="sign",a_id=random.choice(repairreps).id, 
+                    b_id=random.choice(self.winder.clerks).id, name="", remark="3", date=rnddatespan(fault.reporttime,21,22) )))
 
             if i == 20:
                 cols[ "status"] = 5  #5已完成(维修报告完成,提醒付款阶段)
@@ -384,9 +384,9 @@ class gen_case():
                 conn.execute(tbl_flow.insert(),dict_flow(obj2(table_id=gettbl("fault").id,record_id=fault.id,status=5,user_id=fault.guide_id, remark="付款完成")))
 
             #为所有的维修记录增加图片
-            repairlogs = QueryObj( "select * from addit where type='repairlog' and ref_id="+intstr(fault.id))
+            repairlogs = QueryObj( "select * from addit where type='fault_log' and ref_id="+intstr(fault.id))
             if len(repairlogs)>0:
-                self.add_data("addit", [obj2(type="repairpic",ref_id=x.id, name=random.choice(damageimg), remark="", user_id=random.choice(repairteam).id, date=datetime.datetime.strptime(x.date,"%Y-%m-%d") ) for x in repairlogs for y in range(3,5)])
+                self.add_data("addit", [obj2(type="fault_logimg",ref_id=x.id, name=random.choice(damageimg), remark="", user_id=random.choice(repairteam).id, date=datetime.datetime.strptime(x.date,"%Y-%m-%d") ) for x in repairlogs for y in range(3,5)])
             
             #聊天成员
             chatmans=[guideleader,guider,teamleader]+experts +repairteam+ self.winder.clerks

@@ -1,5 +1,5 @@
 /*°¸¼þ¿¨Æ¬*/
-.card {
+.fault_card {
     display: inline-block;
     margin: 10px;
     width: 200px;
@@ -7,7 +7,7 @@
     text-align: center;
     border-radius: 5px;
 }
-.card>.header {
+.fault_card>.header {
     border-radius: 5px 5px 0px 0px;
     background: linear-gradient(to bottom, rgba(192,215,140,1) 0%,rgba(118,170,73,1) 100%);
     color: white;
@@ -16,21 +16,21 @@
     text-align: center;
     overflow: hidden;
 }
-.card>.header>.type {
+.fault_card>.header>.type {
     border-radius: 5px 0px 5px 0px;
     color: white;
     font-size: 12px;
     float: left;
     border: 1px solid #6a923d;
 }
-.card>.header>.title {
+.fault_card>.header>.title {
     color: white;
     padding-top: 4px;
     font-size: 16px;
     text-align: center;
     width: 100%;
 }
-.card>.body {
+.fault_card>.body {
     background-color: #f5f3ee;
     color: #5f5135;
     padding: 5px 10px;
@@ -61,7 +61,7 @@
 .frozenleft{
 	display: flex;
 	flex-direction: row;
-	align-items: baseline;
+	align-items: center;
 }
 .frozenleft>label {
 	flex-shrink: 0;

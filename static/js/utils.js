@@ -130,8 +130,7 @@ function Clone(obj) {
 
 function Create(fields) {
     var r = new Object();
-    for (var k in fields)
-        r[fields[k].name] = "";
+	fields.forEach(x=>r[x.name]="");
     return r;
 }
 
