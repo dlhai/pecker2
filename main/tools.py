@@ -1,4 +1,4 @@
-#encoding:utf8
+#encoding:utf-8
 def rndstr(len):
     return ''.join(random.sample("abcdefghijklmnopqrstuvwxyz0123456789", len))
 
@@ -11,7 +11,17 @@ class obj:
             setattr( self, k, v)
 
 def atoi(s):
-    return 0 if s == "" else int(s)
+    if type(s) == type(1):
+        return s
+    s = s.strip()
+    x=""
+    for c in s:
+        if c in "0123456789":
+            x+=c
+        else:
+            break
+
+    return 0 if x == "" else int(x)
 
 #把python对象转换成json字符串
 def tojson(o):
@@ -48,11 +58,7 @@ def newdir(path):
 
 import pdb
 if __name__ == "__main__":
-    rec = obj()
-    rec.type = "1" #1changejob
-    rec.sss="2"
-    vals=",".join([ k+"='"+v+"'" for k,v in rec.__dict__.items()])
+    a = atoi("123as")
+    b = atoi(" 123as ")
+    c = 0
 
-    for k,v in rec.__dict__.items():
-        print(k,v)
-    aa=0

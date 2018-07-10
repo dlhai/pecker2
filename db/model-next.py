@@ -107,6 +107,7 @@ gen_matin()
 matos=[] #后面生成案件数据时要用
 index=[]
 matoutcount=0
+devworkcount = 0
 #生成出库单数据
 def gen_matout(): #0编辑(正在签收) 1等待审批 2等待入库 3完成 -1退回
     matwh = QueryObj( "select * from matwh where id="+str(GetUser("仓库主管").depart_id) )[0]
@@ -188,6 +189,7 @@ gen_matout()
 #（已评估，在维修状态）、， 计13个
 #随机选取2/4报修单，再随机选择调度人员接单（已评估，在维修状态）、已完成10个
 #合计27个。
+
 class gen_case():
     def __init__(self):
         #各种需要的数据
@@ -237,27 +239,34 @@ class gen_case():
             matout.flows = flows[0:(status+1)]
         return matout;
 
-    #创建设备调用单
-    def create_devwork(self,fault):
-        devworks=[]
-        for c in range(rndnum(2,5)):
+    def create_devwork2(self,fault):
+        for i in range(5):
             dev = random.choice(self.devwh.devs)
-            devworks.append( dict(status=2,	#状态 0:编辑、1:提交、2受理 -1拒绝
-                fault_id=fault.id,	#故障单号
+            ar = [dict(status=0), #未提交，未指定驻地
+                  dict(status=0,  devwh_id=self.devwh.id, ),#未提交，已指定驻地
+                  dict(status=1,  devwh_id=self.devwh.id, ),#已提交
+                  dict(status=2,  devwh_id=self.devwh.id, deal_id=self.devwh.leader.id, dealdt=rnddatespan(fault.guidetime,1,2), dev_id=dev.id, driver_id=dev.driver_id,),#已受理
+                  dict(status=-1, devwh_id=self.devwh.id, deal_id=self.devwh.leader.id, dealdt=rnddatespan(fault.guidetime,1,2)),]#拒绝
+            u=dict(ar[i],**dict(fault_id=fault.id,	#故障单号
                 guide_id=fault.guide_id,	#发单人
                 guidedt=rnddatespan(fault.guidetime,0,1),	#发单时间
                 clss=int(float(random.choice(data("_devclss").data)[0])),	#设备分类
-                devwh_id=self.devwh.id,	#所属驻地
                 timelen=rndnum(3,5),	#预计工期
                 winder_id=self.winder.id,	#任务风场
-                addr=self.winder.addr,	#任务地址
-                remark=rnditem("_songci"),	#备注
-                deal_id=self.devwh.leader.id,	#接单人
-                dealdt=rnddatespan(fault.guidetime,1,2),	#接单时间
-                dev_id=dev.id,	#调用设备
-                driver_id=dev.driver_id,	#司机
-            ))
-        conn.execute(tbl_devwork.insert(),devworks)
+                #addr=self.winder.addr,	#任务地址
+                remark=rnditem("_songci")))	#备注
+
+            global devworkcount
+            devworkcount+=1
+            flows = [#devwork 22
+                obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单"),
+                obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单"),
+                obj2(table_id=22,record_id=devworkcount,status=1,user_id=u["guide_id"],remark="调度提交调用单"),
+                obj2(table_id=22,record_id=devworkcount,status=2,user_id=self.devwh.leader.id,remark="驻地长审批通过"),
+                obj2(table_id=22,record_id=devworkcount,status=-1,user_id=self.devwh.leader.id,remark="驻地长拒绝"),
+            ]
+            conn.execute(tbl_devwork.insert(),u)
+            conn.execute(tbl_flow.insert(),[dict_flow(x) for x in flows[0:i+1] ])
 
     def add_data(self,tbl, rec):
         if type(rec) == type([]):
@@ -349,7 +358,7 @@ class gen_case():
                 conn.execute(tbl_matoutrec.insert(),[dict_matoutrec(y) for x in matouts for y in x.recs ])
                 conn.execute(tbl_flow.insert(),[dict_flow(y) for x in matouts for y in x.flows ])
             if i>=16:#设备调用单
-                self.create_devwork(fault)
+                self.create_devwork2(fault)
             if i>=17:#维修记录(图片部分直至最后再添加)
                 repairlogs = []
                 for x in range(2,5):

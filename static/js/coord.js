@@ -3,8 +3,6 @@
 var fault_matstatus = {"": "未指派","0": "未提交" ,"1": "已提交" ,"2": "正在备货" ,"3": "等待审批" ,
 			"4": "等待发货" ,"5": "等待收货" ,"6": "风场已收" ,"-1": "退回" }
 
-
-
 //------------------------人员选择对话框------------------------------------------
 function crd_showuserselectdlg() {
     var us = `<div id="rolelist" class="xCombox xRndAngle" style="margin-top:5px; display:inline-block;"><span>调度人员</span><div class="xMenu">
@@ -318,10 +316,8 @@ function rd_matrec( matoutrec ) {
 
 // 维修设备
 function rd_device( devwork ) {
-	var status = { "": "未指派" ,"0": "编辑" ,"1": "已提交" ,"2": "已指派" ,
-				"3": "前往现场" ,"4": "工作中" ,"5": "完成" ,"-1": "退回" };
 	var clss = GetSub(db_devclss, "id", devwork.clss).name;
-	return rd_statusright(clss+"("+devwork.type+")", status[devwork.status]);
+	return rd_statusright(clss+"("+devwork.type+")", GetSub(status_devwork,"id",devwork.status).name);
 }
 
 // 维修记录

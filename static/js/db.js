@@ -273,6 +273,16 @@ var status_matout = [
     { "id": "-1", "name": "退回" },
 ]
 
+var status_devwork = [
+    { "id": "",  "name": "新建" },
+    { "id": "0", "bid":"", "name":"未提交" },
+    { "id": "1", "bid":"0","name":"已提交" },
+    { "id": "2", "bid":"1","name":"前往现场" },
+    { "id": "3", "bid":"2","name":"到达现场" },
+    { "id": "4", "bid":"3","name":"任务完成" },
+    { "id": "-1","bid":"1","name":"退回" },
+]
+
 var db_tbl = [
     { "id": "1", "name": "base", "title": "定义" },
     { "id": "2", "name": "link", "title": "一对多引用" },

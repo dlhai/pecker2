@@ -65,10 +65,17 @@ Array.prototype.fmap = function (cb) {
 }
 
 // 对Array的扩展
+Array.prototype.insertbeforename = function (name, it ) {
+	idx =GetIdx(this, "name", name);
+	if ( idx != null)
+		this.splice(idx+1,0,it);
+}
+
+// 对Array的扩展
 Array.prototype.insertaftername = function (name, it ) {
 	idx =GetIdx(this, "name", name);
 	if ( idx != null)
-		this.splice(idx,0,it);
+		this.splice(parseInt(idx)+1,0,it);
 }
 
 function isInArray(arr, value) {

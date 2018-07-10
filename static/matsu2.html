@@ -65,7 +65,7 @@
                 Reqdata("/mat/store?matwh_id=" + id, "", function (stores) {
 					GetSub(stores.fields, "name", "remark").twidth = 0;
                     if (!stores.fields.some(x => x.name == "innum") )
-                        stores.fields.insertaftername("unit", { title: "库存数量", name: "innum", twidth: "80" });
+                        stores.fields.insertbeforename("unit", { title: "库存数量", name: "innum", twidth: "80" });
                     $("#subitem_list").html(RenderTable2(stores, "", (data, field) => {
                         if (field.name == "innum")
                             return int(data.allin) - int(data.allout);

@@ -96,7 +96,7 @@
 				GetSub(stores.fields, "name", "remark").twidth = 0;
 				GetSub(stores.fields, "name", "usage").twidth = 0;
 				GetSub(stores.fields, "name", "unit").twidth = 0;
-				stores.fields.insertaftername("unit", { title: "库存数量", name: "innum", twidth: "80" });
+				stores.fields.insertbeforename("unit", { title: "库存数量", name: "innum", twidth: "80" });
 				$("#mat_list").html(RenderTable2(stores, "", (data, field) => {
 					if (field.name == "innum")
 						return (int(data.allin) - int(data.allout))+data["unit"];

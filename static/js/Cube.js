@@ -289,28 +289,6 @@ cbFormDlg.prototype.remove = function () {
 	});
 }
 
-function RenderPane(ar, idx, fun) {
-    var r = "";
-    ar.fields.sort(function (a, b) { return parseInt(a.forder) - parseInt(b.forder); });
-    for (var i = 0; i < ar.fields.length; i++) {
-        var field = ar.fields[i];
-        if (field.name == "id")
-            continue;
-        var val = ar.data[idx][field.name];
-        var attr = "";
-        if (field.name.indexOf("_") != -1)
-            attr = 'id="' + field.name + "_" + val + '" ';
-
-        if (field.ftype == "input_long" || field.ftype == "div_long")
-            attr += 'style="width:490px;"';
-        else if (field.ftype == "textarea")
-            attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
-
-        r += "<div><label>" + field.title + "</label><div " + attr + ">" + (fun ? fun(ar.data[idx], field) : val) + "</div></div>";
-    }
-    return r;
-}
-
 function RenderPane2(entity, fields, fun) {
     var r = "";
     for (var i = 0; i < fields.length; i++) {
@@ -322,6 +300,8 @@ function RenderPane2(entity, fields, fun) {
             attr += 'style="width:490px;"';
         else if (field.ftype == "textarea")
             attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
+        else if (field.ftype == "combox")
+            attr += 'class="xCombox"';
         r += "<div><label>" + field.title + "</label><div " + attr + ">" +
             (fun != undefined ? fun(entity, field) : entity[field.name]) + "</div></div>";
     }
@@ -340,6 +320,8 @@ function RenderPane3(entity, fields, fun) {
             attr += 'style="width:490px;"';
         else if (field.ftype == "textarea")
             attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
+        else if (field.ftype == "combox")
+            attr += 'class="xCombox"';
         r += "<div><label>" + field.title + "</label><div " + attr + ">" +
             (fun != undefined ? fun(entity, field) : entity[field.name]) + "</div></div>";
     }
@@ -367,6 +349,8 @@ function RenderFormItem(type, attr, val )
         r += '<textarea ' + attr + ' style="resize:none;height:80px;">' + val + '</textarea>';
     else if (type == "select")
         r += '<select ' + attr + '>' + val + '</select>';
+    else if (type == "combox")
+        r += '<div ' + attr + ' class="xCombox">' + val + '</div>';
     else if (type == "date")
         r += '<input ' + attr + ' value="' + val + '" onClick="xrlaydate(this)" />';
     else if (type == "multiselect")
