@@ -30,7 +30,7 @@
     },
     {
         "id": "5", "type": "dev", "name": "驻地主管", modules: [
-            { name: "地图", url: "devmap.html" },
+            { name: "地图", url: "devwork2.html" },
             { name: "驻地", url: "devwh.html" },
             { name: "人员", url: "user_list2.html" }]
     },

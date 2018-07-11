@@ -203,10 +203,28 @@ def devworkremove():
 def devworkquery():
     params = request.args.to_dict()
     r = obj(result="404",fun="/dev/devworkquery")
-    if "fault_id" not in params or params["fault_id"]=="":
-        return toret(r,msg="缺少参数fault_id")
-    sql = "select devwork.*, dev.code as dev_code, user.name as driver_name from devwork left join dev on dev_id=dev.id left join user on devwork.driver_id=user.id"
-    r.data= QueryObj(sql+" where fault_id="+params["fault_id"]+" order by devwork.status,devwork.id desc")
+
+    sql = '''select devwork.*, dev.code as dev_code, user.name as driver_name, winder.name as winder_name, fault.code as fault_code 
+            from winder, fault,devwork left join dev on dev_id=dev.id left join user on devwork.driver_id=user.id
+            where fault.id=fault_id and devwork.winder_id=winder.id '''
+    if "fault_id" in params:
+        if params["fault_id"]=="":
+            return toret(r,msg="fault_id不正确")
+        sql+=" and fault_id="+params["fault_id"]
+    elif "devwh_id" in params:
+        if params["devwh_id"]=="":
+            return toret(r,msg="devwh_id不正确")
+        sql+=" and devwork.devwh_id="+params["devwh_id"]+" and devwork.status>0"
+    else:
+        return toret(r,msg="缺少必须的参数")
+    sql+=" order by devwork.status,devwork.id desc"
+
+    r.data= QueryObj(sql)
+    r.maxid = atoi(QueryObj("select max(id) as maxid from flow where table_id=22 and record_id in ("+",".join([str(x.id) for x in r.data])+")")[0].maxid)
+    if "maxid" in params and atoi(r.maxid) == atoi(params["maxid"]):
+        r.data=[]
+        return toret(r,result=200, msg="没有新数据")
+
     r.fields=QueryObj(select(base.sl).where(base.c.table=="devwork"))
     return toret(r,result=200)
 
@@ -224,15 +242,16 @@ def devworkdetail():
         return toret(r,msg="id不正确")
 
     r.devwork=r.devwork[0]
-    r.statuslist= QueryObj("select * from flow where table_id=22 and record_id="+id+" order by id desc")
+    r.flows= QueryObj("select * from flow where table_id=22 and record_id="+id+" order by id desc")
     r.winder= QueryObj("select * from winder where id="+str(r.devwork.winder_id))[0]
     r.fault= QueryObj("select * from fault where id="+str(r.devwork.fault_id))[0]
-    userids = [x.user_id for x in r.statuslist ]
+    userids = [x.user_id for x in r.flows ]
     if r.devwork.driver_id != "":
         userids.append(r.devwork.driver_id)
     if r.devwork.dev_id != "":
         r.dev= QueryObj("select * from dev where id="+str(r.devwork.dev_id))[0]
     r.users= QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ("+ ",".join([str(x) for x in userids]) +")")
+    r.maxid=r.flows[0].id
     return toret(r,result=200)
 
 
@@ -281,11 +300,20 @@ def devworkchgstatus():
             return toret(r,msg="未指定设备分类")
         if u.devwh_id =="":
             return toret(r,msg="未指定设备驻地")
-
-
     action = tab[form["action"]]
+    newdata=obj(status=action["newstatus"])
+    if form["action"] == "接单":
+        if "dev_id" not in form or form["dev_id"]=="":
+            return toret(r,msg="缺少参数dev_id")
+        if "driver_id" not in form or form["driver_id"]=="":
+            return toret(r,msg="缺少参数driver_id")
+        newdata.dev_id=form["dev_id"]
+        newdata.driver_id=form["driver_id"]
+        newdata.deal_id=current_user.id
+        newdata.dealdt=datetime.datetime.now()
+
     if u.status != int(action["oldstatus"]):
-        return toret(r,msg="调用单已变更")
-    conn.execute(toupdate( "devwork", obj(status=action["newstatus"]), obj(id=form["id"])))
+        return toret(r,result="405",msg="调用单已变更")
+    conn.execute(toupdate( "devwork", newdata, obj(id=form["id"])))
     insertflow(record_id=form["id"],status=action["newstatus"],remark=action["remark"])
     return toret(r,result=200)

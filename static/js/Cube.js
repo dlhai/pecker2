@@ -174,6 +174,7 @@ function cbDlg(title, css, subs) {
 	this.btnsave = false;
 	this.btncreate = false;
 	this.btndiscard= false;
+	this.btnsubmit=true;
 }
 cbDlg.prototype.Add = function (sub) {
     this.subs.push(sub);
@@ -197,8 +198,8 @@ cbDlg.prototype.Show = function () {
 				(this.btncreate ? `<button type="button" class="btn btn-primary" style="margin:0 5px;">新建</button>` : "") +
 				(this.btndiscard ? `<button type="button" class="btn btn-primary" style="margin:0 5px;">撤销</button>` : "") +
 				(this.btnsave ? `<button type="button" class="btn btn-primary" style="margin:0 5px;">保存</button>` : "") +
-                `<button type="button" class="btn btn-primary" style="margin:0 5px;">提交</button>
-				<button type="button" class="btn btn-default" data-dismiss="modal" style="margin:0 5px;">关闭</button>
+                (this.btnsubmit ? `<button type="button" class="btn btn-primary" style="margin:0 5px;">提交</button>` : "") +
+				`<button type="button" class="btn btn-default" data-dismiss="modal" style="margin:0 5px;">关闭</button>
             </div>
         </div><!-- /.modal-content -->
         </div><!-- /.modal -->`;
@@ -324,6 +325,27 @@ function RenderPane3(entity, fields, fun) {
             attr += 'class="xCombox"';
         r += "<div><label>" + field.title + "</label><div " + attr + ">" +
             (fun != undefined ? fun(entity, field) : entity[field.name]) + "</div></div>";
+    }
+    r += "</div>"
+    return r;
+}
+
+// 与第三版区别是增加了ctx参数，主要是为了状态下拉菜单渲染
+function RenderPane4(entity, fields, ctx, fun) {
+    var r = '<div class="x2Form">';
+    for (var i = 0; i < fields.length; i++) {
+        var field = fields[i];
+        if (field.forder == -1 || field.ftype == "none")
+            continue;
+        var attr = "";
+        if (field.ftype == "input_long"|| field.ftype == "div_long")
+            attr += 'style="width:490px;"';
+        else if (field.ftype == "textarea")
+            attr += 'style="overflow-y: scroll;width:490px;max-height:45px;"';
+        else if (field.ftype == "combox")
+            attr += 'class="xCombox"';
+        r += "<div><label>" + field.title + "</label><div " + attr + ">" +
+            (fun != undefined ? fun(entity, field, ctx) : entity[field.name]) + "</div></div>";
     }
     r += "</div>"
     return r;
