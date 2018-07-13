@@ -1,0 +1,293 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>啄木鸟风电维保系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <script src="js/jquery.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.css"/>
+    <script src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/doTe.js"></script>
+	<script src="laydate/laydate.js"></script>
+    <script src="js/utils.js"></script>
+	<link rel="stylesheet" href="css/cube.css"/>
+    <script src="js/Cube.js"></script>
+    <script src="js/db.js"></script>
+    <link rel="stylesheet" href="css/xpecker.css" />
+    <script src="js/xpecker.js"></script>
+    <script src="js/dev.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=nSxiPohfziUaCuONe4ViUP2N"></script>
+    <script src="js/xmap.js"></script>
+
+    <style>
+        .narrow>div>div:first-of-type,.narrow>div>input:first-of-type {width: 136px;}
+        .narrow>div>label:first-of-type {width: 40px;}
+        .narrow>div,.narrow>div>div:first-of-type {margin-right: 0px;}
+    </style>
+
+</head>
+<body class="xFCsrow" style="padding:10px 0px 0px 10px;">
+    <section id="item_map" class="xPanel2" style="width:100px">
+    </section>
+
+    <div id="curitem" class="xFCscol" style="width:100px;">
+        <section class="xPanel2 xFIfixed">
+            <header>设备信息<div style="float: right;"><!--a href="javascript:onEditDev()">编辑</a--></div></header>
+            <div id="item_detail" style="padding:5px;"></div>
+        </section>
+        <section class="xPanel2">
+            <header class="xFIfixed">任务列表</header>
+            <div id="table_dw" class="xScroll" style="padding: 5px;height:100px;flex-grow: 1;"></div>
+        </section>
+    </div>
+
+    <script id="tpl_dev_pane" type="text/template">
+        <div style="height:240px;width:280px;float: left; display:block;">
+            <div class="pane_image" style="width: 100%; height: 80px; margin: 0px; padding:0px; display:block;border:0px;">
+                <div style="float: left; margin:0px;"><img style="width: 78px; height: 78px;" src="{%=it.face%}" /></div>
+                <div style="margin-top:0px;"><label>编号</label><div style="display:inline-block;">{%=it.code%}</div></div>
+                <div><label>分类</label><div>{%=GetSub(db_devclss, "id", it.clss).name%}</div></div>
+            </div>
+            <img style="width: 280px; height: 160px;" src="{%=it.img%}" />
+        </div>
+    </script>
+
+    <script id="tpl_dev_form" type="text/template">
+        <div style="height:240px;width:280px;float: left; display:block;">
+            <div class="pane_image" style="width: 100%; height: 80px; margin: 0px; padding:0px; display:block;border:0px;">
+                <div style="float: left; margin:0px;">
+                    <label class="ImgBlank" style="display:inline-block;width:78px;margin:0px;" for="SelectFace"> <img id="viewface" style="width: 78px; height: 78px;;z-index: 999;" src="{%=it.face%}" /> </label>
+                    <input type="file" id="SelectFace" accept="image/*" style="display:none;" onchange="imgPreview(this,'viewface')">
+                </div>
+                <div style="margin-top:0px;"><label>编号</label><div style="display:inline-block;">{%=it.code%}在</div></div>
+                <div style="position:relative;">
+                    <label>分类</label><select>{%=FieldToEdit(it,GetSub(g_devs.fields, "name", "clss"))%}</select>
+                </div>
+            </div>
+            <label class="ImgBlank" style="display:inline-block;" for="selectidimg"> <img id="viewidimg" style="width: 280px; height: 160px;z-index: 999;" src="{%=it.img%}" /> </label>
+            <input type="file" id="selectidimg" accept="image/*" style="display:none;" onchange="imgPreview(this,'viewidimg')">
+        </div>
+    </script>
+
+    <script type="text/javascript"> //共享数据
+        var g_map=CreateMap("item_map"), g_devwhs = new Object(), g_devs, g_devvenders, g_drivers= new Object(), g_devworks, g_postion;
+        g_user = parent.g_user;
+        if (g_user == undefined) {
+            Reqdata("/curuserinf", "", function (res) {
+                g_user = res.data;
+                g_user.fields = res.fields;
+                init();
+            });
+        }
+        else {
+            init();
+        }
+
+        function init() {
+			g_drivers.users = [g_user];
+			g_devwhs.data = [g_user.depart];
+			g_devwhs.fields = g_user.departfields;
+			Reqdata("/user/briefs?job=(11,12)", "", function (res) { g_guiders = res; });// 调度
+            Reqdata("/user/briefs?job=(5,6)&depart_id=" + g_user.depart.id, "", function (res) { g_drivers = res; }); // 本驻地所有人员
+			Reqdata("/rd?ls=vender&type=21", "", function (res) {g_devvenders = res; });
+
+			CreateMark("devwh", g_user.depart, "devwh", g_user.departfields);
+			g_map.centerAndZoom(CreatePoint(g_user.depart.position), 11);
+
+			var geolocation = new BMap.Geolocation();
+			geolocation.getCurrentPosition(function(r){
+				if(this.getStatus() == BMAP_STATUS_SUCCESS){
+					var mk = new BMap.Marker(r.point);
+					map.addOverlay(mk);
+					map.panTo(r.point);
+					alert('您的位置：'+r.point.lng+','+r.point.lat);
+				}
+				else {
+					alert('failed'+this.getStatus());
+				}        
+			},{enableHighAccuracy: true})
+
+
+			var int=self.setInterval( refresh,10000);
+			refresh();
+        }
+		function refresh(){
+			updatepos();
+			showdev();
+			showdevworks();
+		}
+
+		function showdev(){
+			Reqdata("/rd?ls=dev" + "&driver_id=" + g_user.id, "", function (res) {
+				g_devs = res;
+				if (g_devs.data.length==0)
+					return;
+				if ( g_postion && g_devs.data.some(x=>x.position != g_postion )){
+					g_devs.data.forEach(x=>{
+						x.position = g_position;
+
+						var fd = new FormData();
+						fd.append("type", "dev" );
+						fd.append("id", x.id );
+						fd.append("position", pos.point.lng+' '+pos.point.lat );
+				//		postform("/updatepos", fd);
+					});
+				}
+				g_devs.data.forEach(x=>CreateMark2(x, g_devs.ls, g_devs.fields,onclickItem));
+
+				GetSub(g_devs.fields, "name", "code").ftype = "none";
+				GetSub(g_devs.fields, "name", "type").ftype = "none";
+				$("#item_detail").html(devpane(g_devs.data[0],g_devs.fields));
+			});
+		}
+		
+		function showdevworks(){
+			Reqdata("/dev/devworkquery?driver_id="+g_user.id, "", function(res){
+				if (g_devworks&&g_devworks.maxid==res.maxid) 
+					return;// 没有新数据
+
+				g_devworks=res;
+				GetSub( g_devworks.fields, "name", "devwh_id").twidth="0px";
+				GetSub( g_devworks.fields, "name", "remark").twidth="0px";
+				GetSub( g_devworks.fields, "name", "deal_id").twidth="0px";
+				GetSub( g_devworks.fields, "name", "driver_id").twidth="0px";
+				res.fields.insertaftername( "winder_id", { title: "风场地址", name: "winder_addr", ftype:"div", twidth: "120px" } );
+				$("#table_dw").html(RenderTable2({"data":g_devworks.data, "fields":g_devworks.fields, "ls":"devwork_table"}, "", f2s_dw));
+				$("#table_dw tr").on("click", function (ev) {
+					Reqdata("/dev/devworkdetail?id="+$(ev.delegateTarget).attr("data_id"), "", function(res){
+						var dlg = new cbDlg("查看 调用单", "width:600px", RenderPane4( res.devwork, g_devworks.fields, res, f2s_dw2 ));
+						dlg.btnsubmit=false;
+						dlg.Show();
+					});
+				});
+			});		
+		}
+
+		function updatepos(){
+			var geolocation = new BMap.Geolocation();
+			geolocation.getCurrentPosition(function(pos){
+				if(this.getStatus() == BMAP_STATUS_SUCCESS){
+					var pos2 = pos.point.lng+' '+pos.point.lat;
+					if ( g_postion == pos2 )
+						return;
+
+					if ( g_postion && g_devs.data.some(x=>x.position != g_postion )){
+						g_devs.data.forEach(x=>{
+							x.position = g_position;
+
+							var fd = new FormData();
+							fd.append("type", "dev" );
+							fd.append("id", x.id );
+							fd.append("position", pos.point.lng+' '+pos.point.lat );
+				//			postform("/updatepos", fd);
+						});
+						if (x.mk != undefined )
+							g_map.removeOverlay(x.mk);
+						CreateMark2(x, g_devs.ls, g_devs.fields,onclickItem);
+					}
+				}
+				else {
+					alert('获得位置失败'+this.getStatus());
+				}        
+			},{enableHighAccuracy: true})
+		}
+
+        function onEditDev(){
+            var title = "编辑 设备";
+            var idx = 0;
+			var cnt = devform( g_devs.data[idx], g_devs.fields);
+
+			var dlg = new cbFormDlg(title, "width:910px", cnt);
+            dlg.urlsubmit = "/dev/devmodify?id=" + g_devs.data[idx].id;
+			dlg.check = devcheck;
+			dlg.closing = function (reason){
+				if (reason == "submit"){
+					g_devs.data[idx] = dlg.res.data[0];
+					$("#item_detail").html(devpane(g_devs.data[0],g_devs.fields));
+				}
+			}
+            dlg.Show();
+		}
+
+		function onclickItem(type, data, fields, e) {
+			if (type=="dev"){
+				$("#item_detail").html(devpane(data,fields));
+			}
+			else{
+				var p = e.target;
+				var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+				tpl = '<div class="xRndAngle" style="height:390px;padding:5px 0px">{0}</div>';
+				var content = tpl.format(RenderPane2(data, fields, FieldToShow));
+				var infoWindow = new BMap.InfoWindow(content, { width: 590, title: GetTbl(type).title + " 信息", enableMessage: true });
+				g_map.openInfoWindow(infoWindow, point); //开启信息窗口
+			}
+		}
+
+		function FieldToShow(data, field) {
+			if (field.name == "clss")
+				return GetSub(db_devclss, "id", data[field.name]).name;
+			else if (field.name == "devwh_id")
+				return GetSub(g_devwhs.data, "id", data[field.name]).name;
+			else if (field.name == "status")
+				return GetSub(status_dev, "id", data[field.name]).name;
+			else if (field.name == "vender")
+				return GetSub(g_devvenders.data, "id", data[field.name]).name;
+			else
+				return data[field.name];
+		}
+
+
+	// 表格中使用，无ctx参数
+	function f2s_dw(data, field) {
+		var fn = field.name;
+        if (fn == "clss")			return data[fn] == "" ? "" :GetSub(db_devclss, "id", data[fn]).name;
+        else if (fn == "status")	return data[fn] == "" ? "" :GetSub(status_devwork, "id", data[fn]).name;
+        else if (fn == "deal_id")	return data[fn] == "" ? "" :GetSub(g_drivers.users, "id", data[fn]).name;
+		else if (fn == "dealdt")	return data[fn] == "" ? "" :data[fn].substr(5,11);
+        else if (fn == "fault_id")	return data[fn] == "" ? "" :data["fault_code"];
+        else if (fn == "guide_id")	return data[fn] == "" ? "" :GetSub(g_guiders.users, "id", data[fn]).name;
+		else if (fn == "guidedt")	return data[fn] == "" ? "" :data[fn].substr(5,11);
+        else if (fn == "timelen")	return data[fn] == "" ? "" :data[fn]+"天";
+        else if (fn == "dev_id")	return data[fn] == "" ? "" :data["dev_code"];
+        else if (fn == "driver_id")	return data[fn] == "" ? "" :data["driver_name"];
+        else if (fn == "winder_id") return data[fn] == "" ? "" :data["winder_name"];
+        else return data[fn];
+    }
+	// 只读表单中使用，需要ctx参数
+	function f2s_dw2(u,fd, ctx ) {
+		var f = (typeof fd == "string"?fd:fd.name);
+		if ( f == "status")			return u[f]==""?"":rd_status(GetSub(status_devwork, "id",u[f]).name, ctx.flows, ctx.users );
+		else if ( f=="guide_id")	return u[f]==""?"":GetSub(ctx.users, "id", u[f]).name;
+		else if ( f=="guidedt")		return u[f]==""?"":u[f].substr(0,19);
+		else if ( f=="fault_id")	return u[f]==""?"":ctx.fault.code;
+		else if ( f=="timelen")		return u[f]==""?"":u[f]+"天";
+		else if ( f=="winder_id")	return u[f]==""?"":ctx.winder.name;
+		else if ( f=="winder_addr")	return u[f]==""?"":ctx.winder.addr;
+		else if ( f=="deal_id")		return u[f]==""?"":GetSub(ctx.users, "id", u[f]).name;
+		else if ( f=="dealdt")		return u[f]==""?"":u[f].substr(0,19);
+		else if ( f=="clss")		return u[f]==""?"":GetSub(db_devclss, "id", u[f]).name;
+		else if ( f=="devwh_id")	return u[f]==""?"":GetSub(g_devwhs.data, "id", u[f]).name;
+		else if ( f=="dev_id")		return u[f]==""?"":ctx.dev.code;
+		else if ( f=="driver_id")	return u[f]==""?"":GetSub(ctx.users, "id", u[f]).name;
+		return u[f];
+	}
+	//	`<div class="xCombox">
+	//		<span>{text}</span>
+	//		<div class="xPopWnd xdoclist">{items}</div>
+	//	</div>`
+	function rd_status( text, items, users ) {
+		// 只用填div内部
+		return `<span>{text}</span><div class="xPopWnd xdoclist">{items}</div>`.format({
+			"text":text, 
+			"items":items.map(x=>"<div>"+ x.date.substr(5,11)+ " " 
+				+ GetSub(users, "id", x.user_id ).name + " "+ x.remark + "</div>" ).join("")
+		});
+	}
+
+    </script>
+
+</body>
+</html>
+
+
+

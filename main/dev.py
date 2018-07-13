@@ -197,24 +197,28 @@ def devworkremove():
     conn.execute(todelete("flow", obj(table_id=22,record_id=id)))
     return toret(r,result=200)
 
-#读取某案件任务单列表，生成卡片
+#读取任务单列表
 @app.route("/dev/devworkquery")
 @login_required
 def devworkquery():
     params = request.args.to_dict()
     r = obj(result="404",fun="/dev/devworkquery")
 
-    sql = '''select devwork.*, dev.code as dev_code, user.name as driver_name, winder.name as winder_name, fault.code as fault_code 
+    sql = '''select devwork.*, dev.code as dev_code, user.name as driver_name, winder.name as winder_name, winder.addr as winder_addr, fault.code as fault_code 
             from winder, fault,devwork left join dev on dev_id=dev.id left join user on devwork.driver_id=user.id
             where fault.id=fault_id and devwork.winder_id=winder.id '''
-    if "fault_id" in params:
+    if "fault_id" in params: #根据案件查
         if params["fault_id"]=="":
             return toret(r,msg="fault_id不正确")
         sql+=" and fault_id="+params["fault_id"]
-    elif "devwh_id" in params:
+    elif "devwh_id" in params:#根据驻地查
         if params["devwh_id"]=="":
             return toret(r,msg="devwh_id不正确")
         sql+=" and devwork.devwh_id="+params["devwh_id"]+" and devwork.status>0"
+    elif "driver_id" in params:#根据司机查
+        if params["driver_id"]=="":
+            return toret(r,msg="driver_id不正确")
+        sql+=" and devwork.driver_id="+params["driver_id"]+" and devwork.status>0"
     else:
         return toret(r,msg="缺少必须的参数")
     sql+=" order by devwork.status,devwork.id desc"
@@ -276,6 +280,8 @@ def devworkchgstatus():
     if (len(u) == 0 ):
         return toret(r,msg="id不存在")
     u=u[0]
+    if u.status != int(action["oldstatus"]):
+        return toret(r,result="405",msg="调用单已变更")
 
 
     '''{{ "id": "",  "name": "新建" },
@@ -294,14 +300,14 @@ def devworkchgstatus():
          "任务结束":{"oldstatus":"3","newstatus":"4","remark":"确认任务完成"}}
     if form["action"] not in tab:
         return toret(r,msg="不认识的操作类型")
+    action = tab[form["action"]]
+    newdata=obj(status=action["newstatus"])
 
     if form["action"] == "提交":
         if u.clss =="":
             return toret(r,msg="未指定设备分类")
         if u.devwh_id =="":
             return toret(r,msg="未指定设备驻地")
-    action = tab[form["action"]]
-    newdata=obj(status=action["newstatus"])
     if form["action"] == "接单":
         if "dev_id" not in form or form["dev_id"]=="":
             return toret(r,msg="缺少参数dev_id")
@@ -311,9 +317,8 @@ def devworkchgstatus():
         newdata.driver_id=form["driver_id"]
         newdata.deal_id=current_user.id
         newdata.dealdt=datetime.datetime.now()
+        conn.execute(toupdate( "dev", obj(driver_id=form["driver_id"]), obj(id=form["dev_id"])))
 
-    if u.status != int(action["oldstatus"]):
-        return toret(r,result="405",msg="调用单已变更")
     conn.execute(toupdate( "devwork", newdata, obj(id=form["id"])))
     insertflow(record_id=form["id"],status=action["newstatus"],remark=action["remark"])
     return toret(r,result=200)

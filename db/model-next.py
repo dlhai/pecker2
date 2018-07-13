@@ -230,7 +230,9 @@ class gen_case():
         rej = obj2(table_id=tbl_id,record_id=matoutcount,status=-1,user_id=self.matwh.leader.id,remark="审批退回出库单")
 
         matout = obj2()
-        matout.main = obj2(fault_id=fault.id, fault_code=fault.code,matwh_id=self.matwh.id, status=status,usage="维修用料",creater_id=fault.guide_id,stocker_id=stocker_id)
+        matout.main = obj2(fault_id=fault.id, fault_code=fault.code,matwh_id=self.matwh.id, status=status,usage="维修用料",creater_id=fault.guide_id,stocker_id="")
+        if status >= 2 or status == -1: 
+            matout.main.stocker_id=stocker_id
         matout.recs = [obj2(matwh_id=self.matwh.id,matout_id=matoutcount,mat_id=x.mat_id,num=x.num, matinrec_id=x.matinrec_id) for x in rndpick(matos,index, rndnum(2,4))]
         if status == -1:
             matout.flows = flows[0:4]

@@ -15,6 +15,9 @@ def atoi(s):
         return s
     s = s.strip()
     x=""
+    if len(s)>0 and s[0] =="-":
+        x +="-"
+        s=s[1:]
     for c in s:
         if c in "0123456789":
             x+=c

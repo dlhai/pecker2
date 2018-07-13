@@ -210,7 +210,6 @@
 
 	$("#btnary button").on('click', "", "", function (ev) {
 		var fd = new FormData($("#form_dw")[0]), fd2 = new FormData();
-		var aa = fd.get("dev_id");
 		fd2.append("action", $(ev.target).html() );
 		fd2.append("id", d_form.devwork.id );
 		fd2.append("maxid", d_form.maxid );
@@ -282,8 +281,6 @@
 		else if ( f=="driver_id")	return RenderSelect(g_drivers.users, u[f]);
 		return u[f];
 	}
-
-
 
 	//	`<div class="xCombox">
 	//		<span>{text}</span>

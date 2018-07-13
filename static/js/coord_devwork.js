@@ -51,7 +51,20 @@ devdlg.prototype.onRadioGroup = function (ev) {
 		this.refresh();
 	}
 	else{
-	
+		$('#' + this.id+" .modal-body").html(`<div id="bdmap" style="width:100%;height:100%;"></div>`);
+		g_map=CreateMap("bdmap");
+
+		// 显示风场
+		Reqdata("/rd?ls=winder&id=" + g_focus.fault.winder_id, "", function (res) {
+			res.data.forEach((x, i) => CreateMark("winder", x, res.ls, res.fields));
+			if (res.data.length > 0 )
+				g_map.centerAndZoom(CreatePoint(res.data[0].position), 14); 
+		});
+
+		// 显示设备
+		Reqdata("/rd?ls=dev&id=("+this.devworks.data.map(x=>x.dev_id).join(",")+")", "", function (res) {
+			res.data.forEach(x=>CreateMark2(x, res.ls, res.fields));
+		});
 	}
 }
 

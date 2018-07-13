@@ -350,7 +350,7 @@ function rd_repairlog( logs,imgs,users ) {
 }
 
 function rd_speech(speech) {
-    if (speech.src != g_user.id) {
+    if (speech.user_id != g_user.id) {
         var user=GetSub(g_focus.chatmen,"id",speech.user_id);
 
 		tpl=`<div class="lspeech">

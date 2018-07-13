@@ -39,7 +39,6 @@ function SaveData(curdata) {
     ReqdataP("/wt?ls=" + curdata.type, val);
 }
 
-
 function IsCurData(type, data) {
     if (typeof g_curdata == "undefined" && type == "undefine")
         return true;
@@ -74,7 +73,7 @@ function CreateMark(iconname, data, type, fields, cbclick) {
     label.addEventListener("click", function (e) { cbclick != undefined ? cbclick(type, data, fields, e) : ShowWindow(type, data, fields, e); });
 }
 
-// 与上版区别：
+// 与CreateMark区别：
 // 使用data.face作为地图上显示的图标，有的对象没有face属性，因此CreateMark不能被代替
 function CreateMark2(data, type, fields, cbclick) {
     var marker = new BMap.Marker(CreatePoint(data.position), { icon: GetIcon(data.face) });
