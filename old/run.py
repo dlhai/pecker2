@@ -1,4 +1,4 @@
-#encoding:utf8
+#encoding:utf-8
 import pdb
 from tools import *
 from flask import Flask

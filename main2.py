@@ -1,4 +1,4 @@
-#encoding:utf8
+#encoding:utf-8
 from flask import Flask,request, Response, jsonify
 from flask_sockets import Sockets
 from werkzeug.utils import secure_filename

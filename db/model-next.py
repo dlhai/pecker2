@@ -1,4 +1,4 @@
-#encoding:utf8
+#encoding:utf-8
 from buildarea import dobj,rndarea
 from vdgt import *
 from model import *

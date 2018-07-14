@@ -1,4 +1,4 @@
-#encoding:utf8
+#encoding:utf-8
 from flask import request,Response,jsonify
 import json
 from model import *

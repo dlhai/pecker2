@@ -1,4 +1,4 @@
-#encoding:utf8
+#encoding:utf-8
 from sqlalchemy import *
 from flask import Flask,request, Response, jsonify
 from flask_sockets import Sockets

@@ -1,4 +1,4 @@
-#encoding:utf8
+#encoding:utf-8
 from flask import Flask,request, Response,jsonify,render_template
 from flask_login import login_required,current_user
 import datetime

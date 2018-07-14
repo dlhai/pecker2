@@ -32,7 +32,7 @@ def T(s):
     raise Exception;
 
 def xBuildModel(tbls):
-    model = '''#encoding:utf8
+    model = '''#encoding:utf-8
 from sqlalchemy import *
 from random import *
 from vdgt import *

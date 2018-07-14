@@ -1,4 +1,4 @@
-#encoding:utf8
+#encoding:utf-8
 #virtual data generate tools(vdgt)
 
 import random

@@ -1,4 +1,4 @@
-#encoding:utf8
+#encoding:utf-8
 from flask import Flask,request, Response, jsonify
 from flask_login import (LoginManager, login_required, login_user,
                              logout_user, UserMixin,current_user)

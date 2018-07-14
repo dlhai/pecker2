@@ -1,4 +1,4 @@
-#encoding:utf8
+#encoding:utf-8
 from random import *
 
 if __name__=="__main__": 

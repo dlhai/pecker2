@@ -1,4 +1,4 @@
-#encoding:utf8
+#encoding:utf-8
 from flask import Flask,request, Response,jsonify,render_template
 from flask_login import login_required,current_user
 import datetime
@@ -212,79 +212,6 @@ def casedetail2():
         r.devworks = QueryObj("select * from devwork where fault_id="+id)
     r.maxid=",".join([str(x) for x in [maxid0,maxid1,maxid2,maxid3]])
     return toret(r,result=200)
-
-def casedetail():
-    r = obj(result="404",fun="/case/detail")
-    params = request.args.to_dict()
-    if "id" not in params or params["id"]=="":
-        return toret(r,msg="案件不能为空")
-
-    id = params["id"]
-    r.fault=QueryObj('''select fault.*,user.name as report_name, winder.name as winder_name 
-           from fault,winder,user 
-           where fault.report_id=user.id and fault.winder_id=winder.id and fault.id='''+id);
-    if len(r.fault)==0:
-        return toret(r,msg="案件ID不正确")
-    r.fault=r.fault[0]
-    r.maxid = atoi(QueryObj("select max(id) as maxid from flow where table_id=19 and record_id="+id)[0].maxid)
-    r.fault.efans = QueryObj("select * from efan where id in( select b_id from link where type='faultefan' and a_id="+id+")")
-    r.fault.leafs = QueryObj("select * from leaf where id in( select b_id from link where type='faultleaf' and a_id="+id+")")
-    r.fault.imgs = QueryObj("select * from addit where type='fault_image' and ref_id="+id)
-    r.eval1rep = QueryObj("select * from addit where type='fault_eval1' and ref_id="+id)
-    r.eval2rep = QueryObj("select * from addit where type='fault_eval2' and ref_id="+id)
-    r.repairplan = QueryObj("select * from addit where type='fault_plan' and ref_id="+id)
-    if len(r.repairplan)>0:
-        r.repairplan_sign = QueryObj("select * from link where type='sign' and a_id in("+",".join(map(lambda x:str(x.id),r.repairplan))+")")
-        if len(r.repairplan_sign)>0:
-            r.repairplan_signers = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ("+",".join(map(lambda x:str(x.b_id),r.repairplan_sign))+")")
-        else:
-            r.repairplan_signers = []
-    else:
-        r.repairplan_sign = []
-        r.repairplan_signers = []
-    r.experts = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ( select b_id from link where type='f_experts' and a_id="+id+")")
-    r.engineers = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ( select b_id from link where type='f_team' and a_id="+id+")")
-
-    r.matoutrecs = QueryObj('''
-        select matoutrec.*, matinrec.mat_id, matout.matwh_id, matout.status
-        from matoutrec, matout, matinrec
-        where matoutrec.matout_id = matout.id and matoutrec.matinrec_id=matinrec.id 
-        and matout.fault_id='''+id)
-    r.devworks = QueryObj("select * from devwork where fault_id="+id)
-
-    r.repairlog = QueryObj("select * from addit where type='fault_log' and ref_id="+id)
-    if len(r.repairlog)>0:
-        r.repairlog_imgs = QueryObj("select * from addit where type='fault_logimg' and ref_id in("+",".join(map(lambda x:str(x.id),r.repairlog))+")")
-        r.repairlog_users = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ("+",".join(map(lambda x:str(x.user_id),r.repairlog))+")")
-    else:
-        r.repairlog_imgs =[]
-        r.repairlog_users = []
-
-    r.repairrep = QueryObj("select * from addit where type='fault_report' and ref_id="+id)
-    if len(r.repairrep)>0:
-        r.repairrep_sign = QueryObj("select * from link where type='sign' and a_id in("+",".join(map(lambda x:str(x.id),r.repairrep))+")")
-        if len(r.repairrep_sign)>0:
-            r.repairrep_signers = QueryObj("select id,name,face,profile,sex,job,depart_id from user where id in ("+",".join(map(lambda x:str(x.b_id),r.repairrep_sign))+")")
-        else:
-            r.repairrep_sign = []
-    else:
-        r.repairrep_sign = []
-        r.repairrep_signers = []
-
-    #组件聊天数据
-    sql = "select id,name,face,profile,sex,job,depart_id from user where"
-    sql += " (depart_table=15 and depart_id="+str(r.fault.winder_id)+")" #风场所有人
-    if r.fault.status>=2:
-        sql += " or job=11" #11调度长
-        if r.fault.guide_id != "": #接单调度
-            sql += " or id="+str(r.fault.guide_id)
-        sql += " or id in ( select b_id from link where type='chatman' and a_id="+id+")" #聊天列表
-    r.chatmen = QueryObj(sql)+r.experts+r.engineers
-    r.speechlist= QueryObj("select * from chat where fault_id="+id)
-
-    return toret(r,result=200)
-
-
 
 #/case/chgstatus?id=
 @app.route("/case/chgstatus",methods=['POST'])

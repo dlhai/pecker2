@@ -1,4 +1,4 @@
-#encoding:utf8
+#encoding:utf-8
 from main.tools import *
 from sqlalchemy import *
 from flask import Response

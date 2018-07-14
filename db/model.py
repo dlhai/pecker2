@@ -1,4 +1,4 @@
-#encoding:utf8
+#encoding:utf-8
 from sqlalchemy import *
 from random import *
 from vdgt import *
