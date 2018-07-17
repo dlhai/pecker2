@@ -410,139 +410,6 @@ class gen_case():
             sql = "update fault set " + ",".join([k+"='"+str(v)+"'" for k,v in cols.items()])+ " where id="+ intstr(fault.id)
             conn.execute(sql)
 
-class gen_case2():
-    def __init__(self):
-        #各种需要的数据
-        self.winder = QueryObj( "select * from winder where id="+intstr(GetUser("风场主管").depart_id) )[0]
-        self.winder.leader = GetUser("风场主管")
-        self.winder.clerks = QueryObj( "select * from user where depart_table="+intstr(gettbl("winder").id) + " and depart_id="+intstr(self.winder.id) )
-        self.winder.winderareas = QueryObj( "select * from winderarea where winder_id="+intstr(self.winder.id) )
-        self.winder.efans = QueryObj( "select * from efan where winderarea_id="+intstr(self.winder.winderareas[0].id) )
-        self.winder.leafs = QueryObj( "select * from leaf where winderarea_id="+intstr(self.winder.winderareas[0].id) )
-        #self.guides = QueryObj( "select * from user where job="+intstr(getjob("调度").id) )
-        self.experts = QueryObj( "select * from user where job="+intstr(getjob("专家").id) )
-        self.teams = QueryObj( '''select * from user where id in ( select b_id from link where type ='team' and a_id = {0})'''.format(GetUser("维修队长").id) )
-        self.devwh = QueryObj( "select * from devwh where id="+intstr(GetUser("驻地主管").depart_id) )[0]
-        self.devwh.leader = GetUser("驻地主管")
-        self.devwh.clerks = QueryObj( "select * from user where depart_table="+intstr(gettbl("devwh").id) + " and depart_id="+intstr(self.devwh.id))
-        self.devwh.devs = QueryObj( "select * from dev where devwh_id="+intstr(self.devwh.id))
-        self.matwh = QueryObj( "select * from matwh where id="+intstr(GetUser("仓库主管").depart_id))[0]
-        self.matwh.leader = GetUser("仓库主管")
-        self.matwh.clerks = QueryObj( "select * from user where depart_table="+intstr(gettbl("matwh").id) + " and depart_id="+intstr(self.matwh.id))
-
-    def create_matout( self,fault, status ):
-        global matoutcount
-        matoutcount +=1
-        tbl_id=gettbl("matout").id
-        stocker_id = random.choice(self.matwh.clerks).id
-        flows = [
-            obj2(table_id=tbl_id,record_id=matoutcount,status=0,user_id=fault.guide_id,remark="调度创建出库单"),
-            obj2(table_id=tbl_id,record_id=matoutcount,status=1,user_id=fault.guide_id,remark="调度提交出库单"),
-            obj2(table_id=tbl_id,record_id=matoutcount,status=2,user_id=stocker_id,remark="库管开始备货"),
-            obj2(table_id=tbl_id,record_id=matoutcount,status=3,user_id=stocker_id,remark="提交审批出库单"),
-            obj2(table_id=tbl_id,record_id=matoutcount,status=4,user_id=self.matwh.leader.id,remark="审批通过出库单"),
-            obj2(table_id=tbl_id,record_id=matoutcount,status=5,user_id=stocker_id,remark="发货完毕"),
-            obj2(table_id=tbl_id,record_id=matoutcount,status=6,user_id=stocker_id,remark="对方确认收货")]
-        rej = obj2(table_id=tbl_id,record_id=matoutcount,status=-1,user_id=self.matwh.leader.id,remark="审批退回出库单")
-
-        matout = obj2()
-        matout.main = obj2(fault_id=fault.id, fault_code=fault.code,matwh_id=self.matwh.id, status=0,usage="维修用料")
-        matout.recs = [obj2(matwh_id=self.matwh.id,matout_id=matoutcount,mat_id=x.mat_id,num=x.num, matinrec_id=x.matinrec_id) for x in rndpick(matos,index, rndnum(3,6))]
-        if status == -1:
-            matout.flows = flows[0:4]
-            matout.flows.append(rej)
-        else:
-            matout.flows = flows[0:(status+1)]
-        return matout;
-
-    #创建设备调用单
-    def create_devwork(self,fault):
-        devworks=[]
-        for c in range(rndnum(2,5)):
-            dev = random.choice(self.devwh.devs)
-            devworks.append( dict(status=2,	#状态 0:编辑、1:提交、2受理 -1拒绝
-                fault_id=fault.id,	#故障单号
-                guide_id=fault.guide_id,	#发单人
-                guidedt=rnddatespan(fault.guidetime,0,1),	#发单时间
-                clss=int(float(random.choice(data("_devclss").data)[0])),	#设备分类
-                devwh_id=self.devwh.id,	#所属驻地
-                timelen=rndnum(3,5),	#预计工期
-                winder_id=self.winder.id,	#任务风场
-                addr=self.winder.addr,	#任务地址
-                remark=rnditem("_songci"),	#备注
-                deal_id=self.devwh.leader.id,	#接单人
-                dealdt=rnddatespan(fault.guidetime,1,2),	#接单时间
-                dev_id=dev.id,	#调用设备
-                driver_id=dev.driver_id,	#司机
-            ))
-        conn.execute(tbl_devwork.insert(),devworks)
-
-    def add_data(self,tbl, rec):
-        if type(rec) == type([]):
-            if tbl == "link":
-                conn.execute(tbl_link.insert(),[ dict_link(x) for x in rec])
-            elif tbl == "addit":
-                conn.execute(tbl_addit.insert(),[ dict_addit(x) for x in rec])
-        else:
-            if tbl == "link":
-                conn.execute(tbl_link.insert(),dict_link(rec))
-            elif tbl == "addit":
-                conn.execute(tbl_addit.insert(),dict_addit(rec))
-
-    def create_eval(case):
-        r=[]
-        for x in range(2,5):
-            expert = random.choice(case.experts)
-            date = rnddatespan(case.fault.reporttime,2,4)
-            name = "评估报告_"+case.expert.name+"_" + date.strftime("%m-%d %H:%M")
-            r.append( obj2(type="eval1rep",ref_id=fault.id, name=name, remark="", user_id=expert.id, date=date ))
-        return r
-
-
-    def create_case(self):
-        guideleader = GetUser("调度主管")
-        guider = GetUser("调度")
-        teamleader = GetUser("维修队长")
-        damageimg=["img/winder/winder1.jpg", "img/winder/winder2.jpg", "img/winder/winder3.jpg", "img/winder/winder4.jpg", "img/winder/winder5.jpg", "img/winder/winder6.jpg", "img/winder/winder7.jpg", "img/winder/winder8.jpg", "img/winder/winder9.jpg", "img/winder/winder10.jpg", "img/winder/winder11.jpg"]
-
-        #生成20个故障报告
-        for i in range(20):
-            case = obj2()
-            case.fault=create_fault()
-            case.fault_imgs=random.sample(damageimg, rndnum(3,5))
-            if i > 1:#2个
-                case.experts=random.sample(self.experts, rndnum(4,8))
-            if i > 2:
-                case.eval1=create_eval(case)
-            if i > 3:
-                case.eval2=create_eval(case)
-            if i > 4:
-                case.plan=create_plan(case)
-            if i > 5:#签字3个
-                case.plan_signs.append(create_plan_signs(case))
-            if i > 6:
-                case.plan_signs.append(create_plan_signs(case))
-            if i > 7:
-                case.plan_signs.append(create_plan_signs(case))
-            if i > 8:
-                case.workers=create_plan(case) #队长
-            if i > 9:
-                case.workers=create_plan(case) #技工
-            if i > 8:
-                case.matouts=create_matout(case,i) #7个
-                case.devworks=create_devworks(case,i) #5个
-            if i > 15:
-                case.logs=create_log(case)
-            if i > 16:
-                case.reports=create_preport(case)
-            if i > 17:
-                case.reports_signs=create_plan(case)
-            if i > 18:
-                case.reports_signs=create_plan(case)
-            if case.fault.status >= 2:
-                case.chatmen=create_plan(case)
-                case.speechs=create_plan(case)
-
 gc=gen_case()
 gc.create_case()
 
@@ -598,3 +465,149 @@ print("haha!")
 #地图：
 
 #树+内容
+
+
+class case:
+    winder = QueryObj( "select * from winder where id="+intstr(GetUser("风场主管").depart_id) )[0]
+    winder.leader = GetUser("风场主管")
+    winder.clerks = QueryObj( "select * from user where depart_table="+intstr(gettbl("winder").id) + " and depart_id="+intstr(self.winder.id) )
+
+    winder.winderareas = QueryObj( "select * from winderarea where winder_id="+intstr(self.winder.id) )
+    winder.efans = QueryObj( "select * from efan where winderarea_id="+intstr(self.winder.winderareas[0].id) )
+    winder.leafs = QueryObj( "select * from leaf where winderarea_id="+intstr(self.winder.winderareas[0].id) )
+    #guides = QueryObj( "select * from user where job="+intstr(getjob("调度").id) )
+    experts = QueryObj( "select * from user where job="+intstr(getjob("专家").id) )
+    teams = QueryObj( '''select * from user where id in ( select b_id from link where type ='team' and a_id = {0})'''.format(GetUser("维修队长").id) )
+    devwh = QueryObj( "select * from devwh where id="+intstr(GetUser("驻地主管").depart_id) )[0]
+    devwh.leader = GetUser("驻地主管")
+    devwh.clerks = QueryObj( "select * from user where depart_table="+intstr(gettbl("devwh").id) + " and depart_id="+intstr(self.devwh.id))
+    devwh.devs = QueryObj( "select * from dev where devwh_id="+intstr(self.devwh.id))
+    matwh = QueryObj( "select * from matwh where id="+intstr(GetUser("仓库主管").depart_id))[0]
+    matwh.leader = GetUser("仓库主管")
+    matwh.clerks = QueryObj( "select * from user where depart_table="+intstr(gettbl("matwh").id) + " and depart_id="+intstr(self.matwh.id))
+    guideleader = GetUser("调度主管")
+    guider = GetUser("调度")
+    teamleader = GetUser("维修队长")
+    damageimg=["img/winder/winder1.jpg", "img/winder/winder2.jpg", "img/winder/winder3.jpg", "img/winder/winder4.jpg", "img/winder/winder5.jpg", "img/winder/winder6.jpg", "img/winder/winder7.jpg", "img/winder/winder8.jpg", "img/winder/winder9.jpg", "img/winder/winder10.jpg", "img/winder/winder11.jpg"]
+
+    maxid = obj2(flow=0,)
+
+    def __init__(self):
+        ar=["创建", "提交","撤回",  "接单","退回", "创建专家组","创建评估报告1",  "创建评估报告2",
+            "创建维修方案","维修方案签字1","维修方案签字2","维修方案签字3","添加维修队长","添加维修队员",
+            "创建维修用料","创建维修设备", "创建维修记录", "创建维修报告", "维修报告1",   "维修报告2",
+            "完工",   "催款",   "冻结"   ]
+        for i in range(len(ar)):
+            for x in ar[0:i+1]:
+                case.__dict__[x](self)
+
+    def 创建():
+        self.id = maxid.create("fault")
+        self.fault=dict_fault(random.choice(case.winder.clerks))
+        self.fault_efans = [ dict_link(obj2(type="faultefan",a_id=fault.id, b_id=random.choice(self.winder.efans).id,remark="",date=rnddate(30,60))) for x in range(3,6)]
+        self.fault_leafs = []
+        self.fault_imgs = [obj2(type="fault_image",ref_id=fault.id, name=random.choice(damageimg), remark="", user_id=random.choice(repairteam).id, date=datetime.datetime.strptime(fault.reporttime,'%Y-%m-%d') ) for x in range(3,5)]
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #创建
+
+    def 提交():
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #提交
+    def 撤回():
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #撤回
+    def 接单():
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #接单
+    def 退回():
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 创建专家组():
+        experts = random.sample(self.experts, rndnum(3,6))
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 创建评估报告1():
+        for x in range(2,4):
+            expert = random.choice(self.experts)
+            date = rnddatespan(fault.reporttime,2,4)
+            name = "评估报告_"+expert.name+"_" + date.strftime("%m-%d %H:%M")
+            self.eval1.append( obj2(type="fault_eval1",ref_id=fault.id, name=name, remark="", user_id=expert.id, date=date ))
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 创建评估报告2():
+        for x in range(2,4):
+            expert = random.choice(experts)
+            date = rnddatespan(fault.reporttime,5,8)
+            name = "二评报告_"+expert.name+"_" + date.strftime("%m-%d %H:%M")
+            self.eval2.append( obj2(type="fault_eval2",ref_id=fault.id, name=name, remark="", user_id=expert.id, date=date ))
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 创建维修方案():
+        for x in range(2,4):
+            user = random.choice([guideleader,guider])
+            date = rnddatespan(fault.reporttime,8,10)
+            name = "维修方案_"+user.name+"_" + date.strftime("%m-%d %H:%M")
+            self.plans.append( obj2(type="fault_plan",ref_id=fault.id, name=name, remark="", user_id=user.id, date=date ))
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 维修方案签字1():#调度主管签字
+        self.plans_sign.append(obj2(type="sign",a_id=random.choice(repairplans).id, b_id=guideleader.id, name="", remark=str(guideleader.job), date=rnddatespan(fault.reporttime,11,12) ))
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 维修方案签字2():#驻场签字
+        self.plans_sign.append(obj2(type="sign",a_id=random.choice(repairplans).id, b_id=random.choice(self.winder.clerks).id, name="", remark="3", date=rnddatespan(fault.reporttime,12,13) ))
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 维修方案签字3():#风场主管签字
+        self.plans_sign.append(obj2(type="sign",a_id=random.choice(repairplans).id, b_id=self.winder.leader.id, name="", remark=str(self.winder.leader.job), date=rnddatespan(fault.reporttime,13,14) ))
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 添加维修队长():
+        self.engineers = [ obj2(type="f_team",a_id=fault.id, b_id=x.id, name="", remark="", date=rnddatespan(fault.reporttime,10,14) ) for x in repairteam]
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 添加维修队员():
+        teamsize= rndnum(3,5)
+        if teamsize > len(self.teams):
+            teamsize =len(self.teams)
+        repairteam = random.sample(self.teams, teamsize)
+        self.engineers = [ obj2(type="f_team",a_id=fault.id, b_id=x.id, name="", remark="", date=rnddatespan(fault.reporttime,10,14) ) for x in repairteam]
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 创建维修用料():
+        matouts = [self.create_matout( fault, status) for status in [0,1,2,3,-1,4,5,6]]
+        conn.execute(tbl_matout.insert(),[dict_matout(x.main) for x in matouts])
+        conn.execute(tbl_matoutrec.insert(),[dict_matoutrec(y) for x in matouts for y in x.recs ])
+        conn.execute(tbl_flow.insert(),[dict_flow(y) for x in matouts for y in x.flows ])
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 创建维修设备():
+        self.create_devwork2(fault)
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 创建维修记录():
+        repairlogs = []
+        for x in range(2,5):
+            mender = random.choice(repairteam)
+            date = rnddatespan(fault.reporttime,15,18)
+            repairlogs.append( obj2(type="fault_log",ref_id=fault.id, name="", remark=rnditem("_songci"), user_id=mender.id, date=date ))
+        self.add_data("addit",repairlogs)
+
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 创建维修报告():
+        for x in range(2,5):
+            user = random.choice([guideleader,guider])
+            date = rnddatespan(fault.reporttime,19,20)
+            name = "维修报告_"+user.name+"_" + date.strftime("%m-%d %H:%M")
+            repairreps.append( obj2(type="fault_report",ref_id=fault.id, name=name, remark="", user_id=teamleader.id, date=date ))
+        self.add_data("addit",repairreps)
+        repairreps = QueryObj( "select * from addit where type='fault_report' and ref_id="+intstr(fault.id) )
+
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 维修报告队长签字():
+        #维修队长签字
+        conn.execute(tbl_link.insert(),dict_link(obj2(type="sign",a_id=random.choice(repairreps).id, 
+            b_id=teamleader.id, name="", remark=str(teamleader.job), date=rnddatespan(fault.reporttime,21,22) )))
+
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 维修报告驻场():
+        conn.execute(tbl_link.insert(),dict_link(obj2(type="sign",a_id=random.choice(repairreps).id, 
+            b_id=random.choice(self.winder.clerks).id, name="", remark="3", date=rnddatespan(fault.reporttime,21,22) )))
+
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 完工():
+        cols[ "status"] = 5  #5已完成(维修报告完成,提醒付款阶段)
+        conn.execute(tbl_flow.insert(),dict_flow(obj2(table_id=gettbl("fault").id,record_id=fault.id,status=5,user_id=fault.guide_id, remark="案件处理结束")))
+
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+#    def 催款():
+#        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回
+    def 冻结():
+        cols["status"] = 6  #6已付款，冻结
+        conn.execute(tbl_flow.insert(),dict_flow(obj2(table_id=gettbl("fault").id,record_id=fault.id,status=5,user_id=fault.guide_id, remark="付款完成")))
+
+        self.flows += [obj2(table_id=22,record_id=devworkcount,status=0,user_id=u["guide_id"],remark="调度创建调用单")] #退回

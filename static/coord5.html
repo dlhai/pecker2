@@ -294,13 +294,13 @@
 				
 			$("#case").html(html);
 			var btnstatus = {// 功能按钮分角色控制
-				/*风场长*/  "2": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "s",  "works": "h", "mats": "h", "devs": "s",  "log": "s", "report": "h", "reportsign": "s", "btn_chatmen": "h",},
-				/*驻场*/    "3": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "s",  "works": "h", "mats": "h", "devs": "s",  "log": "s", "report": "h", "reportsign": "s", "btn_chatmen": "h",},
+				/*风场长*/  "2": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "s",  "works": "h", "mats": "s", "devs": "s",  "log": "s", "report": "h", "reportsign": "s", "btn_chatmen": "h",},
+				/*驻场*/    "3": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "s",  "works": "h", "mats": "s", "devs": "s",  "log": "s", "report": "h", "reportsign": "s", "btn_chatmen": "h",},
 				/*调度长*/ "11": { "experts": "s","eval1": "h", "eval2": "h", "plan": "s", "plansign": "s",  "works": "s", "mats": "s", "devs": "s",  "log": "h", "report": "h", "reportsign": "h", "btn_chatmen": "s",},
 				/*调度*/   "12": { "experts": "h","eval1": "h", "eval2": "h", "plan": "s", "plansign": "h",  "works": "s", "mats": "s", "devs": "s",  "log": "h", "report": "h", "reportsign": "h", "btn_chatmen": "s",},
 				/*专家*/   "14": { "experts": "h","eval1": "s", "eval2": "s", "plan": "h", "plansign": "h",  "works": "h", "mats": "h", "devs": "h",  "log": "h", "report": "h", "reportsign": "h", "btn_chatmen": "h",},
-				/*队长*/   "16": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "h",  "works": "s", "mats": "h", "devs": "h",  "log": "s", "report": "s", "reportsign": "h", "btn_chatmen": "h",},
-				/*技工*/   "17": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "h",  "works": "h", "mats": "h", "devs": "h",  "log": "s", "report": "h", "reportsign": "h", "btn_chatmen": "h",},
+				/*队长*/   "16": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "h",  "works": "s", "mats": "s", "devs": "s",  "log": "s", "report": "s", "reportsign": "h", "btn_chatmen": "h",},
+				/*技工*/   "17": { "experts": "h","eval1": "h", "eval2": "h", "plan": "h", "plansign": "h",  "works": "h", "mats": "s", "devs": "s",  "log": "s", "report": "h", "reportsign": "h", "btn_chatmen": "h",},
 			};
 			$.each(btnstatus[g_user.job], (k, v) => { v == "s" ? $("#btn_"+k).show() : $("#btn_"+k).hide() });
 

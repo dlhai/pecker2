@@ -436,9 +436,9 @@ function xCreateNode(param) {
 // twidth:0不显示，无此属性或为-1表示默认宽度
 g_TableCurRow = new Object();
 function RenderTable2(res, style, fun) {
-	var attr = style == "" ? "" : ` style="`+style+`"`;
+	var attr = (!style || style == "") ? "" : ` style="`+style+`"`;
 	attr += res.ls == "" ? "" : ` id="`+res.ls+`"`;
-    var r = `<table class="xTable" ` + attr + `"><thead><tr>`;
+    var r = `<table class="xTable" ` + attr + `><thead><tr>`;
     res.fields.forEach(field => {
         if (!field.hasOwnProperty("twidth"))
             field.twidth = -1;

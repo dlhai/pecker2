@@ -125,18 +125,40 @@ def rdfault():
     params = request.args.to_dict()
     sql='''select fault.*,user.name as report_name, winder.name as winder_name 
            from fault,winder,user 
-           where fault.report_id=user.id and fault.winder_id=winder.id and fault.status<5 '''
+           where fault.report_id=user.id and fault.winder_id=winder.id'''
 
-    if current_user.job == 2 or current_user.job == 3:# 2风场长、3驻场：本风场所有
-        sql += " and winder_id="+str(current_user.depart_id)
-    elif current_user.job == 11:# 11调度长：取所有已提交
-        sql += " and fault.status>=1"
-    elif current_user.job == 12:# 12调度：取自己的接单的 + 聊天含自己的
-        sql += ''' and fault.status>=1 and ( fault.guide_id='''+str(current_user.id)+''' or fault.id in (select a_id from link where type="chatman" and b_id='''+str(current_user.id)+"))"
-    elif current_user.job == 14:# 14专家：取专家列表中含自己、聊天含自己的
-        sql += ''' and fault.status>=2 and fault.id in (select a_id from link where (type="chatman" or type="f_experts") and b_id='''+str(current_user.id)+")"
-    elif current_user.job == 16 or current_user.job == 17:# 16队长、17技工：取施工队中含自己、聊天含自己的
-        sql += ''' and fault.status>=2 and fault.id in (select a_id from link where (type="chatman" or type="f_team") and b_id='''+str(current_user.id)+")"
+    #0未提交
+    #1已提交
+    #2已受理(正在评估) 
+    #3正在维修（维修方案完成）
+    #4即将完成(开始编写维修报告) 
+    #5已完成(维修报告完成) 
+    #6提醒付款 
+    #7冻结
+    if "finish" not in params:
+        sql += " and fault.status<5"
+        if current_user.job == 2 or current_user.job == 3:# 2风场长、3驻场：本风场所有
+            sql += " and winder_id="+str(current_user.depart_id)
+        elif current_user.job == 11:# 11调度长：取所有已提交
+            sql += " and fault.status>=1"
+        elif current_user.job == 12:# 12调度：取自己的接单的 + 聊天含自己的
+            sql += ''' and fault.status>=1 and ( fault.guide_id='''+str(current_user.id)+''' or fault.id in (select a_id from link where type="chatman" and b_id='''+str(current_user.id)+"))"
+        elif current_user.job == 14:# 14专家：取专家列表中含自己、聊天含自己的
+            sql += ''' and fault.status>=2 and fault.id in (select a_id from link where (type="chatman" or type="f_experts") and b_id='''+str(current_user.id)+")"
+        elif current_user.job == 16 or current_user.job == 17:# 16队长、17技工：取施工队中含自己、聊天含自己的
+            sql += ''' and fault.status>=2 and fault.id in (select a_id from link where (type="chatman" or type="f_team") and b_id='''+str(current_user.id)+")"
+    else:
+        sql += " and fault.status>=5"
+        if current_user.job == 2 or current_user.job == 3:# 2风场长、3驻场：本风场所有
+            sql += " and winder_id="+str(current_user.depart_id)
+        elif current_user.job == 11:# 11调度长：取所有已提交
+            pass
+        elif current_user.job == 12:# 12调度：取自己的接单的 + 聊天含自己的
+            sql += ''' and ( fault.guide_id='''+str(current_user.id)+''' or fault.id in (select a_id from link where type="chatman" and b_id='''+str(current_user.id)+"))"
+        elif current_user.job == 14:# 14专家：取专家列表中含自己、聊天含自己的
+            sql += ''' and fault.id in (select a_id from link where (type="chatman" or type="f_experts") and b_id='''+str(current_user.id)+")"
+        elif current_user.job == 16 or current_user.job == 17:# 16队长、17技工：取施工队中含自己、聊天含自己的
+            sql += ''' and fault.id in (select a_id from link where (type="chatman" or type="f_team") and b_id='''+str(current_user.id)+")"
     sql += " order by fault.status,reporttime desc" # 越接近处理完成，排序越靠后
 
     r.data=QueryObj(sql)
