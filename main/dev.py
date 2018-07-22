@@ -275,13 +275,11 @@ def devworkchgstatus():
 
     maxid = atoi(QueryObj("select max(id) as maxid from flow where table_id=22 and record_id="+form["id"])[0].maxid)
     if maxid != atoi(form["maxid"]):
-        return toret(r,result="405",msg="报修单已变更")
+        return toret(r,result="405",msg="调用单已变更")
     u = QueryObj("select * from devwork where id="+ form["id"])
     if (len(u) == 0 ):
         return toret(r,msg="id不存在")
     u=u[0]
-    if u.status != int(action["oldstatus"]):
-        return toret(r,result="405",msg="调用单已变更")
 
 
     '''{{ "id": "",  "name": "新建" },
@@ -302,6 +300,8 @@ def devworkchgstatus():
         return toret(r,msg="不认识的操作类型")
     action = tab[form["action"]]
     newdata=obj(status=action["newstatus"])
+    if u.status != int(action["oldstatus"]) or (newdata.status=="1" and u.status != -1 ):
+        return toret(r,result="405",msg="调用单不合要求")
 
     if form["action"] == "提交":
         if u.clss =="":

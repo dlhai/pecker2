@@ -2,69 +2,45 @@
 from main.tools import *
 from sqlalchemy import *
 from flask import Response
+import datetime
 
 engine = create_engine('sqlite:///./db/pecker.db')
 #engine.echo = True
 metadata = MetaData(engine)
 conn = engine.connect()
 
-db_job = [
-    {"id":"1","sname":"su叶片","name":"叶片超级帐号","su":""},
-    {"id":"2","sname":"风场长","name":"风场主管","su":"1"},
-    {"id":"3","sname":"驻场","name":"驻场","su":"1"},
-    {"id":"4","sname":"su设备","name":"设备超级帐号","su":""},
-    {"id":"5","sname":"驻地长","name":"驻地主管","su":"4"},
-    {"id":"6","sname":"司机","name":"设备司机","su":"4"},
-    {"id":"7","sname":"su仓库","name":"仓库超级帐号","su":""},
-    {"id":"8","sname":"仓库长","name":"仓库主管","su":"7"},
-    {"id":"9","sname":"仓管","name":"仓库管理员","su":"7"},
-    {"id":"10","sname":"su调度","name":"调度超级帐号","su":""},
-    {"id":"11","sname":"调度长","name":"调度主管","su":"10"},
-    {"id":"12","sname":"调度","name":"调度","su":"10"},
-    {"id":"13","sname":"su专家","name":"专家超级帐号","su":""},
-    {"id":"14","sname":"专家","name":"专家","su":"13"},
-    {"id":"15","sname":"su技工","name":"技工超级帐号","su":""},
-    {"id":"16","sname":"队长","name":"维修队长","su":"15"},
-    {"id":"17","sname":"技工","name":"技工","su":"15"},
-    {"id":"18","sname":"su博客","name":"博客超级帐号","su":""},
-    {"id":"19","sname":"公众","name":"公众","su":"18"},
-]
-def getjob(id):
-    id=str(id)
-    return list(filter(lambda x: x["id"]==id, db_job))[0]
-
 db_tbl = [
-    { "id": "0", "name": "none", "title": "占位" },
-    { "id": "1", "name": "base", "title": "定义" },
-    { "id": "2", "name": "link", "title": "一对多引用" },
-    { "id": "3", "name": "addit", "title": "附件" },
-    { "id": "4", "name": "config", "title": "配置信息" },
-    { "id": "5", "name": "admarea", "title": "行政区划" },
-    { "id": "6", "name": "user", "title": "供应商" },
-    { "id": "7", "name": "certif", "title": "人员" },
-    { "id": "8", "name": "edu", "title": "证件信息" },
-    { "id": "9", "name": "employ", "title": "受教育经历" },
-    { "id": "10", "name": "opus", "title": "就业经历" },
-    { "id": "11", "name": "vender", "title": "发表作品" },
-    { "id": "12", "name": "wait", "title": "" },
-    { "id": "13", "name": "winderco", "title": "风电企业" },
-    { "id": "14", "name": "winderprov", "title": "省区" },
-    { "id": "15", "name": "winder", "title": "风场" },
-    { "id": "16", "name": "winderarea", "title": "风区" },
-    { "id": "17", "name": "efan", "title": "风机" },
-    { "id": "18", "name": "leaf", "title": "叶片" },
-    { "id": "19", "name": "fault", "title": "报修" },
-    { "id": "20", "name": "devwh", "title": "设备驻地" },
-    { "id": "21", "name": "dev", "title": "设备" },
-    { "id": "22", "name": "devwork", "title": "设备任务" },
-    { "id": "23", "name": "matprov", "title": "仓库省区" },
-    { "id": "24", "name": "matwh", "title": "仓库" },
-    { "id": "25", "name": "mat", "title": "材料" },
-    { "id": "26", "name": "matin", "title": "入库单" },
-    { "id": "27", "name": "matinrec", "title": "入库记录" },
-    { "id": "28", "name": "matout", "title": "出库单" },
-    { "id": "29", "name": "matoutrec", "title": "出库记录" },
-    { "id": "30", "name": "chat", "title": "聊天记录" },
+    { "id": "0", "name": "none", "title": "占位", },
+    { "id": "1", "name": "base", "title": "定义", },
+    { "id": "2", "name": "link", "title": "一对多引用", },
+    { "id": "3", "name": "addit", "title": "附件", },
+    { "id": "4", "name": "config", "title": "配置信息", },
+    { "id": "5", "name": "admarea", "title": "行政区划", },
+    { "id": "6", "name": "user", "title": "供应商", },
+    { "id": "7", "name": "certif", "title": "人员", },
+    { "id": "8", "name": "edu", "title": "证件信息", },
+    { "id": "9", "name": "employ", "title": "受教育经历", },
+    { "id": "10", "name": "opus", "title": "就业经历", },
+    { "id": "11", "name": "vender", "title": "发表作品", },
+    { "id": "12", "name": "wait", "title": "", },
+    { "id": "13", "name": "winderco", "title": "风电企业", },
+    { "id": "14", "name": "winderprov", "title": "省区", },
+    { "id": "15", "name": "winder", "title": "风场", },
+    { "id": "16", "name": "winderarea", "title": "风区", },
+    { "id": "17", "name": "efan", "title": "风机", },
+    { "id": "18", "name": "leaf", "title": "叶片", },
+    { "id": "19", "name": "fault", "title": "报修", },
+    { "id": "20", "name": "devwh", "title": "设备驻地", },
+    { "id": "21", "name": "dev", "title": "设备", },
+    { "id": "22", "name": "devwork", "title": "设备任务", },
+    { "id": "23", "name": "matprov", "title": "仓库省区", },
+    { "id": "24", "name": "matwh", "title": "仓库", },
+    { "id": "25", "name": "mat", "title": "材料", },
+    { "id": "26", "name": "matin", "title": "入库单", },
+    { "id": "27", "name": "matinrec", "title": "入库记录", },
+    { "id": "28", "name": "matout", "title": "出库单", },
+    { "id": "29", "name": "matoutrec", "title": "出库记录", },
+    { "id": "30", "name": "chat", "title": "聊天记录", },
 ]
 
 def gettbl( nameorid ):
@@ -100,6 +76,7 @@ base=tables["base"]
 base.sl = [base.c.title, base.c.name, base.c.forder, base.c.ftype, base.c.twidth, base.c.tstyle]
 organ = { "root": "winderco", "winderco": "winderprov", "winderprov": "winder", "winder":"winderarea","winderarea":"efan" } #定义上下级结构关系
 
+
 def QueryObj( sql ):
     result = conn.execute(sql).fetchall()
     ret = []
@@ -131,6 +108,7 @@ def loaduser(where):
         if tbl["name"] == "winder":
             user.subs = QueryObj( "select id, name from winderarea where winder_id="+str(user.depart_id))
     user.idols = list(map( lambda x:x.idol_id,QueryObj( "select idol_id from follow where fans_id="+str(user.id))))
+    getjob(user.job)["mark"].update(user)
     return user
 
 from math import ceil
@@ -198,12 +176,6 @@ def toinsert(tbl,obj):
         sql = "insert into {0}({1}) values({2})".format(tbl, fields,values)
     return sql
 
-def insert(tbl,obj):
-    conn.execute(toinsert(tbl,obj))
-def insertq(tbl,obj):
-    conn.execute(toinsert(tbl,obj))
-    return QueryObj("select * from "+tbl+" where id in (select max(id) from "+tbl+")")
-
 def toupdate(tbl,values,where):
     dvals = todict(values)
     if "id" in dvals:
@@ -218,6 +190,13 @@ def todelete(tbl,where):
     sql = "delete from {0} where {1}".format(tbl, whrs)
     return sql
 
+def insert(tbl,obj):
+    conn.execute(toinsert(tbl,obj))
+def insertq(tbl,obj):
+    conn.execute(toinsert(tbl,obj))
+    return QueryObj("select * from "+tbl+" where id in (select max(id) from "+tbl+")")
+def delete(tbl,obj):
+    conn.execute(todelete(tbl,obj))
 def querycount(tbl,where):
     whrs=" and ".join([ k+"='"+str(v)+"'" for k,v in where.__dict__.items()])
     rs =QueryObj( "select count(*) as count from {0} where {1}".format(tbl, whrs) )
@@ -232,3 +211,143 @@ def verifyface(user):
             user.face = "img/face_default_female.png"
         else:
             user.face = "img/face_default.png"
+
+class mark_type:
+    checkdt=0
+    annual=1
+    expired=2
+    lowstock=3
+    urgepay=4
+    def check(owner_id):
+        now = datetime.datetime.now()
+        rs = QueryObj('''select whn from mark where type="{0}" and owner_id={1}'''.format(mark_type.checkdt,owner_id))
+        if len(rs):
+            if rs[0].whn[0:10] == now.strftime("%Y-%m-%d"):
+                return False
+        insert("mark",obj(type=mark_type.checkdt, owner_id=owner_id, whn=now))
+        return True
+
+class mark_default:
+    def update(user):
+        pass
+    def query(user):
+        pass
+    def read(user):
+        pass
+
+class mark_驻地长:
+    def update(user):
+        if not mark_type.check(user.id):
+            return
+        now = datetime.datetime.now()
+        delete("mark", obj(type=mark_type.annual,owner_id=user.id))
+        ar = QueryObj("select id from dev where checkdate between date('now','-30 day') and date('now')")
+        insert("mark",[obj(type=mark_type.annual, obj_id=x.id, owner_id=user.id, whn=now) for x in ar ])
+    def query(user):
+        return querycount( "mark", obj(type=mark_type.annual, owner_id=user.id))
+    def read(obj_id):
+        delete("mark", obj(type=mark_type.annual, obj_id=obj_id)) #不设置owner_id，这样其他人的也可以删掉
+        
+class mark_司机:
+    def update(user):
+        if not mark_type.check(user.id):
+            return
+        now = datetime.datetime.now()
+        delete("mark", obj(type=mark_type.annual,owner_id=user.id))
+        ar = QueryObj("select id from dev where checkdate between date('now','-30 day') and date('now') and driver_id={0}".format(user.id))
+        insert("mark",[obj(type=mark_type.annual, obj_id=x.id, owner_id=user.id, whn=now) for x in ar ])
+    def query(user):
+        return querycount( "mark", obj(type=mark_type.annual, owner_id=user.id))
+    def read(obj_id):
+        delete("mark", obj(type=mark_type.annual, obj_id=obj_id))#不设置owner_id，这样其他人的也可以删掉
+
+class mark_仓库长:
+    def update(user):
+        if not mark_type.check(user.depart_id):
+            return
+        now = datetime.datetime.now()
+        rec="matinrec left join ( select matinrec_id, sum(num) as numout from matout,matoutrec where matout.id=matoutrec.matout_id and matout.status >=3 group by matinrec_id) as rec on matinrec.id=matinrec_id"
+
+        delete("mark", obj(type=mark_type.expired,owner_id=user.depart_id))
+        sql="select matinrec.id, mat_id, alarm, matinrec.num as numin,rec.numout,expiredt from mat,matin, {0} where matinrec.matin_id=matin.id and matinrec.mat_id=mat.id and matin.status >=3 and matin.matwh_id={1}"
+        ar = QueryObj(sql.format(rec,user.depart_id))
+        insert("mark",[obj(type=mark_type.expired, obj_id=x.id,owner_id=user.depart_id) for x in ar if x.numin>x.numout and x.expiredt+x.alarm>now ])
+
+        delete("mark", obj(type=mark_type.lowstock,owner_id=user.depart_id))
+        sql="select mat_id, sum(matinrec.num) as allin,sum(rec.numout) as allout from matin, {0} where matinrec.matin_id=matin.id and matin.matwh_id={1} and matin.status >=3 group by mat_id"
+        ar = QueryObj(sql.format(rec,user.depart_id))
+        lows= QueryObj("select b_id as mat_id,remark as line from link where type='low' and a_id="+str(user.depart_id))
+        def checklow(rec,lows):
+            for x in lows:
+                if rec.mat_id == x.mat_id:
+                    if rec.allin-rec.allout < x.line:
+                        return True
+            return False
+        insert("mark",[obj(type=mark_type.lowstock, obj_id=x.id,owner_id=user.depart_id) for x in ar if checklow(x, lows) ])
+    def query(user):
+        count = querycount( "mark", obj(type=mark_type.expired, owner_id=user.depart_id))
+        count += querycount( "mark", obj(type=mark_type.lowstock, owner_id=user.depart_id))
+        return count
+    def read(obj_id,type):
+        if type=="expired":
+            delete("mark", obj(type=mark_type.expired, obj_id=obj_id))
+        else:
+            delete("mark", obj(type=mark_type.lowstock, obj_id=obj_id))
+
+class mark_仓管(mark_仓库长):#内容一样
+    pass
+
+class mark_调度长:
+    def update(user):
+        if not mark_type.check(user.id):
+            return
+        now = datetime.datetime.now()
+        delete("mark", obj(type=mark_type.urgepay,owner_id=user.id))
+        sql="select id from fault where status=6 and finish_dt between date('now','-10 year') and date('now','-60 day')"
+        ar = QueryObj(sql)
+        insert("mark",[obj(type=mark_type.urgepay, obj_id=x.id, owner_id=user.id, whn=now) for x in ar ])
+    def query(user):
+        return querycount( "mark", obj(type=mark_type.urgepay, owner_id=user.id))
+    def read(obj_id):
+        delete("mark", obj(type=mark_type.urgepay, obj_id=obj_id)) #不设置owner_id，这样其他人的也可以删掉
+
+class mark_调度:
+    def update(user):
+        if not mark_type.check(user.id):
+            return
+        now = datetime.datetime.now()
+        delete("mark", obj(type=mark_type.urgepay,owner_id=user.id))
+        sql="select id from fault where status=6 and finish_dt between date('now','-10 year') and date('now','-60 day')"
+        sql+="and ( guide_id={0} or fault.id in (select a_id from link where type=chatman and b_id={0}))" #与调度长区别仅此一行
+        ar = QueryObj(sql)
+        insert("mark",[obj(type=mark_type.urgepay, obj_id=x.id, owner_id=user.id, whn=now) for x in ar ])
+    def query(user):
+        return querycount( "mark", obj(type=mark_type.urgepay, owner_id=user.id))
+    def read(obj_id):
+        delete("mark", obj(type=mark_type.urgepay, obj_id=obj_id)) #不设置owner_id，这样其他人的也可以删掉
+
+db_job = [
+    {"id":"1","sname":"su叶片","name":"叶片超级帐号","su":"","mark":mark_default},
+    {"id":"2","sname":"风场长","name":"风场主管","su":"1","mark":mark_default},
+    {"id":"3","sname":"驻场","name":"驻场","su":"1","mark":mark_default},
+    {"id":"4","sname":"su设备","name":"设备超级帐号","su":"","mark":mark_default},
+    {"id":"5","sname":"驻地长","name":"驻地主管","su":"4","mark":mark_驻地长},
+    {"id":"6","sname":"司机","name":"设备司机","su":"4","mark":mark_司机},
+    {"id":"7","sname":"su仓库","name":"仓库超级帐号","su":"","mark":mark_default},
+    {"id":"8","sname":"仓库长","name":"仓库主管","su":"7","mark":mark_仓库长},
+    {"id":"9","sname":"仓管","name":"仓库管理员","su":"7","mark":mark_仓管},
+    {"id":"10","sname":"su调度","name":"调度超级帐号","su":"","mark":mark_default},
+    {"id":"11","sname":"调度长","name":"调度主管","su":"10","mark":mark_调度长},
+    {"id":"12","sname":"调度","name":"调度","su":"10","mark":mark_调度},
+    {"id":"13","sname":"su专家","name":"专家超级帐号","su":"","mark":mark_default},
+    {"id":"14","sname":"专家","name":"专家","su":"13","mark":mark_default},
+    {"id":"15","sname":"su技工","name":"技工超级帐号","su":"","mark":mark_default},
+    {"id":"16","sname":"队长","name":"维修队长","su":"15","mark":mark_default},
+    {"id":"17","sname":"技工","name":"技工","su":"15","mark":mark_default},
+    {"id":"18","sname":"su博客","name":"博客超级帐号","su":"","mark":mark_default},
+    {"id":"19","sname":"公众","name":"公众","su":"18","mark":mark_default},
+]
+
+def getjob(id):
+    return list(filter(lambda x: x["id"]==str(id), db_job))[0]
+

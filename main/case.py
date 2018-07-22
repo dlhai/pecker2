@@ -248,51 +248,54 @@ def casechgstatus():
     if "maxid" not in form or form["maxid"]=="":
         return toret(r,msg="缺少参数maxid")
     
-    maxid = atoi(QueryObj("select max(id) as maxid from flow where table_id=19 and record_id="+form["id"])[0].maxid)
+    id=form["id"]
+    maxid = atoi(QueryObj("select max(id) as maxid from flow where table_id=19 and record_id="+id)[0].maxid)
     if maxid != atoi(form["maxid"]):
         return toret(r,result="405",msg="报修单已变更")
-
-    #更新matout状态，并产生flow记录
-    def chgstatus( status, form, remark ):
-        conn.execute(toupdate( "fault", obj(status=status), obj(id=form["id"])))
-        now = datetime.datetime.now()
-        conn.execute(toinsert("flow",obj(table_id=19,record_id=form["id"],status=status,user_id=current_user.id,date=now, remark=remark+" "+form["note"])))
-
-    rs = QueryObj("select * from fault where id="+ form["id"])
-    if (len(rs) == 0 ): 
+    u = QueryObj("select * from fault where id="+ id)
+    if (len(u) == 0 ): 
         return toret(r,msg="id不存在")
-    if form["action"] == "btn_submit": #0未提交 -1退回
-        if rs[0].status != 0 and rs[0].status != -1:
-            return toret(r,msg="报修单状态已变更")
-        chgstatus( 1, form, "提交")
-    elif form["action"] == "btn_recall": #1已提交 
-        if rs[0].status != 1:
-            return toret(r,msg="报修单状态已变更")
-        chgstatus( 0, form, "撤回")
-    elif form["action"] == "btn_accept":#2已受理(正在评估) 
-        if rs[0].status != 1:
-            return toret(r,msg="报修单状态已变更")
-        chgstatus( 2, form, "受理")
-    elif form["action"] == "btn_decline":
-        if rs[0].status != 1:
-            return toret(r,msg="报修单状态已变更")
-        chgstatus( -1, form, "退回")
-    #3正在维修（维修方案完成）
-    #...
-    #4即将完成(开始编写维修报告) 
-    #...
-    elif form["action"] == "btn_finish":#5完工(维修报告完成) 
-        if rs[0].status != 2:
-            return toret(r,msg="报修单状态已变更")
-        chgstatus( 5, form, "完工")
-    #6提醒付款
-    #...
-    elif form["action"] == "btn_frozen": #7冻结 
-        if rs[0].status != 5:
-            return toret(r,msg="报修单状态已变更")
-        chgstatus( 7, form, "冻结")
-    else:
+    u=u[0]
+
+#var status_fault = [
+#    { "id": "",  "name": "新建" },
+#    { "id": "0", "bid":"", "name":"未提交" },
+#    { "id": "1", "bid":"0","name":"已提交" },
+#    { "id": "2", "bid":"1","name":"已受理" },
+#    { "id": "3", "bid":"2","name":"正在维修" }, // 暂无控制节点
+#    { "id": "4", "bid":"3","name":"即将完成" }, // 暂无控制节点
+#    { "id": "5", "bid":"","name":"保留" },		
+#    { "id": "6", "bid":"2","name":"已完成" },	// 可随时手工催款，到时自动催
+#    { "id": "7", "bid":"6","name":"冻结" },		// 付款完成
+#    { "id": "-1","bid":"1","name":"退回" },
+#]
+    tab={"btn_submit":{"oldstatus":"0","newstatus":"1","remark":"提交报修单"},
+         "btn_recall":{"oldstatus":"1","newstatus":"0","remark":"撤回报修单"},
+         "btn_accept":{"oldstatus":"1","newstatus":"2","remark":"审批通过报修单"},
+         "btn_decline":{"oldstatus":"1","newstatus":"-1","remark":"退回报修单"},
+         "btn_finish":{"oldstatus":"2","newstatus":"6","remark":"案件结束"},
+         "btn_frozen":{"oldstatus":"7","newstatus":"6","remark":"案件冻结"}}
+    if form["action"] not in tab:
         return toret(r,msg="不认识的操作类型")
+    action = tab[form["action"]]
+    newdata=obj(status=action["newstatus"])
+    if u.status != int(action["oldstatus"]) or (newdata.status=="1" and u.status != -1 ):
+        return toret(r,result="405",msg="报修单不合要求")
+
+    if newdata.status == "6":
+        plan_sign = QueryObj("select distinct link.remark as job from link,addit where link.type='sign' and addit.type='fault_plan' and link.a_id=addit.id and addit.ref_id="+id+"order by job")
+        if [ x.job for x in plan_sign] != ["11","2","3"]:
+            return toret(r,result="405",msg="维修方案签字人员不够")
+        report_sign = QueryObj("select distinct link.remark as job from link,addit where link.type='sign' and addit.type='fault_report' and link.a_id=addit.id and addit.ref_id="+id+"order by job")
+        if len(report_sign)>0 and [ x.job for x in report_sign] != ["16","3"]:
+            return toret(r,result="405",msg="维修报告签字人员不够")
+        if QueryObj('''select count(*) as count from matout where status !=6 fault_id='''+id)[0].count > 0:
+            return toret(r,result="405",msg="还有未完成的出库单")
+        if QueryObj('''select * from devwork where status !=4 fault_id="+id'''+id)[0].count > 0:
+            return toret(r,result="405",msg="还有未完成的调用单")
+    conn.execute(toupdate( "fault", newdata, obj(id=form["id"])))
+    now = datetime.datetime.now()
+    conn.execute(toinsert("flow",obj(table_id=19,record_id=form["id"],status=status,user_id=current_user.id,date=now, remark=action["remark"]+" "+form["note"])))
     return toret(r,result=200)
 
 def addchat(fault_id, users):
@@ -301,7 +304,7 @@ def addchat(fault_id, users):
     users=[x for x in users if x not in chatmen]
     insert("link",[obj(type='chatman', a_id=id,b_id=x,date=now) for x in team ])
 
-
+    484984849884848425788787
 @app.route("/case/setexpert",methods=['POST'])
 @login_required
 def casesetexpert():

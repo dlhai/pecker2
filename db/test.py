@@ -56,7 +56,14 @@ class gen:
     def 步(self):
         print("t3")
 
+def a():
+    print("a")
+def b():
+    print("b")
+def c():
+    print("c")
+
 if __name__ == '__main__':
-    print(gen.a)
-    g = gen()
-    g.t()
+#    print(gen.a)
+    ar=[a,b,c]
+    ar[0]()

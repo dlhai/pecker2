@@ -64,11 +64,12 @@ def rdfriends():
     return tojson(r)
 
 #主界面，检查未读消息数量
-@app.route('/msgcheck')
+@app.route('/msg/check')
 @login_required
 def msgcheck():
-    r = obj(result="200",fun="msgcheck")
+    r = obj(result="200",fun="msg/check")
     r.count = QueryObj("select count(*) as count from msg where readtime is null and dst=%s"%current_user.id)[0].count
+    r.mark = getjob(current_user.job)["mark"].query(current_user)
     return tojson(r)
 
 #消息界面，检查未读消息数量，精确到好友

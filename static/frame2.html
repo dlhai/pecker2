@@ -91,7 +91,7 @@
     </div>
 
     <script type="text/javascript">
-        var g_user, g_role, g_intervalid;
+        var g_user, g_role, g_intervalid,g_msg;
 
 		InitUser();
 		function InitUser(){
@@ -114,8 +114,10 @@
 		}
 
 		function msgcheck(){
-			Reqdata( "/msgcheck","", function(res){ 
-				$("#msgcheck").html(res.count!="0"? res.count:"" );
+			Reqdata( "/msg/check","", function(res){ 
+				g_msg=res;
+				var count = parseInt(g_msg.count) + parseInt(g_msg.mark);
+				$("#msgcheck").html(count!="0"? count:"" );
 			});
 		}
 
@@ -157,7 +159,15 @@
 					$("#modulelist2").html("");
 					$("#modulelist2").attr("data_pid", "" );
 				}
-			};
+			}
+			else if ( id == "msgcheck" ){
+				var role = GetSub(db_roles,"id", g_user.job );
+				if (g_msg && g_msg.mark>0 && role.mark ){
+					var ar = role.mark.split("/");
+					var module = GetSub(role.modules,"name", ar[0]);
+					
+				}
+			}
 
 			if ( text == "退出" ){
 				Reqdata( "/logout", "", function(res){

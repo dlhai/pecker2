@@ -135,11 +135,7 @@
             return data[field.name];
     }
 
-</script>
-
-<script type="text/javascript">
 	var g_devworks, d_form;
-
 	function refresh(){
 		Reqdata("/dev/devworkquery?devwh_id="+g_user.depart.id + (g_devworks!=undefined?"&maxid="+g_devworks.maxid:""), "", function(res){
 			if (g_devworks&&g_devworks.maxid==res.maxid) 
