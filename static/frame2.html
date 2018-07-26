@@ -144,7 +144,7 @@
 					node.addClass("active");
 					return;
 				}
-				else if ( (g_user.job == "2" || g_user.job == "3")&& m.name=="设备"){
+				else if ( (g_user.job == "2" || g_user.job == "3")&& m.name=="设备"){ //风场长和驻场
 					var tpl= `<div data_url="static/`+m.url+`?id={id}">{name}</div>`;
 					$("#modulelist2").html(g_user.subs.map(x=>tpl.format(x)).join(""));
 					$("#modulelist2").attr("data_pid", node.attr("id") );
@@ -163,9 +163,23 @@
 			else if ( id == "msgcheck" ){
 				var role = GetSub(db_roles,"id", g_user.job );
 				if (g_msg && g_msg.mark>0 && role.mark ){
+					$('.active').removeClass("active");
+
 					var ar = role.mark.split("/");
-					var module = GetSub(role.modules,"name", ar[0]);
-					
+					var node=$("#modulelist1 div").filter(x=>x.html() == ar[0]);
+					if (m.subs!=undefined){
+						$("#modulelist2").html(m.subs.map(x=>`<div data_url="static/{url}">{name}</div>`.format(x)).join(""));
+						$("#modulelist2").attr("data_pid", node.attr("id") );
+						$('#mainframe').attr('src', `static/`+m.subs[0].url );
+
+						$("#modulelist2").filter(x=>x.html() == ar[1]).addClass("active");
+					}
+					else{
+						$("#modulelist2").html("");
+						$("#modulelist2").attr("data_pid", "" );
+					}
+					node.addClass("active");
+					return;
 				}
 			}
 

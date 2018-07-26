@@ -161,7 +161,7 @@ def towhere(where):
 def toinsert(tbl,obj):
     if type(obj) == type([]):
         if len(obj)== 0:
-            return
+            return ""
         [delattr(u,"id") for u in obj if hasattr(u,"id")]
         d = todict(obj[0])
         fields=",".join(map( lambda x: "'"+x+"'", d.keys()))
@@ -191,9 +191,11 @@ def todelete(tbl,where):
     return sql
 
 def insert(tbl,obj):
-    conn.execute(toinsert(tbl,obj))
+    sql=toinsert(tbl,obj)
+    conn.execute(sql) if sql != "" else 0
 def insertq(tbl,obj):
-    conn.execute(toinsert(tbl,obj))
+    sql=toinsert(tbl,obj)
+    conn.execute(toinsert(tbl,obj)) if sql != "" else 0
     return QueryObj("select * from "+tbl+" where id in (select max(id) from "+tbl+")")
 def delete(tbl,obj):
     conn.execute(todelete(tbl,obj))
@@ -271,7 +273,14 @@ class mark_仓库长:
         delete("mark", obj(type=mark_type.expired,owner_id=user.depart_id))
         sql="select matinrec.id, mat_id, alarm, matinrec.num as numin,rec.numout,expiredt from mat,matin, {0} where matinrec.matin_id=matin.id and matinrec.mat_id=mat.id and matin.status >=3 and matin.matwh_id={1}"
         ar = QueryObj(sql.format(rec,user.depart_id))
-        insert("mark",[obj(type=mark_type.expired, obj_id=x.id,owner_id=user.depart_id) for x in ar if x.numin>x.numout and x.expiredt+x.alarm>now ])
+        def checkexpired(rec, days):#days是提前的天数
+            nonlocal now
+            return atoi(rec.numin)>atoi(rec.numout) and (datetime.datetime.strptime(rec.expiredt[0:10],"%Y-%m-%d") - datetime.timedelta(days=days)) > now
+        aaa=[]
+        for x in ar:
+            if checkexpired(x, 30):
+                aaa.append(obj(type=mark_type.expired, obj_id=x.id,owner_id=user.depart_id))
+        insert("mark",[obj(type=mark_type.expired, obj_id=x.id,owner_id=user.depart_id) for x in ar if checkexpired(x, 30) ])
 
         delete("mark", obj(type=mark_type.lowstock,owner_id=user.depart_id))
         sql="select mat_id, sum(matinrec.num) as allin,sum(rec.numout) as allout from matin, {0} where matinrec.matin_id=matin.id and matin.matwh_id={1} and matin.status >=3 group by mat_id"

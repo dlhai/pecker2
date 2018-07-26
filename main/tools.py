@@ -11,20 +11,20 @@ class obj:
             setattr( self, k, v)
 
 def atoi(s):
-    if type(s) == type(1):
+    if type(s) == type(1): #若本身即为数字，直接返回
         return s
     s = s.strip()
-    x=""
-    if len(s)>0 and s[0] =="-":
+    x="" 
+    if len(s)>0 and s[0] =="-": #负号处理
         x +="-"
         s=s[1:]
-    for c in s:
-        if c in "0123456789":
+    for c in s: #
+        if c in "0123456789": #碰到第一个不是数字即结束
             x+=c
         else:
             break
 
-    return 0 if x == "" else int(x)
+    return 0 if x == "" else int(x) #转换
 
 #把python对象转换成json字符串
 def tojson(o):
