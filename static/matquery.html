@@ -72,7 +72,7 @@
 		];
 
 
-        var g_mats, g_store, g_focus, g_recs, g_venders, g_users=[];
+        var g_mats, g_store, g_focus, g_recs, g_venders, g_users=[], g_alarm;
 		var g_user = parent.g_user;
         if (g_user == undefined) {
             Reqdata("/curuserinf", "", function (res) {
@@ -90,6 +90,7 @@
 			Reqdata("/user/briefs?job=(8,9)&depart_id=" + g_user.depart.id, "", function (res) { g_users = g_users.concat(res.users); }); // 本仓库所有的人
 			Reqdata("/user/briefs?job=(11,12)", "", function (res) { g_users = g_users.concat(res.users); }); // 调度长和调度
 			Reqdata("/rd?ls=vender&type=" + GetSub(db_tbl, "name", "mat").id, "", function (res) { g_venders = res; });
+			Reqdata("/mat/alarm", "", function (res) { g_alarm = res.data; });
 			Reqdata("/mat/store?matwh_id=" + g_user.depart_id, "", function (stores) {
 				g_store = stores;
 				GetSub(stores.fields, "name", "remark").twidth = 0;
@@ -186,8 +187,7 @@
 			else if (fd == "expiredt") return data[fd].substr(0, 16);
 			else if (fd == "creater_dt") return data[fd].substr(0, 16);
             else if (fd == "vender_id") return data["vender_id"] == "" ? "" : GetSub(g_venders.data, "id", data["vender_id"]).name;
-			else if (fd == "creater_id") 
-				return data["creater_id"] == "" ? "" : GetSub(g_users, "id", data["creater_id"]).name;
+			else if (fd == "creater_id") return data["creater_id"] == "" ? "" : GetSub(g_users, "id", data["creater_id"]).name;
             else return data[fd];
         }
         function f2sout(data, fd) {
@@ -195,8 +195,7 @@
             if (fd == "num") return data[fd]+g_focus.unit;
 			else if (fd == "status") return GetSub(status_matout, "id", data["status"]).name;
 			else if (fd == "creater_dt") return data[fd].substr(0, 16);
-        	else if (fd == "creater_id")
-				return data["creater_id"] == "" ? "" : GetSub(g_users, "id", data["creater_id"]).name;
+        	else if (fd == "creater_id") return data["creater_id"] == "" ? "" : GetSub(g_users, "id", data["creater_id"]).name;
             else return data[fd];
         }
 		
