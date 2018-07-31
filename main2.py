@@ -1,6 +1,6 @@
-#encoding:utf-8
+﻿#encoding:utf-8
 from flask import Flask,request, Response, jsonify
-from flask_sockets import Sockets
+#from flask_sockets import Sockets
 from werkzeug.utils import secure_filename
 from flask_login import (LoginManager, login_required, login_user,
                              logout_user, UserMixin,current_user)
@@ -21,7 +21,7 @@ import os.path
 import pdb
 
 app = Flask(__name__)
-sockets = Sockets(app)
+#sockets = Sockets(app)
 app.secret_key = '1The2quick3brown4fox5jumps6over7the8lazy9dog0'
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
